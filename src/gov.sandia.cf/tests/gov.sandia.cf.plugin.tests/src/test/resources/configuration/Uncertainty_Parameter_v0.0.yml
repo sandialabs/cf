@@ -1,0 +1,41 @@
+Uncertainty Parameters:
+  Variable Name:
+    required: Optional
+    type: Text
+  Description:
+    required: Required
+    type: Text
+  Type:
+    required: Required
+    type: Select
+    values:
+      - 'epistemic'
+      - 'epistemic - model form'
+      - 'aleatory'
+  Characterization:
+    required: Required
+    type: Select
+    values:
+      - 'interval'
+      - 'distributional'
+      - 'discrete'
+      - 'not characterized'
+  Parameters:
+    required: Required
+    type: Text
+  Model Feature:
+    required: Required
+    type: Select
+    values:
+      - 'yes'
+      - 'no'
+      - 'N/A'
+  Comment:
+    required: Optional
+    type: RichText
+  Feasible Physical Range:
+    required: Optional
+    type: Text
+  References:
+    required: "Characterization != 'not characterized'"
+    type: Link

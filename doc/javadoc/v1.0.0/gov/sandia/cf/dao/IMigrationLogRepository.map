@@ -1,0 +1,8 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./ICRUDRepository.html" title="gov.sandia.cf.dao.ICRUDRepository" alt="" coords="48,11,568,277"/>
+<area shape="rect" id="node1" href="./ICRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="37,5,579,283"/>
+<area shape="rect" id="node2_1" href="./IMigrationLogRepository.html" title="gov.sandia.cf.dao.IMigrationLogRepository" alt="" coords="29,336,587,499"/>
+<area shape="rect" id="node2" href="./IMigrationLogRepository.html" title="&lt;TABLE&gt;" alt="" coords="18,331,598,504"/>
+<area shape="rect" id="node3_2" href="./impl/MigrationLogRepository.html" title="gov.sandia.cf.dao.impl.MigrationLogRepository" alt="" coords="16,557,600,737"/>
+<area shape="rect" id="node3" href="./impl/MigrationLogRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,552,611,743"/>
+</map>

@@ -1,0 +1,1467 @@
+Phases:
+  - Evidence
+  - Assess
+  - Aggregate
+  - Stamp
+  - Planning
+Roles:
+  - Customer
+  - System Engineer
+  - Analyst
+  - Code Developer
+  - Experimentalist
+  - V&V Partner
+Levels:
+  Level 0:
+    Code: 0
+    Color: 255,0,0
+  Level 1:
+    Code: 1
+    Color: 255,255,0
+  Level 2:
+    Code: 2
+    Color: 255,192,0
+  Level 3:
+    Code: 3
+    Color: 0,176,80
+Elements:
+  RGF: 
+    Name: Representation and Geometric Fidelity
+    Abbreviation: RGF
+    Color: 0,142,116
+    Levels: 
+    Subelements: 
+      RGF1: 
+        Name: Characterize Representation and Geometric Fidelity
+        Code: RGF1
+        Levels: 
+          Level 0 : 
+            Code: 0
+            Name: Level 0 
+            Descriptors: 
+              Descriptor: "Model has no major or minor features present. Model is mainly \"blobs\" or point masses or stick-figure models or a curve fit of data."
+              Additional Info: "The current writing is centric to meshed geometries. The words are not applicable to more general representation resolution issues. This is a TBD issue. RGF1 speaks to the level of meshed geometric detail in the problem. Level 0 means that there is essentially no discernible level of meshed detail in the presented predictive capability. Conceptual representation of the simulated geometry may be interpreted as detailed cadcam representation of the physical geometry exists, even though this is neglected in the computational simulation capability. The word \"model\" means \"predictive computational simulation capability for the intended application.\" "
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "Evidence of \"blobs\" etc. is presented."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Model = finite element model"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Relative to the actual system, the meshed model is a de-featured representation of it. Subject matter expertise may define this level of meshing and define the meaning of \"major features,\" relationship to \"actual system,\" etc."
+              Additional Info: " \"Major feature\" must be defined in the context of the anticipated predictive application of the computational model.  \"Actual system\" must also be defined. (i.e. CadCam,  blueprints of customer drawing, or existing hardware ).  Fillets are omitted, components are \"blobs\" or point masses, minor features are absent "
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Information is provided that the representation/geometry has meshed some of the major features not present in Level 0."
+              Brief description of evidence relevant to this level: "Specification of \"relative to the actual system.\" Define \"major features\" and provide evidence of the problem components where representation/geometry features have, and have not, been meshed. "
+              Additional evidence from previous level: "Definition of \"major features.\" Characterization of where major features of have been meshed. Characterization of where features have not been meshed."
+              Key Words/Phrases: "de-featured might equal to components modeled as blobs; major features; actual system"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Relative to the actual system, the model has most of the major features. Component geometries are accurate meshed, but most fillets are omitted, bolts and holes may or may not be included, etc.  Subject matter expertise may define this level of meshing and define the meaning of \"major features.\""
+              Additional Info: "\"Major feature\" must be defined in the context of the anticipated predictive application of the computational model.\" Minor feature\" must be defined. \"Actual system\" must be defined. I assume this refers to the system as \"actually represented in a cadcam system\" (or blueprints of customer drawing or hunk of hardware sitting on a table or whatever) - but it must be clarified. I don't know what to say unless we just say: \" 'Actual system' means 'cadcam representation' for purposes of this discussion. Otherwise - definition of 'actual system' must be provided along with the 'major feature' meshing discussion.\""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) \"Major features\" are defined. (2) Specification of what \"most\" means regarding major features. The word \"most\" implies that any major features NOT meshed are identified. 3) Information  provided that the representation/geometry has meshed most of the major features not present in Level 1. 
+4) Identification of the minor features  included (i.e. fillets, holes, bolts, etc.)."
+              Brief description of evidence relevant to this level: "(1) Evidence of the problem components where representation/geometry features have, and have not, been meshed. (2) The \"Major features\" included in the representation/geometry. (3) Evidence of the major feature meshing. (4) Meaning of \"most\" and evidence it is achieved."
+              Additional evidence from previous level: "Meaning of \"most\" and evidence it is achieved."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Model represents \"as built\" system including all \"major features\" and most \"minor features.\" \"All\" defined by the evaluation team. \"Most\" defined by the evaluation team."
+              Additional Info: "\"Major feature\" MUST BE DEFINED in the context of the anticipated predictive application of the computational model. \" Minor feature\" must be defined. \"Actual system\" must be defined. "
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) ALL identified major features included
+2) Most of the minor features are included (i.e. fillets, holes, bolts, cables, etc.)."
+              Brief description of evidence relevant to this level: "(1) Evidence of the problem components where representation/geometry features have, and have not, been meshed. (2) That ALL \"major features\" are included in the representation/geometry. (3) Evidence that ALL major features are meshed. (4) That \"most\" minor features are included in representation/geometry and meshed. (5) Meaning of \"most\" and evidence it is achieved. Define major features\" and summarize the problem components where features have, and have not, been meshed. Explain the reasons (provide the evidence) that ALL of the major features have been meshed. Define \"minor features,\" and explain why those present were selected. Explain the reasons (provide the evidence) that MOST of the minor features are meshed. A peer review is performed."
+              Additional evidence from previous level: "Explanation/evidence that ALL identified \"major features\" have been meshed. Definition of \"minor features.\" Explanation/evidence that \"most\" minor features of have been meshed. Characterization of where minor features have not been meshed."
+              Key Words/Phrases: "\"As built system\""
+      RGF2: 
+        Name: Geometry sensitivity
+        Code: RGF2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Simulation sensitivity to major features is not discussed"
+              Additional Info: "The computation error referred to means \"computational error due to the given level of geometric resolution.\" The practitioner should understand that this is probably impossible to fully address without having representations at all four levels. This is ONE component of numerical error; SVER addresses a more integral view of the source of numerical errors."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "none"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Sensitivity = sensitivity of numerical solution to de-featuring. This is not the same thing as quantifying the component of numerical error due to geometry incompleteness. (Issue is how stable a presented solution is to de-featuring.)  Major features are  defined in element above.) Notice the potential for surprise; major features specified in RGF1, but RGF2 is the real test of how major a feature is!"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Sensitivity of solution to major features is discussed."
+              Additional Info: "QOI=Quantity of Interest. \"Sensitivity\" means performing geometrical variations that are compatible with the defined level of representation, and that are understood (subject matter judgment based) to be \"small, \"and computing their effect on the QOIs. This requires two or more simulations, where only one would be performed if the sensitivity was not studied. An obvious rational that could guide such a sensitivity study is to probe the selection of major features for meshing. It is also possible that \"large\" changes in represented geometry at this level and their computed effect on SRQs would be of interest and should be or could be presented. It is understood that the ability to conduct these studies becomes increasingly difficult as the level of geometric representation increases. \"De-featuring\" is broadly understood to mean variation in the geometric representation. Specifically this term implies coarsening the geometric representation (for example, reducing the number of major features that might be included at Level 1, or reducing the number of minor features included at level 2."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Discussion/Assessment of solution sensitivity to major features."
+              Brief description of evidence relevant to this level: "Discussion of solution sensitivity"
+              Additional evidence from previous level: "Solution sensitivity discussion/results"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Sensitivity of solution to SOME major features is quantified. "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1)Quantitative discussion/assessment of solution sensitivity to some identified major features"
+              Brief description of evidence relevant to this level: "Identification of selected major features; Quantitative discussion of solution sensitivity"
+              Additional evidence from previous level: "Identification of selected major features; Quantitative discussion of solution sensitivity"
+              Key Words/Phrases: "Quantitative sensitivity analysis = see books; Major features = identified in subelement above."
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Sensitivity of solution to ALL major features is quantified. "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1)Quantitative discussion/assessment of solution sensitivity for ALL major features"
+              Brief description of evidence relevant to this level: "Identification of selected major features; Quantitative discussion of solution sensitivity"
+              Additional evidence from previous level: "None"
+              Key Words/Phrases: "All = defined in subelement above"
+      RGF3: 
+        Name: Technical review of representation and geometric fidelity
+        Code: RGF3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No review of representation/geometry reported"
+              Additional Info: "A goal of this element is to perform verification of the representation/geometry. All the details have to do with inspection. "
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team reviewed representation/geometry "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Review performed"
+              Brief description of evidence relevant to this level: "Results of review"
+              Additional evidence from previous level: "Results"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External (independent) review of representation/geometry"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External (independent) review performed"
+              Brief description of evidence relevant to this level: "Results of external (independent) review"
+              Additional evidence from previous level: "Results provided b independent review"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External (independent) review of representation/geometry; certification of representation/geometry"
+              Additional Info: " \"Certified\" = \"attest or confirm in a formal statement.\" Typically for legal or regulatory purposes. "
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Certification"
+              Brief description of evidence relevant to this level: "Results of external (independent) review; certification results"
+              Additional evidence from previous level: "Certification results"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; Certification = attest and document adequacy of representation/geometry for intended application.
+"
+  PMMF: 
+    Name: Physics and Material Model Fidelity
+    Abbreviation: PMMF
+    Color: 108,179,18
+    Levels: 
+    Subelements: 
+      PMMF1: 
+        Name: Characterize completeness versus the PIRT
+        Code: PMMF1
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No correlation of relevant material/physics models in the capability with the PIRT for the intended application is presented; alternative view - NO PIRT elements are present in the capability to be applied."
+              Additional Info: "[This subelement is now redefined to measure the degree to which the capability mat/physics models are correlated with the mandatory PIRT.][note - emphasis on \"knobs\" implies calibration emphasis. Calibration = \"tuning the predictive capability to maximize agreement with a specified set of benchmarks, such as selected experimental data.\" An explanatory model provides a basis for understanding why it is in agreement with selected benchmarks. A  calibrated model is not explanatory in the absence of further information. Sometimes the term \"physics-based model\" is used to convey a sense of \"explanatory\" but the term \"explanatory\" has wider scope than \"physics-based\" and that is our preferred terminology. \"Explanatory\" also suggests that the domain where a model is \"calibrated\" can be significantly larger than the domain where it is \"explanatory.\"]"
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None REQUIRED; alternative - documentation that no PIRT elements are in the capability"
+              Additional evidence from previous level: "N/A"
+              Key Words/Phrases: "PIRT = see V&V documentation; Correlated = logically and substantively linked to the PIRT and its underlying logic - all PIRT elements; other similar words - \"related,\" \"connected,\" \"derived from,\" etc."
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Some relevant material/physics models in the capability are correlated with the PIRT for the intended application"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Some PIRT mat/phys models are identified in the capability"
+              Brief description of evidence relevant to this level: "Documentation of correlated models and logic underlying correlation claims"
+              Additional evidence from previous level: "Documentation"
+              Key Words/Phrases: "Some = less than or equal to 50% of the total PIRT-identified mat/physics models. Evaluation team judgment determines the \"total\" list, and therefore also determines what \"some\" means."
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Most relevant material/physics models in the capability are correlated with the PIRT for the intended application"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Most PIRT mat/phys models are identified in the capability"
+              Brief description of evidence relevant to this level: "Documentation of correlated models and logic underlying correlation claims"
+              Additional evidence from previous level: "No change"
+              Key Words/Phrases: "Most =More than 50% of the total PIRT-identified mat/physics models. Evaluation team judgment  what \"most\" means."
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "All relevant material/physics models in the capability are correlated with the PIRT for the intended application"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) All relevant PIRT mat/phys models are identified in the capability"
+              Brief description of evidence relevant to this level: "Documentation of correlated models and logic underlying correlation claims"
+              Additional evidence from previous level: "No Change"
+              Key Words/Phrases: "All = all relevant PIRT identified mat/physics models are represented in the capability. Evaluation team judgment - the total set of relevant mat/phys models from the PIRT."
+      PMMF2: 
+        Name: Quantify model accuracy (i.e., separate effects model validation)
+        Code: PMMF2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No validation assessment is performed [ A gatekeeper here is familiarity with the SNL V&V program approaches to V&V.]"
+              Additional Info: "This element centers on the VALIDITY of one or more physics/material models. Notice that this is a place where a gatekeeper is the presence of a V&V plan, or at least a PIRT, for the intended application of this predictive capability."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "No evidence is presented"
+              Additional evidence from previous level: "N/A"
+              Key Words/Phrases: "n/a"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Imprecise validation conclusions: qualitative statements, in particular use of viewgraph norms, no use of experimental uncertainty, expert opinion-centric validation statements, etc."
+              Additional Info: "The validation referred to here is of specific physics/material models. It is a COMPONENT of the overall validity of the predictive capability. For all things validation, reliance upon published V&V program documents and recommended approaches should be emphasized. The approaches to validation and verification are not recommended in the PCMM itself. We should rely upon the existing documentation."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Validation results are shown  2) Validation conclusions are drawn "
+              Brief description of evidence relevant to this level: "Whatever basis of information underlies stated validation conclusions that can be and is documented."
+              Additional evidence from previous level: "Validation results"
+              Key Words/Phrases: "Qualitative = \"capability is good/bad because of this plot,\" where \"this plot\" is an overlay of a calculation without error bars, experimental data without error bars, and no presented understanding of the pedigree of either."
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Quantitative validation characterizations and conclusions. Some, but acknowledged INCOMPLETE characterization of uncertainty in experimental data and/or computational data. Quantitative validation statements are made and supported by presented quantitative analysis. Pedigree information is presented, but may be incomplete. Expert opinion may also be presented."
+              Additional Info: "The difference between Level 2 and Level 3 centers on completeness of the uncertainty information and the presented pedigree information. 
+
+Pedigree = \"the background or history of a person or thing, especially as conferring distinction or quality\"
+
+The \"thing\" specifically in question here is (say) a material model. We're interested in the \"background,\" or \"history,\" or other information that at least speaks to distinction or quality in the  model. This \"background\" or \"history\" becomes part of the evidence base given the way we have framed the wording in the element."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) QUANTITATIVE validation results incorporating (possibly incomplete uncertainty characterizations) are shown
+2) Quantitative validation conclusions are drawn 
+3) Explicit linkage of the inferred validation domain to the intended application domain is explicit 4) Pedigree information(possibly incomplete) is explicit"
+              Brief description of evidence relevant to this level: "Quantitative expt/calc comparisons; uncertainty information; domain of validity characterizations; pedigree information - all documented."
+              Additional evidence from previous level: "Quantitative expt/calc comparisons; uncertainty information; domain of validity characterizations; pedigree data - all documented."
+              Key Words/Phrases: "Quantitative = quantitative representation of the difference between calculations and experimental data; statistical statements such as confidence intervals (tolerance intervals); etc."
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Quantitative validation characterizations and conclusions. COMPLETE characterization of uncertainty in experimental data and computational data. Quantitative validation statements are made and supported by presented quantitative analysis. COMPLETE pedigree information is presented. Expert opinion may also be presented."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Attention to completeness of the uncertainty characterizations
+2) Attention to completeness of the pedigree information"
+              Brief description of evidence relevant to this level: "Quantitative expt/calc comparisons; uncertainty information; domain of validity characterizations; pedigree information - all documented. Analysis of  completeness of the uncertainty characterization is documented. Analysis of the completeness of the pedigree information is documented."
+              Additional evidence from previous level: "Analysis of the completeness of the uncertainty characterization and of the completeness of the pedigree information."
+              Key Words/Phrases: "Completeness of uncertainty = uncertainty in both experiment and calculations has been characterized and there are no gaps in the analysis that underlies validation conclusions. Completeness of pedigree = all pedigree information relevant to supporting validation conclusions (such as the pedigree of the experimental data) is presented."
+      PMMF3: 
+        Name: Assess interpolation vs. extrapolation of physics and material model
+        Code: PMMF3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Interpolation and/or extrapolation of the application domain to the validation domain is not analyzed or presented."
+              Additional Info: " \"Interpolation\" and \"extrapolation\"  both are referenced to the validation domain.\" In contrast, PMMF2 has the implied purpose of building a validation domain that is referenced to the original calibration domain of the physics/material models. Interpolation within the validation domain is assumed to be benign. That is, there are not lurking problems like hidden phase transitions, etc. "
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "N/A"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "n/a"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "The application domain does not intersect the validation domain, so that the application is a full extrapolation beyond the validation domain."
+              Additional Info: "There is a lot of concern about the use of the physics/material model in this case."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) The boundary between the application domain and the validation domain is characterized."
+              Brief description of evidence relevant to this level: "Characterization of relationship between the validation domain and the application domain and supporting analysis - all documented."
+              Additional evidence from previous level: "Characterization of relationship between the validation domain and the application domain and supporting analysis - all documented."
+              Key Words/Phrases: "n/a"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "The application domain partially intersects the validation domain. Part of the application domain is therefore an interpolation of the validation domain, while the rest is an extrapolation."
+              Additional Info: "There is some concern about the use of the physics/material model in this case."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) The interpolation part of the application domain is characterized.
+2) The extrapolation part of the application domain is characterized."
+              Brief description of evidence relevant to this level: "Characterization of relationship, both interpolation and extrapolation, between the validation domain and the application domain and supporting analysis - all documented."
+              Additional evidence from previous level: "Characterization of relationship, both interpolation and extrapolation, between the validation domain and the application domain and supporting analysis - all documented."
+              Key Words/Phrases: "n/a"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "The application domain is entirely contained within the validation domain, so that the application is solely interpolation within the validation domain."
+              Additional Info: "There is no concern about the use of the physics/material model in this case."
+              Change(s) from previous level: "Main differences between Level 2 and 3
+1) The interpolation of the application within the validation domain is characterized"
+              Brief description of evidence relevant to this level: "Characterization of interpolation relationship between the validation domain and the application domain and supporting analysis - all documented."
+              Additional evidence from previous level: "Characterization of interpolation relationship between the validation domain and the application domain and supporting analysis - all documented."
+              Key Words/Phrases: "n/a"
+      PMMF4: 
+        Name: Technical review of physics and material models
+        Code: PMMF4
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No review of physics and/or material models reported"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team reviewed physics and/or material models, PIRT coverage, and model accuracy "
+              Additional Info: " \"Analysis team\" and \"PCMM evaluation\" team are synonymous in this context"
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Review performed"
+              Brief description of evidence relevant to this level: "Results of review"
+              Additional evidence from previous level: "Results"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External (independent) review of physics and/or material models , PIRT coverage, and model accuracy"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External (independent) review performed"
+              Brief description of evidence relevant to this level: "Results of external (independent) review"
+              Additional evidence from previous level: "None. Evidence from independent review rather than from PCMM team"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External (independent) review of physics and/or material models , PIRT coverage, and model accuracy; certification of physics and/or material models , PIRT coverage, and model accuracy"
+              Additional Info: " \"Certification\" defined in earlier element."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Certification"
+              Brief description of evidence relevant to this level: "Results of external (independent) review; certification results"
+              Additional evidence from previous level: "Certification results"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; Certification = attest and document adequacy of physics and/or material models for intended application.
+"
+  CVER: 
+    Name: Code Verification
+    Abbreviation: CVER
+    Color: 255,160,51
+    Levels: 
+    Subelements: 
+      CVER1: 
+        Name: Apply Software Quality Engineering (SQE) processes
+        Code: CVER1
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No identified SQE process "
+              Additional Info: "This element requires input from a capability developer."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Code capability is managed to identified SQE practices"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Documented SQE process"
+              Brief description of evidence relevant to this level: "Documentation of the SQE process applied"
+              Key Words/Phrases: "\"Managed\" = ASC IC management (for example); defined in SNL ASC SQE Guidance"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Code capability is managed to identified SQE practices. SQE process is managed."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) SQE process is managed
+2)"
+              Brief description of evidence relevant to this level: "1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices."
+              Key Words/Phrases: "\"SQE Process Management\" = as defined in the SNL ASC SQE Guidance"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Code capability is managed to identified SQE practices. SQE process is managed and optimized."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) SQE process is optimized
+2) "
+              Brief description of evidence relevant to this level: "1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices. 3) Documentation supporting achievement of process optimization."
+              Key Words/Phrases: "\"Optimized\" = as defined in the SNL ASC SQE Guidance"
+      CVER2: 
+        Name: Provide test coverage information
+        Code: CVER2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No test coverage reported"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: ""
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Regression testing and/or limited verification tests (VERTS) reported"
+              Additional Info: "VERTS = Verification test suit; \"Regression testing\" has two implied meanings. First, it is an SQE testing technique that emphasizes robustness, for example preserving yesterday's answers after today's check in. The tests may be unit tests in the sense of SQE and have virtually nothing to do with the computational physics/engineering features of greatest interest. Regression also sometimes informally refers to \"testing on a fixed schedule.\" In this sense, a defined VERTS can be part of a regression suite, or can be tested on its own schedule. Here we are emphasizing the intellectual difference between testing as a software engineering procedure and tests aimed at verifying the computational physics/engineering features."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Testing is reported but feature coverage information may be entirely missing"
+              Brief description of evidence relevant to this level: "Documentation of the testing that is reported, both regression and VERTS. IF coverage is discussed the coverage analysis and conclusions are documented."
+              Key Words/Phrases: "\"Regression testing\" = defined in SNL ASC V&V documentation; \"Verification testing\" = defined in SNL ASC V&V documentation; \"limited\" = understood that VERTS feature coverage is sparse; \"feature\" = computational physics/engineering functionality"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Regression testing and VERTS testing, with VERTS test feature coverage identified and categorized into 1- & 2- way feature coverage categories."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1)VERTS test feature coverage is analyzed."
+              Brief description of evidence relevant to this level: "Documentation of the testing that is reported, both regression and VERTS. VERTS coverage analysis and conclusions are documented."
+              Key Words/Phrases: "\"1-, 2-way feature coverage\" = identified in SNL V&V program documentation"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Regression testing and VERTS testing, with VERTS test feature coverage identified and categorized into 1- & 2- way feature coverage categories. All the physics/engineering features required for the intended application are covered by the reported VERTS."
+              Additional Info: "Remember, a gatekeeper is (at least) the existence of a PIRT - the PCMM evaluation team is required to have an initial definition of \"all the required physics/engineering features for the intended application.\""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) VERTS test feature coverage is complete."
+              Brief description of evidence relevant to this level: "Documentation of the testing that is reported, both regression and VERTS. VERTS coverage analysis and conclusions are documented, with demonstration of coverage completeness."
+              Key Words/Phrases: ""
+      CVER3: 
+        Name:  Identification of code or algorithm attributes, deficiencies and errors
+        Code: CVER3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Code/algorithm attributes, deficiencies and errors from VERTS not presented"
+              Additional Info: "For example, this would automatically be a Level 0 if the CVER2 was Level 0. The \"code errors\" or \"algorithm errors\" here refer to performance of the capability on the VERTS coverage specified in the previous element. The \"code or algorithm attributes\" include order of accuracy, symmetry preservation, boundedness preservation, positivity, etc. "
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Code/algorithm attributes, deficiencies and errors from VERTS presented"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Attributes, deficiencies and errors in VERTS testing reported"
+              Brief description of evidence relevant to this level: "Documentation of VERTS testing analysis of code/algorithm attributes, deficiencies and errors"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Code/algorithm attributes, deficiencies and errors from VERTS presented. Mapping to the intended application analyzed and presented."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) mapping of VERTS errors to intended application analyzed and presented"
+              Brief description of evidence relevant to this level: "Documentation of VERTS testing analysis of code/algorithm attributes, deficiencies and errors. Documentation of mapping of the VERTS errors to the intended application."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Code/algorithm attributes, deficiencies and errors from VERTS presented. Mapping to the intended application analyzed and presented. Impact on the intended application is analyzed and presented."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Impact on the intended application is analyzed and presented."
+              Brief description of evidence relevant to this level: "Documentation of VERTS testing analysis of code/algorithm attributes, deficiencies and errors. Documentation of mapping of the VERTS errors to the intended application. Documentation of the analysis of the impact on the intended application and of the Go/No Go decision."
+              Key Words/Phrases: "\"Impact on intended application\" = this could be the decision to not proceed because of the gravity of the reported VERTS errors. This is a Go/No Go decision point!"
+      CVER4: 
+        Name: Verify compliance to Software Quality Engineering (SQE) processes
+        Code: CVER4
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No assessment"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team self assessment of SQE process compliance"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Self assessment process and analysis conducted"
+              Brief description of evidence relevant to this level: " Self assessment process, analysis and results documented"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External team review of SQE process compliance "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1)  External assessment process and analysis conducted
+"
+              Brief description of evidence relevant to this level: " External assessment process, analysis and results documented"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; alternative word is \"independent.\""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External team review and certification of SQE process compliance "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1)   External assessment process and analysis conducted; 2) certification determination conducted
+"
+              Brief description of evidence relevant to this level: " External assessment process, analysis and results documented; certification basis documented"
+              Key Words/Phrases: "Certification = attest and document adequacy"
+      CVER5: 
+        Name: Technical_review of code verification activities
+        Code: CVER5
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No review of code verification activities reported"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team reviewed code verification activities"
+              Additional Info: " \"Analysis team\" and \"PCMM evaluation\" team are synonymous in this context"
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Review performed"
+              Brief description of evidence relevant to this level: "Results of review"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External (independent) review of code verification activities"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External (independent) review performed"
+              Brief description of evidence relevant to this level: "Results of external (independent) review"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External (independent) review of code verification activities; certification of code verification activities"
+              Additional Info: " \"Certification\" defined in earlier element."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Certification"
+              Brief description of evidence relevant to this level: "Results of external (independent) review; certification results"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; Certification = attest and document adequacy of physics and/or material models for intended application.
+"
+  SVER: 
+    Name: Solution Verification
+    Abbreviation: SVER
+    Color: 169,44,0
+    Levels: 
+    Subelements: 
+      SVER1: 
+        Name: Quantify numerical solution errors
+        Code: SVER1
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Errors due to mesh size not examined"
+              Additional Info: "Level 0 = not acknowledgement or discussion of solution error."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Sensitivity, or robustness, of one or more computed quantities of interest (QoI) to mesh resolution and numerical solution parameters is  studied and presented. Quantification as a computational \"error\" is not required or expected. Conclusions may be qualitative."
+              Additional Info: " \"Computational error\" = putting an error bar reflecting understanding/estimate of the computation error of the QoIs selected. This is Level 2."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Numerical \"sensitivity\" of one or more QoIs is analyzed and reported."
+              Brief description of evidence relevant to this level: "1) Documentation of sensitivity analysis and conclusions."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "\"Sensitivity\" = change in QoI to variation of mesh resolution and/or solution parameters. \"Robustness\" = lack of change of QoI to variation of mesh resolution and/or solution parameters."
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Computational errors, due to mesh resolution and choice of numerical solution parameters, in one or more QoIs are estimated, analyzed and reported. The computational errors are interpreted as error bars on the computed results for the chosen QoIs. The question \"What is the validity of these error estimates\" is answered."
+              Additional Info: "The answer to the question of why the reported error estimate(s) is valid can be \"I don't know.\""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Computational errors are estimated for one or more QOIs
+2) Validity of the numerical error estimates is considered"
+              Brief description of evidence relevant to this level: "1) Documentation of error analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question."
+              Additional evidence from previous level: "1) Documentation of error analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Computational errors, due to mesh resolution and choice of numerical solution parameters, for all QoIs of the intended application are estimated, analyzed and reported. The computational errors are interpreted as error bars on the computed results for the chosen QoIs. The question \"What is the validity of these error estimates\" is answered."
+              Additional Info: "The answer to the question of why the reported error estimate(s) is valid can be \"I don't know.\""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Computational errors are estimated for all QOIs
+2) Validity of the numerical error estimates is considered"
+              Brief description of evidence relevant to this level: "1) Documentation of error analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question.
+3) Documentation of the completeness of identified QoIs."
+              Additional evidence from previous level: "Documentation of the completeness of identified QoIs."
+              Key Words/Phrases: ""
+      SVER2: 
+        Name: Quantify Uncertainty in Computational (or Numerical) Error
+        Code: SVER2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Uncertainty in computational error estimate not examined"
+              Additional Info: "Level 0 = not acknowledgement or discussion of uncertainty in solution error estimation."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Uncertainty of computational error estimates, of one or more computed quantities of interest (QoI) to mesh resolution and numerical solution parameters is examined and presented. Quantification as an uncertainty in computational \"error\" is not required or expected. Conclusions may be qualitative."
+              Additional Info: " \"Computational error\" = putting an error bar reflecting understanding/estimate of the computation error of the QoIs selected. This is Level 2."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Numerical \"sensitivity\" of one or more QoIs is analyzed and reported."
+              Brief description of evidence relevant to this level: "1) Documentation of sensitivity analysis and conclusions regarding uncertainty."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "\"Uncertainty\" = degree to which the error estimate could be incorrect with a quantitative assessment of the range of defensible errors, \"Sensitivity\" = change in QoI to variation of mesh resolution and/or solution parameters. \"Robustness\" = lack of change of QoI to variation of mesh resolution and/or solution parameters."
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Uncertainty of computational error estimates, due to mesh resolution and choice of numerical solution parameters, in one or more QoIs are estimated, analyzed and reported. The computational uncertainties are interpreted as variation in error bars on the computed results for the chosen QoIs. The question \"What is the potential variation of these error estimates\" is answered."
+              Additional Info: " \"Uncertainty of Computational error\" = showing the variation of the  error bar reflecting understanding/estimate of the potential variation in computation error of the QoIs selected. This is Level 2."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Computational errors are estimated for one or more QOIs
+2) Validity of the numerical error estimates is considered"
+              Brief description of evidence relevant to this level: "1) Documentation of uncertainty analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question."
+              Additional evidence from previous level: "1) Documentation of uncertainty analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Uncertainty of computational errors, due to mesh resolution and choice of numerical solution parameters, for all QoIs of the intended application are estimated, analyzed and reported. The uncertainty in computational error are interpreted as variations in the error bars on the computed results for the chosen QoIs. The question \"What is the validity of the variations on the error estimates\" is answered."
+              Additional Info: "The answer to the question of why the reported variation in error estimate(s) is valid can be \"I don't know.\""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Computational errors are estimated for all QOIs
+2) Validity of the numerical error estimates is considered"
+              Brief description of evidence relevant to this level: "1) Documentation of uncertainty analysis and conclusions.
+2) Documentation of the analysis and conclusions of the validity question.
+3) Documentation of the completeness of identified QoIs."
+              Additional evidence from previous level: "Documentation of the completeness of identified QoIs."
+              Key Words/Phrases: ""
+      SVER3: 
+        Name: Verify simulation input decks
+        Code: SVER3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Inspection of input deck(s) for intended application not reported"
+              Additional Info: "The issue here is inspection of \"input decks\" for errors. Input decks can have errors even if calculations run - wrong ICs/BCs, incorrect material parameters. \"Input deck\" is also interpreted in the large to include the geometric specifications (i.e. meshing and geometries). The ultimate level of formality for this element is a formal inspection of the input deck by a team including a scribe, and one or more readers. If People do not know what this terminology means they are not at level 3. This process is called a \"formal inspection\" and derives exactly from formal software inspection procedures well described in the software quality literature."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "\"Inspection\" = examination of input deck(s) for correctness. \"Correctness\" = absence of identified errors."
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Inspection of input deck(s) for intended application by the analyst(s)."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Analyst inspection"
+              Brief description of evidence relevant to this level: "1) Inspection process, 2) conclusions all documented."
+              Additional evidence from previous level: "1) Inspection process, 2) conclusions all documented."
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Inspection of input deck(s) for intended application by one or more people other than the analyst(s). This is an \"external\" or \"independent\" review, but need not be performed as a formal \"software inspection.\""
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Independent review of input"
+              Brief description of evidence relevant to this level: "1) Inspection process, 2) conclusions all documented."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Formal inspection of input deck(s) for intended application by an independent inspection team (one or more readers, scribe)."
+              Additional Info: "A formal inspection procedure implies aspects of reproducibility."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Independent formal \"software inspection\" approach and associated process/results to the input inspection."
+              Brief description of evidence relevant to this level: "Formal inspection personnel, process and results all documented."
+              Additional evidence from previous level: "Formal inspection personnel, process and results all documented."
+              Key Words/Phrases: ""
+      SVER4: 
+        Name: Verify simulation post-processor inputs decks
+        Code: SVER4
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Inspection of post-processor input deck(s) for intended application not reported"
+              Additional Info: "The issue here is inspection of \"input decks\" for post-processer calculations for errors."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "\"Inspection\" = examination of input deck(s) for correctness. \"Correctness\" = absence of identified errors."
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Inspection of post-processor input deck(s) for intended application by the analyst(s)."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Analyst inspection"
+              Brief description of evidence relevant to this level: "1) Inspection process, 2) conclusions all documented."
+              Additional evidence from previous level: "1) Inspection process, 2) conclusions all documented."
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Inspection of post-processor input deck(s) for intended application by one or more people other than the analyst(s). This is an \"external\" or \"independent\" review, but need not be performed as a formal \"software inspection.\""
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Independent review of input"
+              Brief description of evidence relevant to this level: "1) Inspection process, 2) conclusions all documented."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Formal inspection of post-processor input deck(s) for intended application by an independent inspection team (one or more readers, scribe)."
+              Additional Info: "A formal inspection procedure implies aspects of reproducibility."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Independent formal \"software inspection\" approach and associated process/results to the input inspection."
+              Brief description of evidence relevant to this level: "Formal inspection personnel, process and results all documented."
+              Additional evidence from previous level: "Formal inspection personnel, process and results all documented."
+              Key Words/Phrases: ""
+      SVER5: 
+        Name: Technical review of solution verification
+        Code: SVER5
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No review of solution verification activities reported"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team reviewed  solution verification activities "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Review performed"
+              Brief description of evidence relevant to this level: "Results of review"
+              Additional evidence from previous level: "Results"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External (independent) review of solution verification activities "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External (independent) review performed"
+              Brief description of evidence relevant to this level: "Results of external (independent) review"
+              Additional evidence from previous level: "None"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External (independent) review of solution verification activities ; certification of solution verification activities "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Certification"
+              Brief description of evidence relevant to this level: "Results of external (independent) review; certification results"
+              Additional evidence from previous level: "Certification results"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; Certification = attest and document adequacy of solution verification activities for intended application.
+"
+  VAL: 
+    Name: Validation
+    Abbreviation: VAL
+    Color: 125,13,124
+    Levels: 
+    Subelements: 
+      VAL1: 
+        Name: Define a validation hierarchy
+        Code: VAL1
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No validation hierarchy is defined (presented, specified, identified, acknowledged, etc.)."
+              Additional Info: "\"Validation Hierarchy\" is defined in Sandia V&V planning report. This level implies \"NO VALIDATION PLAN.\"  Inability to define a validation hierarchy means that there is no validation plan or PIRT, in all likelihood. This issue is probably a gatekeeper, since we are thinking that a PIRT is a necessary condition (at least) for a PCMM assessment."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "Nothing. "
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Validation hierarchy"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "One level (i.e. level refers to either material level, component level, subsystem level, etc.) of a complete validation hierarchy, or an incomplete validation hierarchy, is defined (etc.). "
+              Additional Info: "Incomplete hierarchy can be specified by a PIRT but a validation plan is desired."
+              Change(s) from previous level: "One level of a validation hierarchy is given. "
+              Brief description of evidence relevant to this level: "Description of the presented hierarchy level."
+              Additional evidence from previous level: "Description of the presented hierarchy level."
+              Key Words/Phrases: "Validation hierarchy"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "More than one level (i.e. level refers to either material level, component level, subsystem level, etc.) of an incomplete validation hierarchy is defined (etc.). "
+              Additional Info: "Incomplete hierarchy can be specified by a PIRT but a validation plan is desired."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) More than one validation hierarchy level is required "
+              Brief description of evidence relevant to this level: "Description of the presented hierarchy levels."
+              Additional evidence from previous level: "Description of additional validation hierarchy level. "
+              Key Words/Phrases: "Validation hierarchy"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Complete validation hierarchy is defined. "
+              Additional Info: "A complete validation hierarchy must be defined by a validation plan. A PIRT alone is insufficient to respond to this level. "
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Complete validation hierarchy defined."
+              Brief description of evidence relevant to this level: "Description of the complete validation hierarchy. "
+              Additional evidence from previous level: "Completion of the validation hierarchy description."
+              Key Words/Phrases: "All levels"
+      VAL2: 
+        Name: Apply a validation hierarchy
+        Code: VAL2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No identified validation work is aligned with a validation hierarchy."
+              Additional Info: "Here the concern is the alignment with a validation hierarchy (alignment with a validation plan, really)."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "Validation evidence (but no association with a defined validation hierarchy)."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Validation hierarchy"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Presented validation work aligns with this level."
+              Additional Info: "PCMM team interprets whether validation work aligns with validation hierarchy at this level"
+              Change(s) from previous level: "Presented validation work aligns with this."
+              Brief description of evidence relevant to this level: "Validation evidence aligned with this level."
+              Additional evidence from previous level: "Validation evidence aligned with this level."
+              Key Words/Phrases: "Validation hierarchy"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Presented validation work aligns with these levels."
+              Additional Info: "PCMM team interprets whether validation work aligns with validation hierarchy at this level"
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Presented validation work aligns etc."
+              Brief description of evidence relevant to this level: "Validation evidence aligned with these levels."
+              Additional evidence from previous level: "Validation evidence aligned with the additional level."
+              Key Words/Phrases: "Validation hierarchy"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Presented validation work aligns with the complete hierarchy."
+              Additional Info: "PCMM team interprets whether validation work aligns with validation hierarchy at this level"
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) All validation work aligns etc."
+              Brief description of evidence relevant to this level: "Validation evidence aligned with the hierarchy."
+              Additional evidence from previous level: "Validation evidence aligned with the complete hierarchy."
+              Key Words/Phrases: "All levels"
+      VAL3: 
+        Name: Quantify physical accuracy 
+        Code: VAL3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Qualitative (i.e. no quantitative) validation results are presented."
+              Additional Info: "\"Quantitative\" is explained in Sandia V&V program documents. For validation, the opposite of \"quantitative\" is \"qualitative,\" and the distinction is presented in Sandia V&V program documents. Validation results mentioned in the above subelement could be quantitative or qualitative or anything in between.  Here, the subelement is exploring how quantitative results are. "
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None: this element is focused on quantitative validation results - so qualitative  validation results are not part of the evidence base."
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Qualitative"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Quantitative validation results are presented but are in the minority of presented validation results."
+              Additional Info: "Quantitative is explained in Sandia V&V program documents. For validation, the opposite of \"quantitative\" is \"qualitative,\" and the distinction is presented in Sandia V&V program documents. \"Minority\" means the dictionary definition - fewer of presented validation results are \"quantitative\" according to V&V program documentation than \"qualitative.\" "
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Some quantitative validation results"
+              Brief description of evidence relevant to this level: "Quantitative validation results"
+              Additional evidence from previous level: "Quantitative validation results"
+              Key Words/Phrases: "Quantitative"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Quantitative validation results are presented and are the majority of presented validation results."
+              Additional Info: "Quantitative is explained in Sandia V&V program documents. For validation, the opposite of \"quantitative\" is \"qualitative,\" and the distinction is presented in Sandia V&V program documents."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Most validation results are quantitative"
+              Brief description of evidence relevant to this level: "Quantitative validation results"
+              Additional evidence from previous level: "A higher percentage of quantitative validation results"
+              Key Words/Phrases: "Quantitative"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "All presented validation results are quantitative"
+              Additional Info: "Quantitative is explained in Sandia V&V program documents. For validation, the opposite of \"quantitative\" is \"qualitative,\" and the distinction is presented in Sandia V&V program documents."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) All validation results are quantitative. "
+              Brief description of evidence relevant to this level: "Quantitative validation results"
+              Additional evidence from previous level: "All validation results"
+              Key Words/Phrases: "Quantitative"
+      VAL4: 
+        Name: Validation domain vs. application domain 
+        Code: VAL4
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No assessment of the relationship (interpolation vs. extrapolation) of the validation domain to the application domain."
+              Additional Info: "\"Validation Domain\" - defined in Sandia V&V documentation. \"Application Domain\" - defined in Sandia V&V documentation. \"Interpolation\" - validation domain contains the application domain; \"Extrapolation\" - validation domain partially overlaps the application domain or is disjoint from the application domain."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: ""
+              Key Words/Phrases: "Validation Domain; Application domain; interpolation; extrapolation"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Pure extrapolation of validation domain with application domain. "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Characterization of validation-application domains"
+              Brief description of evidence relevant to this level: "Documentation of assessment of validation domain/application domain overlap."
+              Additional evidence from previous level: "Documentation of assessment of validation domain/application domain overlap."
+              Key Words/Phrases: "Validation Domain; Application domain; interpolation; extrapolation"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Partial extrapolation of validation domain with application domain (i.e. mix of interpolation and extrapolation)."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Characterization of validation-application domains"
+              Brief description of evidence relevant to this level: "Documentation of assessment of validation domain/application domain overlap."
+              Additional evidence from previous level: ""
+              Key Words/Phrases: "Validation Domain; Application domain; interpolation; extrapolation"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Application domain contained by validation domain (i.e. pure interpolation)."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1)Characterization of validation-application domains"
+              Brief description of evidence relevant to this level: "Documentation of assessment of validation domain/application domain overlap."
+              Additional evidence from previous level: ""
+              Key Words/Phrases: "Validation Domain; Application domain; interpolation; extrapolation"
+      VAL5: 
+        Name: Technical review of validation 
+        Code: VAL5
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No reported review of validation assessment"
+              Additional Info: "\"Review\" - separate activity to examine characteristics of validation results in terms of above subelements."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: ""
+              Key Words/Phrases: "n/a"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Project team reviews validation assessment"
+              Additional Info: "\"Project team\" - those who executed the work and delivered the results. This is not an independent peer review."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) A  review is conducted."
+              Brief description of evidence relevant to this level: "Review is documented."
+              Additional evidence from previous level: "Review documentation."
+              Key Words/Phrases: "Project team"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External team reviews validation assessment"
+              Additional Info: "\"External peer review\" = \"independent peer review\" = review by team of people who are not on the project team."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External review panel reviews validation results"
+              Brief description of evidence relevant to this level: "Review is documented"
+              Additional evidence from previous level: "No change"
+              Key Words/Phrases: "External team"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External team reviews validation assessment and certifies the assessment"
+              Additional Info: "\"Certifies\" = \"certification\" = defined in earlier elements."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) External review panel certifies validation results"
+              Brief description of evidence relevant to this level: "Validation assessment certification"
+              Additional evidence from previous level: "Certification documentation"
+              Key Words/Phrases: "External team; certification"
+  UQ: 
+    Name: Uncertainty Quantification
+    Abbreviation: UQ
+    Color: 0,173,208
+    Levels: 
+    Subelements: 
+      UQ1: 
+        Name: Aleatory and epistemic uncertainties identified and characterized.
+        Code: UQ1
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No uncertainties identified/characterized"
+              Additional Info: "Aleatory = stochastic uncertainty; \"Epistemic\" = incomplete knowledge uncertainty; \"characterized\" = broader term than \"quantified\" but default to \"quantified\" if in doubt. See Sandia QMU documentation for presentation of aleatory and epistemic uncertainty logic. The key  implication is that characterization of aleatory uncertainty is technically different than that for epistemic uncertainty."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Aleatory; epistemic; characterized"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Some uncertainties identified/characterized. Aleatory/epistemic separation (segregation, etc.) not performed. "
+              Additional Info: "Separation - the aleatory uncertainties are separately identified/characterized from epistemic uncertainties. No evidence of completeness of uncertainty ID/characterization is required."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Uncertainty identification/characterization is performed and reported"
+              Brief description of evidence relevant to this level: "Documentation of uncertainty identification/characterization"
+              Additional evidence from previous level: "Documentation of uncertainty identification/characterization"
+              Key Words/Phrases: "Separation (segregation)"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Some uncertainties identified/characterized. Aleatory/epistemic separation (segregation, etc.) is performed for these uncertainties."
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Uncertainty identification/characterization is performed and reported
+2)Aleatory/epistemic separation is performed and reported"
+              Brief description of evidence relevant to this level: "Documentation of uncertainty identification/characterization. Documentation of aleatory/epistemic separation."
+              Additional evidence from previous level: "Documentation of aleatory/epistemic separation."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "All significant uncertainties identified/characterized except for unknown/unknowns. Aleatory/epistemic separation (segregation, etc.) is performed for these uncertainties."
+              Additional Info: "Unknown unknown - uncertainties that we can't identify."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) ALL uncertainties rather than SOME uncertainties
+2) Logic around \"all\" uncertainties characterized"
+              Brief description of evidence relevant to this level: "Documentation of uncertainty identification/characterization. Documentation of aleatory/epistemic separation. Documentation of logic around \"all\" uncertainties characterize"
+              Additional evidence from previous level: "Documentation of logic around \"all\" uncertainties characterize"
+              Key Words/Phrases: "unknown unknown"
+      UQ2: 
+        Name: Perform sensitivity analysis
+        Code: UQ2
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No sensitivity analysis of uncertainties performed"
+              Additional Info: ""
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "n/a"
+              Additional evidence from previous level: ""
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Qualitative sensitivity analysis of some uncertainties is performed"
+              Additional Info: "\"Qualitative\" = non-quantitative. \"Quantitative\" sensitivity analysis is well-defined in a large published literature."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Qualitative sensitivity analysis of some uncertainties"
+              Brief description of evidence relevant to this level: "documentation of reported qualitative sensitivity analysis"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "Qualitative"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Quantitative sensitivity analysis of some uncertainties is performed"
+              Additional Info: "Quantitative sensitivity analysis is well-defined in a large published literature."
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Quantitative sensitivity analysis of some uncertainties"
+              Brief description of evidence relevant to this level: "documentation of reported quantitative sensitivity analysis"
+              Additional evidence from previous level: "quantitative sensitivity analysis documentation"
+              Key Words/Phrases: "Quantitative"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Quantitative sensitivity analysis performed for all characterized uncertainties"
+              Additional Info: "\"All\" is defined by subelement 1."
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1)  Logic executed that all characterized uncertainties are included in quantitative sensitivity analysis"
+              Brief description of evidence relevant to this level: "documentation of reported quantitative sensitivity analysis. Documentation of the logic that all characterized uncertainties are included."
+              Additional evidence from previous level: "Documentation of the logic that all characterized uncertainties are included."
+              Key Words/Phrases: "All"
+      UQ3: 
+        Name: Quantify impact of uncertainties from UQ1 on quantities of interest
+        Code: UQ3
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "Impact reported for uncertainty characterization"
+              Additional Info: "\"computational uncertainty characterization errors\" = the errors in quantitative characterization of uncertainties. Ex. If the characterization is qualitative there is no associated computational error. Ex. If the characterization is a statistic, like a mean, then the error could be a confidence, tolerance or prediction interval. Ex if the uncertainty is epistemic, then the error could be defined by confidence, tolerance or prediction intervals emerging from the probability of frequency framework. The source and computation of errors in uncertainty characterizations is discussed in Sandia QMU documentation."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "none"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "computational uncertainty characterization errors"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Impact reported for some uncertainty characterizations without aleatory/epistemic separation"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Some errors reported"
+              Brief description of evidence relevant to this level: "documentation of reported errors"
+              Additional evidence from previous level: "Error documentation"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Impact reported for some uncertainty characterizations with aleatory/epistemic separation"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) Aleatory/epistemic separation for reported errors
+2) "
+              Brief description of evidence relevant to this level: "Documentation of reported errors. Documentation of aleatory/epistemic separation analysis."
+              Additional evidence from previous level: "Documentation of aleatory/epistemic separation analysis."
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "Impact reported for ALL uncertainty characterizations with aleatory/epistemic separation"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) All errors reported
+2) "
+              Brief description of evidence relevant to this level: "Documentation of reported errors. Documentation of aleatory/epistemic separation analysis. Documentation of logic underlying \"ALL.\""
+              Additional evidence from previous level: "Documentation of logic underlying \"ALL.\""
+              Key Words/Phrases: ""
+      UQ4: 
+        Name: UQ aggregation and roll-up
+        Code: UQ4
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No aggregation or roll-up performed"
+              Additional Info: "Aggregation refers to combining sources of uncertainty at one level in the validation or system hierarchy. Roll-up refers to aggregation sources of uncertainty throughout validation or system hierarchy to a target application."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "none"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: "aggregation, roll-up"
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "Aggregation or roll-up performed for some of the major uncertainties"
+              Additional Info: "Example: Aggregate numerical and physical model parameter uncertainty at one level."
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) aggregation or roll-up for a limited number of major uncertainties"
+              Brief description of evidence relevant to this level: "Documentation"
+              Additional evidence from previous level: "Identification of a limited number of sources of uncertainty and results of aggregation/roll-up"
+              Key Words/Phrases: "\"major\" defined by PCMM team"
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "Aggregation or roll-up performed for most of the major uncertainties"
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) aggregation or roll-up for most of the major uncertainties"
+              Brief description of evidence relevant to this level: "Documentation of evidence. Identification and documentation of 'major' sources of uncertainty and documentation of those addressed"
+              Additional evidence from previous level: "Identification of major sources of uncertainty, identification of those addressed in aggregation/roll-up, and results of aggregation/roll-up"
+              Key Words/Phrases: "\"most\" defined by PCMM team"
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "All significant sources of uncertainty are aggregated and rolled-up "
+              Additional Info: ""
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) aggregation and roll-up for all of the major (i.e. significant) uncertainties"
+              Brief description of evidence relevant to this level: "Documentation of evidence. Identification and documentation of 'major' sources of uncertainty and documentation"
+              Additional evidence from previous level: "Identification of major sources of uncertainty, and results of aggregation and roll-up for all major sources"
+              Key Words/Phrases: "\"all significant\" defined by PCMM team"
+      UQ5: 
+        Name: Technical review of uncertainty quantification
+        Code: UQ5
+        Levels: 
+          Level 0: 
+            Code: 0
+            Name: Level 0
+            Descriptors: 
+              Descriptor: "No review of UQ is reported"
+              Additional Info: "\"Peer review\" = has been defined in previous elements."
+              Change(s) from previous level: "n/a"
+              Brief description of evidence relevant to this level: "None"
+              Additional evidence from previous level: "n/a"
+              Key Words/Phrases: ""
+          Level 1: 
+            Code: 1
+            Name: Level 1
+            Descriptors: 
+              Descriptor: "PCMM evaluation team reviewed UQ"
+              Additional Info: "\"project team\" = prior definition"
+              Change(s) from previous level: "Main differences between Level 0 and 1: 
+1) Review performed"
+              Brief description of evidence relevant to this level: "Results of review"
+              Additional evidence from previous level: "Results"
+              Key Words/Phrases: ""
+          Level 2: 
+            Code: 2
+            Name: Level 2
+            Descriptors: 
+              Descriptor: "External (independent) review of UQ"
+              Additional Info: "\"independent team\" = prior definition"
+              Change(s) from previous level: "Main differences between Level 1 and 2: 
+1) External (independent) review performed"
+              Brief description of evidence relevant to this level: "Results of external (independent) review"
+              Additional evidence from previous level: "None"
+              Key Words/Phrases: ""
+          Level 3: 
+            Code: 3
+            Name: Level 3
+            Descriptors: 
+              Descriptor: "External (independent) review of UQ; certification of UQ"
+              Additional Info: "\"Certifies\" = prior definition"
+              Change(s) from previous level: "Main differences between Level 2 and 3: 
+1) Certification"
+              Brief description of evidence relevant to this level: "Results of external (independent) review; certification results"
+              Additional evidence from previous level: "Certification results"
+              Key Words/Phrases: "External (independent) = review by personnel disjoint from PCMM evaluation team; Certification = attest and document adequacy of UQ for intended application.
+"
+Planning:
+  Planning Fields:
+    Summary:
+      required: Optional
+      type: RichText
+    Notes/Assumptions:
+      required: Optional
+      type: RichText
+    Action Items:
+      required: Optional
+      type: Action Item Table
+  Planning Types:
+    Action Item Table:
+      Identifier:
+        required: Optional
+        type: Text
+      Description:
+        required: Optional
+        type: Text
+      Status:
+        required: Optional
+        type: Select
+        values:
+          - Open
+          - In Progress
+          - Resolved
+          - Canceled
+      Status Narrative:
+        required: Optional
+        type: RichText
+      Priority:
+        required: Optional
+        type: Select
+        values:
+          - High
+          - Medium
+          - Low
+      Owner:
+        required: Optional
+        type: Text
+      Created Date:
+        required: Optional
+        type: Date
+      Planned Completion Date:
+        required: Optional
+        type: Date
+      Actual Completion Date:
+        required: Optional
+        type: Date
+  Planning Questions:
+    RGF:
+      RGF1:
+        - "Has the model been de-featured and to what extent are the primary and secondary features included (ex. Fillets, bolts, holes, cables, etc)?"
+      RGF2:
+        - "How is the computational error due to the given level of geometric resolution expected to influence the QOIs (perform simulations for varying levels of de-featuring)?"
+        - "For which major features has the sensitivity been quantified (few, some, all)?"
+      RGF3:
+        - "Has the representation/geometry for the simulation been rigorously checked (by the analyst, by other analysts, by multiple other users, peer review panel (external or internal))?"
+    PMMF:
+      PMMF1:
+        - "To what extent do the phenomena covered in the PIRT align with the major physics that are included in the application model, and are the same capabilities that were assessed in the PIRT applicableimulation been rigorously checked (by the analyst, by other analysts, by multiple other users, peer review panel (external or internal))?"
+      PMMF2:
+        - "Which individual phenomena have specific validation comparisons?"
+        - "How were the existing validation comparisons conducted (quantitative vs. qualitative), and how was experimental uncertainty/error in the test data incorporated?"
+      PMMF3:
+        - "To what extent does the application domain intersect the validation domain for this physics and material model (does not intersect, partially intersects, entirely contained)?"
+      PMMF4:
+        - "Have the physics and material models, PIRT coverage and model accuracy been subjected to peer review (by the team, internal, external), and where are these results documented?"
+    CVER:
+      CVER1:
+        - "Is the code capability managed to identified SQE practices? If so, reference them."
+        - "How is the SQE process managed and optimized?"
+      CVER2:
+        - "What regression tests and verification test suite (VERTS) are available for the code capabilities?"
+        - "How well are the code features required for the intended application covered by the VERTS?"
+      CVER3:
+        - "How well are the code/algorithm attributes, deficiencies and errors from VERTS known?"
+        - "How are these errors mapped to the intended application?"
+      CVER4:
+        - "How has the SQE process been reviewed (none, self-assessment, external, certification)?"
+      CVER5:
+        - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+    SVER:
+      SVER1:
+        - "How have numerical errors incurred from spatial, temporal, and stochastic resolution been accounted for (qualitative vs. quantitative)?"
+        - "How are these errors expected to impact all of the relevant QoIs?"
+      SVER2:
+        - "Are there appropriate error bars for the stochastic error for all the relevant QoIs?"
+      SVER3:
+        - "How and by whom has the accuracy of the input decks for the simulation been checked (by the analyst, by other analysts, by multiple other users)?"
+      SVER4:
+        - "Is a common set of post-processing tools used for the analysis, and are they held to a common set of SQE standards?"
+        - "How and by whom has the accuracy of the inputs to the post-processing tools been checked (by the analyst, by other analysts, by multiple other users)?"
+      SVER5:
+        - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+    VAL:
+      VAL1:
+        - "Has a validation hierarchy been defined (i.e., mapping from material to component to subsystem to full system levels)?"
+      VAL2:
+        - "What is the methodology for how available experimental data connects the levels of the hierarchy?"
+        - "Have the steps in this methodology been performed (i.e., have quantitative comparisons been made at different levels of the hierarchy)?"
+      VAL3:
+        - "What is the rigor of the validation comparisons (i.e., are they quantitative or qualitative)?"
+        - "Do the validation comparisons include uncertainty/error in the test data and model outputs?"
+      VAL4:
+        - "Is the application of the model an extrapolation from the conditions where test data is available for validation, and to what extent (materials, environments, hardware, etc.)?"
+        - "What evidence exists that provides confidence in the ability to extrapolate?"
+      VAL5:
+        - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+    UQ:
+      UQ1:
+        - "Has an inventory of uncertainty sources been taken, and have they been classified according to these forms?"
+        - "What is the source of information (e.g., legacy, literature, direct measurement, calibration, etc.) that is used for uncertainty characterization (e.g., classification as aleatory vs. epistemic, uncertainty representation, distributional assumptions, etc.)?"
+      UQ2:
+        - "How have the most important uncertainty sources for the relevant QoIs been identified (e.g., SME judgment, local sensitivity analysis, global sensitivity analysis, etc.)?"
+      UQ3:
+        - "Have identified sources of uncertainty (see 1 above) been propagated to the important output QoIs?"
+        - "What is the procedure for propagation and what additional errors are introduced?"
+      UQ4:
+        - "How have sources of uncertainty been combined and transferred across different levels of the system (i.e., validation hierarchy) and to the application domain?"
+      UQ5:
+        - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"

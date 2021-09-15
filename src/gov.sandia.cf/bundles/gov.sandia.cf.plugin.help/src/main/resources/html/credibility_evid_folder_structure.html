@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Credibility Evidence Folder Structure</title>
+</head>
+<body>
+	<h2>Credibility Evidence Folder Structure</h2>
+	
+	<p>The credibility evidence folder structure helps the analyst to classify evidence and documents:</p>
+	
+	<p>
+		<table>
+			<tbody>
+			<tr>
+				<td>|-- 1-Analysis_Model</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 0-Geometry</td>
+				<td>CAD models, STEP files</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 1-Meshing</td>
+				<td>Mesh generation scripts, mesh instances generated at different resolution levels</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 2-Materials</td> 
+				<td>Material models references and analysis code input snippets (the latter may be SAW server links to a program material repository)</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 3-Computational_Models</td> 
+				<td>Analysis code main input file and include files</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 4-Postprocessing</td> 
+				<td>Python or other tools for QoI evaluation, plotting results visualization, etc.</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 5-Analysis_Workflow</td> 
+				<td>Analysis workflow to run a single instance of the model.  No studies/ensembles.</td>
+			</tr>
+			<tr>
+				<td>|-- 2-Studies</td> 
+				<td>Various ensembles or single runs that don't fit into credibility buckets.  Optimization, design studies, etc.</td>
+			</tr>
+			<tr>
+				<td>|-- 3-Credibility</td> 
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 0-Documents</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- |-- 0-References</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 1-PCMM</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 1-Code_Verification</td>
+				<td>Feature coverage tool results and discussion</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 2-Physics_and_Material_Fidelity</td>
+				<td>What physics models are we using, provenance?</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 3-Representation_and_Geometric_Fidelity</td>
+				<td>CAD-FEM comparison, is geometry adequate? Why?</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 4-Solution_Verification</td>
+				<td>Studies for parallel consistency and scalability, mesh refinement, solver controls, deterministic sensitivity etc.</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 5-Validation</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|&emsp;|-- 0-PhysSim</td>
+				<td>Test process description, experimental credibility, test data</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|&emsp;|-- 1-CompSim</td>
+				<td>Models of the tests, test-model comparison</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|&emsp;|-- 6-Uncertainty_Quantification</td>
+				<td>Uncertainty inventory, studies for uncertainty informed sensitivity, LHS or other UQ studies</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 2-System_Requirements-Verification</td>
+				<td>Are we meeting the requirements? Why? (Basically final design review slide package)</td>
+			</tr>
+			<tr>
+				<td>|&emsp;|-- 3-Peer_Reviews</td>
+				<td>Review panel memos and ModSim team responses.</td>
+			</tr>
+			</tbody>
+		</table>
+	</p>
+	
+</body>
+</html>

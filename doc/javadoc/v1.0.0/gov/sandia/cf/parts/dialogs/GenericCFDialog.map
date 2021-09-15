@@ -1,0 +1,18 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./GenericCFDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFDialog" alt="" coords="1599,336,1946,429"/>
+<area shape="rect" id="node1" href="./GenericCFDialog.html" title="&lt;TABLE&gt;" alt="" coords="1589,331,1957,435"/>
+<area shape="rect" id="node2_1" href="./GenericCFSmallDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFSmallDialog" alt="" coords="16,531,396,607"/>
+<area shape="rect" id="node2" href="./GenericCFSmallDialog.html" title="&lt;TABLE&gt;" alt="" coords="5,526,407,613"/>
+<area shape="rect" id="node3_2" href="../ui/pcmm/NewTagDialog.html" title="gov.sandia.cf.parts.ui.pcmm.NewTagDialog" alt="" coords="442,514,845,625"/>
+<area shape="rect" id="node3" href="../ui/pcmm/NewTagDialog.html" title="&lt;TABLE&gt;" alt="" coords="431,509,855,630"/>
+<area shape="rect" id="node4_3" href="../ui/pcmm/PCMMAggregationDetailsDialog.html" title="gov.sandia.cf.parts.ui.pcmm.PCMMAggregationDetailsDialog" alt="" coords="890,514,1810,625"/>
+<area shape="rect" id="node4" href="../ui/pcmm/PCMMAggregationDetailsDialog.html" title="&lt;TABLE&gt;" alt="" coords="879,509,1821,630"/>
+<area shape="rect" id="node5_4" href="../ui/pcmm/PCMMAssessDialog.html" title="gov.sandia.cf.parts.ui.pcmm.PCMMAssessDialog" alt="" coords="1856,514,2537,625"/>
+<area shape="rect" id="node5" href="../ui/pcmm/PCMMAssessDialog.html" title="&lt;TABLE&gt;" alt="" coords="1845,509,2548,630"/>
+<area shape="rect" id="node6_5" href="../ui/pcmm/PCMMEvidenceListDialog.html" title="gov.sandia.cf.parts.ui.pcmm.PCMMEvidenceListDialog" alt="" coords="2583,497,3331,642"/>
+<area shape="rect" id="node6" href="../ui/pcmm/PCMMEvidenceListDialog.html" title="&lt;TABLE&gt;" alt="" coords="2572,491,3341,647"/>
+<area shape="rect" id="node7_6" href="../ui/pcmm/PCMMManageTagDialog.html" title="gov.sandia.cf.parts.ui.pcmm.PCMMManageTagDialog" alt="" coords="3376,488,3876,651"/>
+<area shape="rect" id="node7" href="../ui/pcmm/PCMMManageTagDialog.html" title="&lt;TABLE&gt;" alt="" coords="3365,483,3887,656"/>
+<area shape="rect" id="node8_7" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/dialogs/TitleAreaDialog.html" title="org.eclipse.jface.dialogs.TitleAreaDialog" alt="" coords="1653,11,1893,277"/>
+<area shape="rect" id="node8" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/dialogs/TitleAreaDialog.html" title="&lt;TABLE&gt;" alt="" coords="1642,5,1903,283"/>
+</map>

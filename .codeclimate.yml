@@ -1,0 +1,29 @@
+version: "2"
+checks:
+  file-lines:
+    config:
+      threshold: 500
+  method-complexity:
+    config:
+      threshold: 15
+  method-count:
+    config:
+      threshold: 20
+  method-lines:
+    config:
+      threshold: 50
+  similar-code:
+    enabled: false
+engine:
+  sonar-java:
+    enabled: true
+    config:
+      sonar.java.source: "8"
+      tests_patterns:
+        - src/gov.sandia.cf/tests/**
+exclude_paths:
+  - build/
+  - ci/
+  - doc/
+  - src/gov.sandia.cf/tests/**
+  - THIRD PARTY SOFTWARE LICENSES/

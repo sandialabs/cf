@@ -1,0 +1,53 @@
+Decisions:
+  Description:
+    required: "Optional"
+    type: "Text"
+  Rationale:
+    level: ">=1"
+    required: "Required"
+    type: "RichText"
+  Conservatism:
+    level: ">=1"
+    required: "Required"
+    type: "RichText"
+  Credibility Element:
+    level: ">=1"
+    required: "Desired"
+    type: "Credibility_Element"
+  Consequence of Wrong Decision:
+    level: ">=1"
+    required: "Required"
+    type: "Select"
+    values:
+      - "High"
+      - "Nominal"
+      - "Low"
+      - "Unknown"
+  Likelihood of Wrong Decision:
+    level: ">=1"
+    required: "Required"
+    type: "Select"
+    values:
+      - "High"
+      - "Nominal"
+      - "Low"
+      - "Unknown"
+  Maturity of Techniques:
+    level: ">=1"
+    required: "Required"
+    type: "Select"
+    values:
+      - "Production"
+      - "Pre-Release"
+      - "Research"
+  Analyst Training:
+    level: ">=1"
+    required: "Required"
+    type: "Select"
+    values:
+      - "Familiar"
+      - "First Time"
+  References:
+    level: ">=1"
+    required: "Desired"
+    type: "Link"

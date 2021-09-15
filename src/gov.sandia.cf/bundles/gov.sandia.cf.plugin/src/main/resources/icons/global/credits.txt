@@ -1,0 +1,72 @@
+add_icon_128.png                   - Icon made by srip from www.flaticon.com
+add_icon_128_green.png             - Icon made by srip from www.flaticon.com
+add_icon_128_white.png             - Icon made by srip from www.flaticon.com
+aggregate_icon_128.png             - Icon made by Google from https://www.iconfinder.com/icons/3669392/call_ic_merge_icon
+aggregate_icon_128_blue.png        - Icon made by Google from https://www.iconfinder.com/icons/3669392/call_ic_merge_icon
+aggregate_icon_128_yellow.png      - Icon made by Google from https://www.iconfinder.com/icons/3669392/call_ic_merge_icon
+assess_icon_128.png                - Icon made by Google from https://www.iconfinder.com/icons/3669450/assessment_ic_icon
+back_icon_128.png                  - Icon made by Roundicons from www.flaticon.com
+book.png                           - Icon made by Google from https://www.iconfinder.com/icons/214658/magazine_book_icon
+book-primary.png                   - Icon made by Google from https://www.iconfinder.com/icons/214658/magazine_book_icon
+book-white.png                     - Icon made by Google from https://www.iconfinder.com/icons/214658/magazine_book_icon
+change_icon_128.png                - Icon from https://www.iconfinder.com/icons/211882/refresh_icon
+close_icon_128.png                 - Icon made by Freepik from www.flaticon.com
+collapse_icon_128_black.png        - Icon made by icon king (https://freeicons.io/profile/3) from www.freeicons.io
+communicate_icon_128.png           - Icon from https://www.iconfinder.com/kitofparts
+communicate_icon_128_primary.png   - Icon from https://www.iconfinder.com/kitofparts
+config_icon_128.png                - Icon from https://www.iconfinder.com/icons/1564529/configuration_mechanism_options_setting_settings_icon
+copy_icon_128_black.png			   - Icon from https://www.iconfinder.com/icons/326595/content_copy_duplicate_icon
+delete_icon_128.png                - Icon from https://www.materialui.co/icon/delete
+delete_icon_128_white.png          - Icon from https://www.materialui.co/icon/delete
+duplicate_icon_128.png             - Icon from https://icon-icons.com/icon/duplicate/120027
+duplicate_icon_128_white.png       - Icon from https://icon-icons.com/icon/duplicate/120027
+edit_icon_128.png                  - Icon from https://fontawesome.com/icons/edit?style=regular
+edit_icon_128_white.png            - Icon from https://fontawesome.com/icons/edit?style=regular
+empty_icon.png                     - Icon from NGA
+examine_icon_128.png               - Icon made by NoFace from https://www.iconfinder.com/icons/743893/find_glass_magnifier_magnifying_search_zoom_icon
+expand_icon_128_black.png          - Icon made by icon king (https://freeicons.io/profile/3) from www.freeicons.io
+export_icon_128_black.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
+export_icon_128_white.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
+gen_cf_report_icon_128.png         - Icon from https://www.iconfinder.com/yanlu
+gen_cf_report_icon_128_primary.png - Icon from https://www.iconfinder.com/yanlu
+gen_cf_report_icon_128_white.png   - Icon from https://www.iconfinder.com/yanlu
+help_icon_128.png                  - Icon from https://fontawesome.com/icons/question-circle?style=regular
+help_icon_128_blue.png             - Icon from https://fontawesome.com/icons/question-circle?style=regular
+import_icon_128_black.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
+import_icon_128_white.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
+info_icon_128.png                  - Icon from https://icon-icons.com/icon/information-info/61527#128 under Creative Commons 4.0 licence (https://creativecommons.org/licenses/by/4.0/)
+lock_icon_128.png                  - Icon made by Freepik from www.flaticon.com
+not_found_icon_128.png			   - Icon made by Freepik (https://www.freepik.com) from Flaticon (https://www.flaticon.com/)
+not_save_icon_128.png              - Icon made by Maxime NOYELLE based on https://www.iconfinder.com/icons/2639912/save_icon
+not_save_icon_128_white.png        - Icon made by Maxime NOYELLE based on https://www.iconfinder.com/icons/2639912/save_icon
+open_icon_128_black.png            - Icon made by Cole Bemis from https://www.iconfinder.com/icons/227574/open_icon
+open_icon_128_gray.png             - Icon made by Cole Bemis from https://www.iconfinder.com/icons/227574/open_icon
+open_icon_128_primary.png          - Icon made by Cole Bemis from https://www.iconfinder.com/icons/227574/open_icon
+open_icon_128.png                  - Icon made by Cole Bemis from https://www.iconfinder.com/icons/227574/open_icon
+pcmm_icon_128.png                  - Icon made with http://google.com/design/
+pcmm_icon_128_bis.png              - Icon from https://www.iconfinder.com/icons/326568/check_circle_icon
+pcmm_icon_128_primary.png          - Icon made with http://google.com/design/
+pcmm_icon_16.png                   - Icon made with http://google.com/design/
+pencil_icon_128.png                - Icon made by https://www.flaticon.com/free-icon/edit_709652?related_id=709652
+pirt_icon_128.png                  - Icon from https://www.iconfinder.com/yanlu
+pirt_icon_128_primary.png          - Icon from https://www.iconfinder.com/yanlu
+planning_icon_black_128.png        - Icons made by Freepik (https://www.freepik.com) from Flaticon (https://www.flaticon.com/)
+query_icon_128.png                 - Icon from https://pngtree.com
+reduce_icon_128.png                - Icon made by Didier Verstraete based on add_icon_128.png made by srip from www.flaticon.com
+reduce_icon_128_white.png          - Icon made by Didier Verstraete based on add_icon_128.png made by srip from www.flaticon.com
+reset_icon_128.png                 - Icon from https://www.iconfinder.com/aimnadze
+reset_icon_128_red.png             - Icon from https://www.iconfinder.com/aimnadze
+reset_icon_24.png                  - Icon from https://www.iconfinder.com/aimnadze
+save_icon_128.png                  - Icon made by Icons8 from https://www.iconfinder.com/icons/2639912/save_icon
+save_icon_128_green.png            - Icon made by Icons8 from https://www.iconfinder.com/icons/2639912/save_icon
+save_icon_128_white.png            - Icon made by Icons8 from https://www.iconfinder.com/icons/2639912/save_icon
+stamp_icon_128.png                 - Icon made by Freepik from https://www.flaticon.com/free-icon/printing-stamp-silhouette-variant_29981?term=stamp&page=1&position=60
+stamp_icon_128_blue.png            - Icon made by Freepik from https://www.flaticon.com/free-icon/printing-stamp-silhouette-variant_29981?term=stamp&page=1&position=60
+tag_icon_128.png                   - Icon made by Freepik from www.flaticon.com
+tag_icon_128_brown.png             - Icon made by Freepik from www.flaticon.com
+tag_icon_128_white.png             - Icon made by Freepik from www.flaticon.com
+utd_icon_128.png                   - Icon from https://fontawesome.com/icons/check?style=solid
+utd_icon_128_white.png             - Icon from https://fontawesome.com/icons/check?style=solid
+view_icon_128.png                  - Icon from https://fontawesome.com/icons/eye?style=regular
+view_icon_128_white.png            - Icon https://fontawesome.com/icons/eye?style=regular
+view_icon_128_white.png            - Icon https://fontawesome.com/icons/eye?style=regular

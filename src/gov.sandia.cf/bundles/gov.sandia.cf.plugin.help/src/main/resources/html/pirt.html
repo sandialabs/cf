@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Phenomena, PIRT</title>
+</head>
+<body>
+	<h2>Phenomena, PIRT</h2>
+	<p>PIRT feature permits to describe quantities of interest and associate phenomena and criteria to a created quantity of interest. PIRT view is a stack of tabs starting with the QoI Home View. After that, multiple PIRT tables can be added for each
+	  opened QoI.</p>
+	<p>PIRT content persists across sessions in *.cf file.</p>
+	<div id="qoi-home-view"></div>
+	<h3>QoI Home View</h3>
+	<p>This view lists all the quantities of interest associated to the current ModSim. It is possible to add a new QoI or to modify, open or delete a QoI by selecting it in the table.</p>
+	<h4>Table QoI</h4>
+	<p>The table has four columns: - <strong>Creation Date</strong>: QoI creation date - <strong>Name</strong>: the QoI name - <strong>Tagged</strong>: is QoI tagged? This value can be computed with tag date field. - <strong>Tag Date</strong>: QoI tag
+	  date - <strong>Tag Description</strong>: The QoI description</p>
+	<h5>Table Events</h5>
+	<ul>
+	  <li><strong>Double-clicking on a QoI row</strong> will open it in edition mode in a new tab in a Phenomena View.</li>
+	</ul>
+	<h4>Buttons</h4>
+	<h5>Add Quantity of Interest</h5>
+	<p>This button adds a new QoI. It throws a new QoI creation wizard.</p>
+	<p>The user can enter a <strong>name</strong> for the new QoI. The name can not be null.</p>
+	<p>The <strong>creation date</strong> must be stored on the new QoI.</p>
+	<h5>Back</h5>
+	<p>"Back" button permits to return to cf-plugin Home View.</p>
+	<h5>Delete</h5>
+	<p>This button permits to delete the selected QoIs. Multiple selection in QoI table is allowed.</p>
+	<p>A deletion confirmation dialog should be opened on click.</p>
+	<p>If the user confirms deletion, the selected QoIs are deleted with all the associated phenomenon groups, phenomena and criteria.</p>
+	<h5>Edit</h5>
+	<p>"Edit" button opens a Phenomena view in a new tab for each selected QoI. Multiple selection in QoI table is allowed.</p>
+	<h5>Copy</h5>
+	<p>"Copy" button duplicates the QoI. The user will be asked for a new QoI name.</p>
+	
+	<div id="phenomena-view"></div>
+	<h3>Phenomena View</h3>
+	<p>The Phenomena view displays the informations of a quantity of interest. This view is splitted in two tables, quantity of interest header for the QoI informations and phenomena table that contains adequacy columns to assess criteria credibility.</p>
+	<h4>QoI Header Table</h4>
+	<p>The QoI Header table contains QoI informations. The informations are separated in two types, the fixed fields and the variable ones.</p>
+	<p>The <strong>fixed fields</strong> are: - <strong>Name</strong> - <strong>Creation Date</strong> - <strong>Tagged</strong>: is QoI tagged? This field is computed depending on tag date. - <strong>Tag Date</strong> - <strong>Tag Description</strong>:
+	  The QoI description</p>
+	<p>The <strong>variable fields</strong> are added depending on the project configuration file. All the variable fields are text fields.</p>
+	<h4>Phenomena Table</h4>
+	<p>This table presents the different phenomenon groups with their phenomena associated. The phenomena has multiples criteria. The informations are separated in two types, the fixed columns and the variable ones.</p>
+	<p><strong>Fixed columns</strong> are: - <strong>ID</strong>: group or phenomenon ID to display - <strong>Phenomena</strong>: the name of the group or phenomenon - <strong>Importance</strong>: the reference Level column to be compared with other
+	  Levels criteria</p>
+	<p><strong>Variable columns</strong> are stored as criteria. The criteria can be of different types: Levels or Text.</p>
+	<p><em>Levels</em> criteria must be configurable. Their values are stored in the project configuration file.</p>
+	<h4>Table behavior</h4>
+	<p>Editable columns are: - For phenomenon group: - <em>Phenomena</em> - For phenomenon: - <em>Phenomena</em> - <em>Importance</em> - <em>All the variable columns</em></p>
+	<p>The variable columns of <em>Levels</em> type must be colored depending of the <em>Importance</em> column. All columns of <em>Level</em> type has a numerical value. The numerical value should be used to compare the <em>Importance</em> column to the
+	  criterion column.</p>
+	<p>The difference is splitted in three level differencing colors. This colors are configured in the project configuration file.</p>
+	<p><code>Importance Numerical Value* - *Level Criterion Numerical Value</code>: - <code>&gt;= 0</code> - <code>= -1</code> - <code>&lt;= -2</code></p>
+	<p>See Generate Configuration for Credibility Project for more details.</p>
+	<h4>Buttons</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h5>Add Phenomenon Group</h5>
+	<p>Adds a new phenomenon group.</p>
+	<p>Required fields for phenomenon group are: - <strong>ID</strong>: this field is autogenerated. It is the alphabetic ID of the group. First group starts with 'A', then 'B',etc... - <strong>Label</strong>: this is the group label or name</p>
+	<h5>Add Phenomenon</h5>
+	<p>Adds a new phenomenon.</p>
+	<p>Fixed fields for phenomenon are: - <strong>ID</strong>: this field is autogenerated. It is the alphabetic ID of the group with the phenomenon number for this group (e.g. A1,B3,C2,etc...). - <strong>Label</strong>: this is the phenomenon label or
+	  name - <strong>Importance</strong>: this is the importance level to compare with adequacy columns</p>
+	<h5>Delete</h5>
+	<p>This button permits to delete the selected Group or Phenomenon. Multiple selection in PIRT table is not allowed.</p>
+	<p>A deletion confirmation dialog should be opened on click.</p>
+	<p>If the user confirms deletion, the selected Group or Phenomenon is deleted with all the associated phenomena and criteria.</p>
+	<h5>Tag</h5>
+	<p>Tags the current Quantity of Interest with all its Phenomenon Group, Phenomena and Criteria.</p>
+	<p>A hashtag should be generated to identify the tagged qoi and tag date should be saved.</p>
+	<p>The tagged QoI can not be modified or resetted, but it can be deleted.</p>
+	<h5>Reset</h5>
+	<p>Resets the current Quantity of Interest: - Delete all variable QoI Headers - Delete all Phenomenon groups - Delete all Phenomena - Delete all Criteria</p>
+	<h5>Close</h5>
+	<p>This button closes the current Quantity of Interest tab.</p>
+</body>
+</html>

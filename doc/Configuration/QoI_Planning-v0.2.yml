@@ -1,0 +1,24 @@
+QoIPlanning:
+  System Requirement:
+    required: "Optional"
+    type: "System_Requirement"
+  Feasible Physical Range:
+    required: "Desired"
+    type: "Text"
+  Model Reliability Factor:
+    required: "Required"
+    default: "1.0"
+    type: "Float"
+  Is Extractor Available?:
+    required: "Optional"
+    type: "Select"
+    values:
+      - "Yes"
+      - "No"
+  Basic SQE for Extractor?:
+    required: "Optional"
+    type: "Select"
+    values:
+      - "Yes"
+      - "No"
+      - "Partial"

@@ -1,0 +1,4 @@
+https://projects.eclipse.org/projects/ee4j.jpa/releases/2.2.2
+
+Type B - Full IP Due Diligience (License, Provenance, Scanning)
+All third-party content is reviewed and certified as license-compatible with the project license, and has had the provenance validated and content scanned for anomalies by the Eclipse IP Team.

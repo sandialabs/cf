@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <bundle id="gov.sandia.cf.plugin" version="1.0.0">
+      <category name="credibility"/>
+   </bundle>
+   <category-def name="credibility" label="Credibility Framework"/>
+</site>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+	    <encoder>
+	        <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+	    </encoder>
+	</appender>
+	
+    <appender name="RCP_ERROR_LOG_VIEW" class="gov.sandia.cf.logger.LogbackErrorLogViewAppender">
+    	<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+	        <level>INFO</level>
+	    </filter>
+    </appender>
+
+    <logger name="org.hibernate" level="warn" additivity="false">
+        <appender-ref ref="STDOUT"/>
+		<appender-ref ref="RCP_ERROR_LOG_VIEW" />
+    </logger>
+    
+    <logger name="org.reflections" level="warn" additivity="false">
+        <appender-ref ref="STDOUT"/>
+		<appender-ref ref="RCP_ERROR_LOG_VIEW" />
+    </logger>
+    
+	<root level="debug">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="RCP_ERROR_LOG_VIEW" />
+	</root>
+
+</configuration>

@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Configuration</title>
+</head>
+<body>
+	<h2>Configuration</h2>
+	<p>Every credibility feature must be configurable by a non-programmer user. The choosen solution is to use Excel files to store credibility configuration.</p>
+	<p>Excel files are not easily interpretables by Eclipse plugins. So the Excel file must contains a macro that convert it into interpretable file. The choosen configuration format is YAML (<code>*.yaml</code> or <code>*.yml</code>).</p>
+	<h3>PIRT</h3>
+	<p>The expected elements of configuration for PIRT feature are: - <strong>Header</strong>: contains QoI header fields - <strong>Adequacy</strong> columns: contains PIRT table adequacy columns and their types. Currently two types are needed:
+	  <em>Levels</em> for adequacy assessment for phenomenon, and <em>Text</em> for free input (like Comments field) - <strong>Levels</strong>: contains the adequacy columns values if column type is <em>Levels</em>. (e.g. H:High, M:Mean, L:Low, N/A:N/A,
+	  N:Not Adressed). Each level has a numerical value to compare rank with expected phenomenon importance. The difference between expected numerical value and current numerical value will have effects on column display. - <strong>Level Difference
+	    Coloring</strong>: contains level difference colors between expected importance and current criterion level value. Colors are implemented as rgb format (e.g. 0,255,0 for green). Three levels are implemented, <em>positive or zero</em>, <em>one
+	    level</em>, <em>two or more levels</em>.</p>
+	<h3>PCMM</h3>
+	<p>The expected elements of configuration for PIRT feature are: - <strong>Phases</strong>: contains a list of the PCMM project Phases and functionnalities in the following list: [Evidence, Assess, Aggregate, Stamp] - <strong>Evidence</strong>: it
+	  permits to manage evidence. The evidence are needed to assess at a Level &gt; 0. - <strong>Assess</strong>: this is to assess the evidence and elements/subelements. - <strong>Aggregate</strong>: the aggregate view computes a level value for all the
+	  assessments of a PCMM element. - <strong>Stamp</strong>: the stamp view displays a Kiviat chart (or spider chart) for the aggregation. - <strong>Roles</strong>: contains the list of roles used to assess the elements/subelements. (e.g. Customer,
+	  Analyst, Code Developer, Experimentalist) - <strong>Levels</strong>: contains the assessment levels. Each level has a numerical code and a color. Here are the attributes of one level: - Code: the numerical value of the level. It is used to be
+	  compared to other levels and to aggregate levels results. It must start with 0. - Color: the color to display on the assessment view - <strong>Elements</strong>: contains the PCMM elements. The elements must have the following attributes: -
+	  <strong>Name</strong>: the name of the element - <strong>Color</strong>: the color to display on the PCMM wheel - <strong>Abbreviation</strong>: the PCMM element abbreviation - <strong>Levels</strong>: the list of levels of the element (if the PCMM
+	  Mode is simplified) - <strong>Subelements</strong>: the list of subelements (if the PCMM Mode is by default)</p>
+	<p>Each element can contains multiple subelements. The subelements must have the following attributes: - <strong>Name</strong>: the name of the subelement - <strong>Code</strong>: the code of the subelement or abbreviation - <strong>Levels</strong>:
+	  the list of levels for this subelement</p>
+	<p>Each subelement can contains multiple levels. The levels must have the following attributes: - <strong>Name</strong>: the name of the level - <strong>Code</strong>: the numerical value of the level. It is used to be compared to other levels and to
+	  aggregate levels results. It must start with 0. - <strong>Descriptors</strong>: the list of descriptors for this level or guidance</p>
+	<p>Each level can havemultiple descriptors. The levels must have the following attributes: - <strong>\<Descriptor name></strong>: the name of the descriptor - <strong>\<Descriptor Value></strong>: the value of the descriptor</p>
+	<p>You can find attached an example of PCMM_schema.yml file: PCMM_schema.yml</p>
+</body>
+</html>

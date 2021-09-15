@@ -1,0 +1,29 @@
+Requirement Parameters:
+  Type:
+    level: ">=1"
+    required: "Optional"
+    type: "Select"
+    values:
+      - "Functional"
+      - "Performance"
+      - "Packaging Constraints"
+      - "Interface"
+      - "Environmental"
+      - "Other"
+  Factor of Safety:
+    level: ">=1"
+    required: "Optional"
+    type: "Text"
+  Verification/acceptance method:
+    level: ">=1"
+    required: "Optional"
+    type: "Select"
+    values:
+      - "Examination"
+      - "Test"
+      - "CompSim"
+      - "Demonstration"
+  Source Requirement Reference:
+    level: ">=1"
+    required: "Optional"
+    type: "Link"

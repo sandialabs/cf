@@ -1,0 +1,16 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./ConfigurationViewManager.html" title="gov.sandia.cf.parts.ui.configuration.ConfigurationViewManager" alt="" coords="16,11,571,243"/>
+<area shape="rect" id="node1" href="./ConfigurationViewManager.html" title="&lt;TABLE&gt;" alt="" coords="5,5,581,248"/>
+<area shape="rect" id="node2_1" href="./ExportConfigurationView.html" title="gov.sandia.cf.parts.ui.configuration.ExportConfigurationView" alt="" coords="616,63,1216,191"/>
+<area shape="rect" id="node2" href="./ExportConfigurationView.html" title="&lt;TABLE&gt;" alt="" coords="605,57,1227,196"/>
+<area shape="rect" id="node3_2" href="./ExportConfigurationViewController.html" title="gov.sandia.cf.parts.ui.configuration.ExportConfigurationViewController" alt="" coords="1261,114,1477,139"/>
+<area shape="rect" id="node3" href="./ExportConfigurationViewController.html" title="&lt;TABLE&gt;" alt="" coords="1251,103,1488,151"/>
+<area shape="rect" id="node4_3" href="./GlobalConfigurationView.html" title="gov.sandia.cf.parts.ui.configuration.GlobalConfigurationView" alt="" coords="1523,63,2122,191"/>
+<area shape="rect" id="node4" href="./GlobalConfigurationView.html" title="&lt;TABLE&gt;" alt="" coords="1513,57,2133,196"/>
+<area shape="rect" id="node5_4" href="./GlobalConfigurationViewController.html" title="gov.sandia.cf.parts.ui.configuration.GlobalConfigurationViewController" alt="" coords="2168,89,2424,165"/>
+<area shape="rect" id="node5" href="./GlobalConfigurationViewController.html" title="&lt;TABLE&gt;" alt="" coords="2157,83,2435,170"/>
+<area shape="rect" id="node6_5" href="./ImportConfigurationView.html" title="gov.sandia.cf.parts.ui.configuration.ImportConfigurationView" alt="" coords="2469,63,3067,191"/>
+<area shape="rect" id="node6" href="./ImportConfigurationView.html" title="&lt;TABLE&gt;" alt="" coords="2459,57,3077,196"/>
+<area shape="rect" id="node7_6" href="./ImportConfigurationViewController.html" title="gov.sandia.cf.parts.ui.configuration.ImportConfigurationViewController" alt="" coords="3112,114,3325,139"/>
+<area shape="rect" id="node7" href="./ImportConfigurationViewController.html" title="&lt;TABLE&gt;" alt="" coords="3101,103,3336,151"/>
+</map>

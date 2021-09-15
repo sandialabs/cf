@@ -1,0 +1,31 @@
+QoIPlanning:
+  System Requirement:
+    required: "Optional"
+    type: "System_Requirement"
+  Lower Limit:
+    required: "empty Upper Limit"
+    type: "Float"
+    constraints: 
+      - "Lower Limit <= Upper Limit"
+  Upper Limit:
+    required: "empty Lower Limit"
+    type: "Float"
+    constraints: 
+      - "Upper Limit >= Lower Limit"
+  Model Reliability Factor:
+    required: "Required"
+    default: "1.0"
+    type: "Float"
+  Is Extractor Available?:
+    required: "Optional"
+    type: "Select"
+    values:
+      - Yes
+      - No
+  Basic SQE for Extractor?:
+    required: "Optional"
+    type: "Select"
+    values:
+      - Yes
+      - No
+      - Partial

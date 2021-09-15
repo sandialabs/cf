@@ -1,0 +1,34 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Getting Started</title>
+</head>
+<body>
+	<h2>Getting Started</h2>
+	<h3>Create New Credibility Project</h3>
+	<p>The user must be able to create a new Credibility assessment from an existing modSim project. PIRT can be associated with any point of a SAW project. For example, a project may have multiple ModSim models within a deeply hierarchical folder
+	  structure. Conceptually an analyst would navigate to a particular model to create a PIRT assessment. Right-clicking on the desired project, the plugin should provide a credibility creation wizard. The plugin must use SAW current interface to create
+	  a new project.</p>
+	<p>During creation, the interface should ask the user to complete the following information: - "new credibility file" name (file extension will be <code>*.cf</code>)</p>
+	<ul>
+	  <li>"credibility configuration file" location (<code>yaml</code> file generated)</li>
+	</ul>
+	<p>Just after creation, the new project should be opened in a new editor.</p>
+	<p>Credibility configuration should be stored in the selected project itself. Once created, the configuration is not supposed to change.</p>
+	<p>The new credibility project informations are stored in a database.</p>
+	<h3>Open Existing Credibility Project</h3>
+	<p>To open an existing credibility project, the user should double-click on the <code>*.cf</code> file under the desired modSim project in the Project Explorer. The plugin will open a new editor and go on plugin Home View.</p>
+	<h3>Save Credibility Editor</h3>
+	<p>The credibility editor manages a temporary folder to make the plugin work. Every modification is saved in this temporary folder but not in the *.cf file.</p>
+	<p>After a modification, the editor indicates to the user that there is unsaved data by adding a * beside the editor name:</p>
+	<p>The user has to save the editor to keep the modifications across the sessions:</p>
+	<p>If the user closes the editor with unsaved modifications, the editor prompts the user to save or quit the editor:</p>
+	<p>If the Eclipse based application crashed, there will be an existing temporary folder in the project folder. When the user opens the *.cf file, if the folder is in a recoverable state, the plugin asks the user to recover data or not:</p>
+	<p>If the folder is not recoverable, the plugin warns the user that it is not recoverable:</p>
+	<h3>Navigation</h3>
+	<p>From all views (except the Home View), the user can navigate from a view to another by clicking on an element in the breadcrumb on top of the view:</p>
+	<p>The breadcrumb and title changes depending of the current view. The current view item is selected (grayed out).</p>
+</body>
+</html>

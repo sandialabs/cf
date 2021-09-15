@@ -1,0 +1,13 @@
+ARG version: 1.1.7
+chapters:
+- n: chapter
+  title: Conclusion
+  string: 'The purpose of this section is to demonstrate that an ARG-core structure file can be appended to the CF generated report.'
+  sections:
+  - n: section
+    title: Representation and Geometric Fidelity (RGF)
+    sections:
+    - {n: paragraph, hyperlink_path: CF Mock-Up Report.docx, hyperlink_string: CF
+        Mock-Up Report.docx}
+        
+  

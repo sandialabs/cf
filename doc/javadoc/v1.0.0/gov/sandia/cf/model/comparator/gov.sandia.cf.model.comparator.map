@@ -1,0 +1,10 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./QoiTaggedComparator.html" title="gov.sandia.cf.model.comparator.QoiTaggedComparator" alt="" coords="16,45,401,139"/>
+<area shape="rect" id="node1" href="./QoiTaggedComparator.html" title="&lt;TABLE&gt;" alt="" coords="5,40,412,144"/>
+<area shape="rect" id="node2_1" href="./TagComparatorByDateTag.html" title="gov.sandia.cf.model.comparator.TagComparatorByDateTag" alt="" coords="447,45,664,139"/>
+<area shape="rect" id="node2" href="./TagComparatorByDateTag.html" title="&lt;TABLE&gt;" alt="" coords="436,40,675,144"/>
+<area shape="rect" id="node3_2" href="./VersionComparator.html" title="gov.sandia.cf.model.comparator.VersionComparator" alt="" coords="710,37,1019,147"/>
+<area shape="rect" id="node3" href="./VersionComparator.html" title="&lt;TABLE&gt;" alt="" coords="699,31,1030,153"/>
+<area shape="rect" id="node4_3" href="./VersionTokenizer.html" title="gov.sandia.cf.model.comparator.VersionTokenizer" alt="" coords="1065,11,1291,173"/>
+<area shape="rect" id="node4" href="./VersionTokenizer.html" title="&lt;TABLE&gt;" alt="" coords="1055,5,1301,179"/>
+</map>

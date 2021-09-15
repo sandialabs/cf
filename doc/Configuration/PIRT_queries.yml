@@ -1,0 +1,23 @@
+PIRT:
+    Queries:    
+        CRITERION_ALL:
+            Name: List all criterion
+            Query: select c.* from criterion c
+            ResultType: Criterion            
+        CRITERION_FILTER_BY_ID:
+            Name: List criterion by id
+            Query: select c.* from criterion c where id = {0}
+            ResultType: Criterion
+            Criteria:
+                - id
+        CRITERION_FILTER_BY_ID_AND_NAME:
+            Name: List criterion by id and name
+            Query: select c.* from criterion c where id = {0} and name = {1}
+            ResultType: Criterion
+            Criteria:
+                - id
+                - name
+        MODELL_ALL:
+            Name: List all model
+            Query: select m.* from model m
+            ResultType: Model

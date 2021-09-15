@@ -1,0 +1,181 @@
+/*************************************************************************************************************
+See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/master/LICENSE">CF LICENSE</a>}
+*************************************************************************************************************/
+package gov.sandia.cf.model;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import gov.sandia.cf.model.query.EntityFilter;
+import gov.sandia.cf.tools.MathTools;
+import gov.sandia.cf.tools.RscConst;
+import gov.sandia.cf.tools.StringTools;
+
+/**
+ * Describes PCMM Assess Level
+ * 
+ * @author Didier Verstraete
+ *
+ */
+@Entity
+@Table(name = "PCMM_ASSESS_LEVEL")
+public class PCMMLevelColor implements Serializable, IEntity<PCMMLevelColor, Integer>, IImportable<PCMMLevelColor> {
+
+	/**
+	 * serialVersionUID
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Field Filter
+	 */
+	@SuppressWarnings("javadoc")
+	public enum Filter implements EntityFilter {
+		ID("id"), //$NON-NLS-1$
+		CODE("code"), //$NON-NLS-1$
+		NAME("name"), //$NON-NLS-1$
+		FIXED_COLOR("fixedColor"); //$NON-NLS-1$
+
+		private String field;
+
+		Filter(String field) {
+			this.field = field;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getField() {
+			return this.field;
+		}
+	}
+
+	/**
+	 * The id field linked to ID column
+	 */
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ID")
+	private Integer id;
+
+	/**
+	 * the numerical code to link with the levels
+	 */
+	@Column(name = "CODE")
+	@NotNull(message = RscConst.EX_PCMMOPTION_PHASE_NULL)
+	private Integer code;
+
+	/**
+	 * the name
+	 */
+	@Column(name = "NAME")
+	@NotBlank(message = RscConst.EX_PCMMOPTION_PHASE_NULL)
+	private String name;
+
+	/**
+	 * the importance level fixed color
+	 */
+	@Column(name = "FIXED_COLOR")
+	@NotBlank(message = RscConst.EX_PCMMOPTION_PHASE_NULL)
+	private String fixedColor;
+
+	/**
+	 * The constructor
+	 */
+	public PCMMLevelColor() {
+	}
+
+	/**
+	 * 
+	 * The constructor
+	 * 
+	 * @param code       the code
+	 * @param name       the level name
+	 * @param fixedColor the fixed rgb color
+	 */
+	public PCMMLevelColor(Integer code, String name, String fixedColor) {
+		super();
+		this.code = code;
+		this.name = name;
+		this.fixedColor = fixedColor;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	@SuppressWarnings("javadoc")
+	public Integer getCode() {
+		return code;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setCode(Integer code) {
+		this.code = code;
+	}
+
+	@SuppressWarnings("javadoc")
+	public String getName() {
+		return name;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@SuppressWarnings("javadoc")
+	public String getFixedColor() {
+		return fixedColor;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setFixedColor(String fixedColor) {
+		this.fixedColor = fixedColor;
+	}
+
+	@Override
+	public boolean sameAs(PCMMLevelColor newImportable) {
+
+		if (newImportable == null) {
+			return false;
+		}
+
+		boolean sameName = StringTools.equals(getName(), newImportable.getName());
+		boolean sameCode = MathTools.equals(getCode(), newImportable.getCode());
+		boolean sameFixedColor = StringTools.equals(getFixedColor(), newImportable.getFixedColor());
+
+		return sameName && sameCode && sameFixedColor;
+	}
+
+	@Override
+	public String getAbstract() {
+		return new StringBuilder().append(getCode()).append(" - ").append(getName()).toString(); //$NON-NLS-1$
+	}
+
+	/**
+	 * Create a copy of current entity with id null and referenced entity or entity
+	 * list null
+	 * 
+	 * @return a copy of the current PCMMAssessLevel
+	 */
+	public PCMMLevelColor copy() {
+		PCMMLevelColor entity = new PCMMLevelColor();
+		entity.setCode(getCode());
+		entity.setFixedColor(getFixedColor());
+		entity.setName(getName());
+		return entity;
+	}
+}

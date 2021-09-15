@@ -1,0 +1,85 @@
+<persistence
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+
+	<!-- Test unit -->
+	<persistence-unit name="credibility-test"
+		transaction-type="RESOURCE_LOCAL">
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<class>gov.sandia.cf.model.ARGParameters</class>
+		<class>gov.sandia.cf.model.ARGParametersQoIOption</class>
+		<class>gov.sandia.cf.model.ConfigurationFile</class>
+		<class>gov.sandia.cf.model.Criterion</class>
+		<class>gov.sandia.cf.model.Decision</class>
+		<class>gov.sandia.cf.model.DecisionConstraint</class>
+		<class>gov.sandia.cf.model.DecisionParam</class>
+		<class>gov.sandia.cf.model.DecisionSelectValue</class>
+		<class>gov.sandia.cf.model.DecisionValue</class>
+		<class>gov.sandia.cf.model.Document</class>
+		<class>gov.sandia.cf.model.GenericParameter</class>
+		<class>gov.sandia.cf.model.GenericParameterConstraint</class>
+		<class>gov.sandia.cf.model.GenericParameterSelectValue</class>
+		<class>gov.sandia.cf.model.GenericValue</class>
+		<class>gov.sandia.cf.model.GlobalConfiguration</class>
+		<class>gov.sandia.cf.model.IntendedPurpose</class>
+		<class>gov.sandia.cf.model.MigrationLog</class>
+		<class>gov.sandia.cf.model.Model</class>
+		<class>gov.sandia.cf.model.PCMMAssessment</class>
+		<class>gov.sandia.cf.model.PCMMElement</class>
+		<class>gov.sandia.cf.model.PCMMEvidence</class>
+		<class>gov.sandia.cf.model.PCMMLevel</class>
+		<class>gov.sandia.cf.model.PCMMLevelColor</class>
+		<class>gov.sandia.cf.model.PCMMLevelDescriptor</class>
+		<class>gov.sandia.cf.model.PCMMOption</class>
+		<class>gov.sandia.cf.model.PCMMPlanningParam</class>
+		<class>gov.sandia.cf.model.PCMMPlanningParamConstraint</class>
+		<class>gov.sandia.cf.model.PCMMPlanningQuestion</class>
+		<class>gov.sandia.cf.model.PCMMPlanningQuestionConstraint</class>
+		<class>gov.sandia.cf.model.PCMMPlanningQuestionValue</class>
+		<class>gov.sandia.cf.model.PCMMPlanningTableItem</class>
+		<class>gov.sandia.cf.model.PCMMPlanningTableValue</class>
+		<class>gov.sandia.cf.model.PCMMPlanningValue</class>
+		<class>gov.sandia.cf.model.PCMMPlanningSelectValue</class>
+		<class>gov.sandia.cf.model.PCMMSubelement</class>
+		<class>gov.sandia.cf.model.Phenomenon</class>
+		<class>gov.sandia.cf.model.PhenomenonGroup</class>
+		<class>gov.sandia.cf.model.PIRTAdequacyColumn</class>
+		<class>gov.sandia.cf.model.PIRTAdequacyColumnGuideline</class>
+		<class>gov.sandia.cf.model.PIRTAdequacyColumnLevelGuideline</class>
+		<class>gov.sandia.cf.model.PIRTDescriptionHeader</class>
+		<class>gov.sandia.cf.model.PIRTLevelDifferenceColor</class>
+		<class>gov.sandia.cf.model.PIRTLevelImportance</class>
+		<class>gov.sandia.cf.model.QoIHeader</class>
+		<class>gov.sandia.cf.model.QoIPlanningConstraint</class>
+		<class>gov.sandia.cf.model.QoIPlanningParam</class>
+		<class>gov.sandia.cf.model.QoIPlanningSelectValue</class>
+		<class>gov.sandia.cf.model.QoIPlanningValue</class>
+		<class>gov.sandia.cf.model.QuantityOfInterest</class>
+		<class>gov.sandia.cf.model.Role</class>
+		<class>gov.sandia.cf.model.SystemRequirement</class>
+		<class>gov.sandia.cf.model.SystemRequirementConstraint</class>
+		<class>gov.sandia.cf.model.SystemRequirementGroup</class>
+		<class>gov.sandia.cf.model.SystemRequirementParam</class>
+		<class>gov.sandia.cf.model.SystemRequirementValue</class>
+		<class>gov.sandia.cf.model.SystemRequirementSelectValue</class>
+		<class>gov.sandia.cf.model.Tag</class>
+		<class>gov.sandia.cf.model.User</class>
+		<class>gov.sandia.cf.model.Uncertainty</class>
+		<class>gov.sandia.cf.model.UncertaintyConstraint</class>
+		<class>gov.sandia.cf.model.UncertaintyGroup</class>
+		<class>gov.sandia.cf.model.UncertaintyParam</class>
+		<class>gov.sandia.cf.model.UncertaintyValue</class>
+		<class>gov.sandia.cf.model.UncertaintySelectValue</class>
+		<properties>
+			<property name="javax.persistence.jdbc.driver"
+				value="org.hsqldb.jdbcDriver" />
+			<property name="javax.persistence.jdbc.user" value="sa" />
+			<property name="eclipselink.ddl-generation"
+				value="create-or-extend-tables" />
+			<property name="eclipselink.ddl-generation.output-mode"
+				value="database" />
+			<property name="eclipselink.logging.level" value="SEVERE" />
+		</properties>
+	</persistence-unit>
+</persistence>

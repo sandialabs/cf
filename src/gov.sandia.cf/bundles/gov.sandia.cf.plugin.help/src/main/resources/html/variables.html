@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Variables</title>
+</head>
+<body>
+	<h2>Variables</h2>
+	
+	<p>The credibility framework allow the use of variables. It must encapsulated with ${MY_VAR} where MY_VAR is the variable to get.</p>
+	
+	<p>The following predefined system variables:<br />
+		<ul>
+			<li>
+				<b>user.name</b>: the username of the account that is running the workflow.
+			</li>
+			<li>		
+				<b>user.home</b>: the home directory of the user that is running the workflow.
+			</li>
+			<li>
+				<b>java.version</b>: the value of the Java system property "java.version".
+			</li>
+			<li>
+				<b>os.name</b>: the value of the Java system property "os.name". Returns a human-readable label for the running operating system: i.e., "Mac OS X"
+			</li>
+			<li>
+				<b>hostname</b>: a hostname for the system on which the workflow is running.
+			</li>
+		</ul>
+	</p>
+	
+	<p>The following predefined file/resource variables:<br />				
+		<ul>
+			<li>
+				<b>cf.homedir</b>: the absolute path to the current CF's home directory (typically the location of the CF file.) Relative paths in home_file properties are relative to this directory.
+			</li>
+			<li>	
+				<b>cf.workdir</b>: the absolute path to the current CF's base working directory.
+			</li>
+			<li>				
+				<b>cf.filename</b>: the name (only) of the currently executing CF file.
+			</li>
+			<li>				
+				<b>cf.filedir</b>: the absolute path to the directory in which the file named in cf.filename exists.
+			</li>
+			<li>				
+				<b>eclipse.workspace</b>: the absolute path to the Eclipse workspace on the local filesystem.
+			</li>
+			<li>				
+				<b>eclipse.project</b>: the name of the Eclipse project in which the CF file exists.
+			</li>
+		</ul>
+	</p>
+</body>
+</html>

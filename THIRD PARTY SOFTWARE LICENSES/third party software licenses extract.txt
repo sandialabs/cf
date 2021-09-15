@@ -1,0 +1,21 @@
+-	Apache Commons Lang3 : Apache License v2.0
+-	Apache Commons Text : Apache License v2.0
+-	Apache Commons Validator : Apache License v2.0
+-	Eclipse : Eclipse Public License v2.0 https://www.eclipse.org/legal/epl-2.0/
+-	EclipseLink : Eclipse Public License v1.0 https://www.eclipse.org/legal/epl-v10.html and Eclipse Distribution License v1.0 https://www.eclipse.org/org/documents/edl-v10.php
+-	HSQLDB : based on BSD License http://hsqldb.org/web/hsqlLicense.html
+-	HSQLDB SqlTool: based on BSD License http://hsqldb.org/web/hsqlLicense.html
+-	Jakarta Persistence : Eclipse Distribution License 1.0 (BSD) and Eclipse Public License 2.0 https://projects.eclipse.org/projects/ee4j.jpa/releases/2.2.2
+-	Java : GNU General Public License version 2 with the Classpath Exception http://openjdk.java.net/legal/gplv2+ce.html
+-	Javax.inject : Apache 2.0 license https://github.com/javax-inject/javax-inject
+-	JCommon : LGPL - GNU LESSER GENERAL PUBLIC LICENSE http://www.jfree.org/lgpl.php 
+-	JFreeChart : LGPL - GNU LESSER GENERAL PUBLIC LICENSE http://www.jfree.org/lgpl.php
+-	Logback : EPL v1.0 and the LGPL 2.1 http://logback.qos.ch/license.html
+-	Maven : Apache 2.0 license http://maven.apache.org/ref/3.0/license.html
+-	Mockito : MIT License https://github.com/mockito/mockito
+-	Nebula : Eclipse Public License v2.0 http://www.eclipse.org/legal/epl-2.0
+-	Objenesis : Apache 2.0 license http://objenesis.org/license.html
+-	NetByteBuddy : Apache License v2.0 https://bytebuddy.net/#/ or https://www.apache.org/licenses/LICENSE-2.0.html
+-	Slf4j : Eclipse Public License v2.0 http://www.eclipse.org/legal/epl-2.0
+-	Snakeyaml : Apache License v2.0 https://github.com/spariev/snakeyaml/blob/master/LICENSE.txt
+-	Swtgraphics2d : LGPL - GNU LESSER GENERAL PUBLIC LICENSE http://www.jfree.org/lgpl.php

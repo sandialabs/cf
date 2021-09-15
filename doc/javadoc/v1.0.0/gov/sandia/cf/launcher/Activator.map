@@ -1,0 +1,6 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./Activator.html" title="gov.sandia.cf.launcher.Activator" alt="" coords="16,180,261,308"/>
+<area shape="rect" id="node1" href="./Activator.html" title="&lt;TABLE&gt;" alt="" coords="5,175,272,313"/>
+<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/org/osgi/framework/BundleActivator.html" title="org.osgi.framework.BundleActivator" alt="" coords="45,11,232,121"/>
+<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/osgi/framework/BundleActivator.html" title="&lt;TABLE&gt;" alt="" coords="35,5,243,127"/>
+</map>

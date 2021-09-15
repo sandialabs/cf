@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Home View</title>
+</head>
+<body>
+	<h2>Assess, PCMM</h2>
+	<p>PCMM feature first goal is to associate evidence to the different element or subelement defined, and to assess this evidence. This assessments can be aggregated to display an aggregated score for the different tested elements of the model. This
+	  aggregation can be shown as a table or as a radar chart.</p>
+	<h3>Assessor and Role</h3>
+	<p><strong>Assessor:</strong> Every user can manage evidence and assess but it has to define his role before. The host machine user id is saved as the user id for the PCMM feature.</p>
+	<p><strong>Role:</strong> The role is used to determine the implication and the credibility of the assessor.</p>
+	<p>One user can give only one assessment per role, but he can assess multiple times with different roles.</p>
+	<h3>PCMM Mode</h3>
+	<p>The PCMM feature is available in different modes: - <strong>DEFAULT</strong>: In this mode, the user can <strong>assess</strong> and <strong>manage evidence</strong> at the subelement level. - <strong>SIMPLIFIED</strong>: In the simplified mode,
+	  the user <strong>assess</strong> and <strong>manage evidence</strong> at the element level. There is no subelements.</p>
+	<p>This mode is activated depending of the requirement file specified while creating the new credibility process.</p>
+	<p>If the configuration file associates levels to the PCMM element, even if the PCMM element has subelements, the simplified mode is activated. Otherwise the default mode is activated.</p>
+	<p>This mode can not be changed once the credibility process is created.</p>
+	<h3>PCMM Role</h3>
+	<p>To manage evidence and assess, each user needs to define his role in the PCMM. If not defined, the user is prompted to select his role when he tries to access to the evidence or the asses views.</p>
+	<h4>Change PCMM Role</h4>
+	<p>Each user can change his role. If the user wants to, he has to double-click on the <strong>Role:</strong> section in the top-right corner. The role dialog will be displayed.</p>
+	<h3>PCMM Home View</h3>
+	<p>The PCMM Home view displays the progression of the PCMM and the PCMM wheel with the different elements.</p>
+	<h4>PCMM Progression</h4>
+	<p>The progression is indexed by PCMM element. The progression is divided in two major parts, the evidence and the assessment.</p>
+	<p><strong>In default mode:</strong> The progression of each part is divided by the number of subelements of each PCMM element.</p>
+	<p>Once an evidence is added or an assessment is made on a subelement, the progression is marked as done.</p>
+	<p>For example, a PCMM Element has 5 subelements. The progress bar will be divided in 10 parts (5 for the evidence and 5 for the assessment).</p>
+	<p><strong>In simplified mode:</strong> The progression is divided by two. Once an evidence is added or an assessment is made on an element, the progression is marked as done.</p>
+	<h4>PCMM Tags</h4>
+	<p>It is possible to tag the PCMM process to a specific state. A <strong>Tags</strong> part is available on the PCMM Home view, below the <em>Progress</em> widget:</p>
+	<h5>New Tag</h5>
+	<p>To create a new tag, click on the <strong>New Tag</strong> button. A new dialog will popup to enter the tag informations:</p>
+	<p>The plugin will inform the user of the success of the tag operation:</p>
+	<h5>Select a Tag</h5>
+	<p>By default, the tag <strong>Latest version (working)</strong> is selected. It is the current working state of the PCMM process.</p>
+	<p>The user can select an existing tag in the <strong>Tag</strong> list:</p>
+	<p>When a tag is selected, the associated evidence and assessments are loaded. All the PCMM views are available. But <strong>the user can not alter</strong> (create/update/delete) the evidence or assessments once tagged.</p>
+	<h5>Manage Tags</h5>
+	<p>To manage the existing tags, click on the <strong>Manage Tag</strong> button. A new dialog will popup with a table containing all the existing tags. It is possible to sort the table by each column.</p>
+	<p>The user can update the <strong>Description</strong> of the tag:</p>
+	<p>It is also possible to delete a tag by clicking the <strong>Delete</strong> button or pressing <strong>DEL</strong> key on the keyboard:</p>
+	<p>The plugin will confirm the deletion success:</p>
+	<h4>PCMM Wheel</h4>
+	<p>The PCMM wheel shows the different PCMM elements in one chart. Clicking on a PCMM Element will popup a contextual menu with two options: - <strong>Evidence</strong>: to manage evidence for this element. It opens the evidence view. -
+	  <strong>Assess</strong>: to manage assessments for this element. It opens the assessment view.</p>
+	<p>This sections needs to define a role for the user before being used.</p>
+	<p>If there is no role defined, the user is prompted to select a role.</p>
+	<h4>Buttons</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h5>Aggregate</h5>
+	<p>Open the aggregation view.</p>
+	<h5>PCMM Stamp</h5>
+	<p>Open the PCMM stamp view.</p>
+	<h3>PCMM Evidence View</h3>
+	<p>The evidence view allows the user to watch and manage evidence.</p>
+	<p>The user can see all the evidence but can only manage the ones associated to the PCMM element selected on the PCMM wheel.</p>
+	<p>The user and role wh created the evidence are referenced in the User and Role columns. It is useful to analyze the credibility of the evidence.</p>
+	<p><strong>In default mode:</strong> The evidence are associated to the subelements.</p>
+	<p><strong>In simplified mode:</strong> The evidence are associated to the elements.</p>
+	<h4>Buttons and Actions</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h5>Add Evidence</h5>
+	<p>The user can add an evidence by: - Clicking on the <strong>Add</strong> button. The user must select the destination subelement or element before. - Dragging and droping a document from the Eclipse explorator to the destination subelement or
+	  element. If the element dragged is not valid or if the source is not valid, the interface will show the forbidden icon on the dropped item.</p>
+	<h5>Open Evidence</h5>
+	<p>It is possible to open one or more evidence by: - Double-clicking on the evidence in all columns except the <em>Description</em> one. - Selecting the evidence to open and clicking the <strong>Open</strong> button. - Selecting the evidence to open
+	  and typing "Enter" key on the keyboard.</p>
+	<p>By default, evidences are opened by the Eclipse product. It is possible to change this behavior by using Eclipse's preferences:</p>
+	<p>In the toolbar, Go to "Window &gt; Preferences":</p>
+	<p>Then in the left menu, go to "General &gt; Editors &gt; File Associations":</p>
+	<p>In this screen you can add unknown file extensions and associate them to an editor (internal or external). It is also possible to associate the editor by Content-Type. For that, Go to "General &gt; Content Types":</p>
+	<h5>Add/Update the Description of the Evidence</h5>
+	<p>In the evidence table, the user can add or update the description of the evidence by: - Double-clicking on the evidence in the column <em>Description</em>. The user can fill this column.</p>
+	<h5>Delete Evidence</h5>
+	<p>The user can delete or more evidence by doing the following: - Selecting the evidence to delete and clicking the <strong>Delete</strong> button. - Selecting the evidence to delete and typing "Del" key on the keyboard.</p>
+	<h5>Done</h5>
+	<p>The <strong>Done</strong> button saves the modification and closes the view, returning to the previous opended page.</p>
+	<h3>PCMM Assess View</h3>
+	<p>The assess view permits to assess subelements or elements (depending of the mode) and evidence. It is mandatory to select a role before assessing.</p>
+	<p>An user can only assess once a subelement/element per role selected. The user has to change his role to assess multiple times.</p>
+	<p><strong>In default mode:</strong> The assessment are done on the subelement:</p>
+	<p><strong>In simplified mode:</strong> The assessment are done on the element:</p>
+	<h4>Buttons and Actions</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h5>Assess</h5>
+	<p>There is two options to assess:</p>
+	<ul>
+	  <li>Open the <strong>assessment dialog</strong> by double-clicking on a subelement/element (except for columns "Level Achieved", "Evidence Links", "Comments"):</li>
+	</ul>
+	<ul>
+	  <li>Double-click on the column <strong>Level Achieved</strong> of the subelement/element to assess, and select the level:</li>
+	</ul>
+	<p><strong>Rule:</strong> It is possible to assess every subelement/element, but it is only possible to give a the lowest level if there is no evidence associated to subelement/element. A warning message is displayed if the user tries to assess with
+	  a higher level than permitted:</p>
+	<h5>Add/Update Comment</h5>
+	<p>It is possible to add/update the comment of the assessment by doing the following:</p>
+	<ul>
+	  <li>Open the <strong>assessment dialog</strong> by double-clicking on a subelement/element (except for columns "Level Achieved", "Evidence Links", "Comments") and enter the comment in the <strong>Comment</strong> field.</li>
+	  <li>Double-click on the column <strong>Comment</strong> of the subelement/element and type type your comment.</li>
+	</ul>
+	<h5>Examine Evidence</h5>
+	<p>To examine evidence you can: - Double-clicking in the <strong>Evidence Links</strong> columns on a subelement/element (depending of the mode) to open the Evidence view. - Select a subelement/element and click the <strong>Examine Evidence</strong>
+	  button.</p>
+	<h5>Guidance Levels</h5>
+	<p>Clicking on the <strong>Guidance Levels</strong> button opens the Guidance Level view. This view can help the user to assess.</p>
+	<h5>Done</h5>
+	<p>The <strong>Done</strong> button saves the modification and closes the view, returning to the previous opended page.</p>
+	<h3>PCMM Aggregate View</h3>
+	<p>The aggregate view aggregates all the assessment by subelement and element. It gives a score level to the element based on the level configured.</p>
+	<p><strong>Tip</strong>: There is as many levels as there are subelements/elements. A numerical code is stored on the level to have a correspondance between the subelement/element level and the aggregation level. This gives a numerical score for the
+	  aggregation. This numerical score is then converted to a level score.</p>
+	<p><strong>In default mode:</strong> The aggregation is made for the subelements and the elements.</p>
+	<p><strong>In simplified mode:</strong> The aggregation is only made for the elements.</p>
+	<p><strong>Warning:</strong> If the progression is not complete, the plugin shows a warning to the user:</p>
+	<h4>Action and Buttons</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h5>Details</h5>
+	<p>The user can inspect all the assessments done by: - Double-clicking the subelement/element. - Selecting the subelement/element and clicking the <strong>Details</strong> button.</p>
+	<p><strong>In default mode:</strong> It is possible to see all the assessments for the selected subelement.</p>
+	<p><strong>In simplified mode:</strong> The user can see the details of the assessment done an the elements.</p>
+	<h5>Guidance Levels</h5>
+	<p>Clicking on the <strong>Guidance Levels</strong> button opens the Guidance Level view. This view can help the user to understand the assessments.</p>
+	<h5>Done</h5>
+	<p>The <strong>Done</strong> button closes the view, returning to the previous opended page.</p>
+	<h3>PCMM Stamp View</h3>
+	<p>The PCMM stamp view is a specific view as a chart for the aggregation. It displays the score of each PCMM element in a <strong>Radar chart:</strong></p>
+	<p><strong>Warning:</strong> If the progression is not complete, the plugin shows a warning to the user:</p>
+	<h4>Action and Buttons</h4>
+	<h5>Back</h5>
+	<p>Return to home page.</p>
+	<h3>PCMM Guidance Level View</h3>
+	<p>The guidance level view displays the description of the levels of each subelement/element to help the user to assess:</p>
+	<p>The guidance view is a separated Eclipse view and can be moved into the Eclipse plugin or outside:</p>
+</body>
+</html>

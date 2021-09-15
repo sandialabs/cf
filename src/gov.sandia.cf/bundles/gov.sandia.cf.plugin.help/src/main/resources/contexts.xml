@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<contexts>
+
+  <context id="gov.sandia.cf.plugin.help">
+    <description>Help for individual CF components</description>
+    <topic label='pirt' href='html/pirt.html'/>
+  </context>
+
+
+  <!-- Planning Tools -->
+  <context id="planning" title="Planning">
+    <description>This tool is intended to plan V&amp;V activities before model development commences with the intention that its contents are kept up to date as model development progresses.
+
+The available tools are:
+  • System Requirements
+  • QoI Planner
+  • Uncertainty Inventory
+  • PCMM Planning
+  • Analyst Decisions
+    </description>
+    <topic href="src/main/resources/html/system_requirements.html" label="System Requirements"/>
+    <topic href="src/main/resources/html/qoi_planner.html" label="QoI Planner"/>
+    <topic href="src/main/resources/html/uncertainty_inventory.html" label="Uncertainty Inventory"/>
+    <topic href="src/main/resources/html/pcmm_planning.html" label="PCMM Planning"/>
+    <topic href="src/main/resources/html/analyst_decision.html" label="Analyst Decisions"/>
+  </context>
+
+  <context id="intended_purpose" title="Intended Purpose">
+    <description>ModSim Intended Purpose to describe the model.</description>
+  </context>
+  
+  <context id="system_requirement" title="System Requirements">
+    <description>System Requirements goal is to enumerate and describe the system requirements. This is a prerequisite to Quantity of Interests.
+
+Actions:
+  To <b>add a group</b> click on "Add Requirement Group" button.
+  To <b>add a system requirement</b> click on "Add" in the table.
+  To <b>view a system requirement</b>, click on "View" button in the table.
+  To <b>update a system requirement</b>, click on "Edit" button in the table.
+  To <b>delete a system requirement</b>, click on "Delete" button in the table.
+    </description>
+    <topic href="src/main/resources/html/system_requirements.html" label="System Requirements"/>
+  </context>
+
+  <context id="qoi_planning" title="QoI Planner">
+    <description>QoI Planner tool defines the Quantity of Interest planning elements. The QoI created will be available in the PIRT - QoI section.
+
+Actions:
+  To <b>add a quantity of interest</b> click on "Add Quantity of Interest" button.
+  To <b>view a quantity of interest</b>, click on "View" button in the table.
+  To <b>edit a quantity of interest</b> click on "Edit" in the table.
+  To <b>copy a quantity of interest</b>, click on "Copy" button in the table.
+  To <b>tag a quantity of interest</b>, click on "Tag" button in the table.
+  To <b>delete a quantity of interest</b>, click on "Delete" button in the table.
+    </description>
+    <topic href="src/main/resources/html/qoi_planner.html" label="QoI Planner"/>
+  </context>
+
+  <context id="uncertainty" title="Uncertainty">
+    <description>Uncertainty Inventory is a tool to define the known uncertainties of the current modSim and to associate its references. The current view lets you add groups and uncertainties.
+
+Actions:
+  To <b>add a group</b> click on "Add Uncertainty Group" button.
+  To <b>add an uncertainty</b> click on "Add" in the table.
+  To <b>open an uncertainty</b>, click on "Open" button in the table.
+  To <b>view an uncertainty</b>, click on "View" button in the table.
+  To <b>update an uncertainty</b>, click on "Edit" button in the table.
+  To <b>delete an uncertainty</b>, click on "Delete" button in the table.
+    </description>
+    <topic href="src/main/resources/html/uncertainty_inventory.html" label="Uncertainty Inventory"/>
+  </context>
+
+  <context id="pcmm_planning_item" title="PCMM Planning">
+    <description>PCMM Planning tool defines questions and fields to detail the PCMM elements or/and subelements.
+
+Depending of the configuration, this questions/fields are directly associated to the PCMM element (simplified) or to the subelement (default).
+
+In <b>simplified</b> mode, fill the fields and questions to start planning. 
+
+In <b>default</b> mode, click on the desired subelement and fill the fields and questions to start planning.
+
+To edit <b>richtext</b> fields, click on the top of the field to expand and view the content.
+    </description>
+    <topic href="src/main/resources/html/pcmm_planning.html" label="PCMM Planning"/>
+  </context>
+
+  <context id="analyst_decision" title="Analyst Decision">
+    <description>Analyst Decision is a minitool to record analyst decisions and their characteristics (consequence, techniques maturity, description...).
+
+Actions:
+  To <b>add a group</b> click on "Add Decision Group" button.
+  To <b>add a decision</b> click on "Add" in the table.
+  To <b>open a decision</b>, click on "Open" button in the table.
+  To <b>view a decision</b>, click on "View" button in the table.
+  To <b>update a decision</b>, click on "Edit" button in the table.
+  To <b>delete a decision</b>, click on "Delete" button in the table.
+    </description>
+    <topic href="src/main/resources/html/analyst_decision.html" label="Analyst Decision"/>
+  </context>
+
+
+  <!-- PIRT -->
+  <context id="pirt" title="Phenomena, PIRT">
+    <description>Defining key physical phenomena and ranking importance is the primary function of a PIRT (Phenomena Identification and Ranking Table). A secondary function is to further assess the adequacy and gaps in the simulation capabilities, and available experimental data in an expanded PIRT</description>
+    <topic href="src/main/resources/html/pirt.html" label="PIRT"/>
+  </context>
+
+  <context id="pirt_qoi" title="Quantities of interest">
+    <description>Every model needs a particular model technique to determine the quantities of interest. The quantities of interest can be determined from the simulated variables and it cannot be obtained without the usage of the mathematical computations to improve the probability distributions.
+
+The quantities of interest have two categories.
+  • Name (qi)
+  • Statement (xvalue)
+
+The first category defines the name of the quantities of interest to be simulated whereas the second category states what value of x has to be defined for determining the quantity of interest.
+
+Actions:
+  To <b>add a quantity of interest</b> click on "Add Quantity of Interest" button.
+  To <b>open a quantity of interest</b>, click on the "Edit" button or double-click on the element in the table.
+  To <b>delete a quantity of interest</b>, click on the "Delete" button in the table.
+    </description>
+    <topic href="src/main/resources/html/pirt.html#qoi-home-view" label="PIRT, QOI"/>
+  </context>
+
+  <context id="pirt_phenomena" title="Phenomena Identification and Ranking Table">
+    <description>PIRT is a tool to define the key physical phenomena and ranking their importance. It permits to assess the adequacy and gaps in the simulation capabilities, and available experimental data. The current view lets you add groups and
+      phenomena to describe your quantity of interest and add assessments for each phenomenon for the defined criterion.
+
+Actions:
+  To <b>add a group</b> click on "Add Phenomenon Group" button.
+  To <b>add a phenomenon</b> click on "Add Phenomenon" button. A phenomenon must be part of a group, so please create a group before creating a phenomenon.
+  To <b>view an element</b>, click on "View" button in the table.
+  To <b>update an element</b>, click on "Edit" button or double-click on the element in the table.
+  To <b>delete an element</b>, click on "Delete" button in the table.
+  To <b>tag the current state</b>, click on "Tag" button. This action will duplicate the current PIRT table and create a non-editable copy. This copy is accessible from the PIRT Home view.
+  To <b>reset the PIRT table</b>, click on "Reset" button. This action will delete all the groups, phenomena and criterion ranking informations. The PIRT table will be cleared but the Quantity of Interest informations will not be affected.
+    </description>
+    <topic href="src/main/resources/html/pirt.html#phenomena-view" label="PIRT, Phenomena View"/>
+  </context>
+
+
+  <!-- PCMM -->
+  <context id="pcmm" title="Credibility, PCMM">
+    <description>The Predictive Capability Maturity Model is an expert elicitation process designed to characterize and communicate the completeness and rigor of the approaches used in computational model definition, code and solution verification, validation, and uncertainty quantification for an application prediction</description>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+  <context id="pcmm_home" title="Predictive Capability Maturity Model">
+    <description>PCMM is a tool to help analysts to plan, classify evidence, and assess this evidence. This will be used to start discussion and detect lack in the process, not to assess the analysts.
+
+To <b>start</b> planning, adding evidence or assessing, please <b>select a role</b> in the top-right corner drop-down.
+
+<b>Actions:</b>
+  To start <b>planning</b> click on an element in the PCMM wheel in the PCMM Planning view.
+  To manage <b>evidence</b> click on an element in the PCMM wheel in the PCMM view. A contextual menu will be displayed, then click on "Evidence".
+  To <b>assess</b> click on an element in the PCMM wheel in the PCMM view. A contextual menu will be displayed, then click on "Assess".
+  To view the <b>aggregation</b> of assessments click on "Aggregate" button (not available in PCMM Planning view).
+  To view the <b>PCMM Stamp</b>, click on the "PCMM Stamp" button (not available in PCMM Planning view). This feature will display the aggregation of assessments as a radar chart. Tags: The PCMM tool has a tag function that allows the user to save the analysis at a state. This will duplicate
+  the current work and make a non-editable copy.
+  To <b>add a tag</b> click on "New Tag" button.
+  To <b>select a tag</b> select it into the "Tag" drop-down.
+  To <b>manage tag</b> click on "Manage Tag" button. This will display a popup with all the existing tags. You will be able to rename or delete the tags.
+    </description>
+    
+    <topic href="src/main/resources/html/pcmm_planning.html" label="PCMM Planning"/>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+  <context id="pcmm_evidence" title="Evidence Management">
+    <description>The Evidence view lets you manage your evidence. You can order them by element and subelement.
+
+Type of evidence: The evidence can be an <b>existing file in the workspace</b> or a <b>link to a website</b>.
+
+Actions:
+  To <b>add an evidence</b> click on the "Add" button. If the evidence already exists in your workspace, you can drag and drop your evidence on the subelement you want.
+  To <b>open an evidence</b> double-click on the evidence or select it in the table and click on the "Open" button or press Enter.
+  To <b>delete an evidence</b> select it and click on the "Delete" button.
+  To <b>save your work</b>, click on the "Done" button. This will save and close the Evidence view.
+    </description>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+  <context id="pcmm_assess" title="Assessment">
+    <description>The Assess view is used to evaluate each element and subelement depending of the evidence associated. The user is invited to take a role to assess.
+
+Actions:
+  To <b>examine the evidence</b> click on the "Examine Evidence" button. You will be redirected to the Evidence view.
+  To <b>assess</b> double-click on a subelement or click on the "Assess" button. A popup will be displayed with the different options.
+  To <b>view the PCMM guidance</b> to be able to assess, click on the "Guidance Levels" button.
+  To <b>save your work</b>, click on the "Done" button. This will save and close the Evidence view.
+    </description>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+  <context id="pcmm_aggregate" title="Aggregate">
+    <description>The <b>aggregation view</b> displays the <b>assessments average over team members</b>. The assessments are aggregated by subelement and element depending of the project consequence.
+
+In a <b>low rigor</b> ModSim project, the aggregation will be computed from the assessments done on each PCMM elements.
+
+In a <b>high rigor</b> project, the aggregation is firstly computed at the PCMM subelement level, then computed from the result of the subelement aggregation to the PCMM element.</description>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+  <context id="pcmm_stamp" title="PCMM Stamp">
+    <description>The <b>PCMM Stamp</b> is the <b>aggregation</b> and the <b>average</b> of all the assessments <b>over team members</b>.
+
+In a <b>low rigor</b> ModSim project, the aggregation will be computed from the assessments done on each PCMM elements.
+
+In a <b>high rigor</b> project, the aggregation is firstly computed at the PCMM subelement level, then computed from the result of the subelement aggregation to the PCMM element.</description>
+    <topic href="src/main/resources/html/pcmm.html" label="PCMM"/>
+  </context>
+
+
+  <!-- Communicate -->
+  <context id="communicate" title="Communicate">
+    <description>Communicate feature main goal is to stow the documents associated to the other features and make it available for peer review and discussion about the current Credibility process.
+
+The following references are managed:
+  • Credibility Report
+
+The following references will be managed in the future:
+  • Credibility Evidence Package (Overview)
+  • Credibility Evidence Package
+  • Plausible Margin Bounds
+  • Peer Review
+    </description>
+    <topic href="src/main/resources/html/communicate.html" label="Communicate"/>
+    <topic href="src/main/resources/html/reporting.html" label="Credibility Report"/>
+  </context>
+
+  <context id="reporting" title="Report">
+    <description> Credibility Framework Report Generation: The reporting is based on ARG (Automatic Report Generator).
+
+ARG is not part of CF, you'll need to install it before the generation and to point to it.
+    </description>
+    <topic href="src/main/resources/html/reporting.html" label="Credibility Report"/>
+    <topic href="src/main/resources/html/variables.html" label="Variables"/>
+  	<topic href="https://gitlab.com/AutomaticReportGenerator/arg/-/wikis/home" label="ARG wiki"/>
+  	<topic href="https://gitlab.com/AutomaticReportGenerator/arg" label="ARG repository"/>
+  </context>
+
+
+  <!-- Configuration -->
+  <context id="configuration" title="Configuration">
+    <description>Configuration menu allow to change the *.cf file configuration/data or to export for another CompSim project.
+
+The following references are managed:
+  • Import configuration
+  • Export configuration
+    </description>
+    <topic href="src/main/resources/html/configuration.html" label="Configuration"/>
+  </context>
+
+  <context id="import" title="Import Configuration">
+    <description>The import view allow to import a new schema for a tool in place of the existing one. It is allowed to change a part of the configuration.
+
+Warning: all the associated data of a deleted configuration will be deleted.
+    </description>
+    <topic href="src/main/resources/html/configuration.html" label="Configuration"/>
+  </context>
+
+  <context id="export" title="Export Configuration">
+    <description>The export view allows to export the configuration of a CF tool.
+It allows to export the data of the *.cf as a yml file.
+    </description>
+    <topic href="src/main/resources/html/configuration.html" label="Configuration"/>
+  </context>
+
+  <context id="cred_evid_folder_struct" title="Credibility Evidence Folder Structure">
+    <description>The credibility evidence folder structure helps the analyst to classify evidence and documents.
+    </description>
+    <topic href="src/main/resources/html/credibility_evid_folder_structure.html" label="Credibility Evidence Folder Structure"/>
+  </context>
+</contexts>

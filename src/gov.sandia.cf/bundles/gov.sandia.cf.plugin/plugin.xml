@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="gov.sandia.cf.fragment"
+         point="org.eclipse.e4.workbench.model">
+      <fragment
+            apply="notexists"
+            uri="fragment.e4xmi">
+      </fragment>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="gov.sandia.cf.category.credibility"
+            name="Credibility Framework">
+      </category>
+      <wizard
+            category="gov.sandia.cf.category.credibility"
+            class="gov.sandia.cf.parts.wizards.NewCredibilityProcessWizard"
+            hasPages="true"
+            icon="./src/main/resources/icons/app/16x16.gif"
+            id="gov.sandia.cf.wizards.credibility.process"
+            name="Credibility Process">
+      </wizard>
+      <wizard
+            category="gov.sandia.cf.category.credibility"
+            class="gov.sandia.cf.parts.wizards.NewCredibilityEvidenceStructureWizard"
+            hasPages="true"
+            icon="./src/main/resources/icons/app/16x16.gif"
+            id="gov.sandia.cf.wizards.credibility.evidence-folder-structure"
+            name="Credibility Evidence Folder Structure">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="gov.sandia.cf.launcher.CredibilityEditor"
+            default="true"
+            extensions="cf"
+      		icon="./src/main/resources/icons/app/16x16.gif"
+            id="gov.sandia.cf.credibility-editor"
+            name="Credibility Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="gov.sandia.cf.launcher.Startup">
+      </startup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="gov.sandia.cf.preferences.CredibilityPreferencePage"
+            id="gov.sandia.cf.plugin.rootPreferencePage"
+            name="Credibility Framework">
+      </page>
+      <page
+            category="gov.sandia.cf.plugin.rootPreferencePage"
+            class="gov.sandia.cf.preferences.DeveloperOptionsPreferencePage"
+            id="gov.sandia.cf.plugin.developerOptionsPreferencePage"
+            name="Developer Options">
+      </page>
+   </extension>
+
+</plugin>

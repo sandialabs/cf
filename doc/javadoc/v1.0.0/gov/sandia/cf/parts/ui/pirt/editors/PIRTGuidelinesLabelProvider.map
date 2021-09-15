@@ -1,0 +1,8 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="./PIRTGuidelinesLabelProvider.html" title="gov.sandia.cf.parts.ui.pirt.editors.PIRTGuidelinesLabelProvider" alt="" coords="71,197,615,343"/>
+<area shape="rect" id="node1" href="./PIRTGuidelinesLabelProvider.html" title="&lt;TABLE&gt;" alt="" coords="61,192,626,348"/>
+<area shape="rect" id="node2_1" href="../../../viewer/editors/ATooltipTableLabelProvider.html" title="gov.sandia.cf.parts.viewer.editors.ATooltipTableLabelProvider" alt="" coords="16,11,340,139"/>
+<area shape="rect" id="node2" href="../../../viewer/editors/ATooltipTableLabelProvider.html" title="&lt;TABLE&gt;" alt="" coords="5,5,351,144"/>
+<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/IColorProvider.html" title="org.eclipse.jface.viewers.IColorProvider" alt="" coords="386,19,631,130"/>
+<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/IColorProvider.html" title="&lt;TABLE&gt;" alt="" coords="375,14,642,135"/>
+</map>

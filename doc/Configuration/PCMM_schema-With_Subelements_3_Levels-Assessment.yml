@@ -1,0 +1,261 @@
+Phases:
+  - "Evidence"
+  - "Assess"
+  - "Aggregate"
+  - "Stamp"
+Roles:
+  - "Customer"
+  - "Analyst"
+  - "Code Developer"
+  - "Experimentalist"
+Levels:
+  Level 0:
+    Code: 0
+    Color: 255,0,0
+  Level 1:
+    Code: 1
+    Color: 255,140,0
+  Level 2:
+    Code: 2
+    Color: 255,255,0
+  Level 3:
+    Code: 3
+    Color: 0,255,0
+Elements:
+  Code Verification:
+    Name: Code Verification
+    Color: 255,160,51 #ffa033
+    Abbreviation: CVER
+    Subelements:
+      Apply Software Quality Engineering (SQE) processes:
+        Name: Apply Software Quality Engineering (SQE) processes
+        Code: CVER1
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+            Descriptors:
+              Descriptor: No identified SQE process
+              Additional Info: This element requires input from a capability developer.
+              Change(s) from previous level: n/a
+              Brief description of evidence relevant to this level: n/a
+              Key Words/Phrases:
+          Level 1:
+            Code: 1
+            Name: Level 1
+            Descriptors:
+              Descriptor: Code capability is managed to identified SQE practices
+              Additional Info:
+              Change(s) from previous level: "Main differences between Level 0 and 1:
+1) Documented SQE process"
+              Brief description of evidence relevant to this level: Documentation of the SQE process applied
+              Key Words/Phrases: '"Managed" = ASC IC management (for example); defined in SNL ASC SQE Guidance'
+          Level 2:
+            Code: 2
+            Name: Level 2
+            Descriptors:
+              Descriptor: Code capability is managed to identified SQE practices. SQE process is managed.
+              Additional Info:
+              Change(s) from previous level: "Main differences between Level 1 and 2:
+1) SQE process is managed
+2)"
+              Brief description of evidence relevant to this level: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices.
+              Key Words/Phrases: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices.
+          Level 3:
+            Code: 3
+            Name: Level 3
+            Descriptors:
+              Descriptor: Code capability is managed to identified SQE practices. SQE process is managed and optimized.
+              Additional Info:
+              Change(s) from previous level: "Main differences between Level 2 and 3:
+1) SQE process is optimized
+2) "
+              Brief description of evidence relevant to this level: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices. 3) Documentation supporting achievement of process optimization.
+              Key Words/Phrases: '"Optimized" = as defined in the SNL ASC SQE Guidance'
+      Provide test coverage information:
+        Name: Provide test coverage information
+        Code: CVER2
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Identification of code or algorithm attributes, deficiencies and errors:
+        Name: Identification of code or algorithm attributes, deficiencies and errors
+        Code: CVER3
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Verify compliance to Software Quality Engineering (SQE) processes:
+        Name: Verify compliance to Software Quality Engineering (SQE) processes
+        Code: CVER4
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Technical_review of code verification activities:
+        Name: Technical_review of code verification activities
+        Code: CVER5
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+  Physics And Material Model Fidelity:
+    Name: Physics Models
+    Color: 108,179,17 #6cb311
+    Abbreviation: PMMF
+    Subelements:
+      Characterize completeness versus the PIRT:
+        Name: Characterize completeness versus the PIRT
+        Code: PMMF1
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Quantify model accuracy (i.e., separate effects model validation):
+        Name: Quantify model accuracy (i.e., separate effects model validation)
+        Code: PMMF2
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Assess interpolation vs. extrapolation of physics and material model:
+        Name: Assess interpolation vs. extrapolation of physics and material model
+        Code: PMMF3
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Technical review of physics and material models:
+        Name: Technical review of physics and material models
+        Code: PMMF4
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+  Representation and Geometry Fidelity:
+    Name: Geometry Fidelity
+    Color: 2,142,116 #028e74
+    Abbreviation: RGF
+    Subelements:
+      Characterize Representation and Geometric Fidelity:
+        Name: Characterize Representation and Geometric Fidelity
+        Code: RGF1
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Geometry sensitivity:
+        Name: Geometry sensitivity
+        Code: RGF2
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+      Technical review of representation and geometric fidelity:
+        Name: Technical review of representation and geometric fidelity
+        Code: RGF3
+        Levels:
+          Level 0:
+            Code: 0
+            Name: Level 0
+          Level 1:
+            Code: 1
+            Name: Level 1
+          Level 2:
+            Code: 2
+            Name: Level 2
+          Level 3:
+            Code: 3
+            Name: Level 3
+  

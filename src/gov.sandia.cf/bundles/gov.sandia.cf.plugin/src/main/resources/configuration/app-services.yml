@@ -1,0 +1,26 @@
+services:
+   - gov.sandia.cf.application.IDecisionApplication
+   - gov.sandia.cf.application.IExportApplication
+   - gov.sandia.cf.application.IGlobalApplication
+   - gov.sandia.cf.application.IGenericParameterApplication
+   - gov.sandia.cf.application.IImportApplication
+   - gov.sandia.cf.application.IImportDecisionApp
+   - gov.sandia.cf.application.IImportPIRTApp
+   - gov.sandia.cf.application.IImportPCMMApp
+   - gov.sandia.cf.application.IImportQoIPlanningApp
+   - gov.sandia.cf.application.IImportUncertaintyApp
+   - gov.sandia.cf.application.IImportSysRequirementApp
+   - gov.sandia.cf.application.IIntendedPurposeApp
+   - gov.sandia.cf.application.IMigrationApplication
+   - gov.sandia.cf.application.IPIRTApplication
+   - gov.sandia.cf.application.IPCMMApplication
+   - gov.sandia.cf.application.IPCMMPlanningApplication
+   - gov.sandia.cf.application.IQoIPlanningApplication
+   - gov.sandia.cf.application.IReportARGExecutionApp
+   - gov.sandia.cf.application.IReportARGApplication
+   - gov.sandia.cf.application.IReportARGPIRTApp
+   - gov.sandia.cf.application.IReportARGPCMMApp
+   - gov.sandia.cf.application.IReportARGPlanningApp
+   - gov.sandia.cf.application.ISystemRequirementApplication
+   - gov.sandia.cf.application.IUncertaintyApplication
+   - gov.sandia.cf.application.IUserApplication

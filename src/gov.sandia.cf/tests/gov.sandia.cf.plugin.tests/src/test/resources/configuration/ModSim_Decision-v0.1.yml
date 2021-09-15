@@ -1,0 +1,54 @@
+Decisions:
+  Description:
+    required: "Optional"
+    type: "Text"
+  Rationale:
+    required: "Required"
+    type: "Text"
+  Conservatism:
+    required: "Required"
+    type: "RichText"
+  Credibility Element:
+    required: "Desired"
+    type: "Select"
+    values:
+      - RGF (Representation and Geometric Fidelity)
+      - PMMF (Physics and Material Model Fidelity)
+      - CVER (Code Verification)
+      - SVER (Solution Verification)
+      - VAL (Validation)
+      - UQ (Uncertainty Quantification)
+      - N/A
+  Consequence of Wrong Decision:
+    required: "Required"
+    type: "Select"
+    values:
+      - High
+      - Nominal
+      - Low
+      - Unknown
+  Likelihood of Wrong Decision:
+    required: "Required"
+    type: "Select"
+    values:
+      - High
+      - Nominal
+      - Low
+      - Unknown
+  Maturity of Techniques:
+    required: "Required"
+    type: "Select"
+    values:
+      - Production
+      - Pre-Release
+      - Research
+  Analyst Training:
+    required: "Required"
+    type: "Select"
+    values:
+      - Familiar
+      - First Time
+  References:
+    required: "Desired"
+    type: Link
+

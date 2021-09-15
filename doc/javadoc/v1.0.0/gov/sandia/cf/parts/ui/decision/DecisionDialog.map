@@ -1,0 +1,6 @@
+<map id="G" name="G">
+<area shape="rect" id="node1_0" href="../../dialogs/GenericCFSmallDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFSmallDialog" alt="" coords="250,11,630,87"/>
+<area shape="rect" id="node1" href="../../dialogs/GenericCFSmallDialog.html" title="&lt;TABLE&gt;" alt="" coords="239,5,641,92"/>
+<area shape="rect" id="node2_1" href="./DecisionDialog.html" title="gov.sandia.cf.parts.ui.decision.DecisionDialog" alt="" coords="16,145,864,256"/>
+<area shape="rect" id="node2" href="./DecisionDialog.html" title="&lt;TABLE&gt;" alt="" coords="5,140,875,261"/>
+</map>

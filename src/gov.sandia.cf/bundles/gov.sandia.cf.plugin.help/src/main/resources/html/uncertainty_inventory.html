@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Uncertainty Inventory</title>
+</head>
+<body>
+	<h2>Uncertainty Inventory</h2>
+	<p>Uncertainty Inventory Tool first goal is to enumerate, describe and associate references for known uncertainties.</p>
+	<p>Uncertainty Inventory content persists across sessions in *.cf file.</p>
+	<div id="uncertainty-view"></div>
+	<h3>Uncertainty Inventory View</h3>
+	<p>This view lists all the uncertainties associated to the current ModSim. It is possible to add, update, open, delete a new Group of uncertainty or an Uncertainty.</p>
+	<h4>Uncertainty Table</h4>
+	<p>By default the table has ten columns: - <strong>Uncertainty group</strong>: the group of the uncertainty - <strong>Variable Name</strong>: the name of the uncertainty variable -
+	<strong>Description</strong>: a description of the uncertainty - <strong>Type</strong>: the type of the uncertainty - <strong>Characterization</strong>: The uncertainty characterization -
+	<strong>Parameters</strong>: The list of parameters - <strong>Model Feature</strong>: is it a model feature? - <strong>Comments</strong> -
+	<strong>Feasible Physical Range</strong> - <strong>References</strong>: the evidence link.</p>
+	<h4>Table Events</h5>
+	<ul>
+	  <li><strong>Double-clicking on a row</strong> will open the uncertainty details view.</li>
+	</ul>
+	<h4>Buttons</h4>
+	<h5>Add Uncertainty Group</h5>
+	<p>This button adds a new uncertainty group. It throws a new group creation wizard.</p>
+	<p>The user can enter a <strong>name</strong> for the new group. The name can not be null.</p>
+	<h5>Add Uncertainty</h5>
+	<p>This button adds a new Uncertainty. It throws a new Uncertainty creation wizard.</p>
+	<p>The user can enter all the parameters needed for the uncertainty and associate it to an existing group.</p>
+	<h5>Edit</h5>
+	<p>This button allow to update the selected uncertainty or group. A new wizard is opened.</p>
+	<h5>Delete</h5>
+	<p>This button permits to delete the selected uncertainty or group.</p>
+	<p>A deletion confirmation dialog should be opened on click.</p>
+	<p>If the user confirms deletion, the selected uncertainty or group is deleted with all the associated elements.</p>
+	<h5>Back</h5>
+	<p>"Back" button permits to return to cf-plugin Home View.</p>
+</body>
+</html>
