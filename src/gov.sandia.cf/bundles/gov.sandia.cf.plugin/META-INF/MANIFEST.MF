@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Credibility Framework
 Bundle-SymbolicName: gov.sandia.cf.plugin;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1.qualifier
 Bundle-ClassPath: .,
  bin/,
  lib/jakarta.persistence_2.2.2.jar,

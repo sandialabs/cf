@@ -10,7 +10,7 @@
 		<groupId>gov.sandia.cf</groupId>
 		<artifactId>gov.sandia.cf.configuration</artifactId>
 		<relativePath>./releng/gov.sandia.cf.configuration</relativePath>
-		<version>1.0.0</version>
+		<version>1.0.1-SNAPSHOT</version>
 	</parent>
 
 	<modules>
