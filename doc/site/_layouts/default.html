@@ -1,0 +1,65 @@
+<!--
+Credibility Framework (CF) v.1.0
+
+Copyright 2021 National Technology & Engineering Solutions of Sandia, LLC (NTESS). 
+Under the terms of Contract DE-NA0003525 with NTESS, the U.S. 
+Government retains certain rights in this software.
+
+Licensed under the Eclipse Public License - v 2.0;
+you may not use this files except in compliance with the License.
+
+See LICENSE file at https://gitlab.com/CredibilityFramework/cf/-/blob/master/LICENSE
+!-->
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="{{ site.baseurl }}/assets/css/m-dark.compiled.css" />
+  <link rel="icon" href="{{ site.baseurl }}/assets/images/cf.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+
+<body>
+
+  <header>
+    {% include navigation.html %}
+  </header>
+
+  <main>
+    <article>
+      <div class="m-container m-container-inflatable">
+        <div class="m-row">
+          <div class="m-col-l-10 m-push-l-1">
+            <h1>
+              <span class="m-breadcrumb"><a href="{{ site.baseurl }}/">CF</a> &raquo;</span>
+              {% if page.subitem %}
+              <span class="m-breadcrumb">{{ page.subitem}} &raquo;</span>
+              {% endif %}
+              {{ page.title }}
+            </h1>
+            {{ content }}
+          </div>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <nav>
+      <div class="m-container">
+        <div class="m-row">
+          <div class="m-col-l-10 m-push-l-1">
+            <p>CF (Credibility Framework). Created with <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </footer>
+
+</body>
+
+</html>

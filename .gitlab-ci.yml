@@ -44,14 +44,14 @@ spotbugs-sast:
   extends: []
   needs: []
   before_script:
-    - echo "Install GUI test dependencies"
+    - echo "==================== [test] Installing GUI test dependencies ============="
     - apt-get update -y
     - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
   script:
+    - echo "==================== [test] Verifying cf plugin =========================="
     - cd $PROJECT_ROOT_POM
-    - echo "Verifying cf plugin"
     - mvn $MAVEN_CLI_OPTS clean verify -DskipTests
   artifacts:
     reports:
@@ -69,7 +69,7 @@ build and test:
   stage: build
   image: maven:3.5.4-jdk-8
   before_script:
-    - echo "Install GUI test dependencies"
+    - echo "==================== [build] Installing GUI test dependencies ============"
     - apt-get update -y
     - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz
     - export DISPLAY=:99.0
@@ -79,12 +79,12 @@ build and test:
     - mkdir target/build
     - mkdir target/coverage
   script:
+    - echo "==================== [build] Building and testing CF plugin =============="
     - cd $PROJECT_ROOT_POM
-    - echo "Building and testing CF plugin"
     - mvn $MAVEN_CLI_OPTS clean install
-    - echo "Copying build into the artifacts folder"
+    - echo "==================== [build] Copying build into the artifacts folder ====="
     - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/
-    - echo "Copying test coverage report into the artifacts folder"
+    - echo "==================== [build] Copying test coverage report into the artifacts folder"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
     - cp tests/gov.sandia.cf.plugin.tests/target/build-test.log ../../target/build-test.log
   artifacts:
@@ -105,7 +105,7 @@ build and test tag:
   stage: build
   image: maven:3.5.4-jdk-8
   before_script:
-    - echo "Install GUI test dependencies"
+    - echo "==================== [build] Installing GUI test dependencies ============"
     - apt-get update -y
     - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz
     - export DISPLAY=:99.0
@@ -116,16 +116,16 @@ build and test tag:
     - mkdir target/coverage
     - mkdir target/javadoc
   script: 
+    - echo "==================== [build] Building and testing CF plugin =============="
     - cd $PROJECT_ROOT_POM
-    - echo "Building and testing CF plugin"
     - mvn $MAVEN_CLI_OPTS clean install
-    - echo "Copying build into the artifacts folder"
+    - echo "==================== [build] Copying build into the artifacts folder ====="
     - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/
-    - echo "Copying test coverage report into the artifacts folder"
+    - echo "==================== [build] Copying test coverage report into the artifacts folder"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
     - cp tests/gov.sandia.cf.plugin.tests/target/build-test.log ../../target/build-test.log
     # Generate Javadoc
-    - echo "Generating CF Javadoc"
+    - echo "==================== [build] Generating CF Javadoc ======================="
     - cd bundles/gov.sandia.cf.plugin/
     - mvn javadoc:javadoc
     - cp -r target/site/apidocs/* ../../../../target/javadoc/
@@ -156,22 +156,23 @@ package:
     JAVADOC_FILE_PREFIX: gov.sandia.cf.javadoc
     LATEST_VERSION: "latest"
   before_script:
+    - echo "==================== [package] Install dependencies ======================"
     - apk update && apk add wget curl zip libxml2-utils jq git
   script:
     - mkdir target/package
     - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' target/build/site.xml)
     - if [ -z "$CF_VERSION" ]; then echo "No version found. Impossible to continue package import job." && exit 1; else echo "CF Version $CF_VERSION"; fi;
     # Import p2 repository into Gitlab package registry
-    - echo "Zipping CF build $CF_VERSION to prepare package import"
+    - echo "==================== [package] Zipping CF build $CF_VERSION to prepare package import"
     - cd target/build/
     - zip -q -r ../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip *
-    - echo "Importing CF build target/package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - echo "==================== [package] Importing CF build target/package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
     - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
     # Import javadoc (if it exists) into Gitlab package registry
     - if [ -d "../javadoc" ]; then echo "Zipping CF javadoc $CF_VERSION to prepare package import"; else echo "No javadoc found" && exit 0; fi
     - cd ../javadoc/
     - zip -q -r ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip *
-    - echo "Importing CF javadoc target/package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - echo "==================== [package] Importing CF javadoc target/package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
     - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
   rules:
     - if: '$CI_COMMIT_TAG'
@@ -191,6 +192,7 @@ release snapshot:
   image: alpine:latest
   stage: release
   before_script:
+    - echo "==================== [release] Install dependencies ======================"
     - 'which ssh-agent || ( apk update && apk add openssh-client)'
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
@@ -202,15 +204,15 @@ release snapshot:
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "Cloning CF git repository"
+    - echo "==================== [release] Cloning CF git repository ================="
     - git clone git@gitlab.com:CredibilityFramework/cf.git cf
     - cd cf
-    - echo "Checkout branch $CI_COMMIT_BRANCH"
+    - echo "==================== [release] Checkout branch $BRANCH_DEVELOP ==========="
     - git checkout $CI_COMMIT_BRANCH
     - git branch -a
     - git status
     - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' ../target/build/site.xml)
-    - echo "Tag new CF build $CF_VERSION"
+    - echo "==================== [release] Tag new CF build $CF_VERSION =============="
     - git tag -a $CF_VERSION -m "Autogenerated tag for version $CF_VERSION"
     - git push origin $CF_VERSION
   rules:
@@ -230,6 +232,7 @@ release in master:
     BRANCH_DEVELOP: "develop"
     BRANCH_MASTER: "master"
   before_script:
+    - echo "==================== [release] Install dependencies ======================"
     - 'which ssh-agent || ( apk update && apk add openssh-client)'
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
@@ -241,23 +244,23 @@ release in master:
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "Cloning CF git repository"
+    - echo "==================== [release] Cloning CF git repository ================="
     - git clone git@gitlab.com:CredibilityFramework/cf.git cf
     - cd cf
-    - echo "Checkout branch $BRANCH_DEVELOP"
+    - echo "==================== [release] Checkout branch $BRANCH_DEVELOP ==========="
     - git checkout $BRANCH_DEVELOP
     - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' ../target/build/site.xml)
     - if [ $VERSION == $CF_VERSION ]; then echo "Version confirmation checked for build $CF_VERSION"; else echo "Version confirmation not good, entered version $VERSION does not match build version $CF_VERSION. This message protects from a mistake. Please confirm the version number by entering it manually in variable 'VERSION' before running this manual job." && exit 1; fi;
-    - echo "Merge into $BRANCH_MASTER version $CF_VERSION"
+    - echo "==================== [release] Merge into $BRANCH_MASTER version $CF_VERSION" 
     - git checkout $BRANCH_MASTER
     - git branch -a
     - git status
     - git merge --no-ff $BRANCH_DEVELOP
     - git push
-    - echo "Tag new CF build $CF_VERSION"
+    - echo "==================== [release] Tag new CF build $CF_VERSION =============="
     - git tag -a $CF_VERSION -m "Autogenerated tag for version $CF_VERSION"
     - git push origin $CF_VERSION
-    - echo "Rebase $BRANCH_DEVELOP on $BRANCH_MASTER"
+    - echo "==================== [release] Rebase $BRANCH_DEVELOP on $BRANCH_MASTER =="
     - git checkout $BRANCH_DEVELOP
     - git branch -a
     - git status
@@ -276,28 +279,33 @@ release in master:
 
 # Publish documentation, p2 repository and javadoc from Gitlab Package Registry to Gitlab Pages:
 #  - automatically if it is the 'master' branch or a tag
-#  - manually otherwise
+#  - manually if it is a protected branch (to avoid Gitlab Pages hack by another branch)
 pages:
-  image: alpine:latest
+  image: ruby:2.7
   stage: publish
   variables: 
     PACKAGENAME: "gov.sandia.cf" # used into ci/doc/site/unzip-packages.sh script
     P2_REPO_FILE_PREFIX: "gov.sandia.cf.p2_repo" # used into ci/doc/site/unzip-packages.sh script
     JAVADOC_FILE_PREFIX: "gov.sandia.cf.javadoc" # used into ci/doc/site/unzip-packages.sh script
   before_script:
-    - apk update && apk add wget curl unzip findutils jq
+    - echo "==================== [publish] Install dependencies ===================="
+    - apt-get update -y && apt-get install -y wget curl unzip findutils jq
   script:
-    - ls -al
-    - mkdir .public
-    - echo "Extracting CF Packages"    
-    - . ci/doc/site/unzip-packages.sh .public/
-    - echo "Generating CF site pages to https://credibilityframework.gitlab.io/cf"
-    - . ci/doc/site/generate-pages.sh .public/
-    - mv .public public
+    - echo "==================== [publish] Build documentation ====================="
+    - echo "==================== [publish] Extracting CF Packages =================="  
+    - . ci/doc/site/unzip-packages.sh doc/site/
+    - echo "==================== [publish] Generating CF site pages to https://credibilityframework.gitlab.io/cf"
+    - . ci/doc/site/generate-pages.sh doc/site/
+    - echo "==================== [publish] Creating Jekyll site ===================="
+    - cd doc/site/
+    - gem install jekyll bundler jekyll-remote-include
+    - jekyll build -d ../../public
   artifacts:
     paths:
       - public
   rules:
     - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
-    - when: manual
+    - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+      when: manual
+    - when: never
   allow_failure: true
