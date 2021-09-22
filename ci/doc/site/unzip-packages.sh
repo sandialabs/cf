@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/sh -v
+
 if [ -z "$1" ]
 then
 	EXEC_DIR=$(pwd)
@@ -34,14 +35,14 @@ do
 	if wget --spider $PACKAGEURL 2>/dev/null; then
 		echo "Getting package build artifacts from $PACKAGEURL"
 		wget -q $PACKAGEURL
-		mkdir -p build/$version/
-		echo "Unzipping build package artifacts to build/$version/"
-		unzip -q $P2_REPO_FILE_PREFIX.$version.zip -d build/$version/
+		mkdir -p packages/$version/
+		echo "Unzipping build package artifacts to packages/$version/"
+		unzip -q $P2_REPO_FILE_PREFIX.$version.zip -d packages/$version/
 		echo "Removing build package $P2_REPO_FILE_PREFIX.$version.zip"
 		rm $P2_REPO_FILE_PREFIX.$version.zip
 		# execute the first time to add the latest package into the 'latest' folder
 		if [[ $FIRST == "true" ]]; then
-			cp -R build/$version build/latest
+			cp -R packages/$version packages/latest
 		fi
 	else
 		echo "Impossible to get build package artifact at $PACKAGEURL"

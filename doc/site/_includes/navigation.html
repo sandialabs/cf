@@ -1,0 +1,37 @@
+<!--
+Credibility Framework (CF) v.1.0
+
+Copyright 2021 National Technology & Engineering Solutions of Sandia, LLC (NTESS). 
+Under the terms of Contract DE-NA0003525 with NTESS, the U.S. 
+Government retains certain rights in this software.
+
+Licensed under the Eclipse Public License - v 2.0;
+you may not use this files except in compliance with the License.
+
+See LICENSE file at https://gitlab.com/CredibilityFramework/cf/-/blob/master/LICENSE
+!-->
+<nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="{{ site.baseurl }}/" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
+        <img src="{{ site.baseurl }}/assets/images/cf.png" />CF (Credibility Framework)
+      </a>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          {% for item in site.data.navigation %}
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a {% if item.link %}href="{{ site.baseurl }}{{ item.link }}"{% endif %} {% if page.url == item.link %}id="m-navbar-current"{% endif %}>{{ item.name }}</a>{% if item.sublink And item.sublink != "" And item.sublink != nil %}
+              <ol class="m-col-t-6 m-col-m-none">{% for subitem in item.sublink %}
+                <li>
+                  <a {% if subitem.link %}href="{{ site.baseurl }}{{ subitem.link }}"{% endif %} {% if page.url == subitem.link %}id="m-navbar-current"{% endif %}>{{ subitem.name }}</a>
+                </li>{% endfor %}
+              </ol>{% endif %}
+            </li>
+          </ol>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

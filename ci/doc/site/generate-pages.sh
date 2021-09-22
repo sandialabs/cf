@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/sh -v
+
 if [ -z "$1" ]
 then
 	export EXEC_DIR=$(pwd)
@@ -15,41 +16,31 @@ fi
 
 export CUR_DIR=$(pwd)
 
-# Main page
 
 cd $EXEC_DIR
-echo "Generate main page"
-echo "<html><body><h1>Credibility Framework listing:</h1>" > ./index.html
-find -maxdepth 1 -type d ! -path . -printf "<a href='%f/index.html'>%f</a><br/>\n" | sort >> ./index.html
-echo "</body></html>" >> ./index.html
 
 # Javadoc page
 echo "Generate javadoc page"
 cd javadoc
-echo "<html><body><h1>Credibility Framework Javadoc:</h1>" > ./index.html
-find -maxdepth 1 -type d ! -path . -printf "<a href='%f/index.html'>%f</a><br/>\n" | sort -r >> ./index.html
-echo "</body></html>" >> ./index.html
+echo -e "--- \nlayout: default\ntitle: Javadoc\nsubitem: Developing\n--- \n\n# CF Javadoc\n" > ./index.md
+find -maxdepth 1 -type d ! -path . -printf "- [%f](%f/index.html){:target='_blank'}\n" | sort -r >> ./index.md
 cd ..
 
 # Build page
-echo "Generate build page"
-cd build
-echo "<html><body><h1>Credibility Framework Builds:</h1>" > ./index.html
-find -maxdepth 1 -type d ! -path . -printf "<a href='%f/index.html'>%f</a><br/>\n" | sort -r >> ./index.html
-echo "</body></html>" >> ./index.html
+echo "Generate packages page"
+cd packages
+echo -e "--- \nlayout: default\ntitle: Packages\nsubitem: Using\n--- \n\n# CF Packages\n" > ./index.md
+find -maxdepth 1 -type d ! -path . -printf "- [%f](%f/)\n" | sort -r >> ./index.md
 
 # For each build
 for version in $(find -maxdepth 1 -type d ! -path . -printf '%f\n' | sort)
 do 
-	echo "Generate $version build page"
+	echo "Generate $version package page"
 	cd $version
-	echo "<html><body><h1>P2 repository files for $version:</h1>" > ./index.html
-	echo "<h2>Repository URL:</h2><a href='https://credibilityframework.gitlab.io/cf/build/$version/'>https://credibilityframework.gitlab.io/cf/build/$version/</a></p>" >> ./index.html
-	echo "<h2>Directory content:</h2>" >> ./index.html
-	echo "<ul>" >> ./index.html
-	find -maxdepth 1 ! -name 'index.html' ! -path . -printf '<li>%f</li>\n' | sort >> ./index.html
-	echo "</ul>" >> ./index.html
-	echo "</body></html>" >> ./index.html
+	echo -e "--- \nlayout: default\ntitle: Package $version\nsubitem: Using\n--- \n\n# P2 repository for CF latest\n" > ./index.md
+	echo -e "## Repository URL:\n[https://credibilityframework.gitlab.io/cf/packages/$version/](https://credibilityframework.gitlab.io/cf/packages/$version/)\n\n" >> ./index.md
+	echo -e "## Directory content:\n" >> ./index.md
+	find -maxdepth 1 ! -name 'index.*' ! -path . -printf "- %f\n" | sort -r >> ./index.md
 	cd ..
 done
 
