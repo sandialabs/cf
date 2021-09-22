@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../../../dialogs/GenericCFSmallDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFSmallDialog" alt="" coords="363,11,743,87"/>
-<area shape="rect" id="node1" href="../../../dialogs/GenericCFSmallDialog.html" title="&lt;TABLE&gt;" alt="" coords="352,5,753,92"/>
-<area shape="rect" id="node2_1" href="./PIRTPhenomenonGroupDialog.html" title="gov.sandia.cf.parts.ui.pirt.dialogs.PIRTPhenomenonGroupDialog" alt="" coords="16,145,1089,256"/>
-<area shape="rect" id="node2" href="./PIRTPhenomenonGroupDialog.html" title="&lt;TABLE&gt;" alt="" coords="5,140,1100,261"/>
-</map>

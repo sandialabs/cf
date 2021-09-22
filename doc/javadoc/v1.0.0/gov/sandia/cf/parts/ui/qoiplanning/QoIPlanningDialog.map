@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../../dialogs/GenericCFSmallDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFSmallDialog" alt="" coords="204,11,584,87"/>
-<area shape="rect" id="node1" href="../../dialogs/GenericCFSmallDialog.html" title="&lt;TABLE&gt;" alt="" coords="193,5,595,92"/>
-<area shape="rect" id="node2_1" href="./QoIPlanningDialog.html" title="gov.sandia.cf.parts.ui.qoiplanning.QoIPlanningDialog" alt="" coords="16,145,772,256"/>
-<area shape="rect" id="node2" href="./QoIPlanningDialog.html" title="&lt;TABLE&gt;" alt="" coords="5,140,783,261"/>
-</map>

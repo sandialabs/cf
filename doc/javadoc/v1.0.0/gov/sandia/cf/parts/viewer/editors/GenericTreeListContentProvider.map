@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./GenericTableListContentProvider.html" title="gov.sandia.cf.parts.viewer.editors.GenericTableListContentProvider" alt="" coords="16,37,312,130"/>
-<area shape="rect" id="node1" href="./GenericTableListContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="5,31,323,135"/>
-<area shape="rect" id="node2_1" href="./GenericTreeListContentProvider.html" title="gov.sandia.cf.parts.viewer.editors.GenericTreeListContentProvider" alt="" coords="175,215,471,343"/>
-<area shape="rect" id="node2" href="./GenericTreeListContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="164,209,481,348"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="org.eclipse.jface.viewers.ITreeContentProvider" alt="" coords="357,11,605,156"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="347,5,616,161"/>
-</map>

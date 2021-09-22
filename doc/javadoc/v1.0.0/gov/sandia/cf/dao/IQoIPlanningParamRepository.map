@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ICRUDRepository.html" title="gov.sandia.cf.dao.ICRUDRepository" alt="" coords="16,11,536,277"/>
-<area shape="rect" id="node1" href="./ICRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,547,283"/>
-<area shape="rect" id="node3_1" href="./IQoIPlanningParamRepository.html" title="gov.sandia.cf.dao.IQoIPlanningParamRepository" alt="" coords="180,336,372,379"/>
-<area shape="rect" id="node3" href="./IQoIPlanningParamRepository.html" title="&lt;TABLE&gt;" alt="" coords="169,331,383,384"/>
-<area shape="rect" id="node2_2" href="./impl/QoIPlanningParamRepository.html" title="gov.sandia.cf.dao.impl.QoIPlanningParamRepository" alt="" coords="82,437,470,531"/>
-<area shape="rect" id="node2" href="./impl/QoIPlanningParamRepository.html" title="&lt;TABLE&gt;" alt="" coords="71,432,481,536"/>
-</map>

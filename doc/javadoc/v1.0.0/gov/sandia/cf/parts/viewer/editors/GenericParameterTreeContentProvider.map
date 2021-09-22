@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./GenericParameterTreeContentProvider.html" title="gov.sandia.cf.parts.viewer.editors.GenericParameterTreeContentProvider" alt="" coords="16,215,312,360"/>
-<area shape="rect" id="node1" href="./GenericParameterTreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="5,209,323,365"/>
-<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="org.eclipse.jface.viewers.ITreeContentProvider" alt="" coords="40,11,288,156"/>
-<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="29,5,299,161"/>
-</map>

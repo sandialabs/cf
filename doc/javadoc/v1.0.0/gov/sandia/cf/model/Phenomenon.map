@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./IEntity.html" title="gov.sandia.cf.model.IEntity" alt="" coords="97,11,197,139"/>
-<area shape="rect" id="node1" href="./IEntity.html" title="&lt;TABLE&gt;" alt="" coords="86,5,207,144"/>
-<area shape="rect" id="node2_1" href="./Phenomenon.html" title="gov.sandia.cf.model.Phenomenon" alt="" coords="16,197,416,516"/>
-<area shape="rect" id="node2" href="./Phenomenon.html" title="&lt;TABLE&gt;" alt="" coords="5,192,427,521"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/java/io/Serializable.html" title="java.io.Serializable" alt="" coords="242,53,329,96"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/java/io/Serializable.html" title="&lt;TABLE&gt;" alt="" coords="231,48,339,101"/>
-</map>

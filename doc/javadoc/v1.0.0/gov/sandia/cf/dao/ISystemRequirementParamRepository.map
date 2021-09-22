@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ICRUDRepository.html" title="gov.sandia.cf.dao.ICRUDRepository" alt="" coords="16,11,536,277"/>
-<area shape="rect" id="node1" href="./ICRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,547,283"/>
-<area shape="rect" id="node3_1" href="./ISystemRequirementParamRepository.html" title="gov.sandia.cf.dao.ISystemRequirementParamRepository" alt="" coords="156,336,396,379"/>
-<area shape="rect" id="node3" href="./ISystemRequirementParamRepository.html" title="&lt;TABLE&gt;" alt="" coords="145,331,407,384"/>
-<area shape="rect" id="node2_2" href="./impl/SystemRequirementParamRepository.html" title="gov.sandia.cf.dao.impl.SystemRequirementParamRepository" alt="" coords="58,437,494,531"/>
-<area shape="rect" id="node2" href="./impl/SystemRequirementParamRepository.html" title="&lt;TABLE&gt;" alt="" coords="47,432,505,536"/>
-</map>

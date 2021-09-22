@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../../dialogs/GenericCFSmallDialog.html" title="gov.sandia.cf.parts.dialogs.GenericCFSmallDialog" alt="" coords="83,11,463,87"/>
-<area shape="rect" id="node1" href="../../dialogs/GenericCFSmallDialog.html" title="&lt;TABLE&gt;" alt="" coords="72,5,473,92"/>
-<area shape="rect" id="node2_1" href="./PCMMEvidenceViewDialog.html" title="gov.sandia.cf.parts.ui.pcmm.PCMMEvidenceViewDialog" alt="" coords="16,145,529,256"/>
-<area shape="rect" id="node2" href="./PCMMEvidenceViewDialog.html" title="&lt;TABLE&gt;" alt="" coords="5,140,540,261"/>
-</map>

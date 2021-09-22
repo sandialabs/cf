@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ColumnViewerSupport.html" title="gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport" alt="" coords="72,197,433,360"/>
-<area shape="rect" id="node1" href="./ColumnViewerSupport.html" title="&lt;TABLE&gt;" alt="" coords="61,192,444,365"/>
-<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/swt/widgets/Listener.html" title="org.eclipse.swt.widgets.Listener" alt="" coords="16,28,196,121"/>
-<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/swt/widgets/Listener.html" title="&lt;TABLE&gt;" alt="" coords="5,23,207,127"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ICellModifier.html" title="org.eclipse.jface.viewers.ICellModifier" alt="" coords="241,11,557,139"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ICellModifier.html" title="&lt;TABLE&gt;" alt="" coords="231,5,568,144"/>
-</map>

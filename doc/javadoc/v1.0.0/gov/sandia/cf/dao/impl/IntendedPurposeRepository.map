@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../AbstractCRUDRepository.html" title="gov.sandia.cf.dao.AbstractCRUDRepository" alt="" coords="16,11,537,364"/>
-<area shape="rect" id="node1" href="../AbstractCRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,548,369"/>
-<area shape="rect" id="node3_1" href="./IntendedPurposeRepository.html" title="gov.sandia.cf.dao.impl.IntendedPurposeRepository" alt="" coords="310,423,686,533"/>
-<area shape="rect" id="node3" href="./IntendedPurposeRepository.html" title="&lt;TABLE&gt;" alt="" coords="299,417,697,539"/>
-<area shape="rect" id="node2_2" href="../IIntendedPurposeRepository.html" title="gov.sandia.cf.dao.IIntendedPurposeRepository" alt="" coords="583,141,858,234"/>
-<area shape="rect" id="node2" href="../IIntendedPurposeRepository.html" title="&lt;TABLE&gt;" alt="" coords="573,135,869,239"/>
-</map>

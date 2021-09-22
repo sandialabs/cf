@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../AViewManager.html" title="gov.sandia.cf.parts.ui.AViewManager" alt="" coords="16,561,471,1019"/>
-<area shape="rect" id="node1" href="../AViewManager.html" title="&lt;TABLE&gt;" alt="" coords="5,556,481,1024"/>
-<area shape="rect" id="node3_1" href="./PIRTViewManager.html" title="gov.sandia.cf.parts.ui.pirt.PIRTViewManager" alt="" coords="133,1077,641,1535"/>
-<area shape="rect" id="node3" href="./PIRTViewManager.html" title="&lt;TABLE&gt;" alt="" coords="123,1072,652,1540"/>
-<area shape="rect" id="node2_2" href="../IViewManager.html" title="gov.sandia.cf.parts.ui.IViewManager" alt="" coords="133,11,641,503"/>
-<area shape="rect" id="node2" href="../IViewManager.html" title="&lt;TABLE&gt;" alt="" coords="123,5,652,508"/>
-</map>
