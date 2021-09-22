@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./GenericValue.html" title="gov.sandia.cf.model.GenericValue" alt="" coords="16,11,339,364"/>
-<area shape="rect" id="node1" href="./GenericValue.html" title="&lt;TABLE&gt;" alt="" coords="5,5,349,369"/>
-<area shape="rect" id="node3_1" href="./SystemRequirementValue.html" title="gov.sandia.cf.model.SystemRequirementValue" alt="" coords="173,423,517,603"/>
-<area shape="rect" id="node3" href="./SystemRequirementValue.html" title="&lt;TABLE&gt;" alt="" coords="163,417,528,608"/>
-<area shape="rect" id="node2_2" href="./IGenericTableValue.html" title="gov.sandia.cf.model.IGenericTableValue" alt="" coords="385,115,642,260"/>
-<area shape="rect" id="node2" href="./IGenericTableValue.html" title="&lt;TABLE&gt;" alt="" coords="374,109,653,265"/>
-</map>

@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./PIRTPhenomenonImportanceCellEditor.html" title="gov.sandia.cf.parts.ui.pirt.editors.PIRTPhenomenonImportanceCellEditor" alt="" coords="101,163,739,256"/>
-<area shape="rect" id="node1" href="./PIRTPhenomenonImportanceCellEditor.html" title="&lt;TABLE&gt;" alt="" coords="91,157,749,261"/>
-<area shape="rect" id="node2_1" href="./PIRTPhenomenonLevelCellEditor.html" title="gov.sandia.cf.parts.ui.pirt.editors.PIRTPhenomenonLevelCellEditor" alt="" coords="16,315,824,391"/>
-<area shape="rect" id="node2" href="./PIRTPhenomenonLevelCellEditor.html" title="&lt;TABLE&gt;" alt="" coords="5,309,835,396"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/EditingSupport.html" title="org.eclipse.jface.viewers.EditingSupport" alt="" coords="298,11,542,104"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/EditingSupport.html" title="&lt;TABLE&gt;" alt="" coords="287,5,553,109"/>
-</map>

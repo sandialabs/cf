@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ICRUDRepository.html" title="gov.sandia.cf.dao.ICRUDRepository" alt="" coords="16,11,536,277"/>
-<area shape="rect" id="node1" href="./ICRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,547,283"/>
-<area shape="rect" id="node3_1" href="./IPIRTAdequacyColumnGuidelineRepository.html" title="gov.sandia.cf.dao.IPIRTAdequacyColumnGuidelineRepository" alt="" coords="142,336,410,379"/>
-<area shape="rect" id="node3" href="./IPIRTAdequacyColumnGuidelineRepository.html" title="&lt;TABLE&gt;" alt="" coords="131,331,421,384"/>
-<area shape="rect" id="node2_2" href="./impl/PIRTAdequacyColumnGuidelineRepository.html" title="gov.sandia.cf.dao.impl.PIRTAdequacyColumnGuidelineRepository" alt="" coords="44,437,508,531"/>
-<area shape="rect" id="node2" href="./impl/PIRTAdequacyColumnGuidelineRepository.html" title="&lt;TABLE&gt;" alt="" coords="33,432,519,536"/>
-</map>

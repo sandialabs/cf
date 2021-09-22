@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./AHelperWidget.html" title="gov.sandia.cf.parts.widgets.AHelperWidget" alt="" coords="227,11,577,277"/>
-<area shape="rect" id="node1" href="./AHelperWidget.html" title="&lt;TABLE&gt;" alt="" coords="217,5,587,283"/>
-<area shape="rect" id="node3_1" href="./SelectWidget.html" title="gov.sandia.cf.parts.widgets.SelectWidget" alt="" coords="16,336,788,568"/>
-<area shape="rect" id="node3" href="./SelectWidget.html" title="&lt;TABLE&gt;" alt="" coords="5,331,799,573"/>
-<area shape="rect" id="node2_2" href="./PCMMElementSelectorWidget.html" title="gov.sandia.cf.parts.widgets.PCMMElementSelectorWidget" alt="" coords="45,627,759,720"/>
-<area shape="rect" id="node2" href="./PCMMElementSelectorWidget.html" title="&lt;TABLE&gt;" alt="" coords="35,621,769,725"/>
-</map>

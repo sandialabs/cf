@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./BreadcrumbItemParts.html" title="gov.sandia.cf.parts.model.BreadcrumbItemParts" alt="" coords="16,71,255,217"/>
-<area shape="rect" id="node1" href="./BreadcrumbItemParts.html" title="&lt;TABLE&gt;" alt="" coords="5,66,265,222"/>
-<area shape="rect" id="node2_1" href="./HeaderParts.html" title="gov.sandia.cf.parts.model.HeaderParts" alt="" coords="300,11,624,277"/>
-<area shape="rect" id="node2" href="./HeaderParts.html" title="&lt;TABLE&gt;" alt="" coords="289,5,635,283"/>
-<area shape="rect" id="node3_2" href="./QoIHeaderParts.html" title="gov.sandia.cf.parts.model.QoIHeaderParts" alt="" coords="245,336,679,585"/>
-<area shape="rect" id="node3" href="./QoIHeaderParts.html" title="&lt;TABLE&gt;" alt="" coords="234,331,690,591"/>
-</map>

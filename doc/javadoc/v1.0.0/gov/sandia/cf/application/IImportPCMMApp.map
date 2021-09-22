@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./IApplication.html" title="gov.sandia.cf.application.IApplication" alt="" coords="607,11,879,139"/>
-<area shape="rect" id="node1" href="./IApplication.html" title="&lt;TABLE&gt;" alt="" coords="597,5,890,144"/>
-<area shape="rect" id="node2_1" href="./IImportPCMMApp.html" title="gov.sandia.cf.application.IImportPCMMApp" alt="" coords="58,197,1429,551"/>
-<area shape="rect" id="node2" href="./IImportPCMMApp.html" title="&lt;TABLE&gt;" alt="" coords="47,192,1439,556"/>
-<area shape="rect" id="node3_2" href="./impl/ImportPCMMApp.html" title="gov.sandia.cf.application.impl.ImportPCMMApp" alt="" coords="16,609,1471,980"/>
-<area shape="rect" id="node3" href="./impl/ImportPCMMApp.html" title="&lt;TABLE&gt;" alt="" coords="5,604,1481,985"/>
-</map>

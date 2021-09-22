@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../AbstractCRUDRepository.html" title="gov.sandia.cf.dao.AbstractCRUDRepository" alt="" coords="16,11,537,364"/>
-<area shape="rect" id="node1" href="../AbstractCRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,548,369"/>
-<area shape="rect" id="node2_1" href="./UncertaintyValueRepository.html" title="gov.sandia.cf.dao.impl.UncertaintyValueRepository" alt="" coords="286,423,665,516"/>
-<area shape="rect" id="node2" href="./UncertaintyValueRepository.html" title="&lt;TABLE&gt;" alt="" coords="275,417,675,521"/>
-<area shape="rect" id="node3_2" href="../IUncertaintyValueRepository.html" title="gov.sandia.cf.dao.IUncertaintyValueRepository" alt="" coords="583,166,767,209"/>
-<area shape="rect" id="node3" href="../IUncertaintyValueRepository.html" title="&lt;TABLE&gt;" alt="" coords="573,161,778,214"/>
-</map>

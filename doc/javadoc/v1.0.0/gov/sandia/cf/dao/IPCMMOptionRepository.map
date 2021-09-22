@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ICRUDRepository.html" title="gov.sandia.cf.dao.ICRUDRepository" alt="" coords="16,11,536,277"/>
-<area shape="rect" id="node1" href="./ICRUDRepository.html" title="&lt;TABLE&gt;" alt="" coords="5,5,547,283"/>
-<area shape="rect" id="node3_1" href="./IPCMMOptionRepository.html" title="gov.sandia.cf.dao.IPCMMOptionRepository" alt="" coords="195,336,357,379"/>
-<area shape="rect" id="node3" href="./IPCMMOptionRepository.html" title="&lt;TABLE&gt;" alt="" coords="184,331,368,384"/>
-<area shape="rect" id="node2_2" href="./impl/PCMMOptionRepository.html" title="gov.sandia.cf.dao.impl.PCMMOptionRepository" alt="" coords="97,437,455,531"/>
-<area shape="rect" id="node2" href="./impl/PCMMOptionRepository.html" title="&lt;TABLE&gt;" alt="" coords="87,432,465,536"/>
-</map>

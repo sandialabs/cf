@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="../AApplication.html" title="gov.sandia.cf.application.AApplication" alt="" coords="23,37,307,182"/>
-<area shape="rect" id="node1" href="../AApplication.html" title="&lt;TABLE&gt;" alt="" coords="12,31,317,187"/>
-<area shape="rect" id="node3_1" href="./ImportUncertaintyApp.html" title="gov.sandia.cf.application.impl.ImportUncertaintyApp" alt="" coords="16,267,1020,481"/>
-<area shape="rect" id="node3" href="./ImportUncertaintyApp.html" title="&lt;TABLE&gt;" alt="" coords="5,261,1031,487"/>
-<area shape="rect" id="node2_2" href="../IImportUncertaintyApp.html" title="gov.sandia.cf.application.IImportUncertaintyApp" alt="" coords="353,11,1393,208"/>
-<area shape="rect" id="node2" href="../IImportUncertaintyApp.html" title="&lt;TABLE&gt;" alt="" coords="342,5,1403,213"/>
-</map>

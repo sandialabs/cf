@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./ImportChangePCMMPlanningQuestionTreeContentProvider.html" title="gov.sandia.cf.parts.dialogs.importation.ImportChangePCMMPlanningQuestionTreeContentProvider" alt="" coords="16,419,393,564"/>
-<area shape="rect" id="node1" href="./ImportChangePCMMPlanningQuestionTreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="5,413,404,569"/>
-<area shape="rect" id="node2_1" href="./ImportChangeTreeContentProvider.html" title="gov.sandia.cf.parts.dialogs.importation.ImportChangeTreeContentProvider" alt="" coords="57,215,353,360"/>
-<area shape="rect" id="node2" href="./ImportChangeTreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="46,209,363,365"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="org.eclipse.jface.viewers.ITreeContentProvider" alt="" coords="81,11,329,156"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ITreeContentProvider.html" title="&lt;TABLE&gt;" alt="" coords="70,5,339,161"/>
-</map>
