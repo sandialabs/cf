@@ -38,12 +38,14 @@ do
 		mkdir -p packages/$version/
 		echo "Unzipping build package artifacts to packages/$version/"
 		unzip -q $P2_REPO_FILE_PREFIX.$version.zip -d packages/$version/
-		echo "Removing build package $P2_REPO_FILE_PREFIX.$version.zip"
-		rm $P2_REPO_FILE_PREFIX.$version.zip
 		# execute the first time to add the latest package into the 'latest' folder
 		if [[ $FIRST == "true" ]]; then
+			echo "Creating latest package for $P2_REPO_FILE_PREFIX.$version.zip"
 			cp -R packages/$version packages/latest
+			cp $P2_REPO_FILE_PREFIX.$version.zip packages/latest/$P2_REPO_FILE_PREFIX.latest.zip
 		fi
+		echo "Removing build package $P2_REPO_FILE_PREFIX.$version.zip"
+		rm $P2_REPO_FILE_PREFIX.$version.zip
 	else
 		echo "Impossible to get build package artifact at $PACKAGEURL"
 	fi

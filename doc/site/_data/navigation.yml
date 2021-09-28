@@ -5,7 +5,7 @@
   sublink:
   - name: Installing
     link: /installing.html
-  - name: Packages
+  - name: Downloads
     link: /packages/
 - name: Developing
   link:

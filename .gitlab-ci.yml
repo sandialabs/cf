@@ -294,7 +294,7 @@ pages:
     - echo "==================== [publish] Build documentation ====================="
     - echo "==================== [publish] Extracting CF Packages =================="  
     - . ci/doc/site/unzip-packages.sh doc/site/
-    - echo "==================== [publish] Generating CF site pages to https://credibilityframework.gitlab.io/cf"
+    - echo "==================== [publish] Generating CF site pages to $CI_PAGES_URL"
     - . ci/doc/site/generate-pages.sh doc/site/
     - echo "==================== [publish] Creating Jekyll site ===================="
     - cd doc/site/

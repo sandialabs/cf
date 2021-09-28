@@ -38,5 +38,3 @@ Consequently, the Credibility Framework under the Uncertainty Quantification sub
 - `PIRT`: `P`henomena `I`dentification `R`anking `T`able
 - `QoI`: `Q`uantity `o`f `I`nterest
 - `PCMM`: `P`redictive `C`apability `M`aturity `M`odel
-
-## Contacts
