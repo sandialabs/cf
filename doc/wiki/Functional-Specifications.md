@@ -59,15 +59,15 @@ It is possible to configure the cf plugin with the preference page under ```Ecli
 
 ### Global Preferences
 
-![image](uploads/2aad0a7682c1907da840f9ecbc958754/image.png)
+![image](uploads/49a292cb60a565260d5284bf4b3c10de/image.png)
 
 - `Display Credibility Framework Version Number`: If set to true (default value), this option displays the version number in the bottom left corner of the Home view.
 
-![image](uploads/51dbbe81f07709b49abd92e8b454c1ab/image.png)
+![image](uploads/f9d53a83a7b0df02ca01dbaf6095d4bf/image.png)
 
 - `Display Credibility File Version Origin Number`: If set to true (default value), this option displays the CF file version origin number in the bottom right corner of the Home view.
 
-![image](uploads/4b26927b5d3786fdff96f1c0caa2599f/image.png)
+![image](uploads/1ccdd6a74b0d7ad3a133fc9a50caeb5e/image.png)
 
 - `Python executable path`: to execute python scripts (used for reporting)
 - `ARG executable path`: the ARG installation path (used for reporting)
@@ -77,11 +77,11 @@ It is possible to configure the cf plugin with the preference page under ```Ecli
 
 ### Developer Options
 
-![image](uploads/350f56f70b81ced0e151681f28216c0f/image.png)
+![image](uploads/22ec0cbb209322c00a96b2fadab0c4e7/image.png)
 
 - Enable `Inline Word Document` option in the Report View: enable the word document inlining option into the [Report View](#credibility-report). The option will be available here:
 
-![image](/uploads/539654389d249a5de742a73b3110f44a/image.png)
+![image](uploads/4f85457eac98a71406c8887fa2e762e2/image.png)
 
 - Enable `Concurrency Support` allows the CF plugin to create/open web projects and connect to a remote server
 
@@ -99,15 +99,15 @@ If you don't have an existing Eclipse project please create one with section [Ho
 If you don't have an existing project, create one:
 - In the menu, click on `File > New > Project`:
 
-![image](uploads/601d15950fcb30bcb090fac02925b9a1/image.png)
+![image](uploads/1d798e43359a58e9e0c7f9beab0ffc49/image.png)
 
 - Select `General > Project`:
 
-![image](uploads/26df7546e164695c70b0c118e6b813b3/image.png)
+![image](uploads/194372b2eae73129a56922548a5e8a3f/image.png)
 
 - Enter a **name** for your project and click `Finish`:
 
-![image](uploads/94fd7161b06ed698811231b52bdecda8/image.png)
+![image](uploads/58dbeb136928007f76d55f686725d689/image.png)
 
 ### New Credibility Process
 [Go back to Contents](#contents)
@@ -116,19 +116,18 @@ Create the Credibility Process for an existing Eclipse project:
 
 - **Right-click** on the desired project, the plugin should provide a credibility creation wizard. The plugin must use Eclipse current interface to create a new project.
 
-![2019-07-23_fspecs-new-cf-project](uploads/4dd810887c804cfafd35b5b179954d16/2019-07-23_fspecs-new-cf-project.png)
+![image](uploads/f97daab3ef8bb1ea19f21550bac63f46/image.png)
 
-#### Credibility Process
+- Select `Credibility Process` under `Credibility Framework` section:
 
-Select `Credibility Process` under `Credibility Framework` section:
-
-![Annotation_2020-03-17_181307](uploads/792f94bdd231796251d7fbeeb180d72f/Annotation_2020-03-17_181307.png)
+![image](uploads/a5aec002c9321d5ad69303f2f717071b/image.png)
 
 During creation, the interface should ask the user to complete the following information:
 - `Parent folder`: the file location in the project explorer.
 - `File base name`: the name of the credibility process (file extension will be `<filename>.cf` and is automatically generated).
 
-![Annotation_2020-03-17_180905](uploads/2a045f24c294c6f08a81cd299227c90d/Annotation_2020-03-17_180905.png)
+![image](uploads/9c5365fa6b1882de3ba2378d4f5f0390/image.png)
+
 
 #### Credibility Setup
 
@@ -140,19 +139,20 @@ This dialog has two different pages:
 
 Opened by default, the configuration directory location will be asked. The folder will be parsed searching for configuration files. By default, the found files will be automatically associated to the corresponding feature:
 
-![image](uploads/bdc1f67d7eac8807e6dff3dc3e3e27f8/image.png)
+![image](uploads/cc561da7d70c5b36b2ce5cb3efc196fe/image.png)
 
 If there is multiple files available for one feature, a drop-down combo will be displayed with different options:
 
-![image](uploads/5f085e2f45069d69c68a3d6a09f1fd5f/image.png)
+![image](uploads/17691a0d2a09e5ca56f83deb8a0bc326/image.png)
 
 - `Advanced`:
 
 All configuration files location will be asked:
 
-![image](uploads/acbef0dfc57bace60cf37a028236a39f/image.png)
+![image](uploads/d89cf10975cb5ec1557a0cfaab60ee0b/image.png)
 
 - `Generate Credibility Evidence Folder Structure`: this checkbox is checked by default. It enables the generation of the default Credibility Evidence Folder Structure at the same location as the .cf file. See section [Credibility Evidence Folder Structure](#credibility-evidence-folder-structure) for further information.
+
 
 Just after creation, the new project wiil be opened in a new editor.
 
@@ -165,11 +165,11 @@ This option enables the generation of the default Credibility Evidence Folder St
 
 - **Right-click** a project or folder in the project explorer and select `Credibility Evidence Folder Structure`, then `Next`:
 
-![image](uploads/913d88d73ef86b5c70f03eca0ac98a44/image.png)
+![image](uploads/c36680fe07d618d1772074e1a4bdb39f/image.png)
 
 - Select the **location** and click `Finish`:
 
-![image](uploads/b2fd3e493b073970068ba11bdda4f26b/image.png)
+![image](uploads/2b0eeb728aa59f556a128c5d1aab3ed2/image.png)
 
 The folder structure will be generated under the location you selected before.
 
@@ -186,23 +186,23 @@ The credibility editor manages a temporary folder to store the processing data. 
 
 After each change, the editor indicates there is unsaved data by adding a `\*` beside the editor name and with a yellow label `Not saved` in the top left corner:
 
-![image](uploads/1a2a748bbc7f0b63d4d33daaec030fae/image.png)
+![image](uploads/5a52fc64d92eed5a9a779ac6d49f4818/image.png)
 
 The user has to save the editor to keep the modifications across sessions by clicking the `Save` button in the Credibility Editor:
 
-![image](uploads/6cb1792f2a83581443b40c3af7abe021/image.png)
+![image](uploads/99920c7594e53ae20a7db14db48fe5ac/image.png)
 
 Or by clicking in the Eclipse menu `File > Save`:
 
-![image](uploads/9ba43af8a4166d4dd3e030c1ed3d895b/image.png)
+![image](uploads/469291df0ec9f17bb79a3131ac52952b/image.png)
 
 If the user **closes the editor with unsaved modifications**, the editor **prompts the user to save** or quit the editor:
 
-![image](uploads/cb5dc98c2534d5da3cd690180ddc63a7/image.png)
+![image](uploads/4a9a9fd86804aee7f8b63b38fb3ec490/image.png)
 
 The editor is saved once the `\*` character disapears aside the file name and when the green `Up to date` label is displayed in the top left corner:
 
-![image](uploads/8ac4a7116b1379eb2f0f83d5363ac62c/image.png)
+![image](uploads/73a3c04b8ffd23e0ef906bbcf7156c65/image.png)
 
 #### Recover after a crash
 
@@ -210,7 +210,7 @@ If the Eclipse based application crashed, a temporary folder will survive in the
 
 When the user opens the `<filename>.cf` file, if the folder is in a recoverable state, the plugin asks the user to recover data or not:
 
-![image](uploads/a05955aac1d6c86b3dab4464f96b1588/image.png)
+![image](uploads/8a29ca5eafadb1c980eefb5f18864c4f/image.png)
 
 If the folder is not recoverable, the plugin will delete it and open the `<filename>.cf` file data.
 
@@ -219,14 +219,13 @@ If the folder is not recoverable, the plugin will delete it and open the `<filen
 
 From all views (except the Home View), the user can navigate by clicking on an element in the `breadcrumb` on top of the view:
 
-![image](uploads/b9b027e6b3829aa1b4386ec027dc4e35/image.png)
+![image](uploads/6e374b61e7d40b391982eccd42216446/image.png)
 
 The `breadcrumb` and title changes depending of the current view. The current view item is selected (grayed out).
 
-![image](uploads/3b8f4035d170e593f42a664610b5033d/image.png)
+![image](uploads/0236397ddf63fac66faac89f6d645a8e/image.png)
 
-![image](uploads/11bd81ce3fdb9d3cdf0aa329cc0ab046/image.png)
-
+![image](uploads/50be70f549acdd6b6a05459a19346504/image.png)
 
 ## Home View
 [Go back to Contents](#contents)
@@ -247,7 +246,7 @@ The available features are:
 
 The home page must be opened by clicking on a credibility file (`<filename>.cf` file) in the eclipse project explorer.
 
-![image](uploads/0108dfdabe80b0d703e246378512c70c/image.png)
+![image](uploads/6c8b80e7b34291783ae1c1d512a2bec5/image.png)
 
 ### Planning card
 
@@ -263,7 +262,7 @@ The buttons trigger the following actions:
 - Click on the card: Opens the associated feature
 - `Informations`: Opens the contextual Help to describe the Planning tools:
 
-![image](uploads/f44d792dec6907b19447eae5b21511d5/image.png)
+![image](uploads/66ebf57a7f544c052eb263c74f088c44/image.png)
 
 ### PIRT card
 
@@ -278,7 +277,7 @@ The buttons trigger the following actions:
 - `Open`: Opens the PIRT home view (see section [Phenomena, PIRT](#phenomena-pirt))
 - `Informations`: Opens the contextual Help to describe PIRT:
 
-![image](uploads/31fdf5e8648d02353234d21507248b3f/image.png)
+![image](uploads/373f445302c9925214f847391b8a6a0e/image.png)
 
 ### PCMM card
 
@@ -295,7 +294,7 @@ The buttons trigger the following actions:
 - `Open`: Opens the PCMM home view (see section [Credibility, PCMM](#credibility-pcmm))
 - `Informations`: Opens the contextual Help to describe PCMM:
 
-![image](uploads/042157dd8d4ab6a4acba0189fbf99d38/image.png)
+![image](uploads/5648406bf7b6af2d536de93b104bee8a/image.png)
 
 ### Communication card
 
@@ -307,7 +306,7 @@ The buttons trigger the following actions:
 - Click on the card: Opens the associated feature
 - `Informations`: Opens the contextual Help to describe the card:
 
-![image](uploads/4529be96707468456feb8f28f8a5d974/image.png)
+![image](uploads/f7361b1ffd309478b12557a5d30a1b93/image.png)
 
 ## Planning
 [Go back to Contents](#contents)
@@ -326,41 +325,41 @@ The available tools are:
 
 The ModSim Intended Purpose goal is to firstly describe the project and its purpose. A reference can be associated. 
 
-![image](uploads/104137f3e5818c8ca3bed36f2fe80c54/image.png)
+![image](uploads/bbf231c7f4ec053970a3f81170f598b9/image.png)
 
 ### System Requirements
 
 The System Requirements goal is to enumerate and describe the initial requirements of the project. This is a **prerequisite to Quantities of Interest**.
 
-![image](uploads/f5ab0abab7db493e3ad33e53070f13c7/image.png)
+![image](uploads/97ed1c55d20c83b8d12608a533159e57/image.png)
 
 There is no limit in the number of groups, and sub-requirements:
 
-![image](uploads/064fac75a43bb77c6a452e5c902e5b10/image.png)
+![image](uploads/403b176fa4386528aecf7f83b3550363/image.png)
 
 #### System Requirements Buttons and Actions
 
 ##### Add Requirement Group
 
-![image](uploads/67cff536075fff3cf67d57d8d4e25bcc/image.png)
+![image](uploads/fd3d25c79d8d28c287664a1c083f0bae/image.png)
 
 This button opens a new dialog to add a requirement group. The configured fields will be available into the dialog:
 
-![image](uploads/ed21143e8c1e798ecf0ec8f43dab6868/image.png)
+![image](uploads/4307be61c49b5a9dc0f48833066dada1/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to Home page (see [Home View](#home-view)).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/06f5c8848621e8713894df2bb4f2e5e3/image.png)
 
 It opens the contextual help for Requirements view:
 
-![image](uploads/a1345d014c5580f5dba3e369c912b5a1/image.png)
+![image](uploads/3b3043f7d8b5b82c49ab709e16e60810/image.png)
 
 #### System Requirements Table Columns
 
@@ -375,43 +374,43 @@ The other columns are managed with the configuration files and can be removed:
 
 #### System Requirements Table Actions
 
-![image](uploads/1dcc5d5749aea3fa2316b1323ad602a6/image.png)
+![image](uploads/49b2137d4465ada5c6b110dd757712e4/image.png)
 
 ##### Add System Requirement
 
 The user can add a requirement under an existing requirement group or a requirement by clicking on the `Add` button:
 
-![image](uploads/9a24e67b0f5fd7b8a0722d2dc99094dd/image.png)
+![image](uploads/a9216d12b2106183fd8b005294ea1acc/image.png)
 
 A new dialog will popup and ask the user to input the necessary informations:
 
-![image](uploads/2bfe2fc99066abaa85dc789c716a157a/image.png)
+![image](uploads/6a303a85d88aee05bf61ba337a0b757b/image.png)
 
 ##### Open System Requirement References
 
 The `Source Requirement Reference` field stores a link to the source document associated. Clicking on the `Open` button will open this document (url, document inside the workspace):
 
-![image](uploads/5011b304ebe94ee31f53d86071ac586e/image.png)
+![image](uploads/06b9d30c67f6f4efc9f9b2a07c3fb5e2/image.png)
 
 ##### View System Requirement
 
 It is possible to view the requirement informations by clicking on the `View` button:
 
-![image](uploads/52c3151b29ef363598a00b6c93832c07/image.png)
+![image](uploads/fa145cd49dd8e57346e0e575ab882e1b/image.png)
 
 A new dialog will popup with the requirement informations in read-only mode:
 
-![image](uploads/ae0f1ea7ca43c807a7eb77a70dd1b6af/image.png)
+![image](uploads/513e8737dac54a21ce7996b1c07247a3/image.png)
 
 ##### Edit System Requirement
 
 To edit the requirement informations click the `Edit` button:
 
-![image](uploads/34c5643f296f9e75801fdd03046cc9e8/image.png)
+![image](uploads/2bad758ee684c248b0a5d9b2af246b82/image.png)
 
 A new dialog will popup in edition mode:
 
-![image](uploads/47b8637615520ba83afa691f3026a19f/image.png)
+![image](uploads/e019f1397bd8ecd7bbe0fc3da7e1854a/image.png)
 
 Click `Update` to save changes.
 
@@ -419,11 +418,11 @@ Click `Update` to save changes.
 
 To delete a requirement click the `Delete` button:
 
-![image](uploads/cfee80c98f67d44cc4a1a7acdebfe958/image.png)
+![image](uploads/736a12bafe0225af1bc6f44872e0cd2f/image.png)
 
 A confirm box will popup:
 
-![image](uploads/9d437bfcf5dadf351ef0348ebc58dabd/image.png)
+![image](uploads/063e8190e81722ea5b818e15892d841c/image.png)
 
 All the requirements and sub-requirements associated will be deleted.
 
@@ -435,33 +434,33 @@ The definition of the PIRT tables will be done later in PIRT section (see [QoI H
 
 System requirements defintion is **a pre-requisite** to QoI Planner.
 
-![image](uploads/f679514a671873e3807440b07ea48c9b/image.png)
+![image](uploads/80c44a1d376d282cca9ec6b316efb784/image.png)
 
 #### QoI Buttons and Actions
 
 ##### Add Quantity of Interest
 
-![image](uploads/ab853fa377c8acb9e510c200d280a45b/image.png)
+![image](uploads/ac26373dd6d8efeb2bfe83f3e1f7a669/image.png)
 
 This button opens a new dialog to add a quantity of interest. The QoI planner fields will only be available in this tool. The PIRT view of the QoI is more PIRT table oriented. The fields are configurable with the configuration process:
 
-![image](uploads/51f3bb2ae6b162f224a6f85f4a27d750/image.png)
+![image](uploads/bd91cd970ed338ed0da65165966b8756/image.png)
 
 The **QoI name must be unique.**
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to Home page (see [Home View](#home-view)).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/3122311027699f6f40b6ed9c2063021a/image.png)
 
 It opens the contextual help for QoI Planner view:
 
-![image](uploads/fd60ecae316314da458faabf3d87735a/image.png)
+![image](uploads/3420abba2056f1836198d7c368042a4b/image.png)
 
 #### QoI Table Columns
 
@@ -479,27 +478,27 @@ The other columns are managed with the configuration files and can be removed:
 
 #### QoI Table Actions
 
-![image](uploads/aa8229263d7c00349b21c416ed33f0c8/image.png)
+![image](uploads/4a1fff9e7cb2323df80e2669bb47e6c1/image.png)
 
 ##### View Quantity of Interest
 
 It is possible to view the QoI informations by clicking on the `View` button:
 
-![image](uploads/52c3151b29ef363598a00b6c93832c07/image.png)
+![image](uploads/1731be60956677d4d67a6e7de00a4657/image.png)
 
 A new dialog will popup with the QoI informations in read-only mode:
 
-![image](uploads/3541d00cc8bd5ab76e16d52703641db3/image.png)
+![image](uploads/a30c335628f43c9f716d63c7c585899b/image.png)
 
 ##### Edit Quantity of Interest
 
 To edit the QoI informations click the `Edit` button:
 
-![image](uploads/34c5643f296f9e75801fdd03046cc9e8/image.png)
+![image](uploads/e889b23d5f2a6345002ff6238a8c634f/image.png)
 
 A new dialog will popup in edition mode:
 
-![image](uploads/490529e2ed4b0ac78d9e3fbaf295cc99/image.png)
+![image](uploads/e058ec5d93214c220946ad828496c729/image.png)
 
 Click `Update` to save changes.
 
@@ -509,15 +508,15 @@ A tagged QoI is only visible and can not be edited.
 
 The user can make a copy of the QoI by clicking on the `Copy` button:
 
-![image](uploads/62638bec663871d21c692d4b0132cadc/image.png)
+![image](uploads/201c05cac68f9d6ccc3371e7a2aa48fb/image.png)
 
 A confirmation box will popup, click `Ok`:
 
-![image](uploads/e4a1afdc9e1598988e22c33278188120/image.png)
+![image](uploads/f09d3305b834c44650b5aa9c2a693ed2/image.png)
 
 A new dialog will popup and ask the user to input the necessary informations:
 
-![image](uploads/a19bb9f62f4bafe3b96d0024af9f81d7/image.png)
+![image](uploads/3374aa0c557d44aa76fa6af0e91a9d14/image.png)
 
 The **QoI name must be unique.**
 
@@ -528,19 +527,19 @@ A tagged QoI can not be copied.
 The user can tag a QoI. A tag is a copy that can not be edited. It is used to kept the state of a QoI. It helps the user to see the progress and take decision. Each associated phenomenon groups, phenomena and criteria will be copied and tagged (see [Tag QoI](#tag-qoi)). 
 To tag a QoI click on the `Tag` button:
 
-![image](uploads/9a24e67b0f5fd7b8a0722d2dc99094dd/image.png)
+![image](uploads/63e6ed55b1358e80d3dd0df2861d3d05/image.png)
 
 A confirmation box will popup, click `Ok`:
 
-![image](uploads/75a526702c61b1515b7bada29c7814f7/image.png)
+![image](uploads/63f771655ae4fb79118e62a12790130f/image.png)
 
 A new dialog will popup asking the user to input a description for the tag:
 
-![image](uploads/4be2b009e80091dc8ecfe92ddc07e0a1/image.png)
+![image](uploads/e0bb4264a20aaf560852dcffab9e3f76/image.png)
 
 A succes box will be displayed to confirm the tag operation:
 
-![image](uploads/77ac538ec9205166b84b779c6fc375d2/image.png)
+![image](uploads/3e20262ca591362d3907a92049b19a86/image.png)
 
 A tagged QoI can not be tagged again.
 
@@ -548,11 +547,11 @@ A tagged QoI can not be tagged again.
 
 To delete a QoI click the `Delete` button:
 
-![image](uploads/cfee80c98f67d44cc4a1a7acdebfe958/image.png)
+![image](uploads/b68a94d0b71ac40af1988bef41855edd/image.png)
 
 A confirm box will popup:
 
-![image](uploads/433bdbf868466e3e9887b3b6906197ef/image.png)
+![image](uploads/c583c88db2b0e23ddd6940b86898ce8c/image.png)
 
 If the user confirms deletion, the selected QoI is deleted with all the associated definition, ranking, phenomenon groups, phenomena and criteria. The associated tags will be deleted too.
 
@@ -560,31 +559,31 @@ If the user confirms deletion, the selected QoI is deleted with all the associat
 
 Uncertainty Inventory is a tool to define the known uncertainties of the current modSim and to associate its references. The current view lets you add groups and uncertainties.
 
-![image](uploads/20a8c78e280d198a45d00d2a03e9aca1/image.png)
+![image](uploads/b846575a207016d21388eb635edbc619/image.png)
 
 #### Uncertainty Buttons and Actions
 
 ##### Add Uncertainty Group
 
-![image](uploads/095cc0dd4b83d8dcf00b0f5f5b6a7c87/image.png)
+![image](uploads/e1033f061caaf0e3567b7c939f788e48/image.png)
 
 This button opens a new dialog to add an uncertainty group:
 
-![image](uploads/8943ad43ac3a13f59707e9f14b4cdec7/image.png)
+![image](uploads/fb6cdf56aadb995cc7de813f231c6d12/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to Home page (see [Home View](#home-view)).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/84aec3b741cf7c3a33248704c032fdd5/image.png)
 
 It opens the contextual help for Uncertainty view:
 
-![image](uploads/7a11729325b2912d82f4a288a1ff297d/image.png)
+![image](uploads/8b41683e0de2a2dd91a4c3150ad762ef/image.png)
 
 #### Uncertainty Table Columns
 
@@ -604,43 +603,43 @@ The other columns are managed with the configuration files and can be removed:
 
 #### Uncertainty Table Actions
 
-![image](uploads/d10e01cd136652fa22bd375a6139370e/image.png)
+![image](uploads/2b9e0f2db8a4d6bde2ad62053cb4c267/image.png)
 
 ##### Add Uncertainty
 
 The user can add an uncertainty under an existing uncertainty group by clicking on the `Add` button:
 
-![image](uploads/9a24e67b0f5fd7b8a0722d2dc99094dd/image.png)
+![image](uploads/4daee41e1f692aa1cd5d46683aec636b/image.png)
 
 A new dialog will popup and ask the user to input the necessary informations:
 
-![image](uploads/a5dbae6ce88113e5a9f64c6b5405198a/image.png)
+![image](uploads/0c2f16765518c8c69b63e5bfc96551ff/image.png)
 
 ##### Open Uncertainty
 
 The `References` field stores a link to a document associated to the uncertainty. Clicking on the `Open` button will open this document (url, document inside the workspace):
 
-![image](uploads/5011b304ebe94ee31f53d86071ac586e/image.png)
+![image](uploads/bbca3ba476df7dd397edece12bd9712d/image.png)
 
 ##### View Uncertainty
 
 It is possible to view the uncertainty informations by clicking on the `View` button:
 
-![image](uploads/52c3151b29ef363598a00b6c93832c07/image.png)
+![image](uploads/6d630592e854a8c20fed882159908aa4/image.png)
 
 A new dialog will popup with the uncertainty informations in read-only mode:
 
-![image](uploads/740a6cbcca62571293bfb229eeab2f13/image.png)
+![image](uploads/360ba554004f58ea29a866df099d3447/image.png)
 
 ##### Edit Uncertainty
 
 To edit the uncertainty or group informations click the `Edit` button:
 
-![image](uploads/34c5643f296f9e75801fdd03046cc9e8/image.png)
+![image](uploads/6ccd842a5f7b607b505deca805a5c857/image.png)
 
 A new dialog will popup in edition mode:
 
-![image](uploads/e5c49511b1b6b508061e27b1ff1c85a7/image.png)
+![image](uploads/c6bd346ff329e7ba647c87b5cbbffec4/image.png)
 
 Click `Update` to save changes.
 
@@ -648,11 +647,11 @@ Click `Update` to save changes.
 
 To delete an uncertainty or a group click the `Delete` button:
 
-![image](uploads/cfee80c98f67d44cc4a1a7acdebfe958/image.png)
+![image](uploads/7ffef679c92150b32739b765b3a78c23/image.png)
 
 A confirm box will popup:
 
-![image](uploads/ff881cc324145d1b0003208574897b0e/image.png)
+![image](uploads/1b958c8eab80601a164ee995e449aac1/image.png)
 
 For a group, all the associated uncertainties will be deleted.
 
@@ -661,7 +660,7 @@ For a group, all the associated uncertainties will be deleted.
 
 PCMM is a tool to help analysts to classify and assess evidence. The planning tool's goal is to prepare further  discussions and describe each element and/or sub-element with questions and predefined fields.
 
-![image](uploads/a24ed92b6afac16d6eaf9041d62a1517/image.png)
+![image](uploads/27a5be611f56ce688b9f6d070f36dd9e/image.png)
 
 #### PCMM Wheel
 
@@ -669,7 +668,7 @@ The PCMM wheel shows the different PCMM elements in one chart.
 
 To start planning, **click on a PCMM Element**.
 
-![image](uploads/28b33808c40e388309b1ebb86793c13d/image.png)
+![image](uploads/75fdb443cfca0d322bf9e6fd213bd54a/image.png)
 
 **Important**: This section requires a role to be defined for the user before it an be used.
 
@@ -677,7 +676,7 @@ If there is no role defined, the user is prompted to select a role (see [Change 
 
 **Important**: The PCMM Element PMMF (Physics and Material Model Fidelity) needs to define PIRT quantities of interest first:
 
-![image](uploads/a0dbba74bda5af4941633a0f0aa8c109/image.png)
+![image](uploads/6cf43332652107b7be84a0a2f38ea793/image.png)
 
 #### PCMM Planning Progress
 
@@ -691,7 +690,7 @@ A tag saves the state of the PCMM process at one point. By default, the tag `Lat
 
 A `Tags` part is available on the PCMM Home view, below the `Progress` one:
 
-![image](uploads/655552de279ed3939438188ccfca1321/image.png)
+![image](uploads/d0bd100689eb6b4e266feeccd592ddc2/image.png)
 
 Different actions are available for the tags. See how to:
 - [add a new Tag](#new-tag)
@@ -704,27 +703,27 @@ Different actions are available for the tags. See how to:
 
 In the top right corner, the user has to choose a role to start planning (see [Change PCMM Role](#change-pcmm-role)).
 
-![image](uploads/4f0069f1c6cd238e1d0798db3f4095e1/image.png)
+![image](uploads/5a4886e5c1745e1c5258e758e174c133/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to Home page (see [Home View](#home-view)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/814fb9d46a32f90f1fc33c921d5a264a/image.png)
 
 It opens the contextual help for the PCMM Planning view:
 
-![image](uploads/42448f5155948bebdee5e545021d5b19/image.png)
+![image](uploads/b93566d2d3edd3fb61e81afcb5845218/image.png)
 
 #### PCMM Planning Form
 
@@ -734,15 +733,15 @@ Depending of the project configuration, the rendering will change:
 
 **In default mode:** All the subelements associated to the element are displayed. 
 
-![image](uploads/7ec79d94d3758efbe6fd8879b496a333/image.png)
+![image](uploads/bf7102b6753fc1c040fa20b6e59ca918/image.png)
 
 To start planning, click on a subelement. The available fields will be displayed:
 
-![image](uploads/43089e4e880fac84352673a23f5aff38/image.png)
+![image](uploads/5ea811fe24e32709cd7205c1bcb797e2/image.png)
 
 **In simplified mode:** The planning informations are associated to the element:
 
-![image](uploads/f95c67a48cda12917700deb49df85bcb/image.png)
+![image](uploads/21e3c8af3bf8bdb12cf81832c9ff7590/image.png)
 
 ##### PCMM Planning item types
 
@@ -761,28 +760,28 @@ The PCMM Planning fields can be of the following types (see [Generic Parameters 
 
 In the top right corner, the user can change its role (see [Change PCMM Role](#change-pcmm-role)).
 
-![image](uploads/4f0069f1c6cd238e1d0798db3f4095e1/image.png)
+![image](uploads/67bbd6084ad6907254079a0c5b815910/image.png)
 
 ###### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to the PCMM Planning Home page.
 
 ###### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 Opens the contextual help for the PCMM Planning view:
 
-![image](uploads/131b5a55ef8e9136bb5be6ff1c46d2c1/image.png)
+![image](uploads/47a9208d969e21ccf9ead40b6bf9a466/image.png)
 
 
 ### Analyst Decisions
 
 Analyst Decision is a minitool to record analyst decisions and their characteristics (consequence, techniques maturity, description...).
 
-![image](uploads/110f20a012be209189e63f740e5a063f/image.png)
+![image](uploads/eb0df3fbaacf108268e9e38a092a0617/image.png)
 
 There is no limit in the number of levels for the groups, decisions, sub-decisions...
 
@@ -790,25 +789,25 @@ There is no limit in the number of levels for the groups, decisions, sub-decisio
 
 ##### Add Decision Group
 
-![image](uploads/ac82fe1a7af85a043a7769e4f99b6063/image.png)
+![image](uploads/877d468b3de947110452d886630c9391/image.png)
 
 This button opens a new dialog to add a decision group. The configured fields will be available into the dialog:
 
-![image](uploads/ed21143e8c1e798ecf0ec8f43dab6868/image.png)
+![image](uploads/db851a6494278569c8a0feac8167e834/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to Home page (see [Home View](#home-view)).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for the Decision view:
 
-![image](uploads/554b17f2eff9754b436bce257c1f223d/image.png)
+![image](uploads/c9b276644a942d82b75650ef20b1eb76/image.png)
 
 #### Analyst Decisions Table Columns
 
@@ -828,43 +827,43 @@ The other columns are managed with the configuration files and can be removed:
 
 #### Analyst Decisions Table Actions
 
-![image](uploads/04f247b9def672fd8cfe2855343c6462/image.png)
+![image](uploads/a4bfb76af439b6cb0bd0a98c2eedc2a3/image.png)
 
 ##### Add Analyst Decision
 
 The user can add a decision under an existing decision group or a decision by clicking on the `Add` button:
 
-![image](uploads/9a24e67b0f5fd7b8a0722d2dc99094dd/image.png)
+![image](uploads/084236040b8256bffb5a3f4d514e531f/image.png)
 
 A new dialog will popup and ask the user to input the necessary informations:
 
-![image](uploads/e9d85e0875112e531c25694cf85894d6/image.png)
+![image](uploads/f3a48c678deaeeaaaa10aef764618b58/image.png)
 
 ##### Open Analyst Decision
 
 The `References` field stores a link to a document associated to the decision. Clicking on the `Open` button will open this document (url, document inside the workspace):
 
-![image](uploads/5011b304ebe94ee31f53d86071ac586e/image.png)
+![image](uploads/3b280454b34f0ea216e52eec7a3e09ad/image.png)
 
 ##### View Analyst Decision
 
 It is possible to view the decision informations by clicking on the `View` button:
 
-![image](uploads/52c3151b29ef363598a00b6c93832c07/image.png)
+![image](uploads/96e5d0973ba256fd2a55ba2a0b44961f/image.png)
 
 A new dialog will popup with the decision informations in read-only mode:
 
-![image](uploads/45edfa99eac9a1911c0565c8065d72a9/image.png)
+![image](uploads/96b58c937faf5e04bfd7e8d468ca3b7a/image.png)
 
 ##### Edit Analyst Decision
 
 To edit the decision informations click the `Edit` button:
 
-![image](uploads/34c5643f296f9e75801fdd03046cc9e8/image.png)
+![image](uploads/764b25403f4b7303d763034926b52a4e/image.png)
 
 A new dialog will popup in edition mode:
 
-![image](uploads/2e318217e192d0ead9a73618bd74d74a/image.png)
+![image](uploads/49a402a9a83112824cf01b9b7f9dba4b/image.png)
 
 Click `Update` to save changes.
 
@@ -872,11 +871,11 @@ Click `Update` to save changes.
 
 To delete a decision click the `Delete` button:
 
-![image](uploads/cfee80c98f67d44cc4a1a7acdebfe958/image.png)
+![image](uploads/e9f467393a3e1a739ad0c9324b1d7fed/image.png)
 
 A confirm box will popup:
 
-![image](uploads/67e9ac8250ada9ac9e2b0c0249e68e2c/image.png)
+![image](uploads/b691440c3367d222c5463b162da27ddf/image.png)
 
 All the decisions and sub-decisions associated will be deleted.
 
@@ -891,11 +890,11 @@ PIRT content persists across sessions in `<filename>.cf` file.
 
 This view lists all the quantities of interest associated to the current credibility process. It is possible to add, edit/open, copy, tag or delete a QoI (Quantity of Interest).
 
-![image](uploads/373f412d5f787979383b370cbba54fa0/image.png)
+![image](uploads/388e46dea2a04027fd32dab8c4150db6/image.png)
 
 #### Model Header Table
 
-![image](uploads/95b0ae43d48711c482d6141721477a66/image.png)
+![image](uploads/e06f34137fc2341fa96866aae8968dbc/image.png)
 
 The Model Header table contains model information:
 - `Application`: the application of this model.
@@ -905,7 +904,7 @@ The Model Header table can be hidden by clicking on the topbar containing *Model
 
 #### Table QoI columns:
 
-![image](uploads/a036135cd82d74ffb89e2c708a39fcff/image.png)
+![image](uploads/cee3b1218f6623bec84808617f292a38/image.png)
 
 The table has four columns:
 - `<Tagged?>`: is QoI tagged? The first column displays a tag icon if the QoI is tagged, otherwise nothing. A tagged QoI is always displayed under its parent untagged QoI. Its line background color is brown.
@@ -919,14 +918,14 @@ The table has four columns:
 
 #### Table QoI action buttons:
 
-![image](uploads/9e4146bc722ff3dfd6b9b8e1385036b1/image.png)
+![image](uploads/ac8bf657810dae1649c1cc7956a603e1/image.png)
 
 - `Open`: opens the selected QoI in a new tab in edition. A tagged QoI is only visible and can not be edited.
 - `Copy`: makes a copy of the QoI and of all its associated phenomenon groups, phenomena and criteria.
 - `Tag`: creates a tag for this QoI. A tag is a copy that can not be edited. It is used to kept the state of a QoI. It helps the user to see the progress and take decision. Each associated phenomenon groups, phenomena and criteria will be copied and tagged (see [Tag QoI](#tag-qoi)).
 - `Delete`: deletes the QoI. A deletion confirmation dialog is opened on click:
 
-![image](uploads/2196b1dd077a61221cad985588a61661/image.png)
+![image](uploads/39323837ca5fd7705b8fa45a10730400/image.png)
 
 If the user confirms deletion, the selected QoI is deleted with all the associated phenomenon groups, phenomena and criteria.
 
@@ -934,7 +933,7 @@ If the user confirms deletion, the selected QoI is deleted with all the associat
 
 ##### Add Quantity of Interest
 
-![image](uploads/2de0bd17af6b0a6337c99a3063eb163f/image.png)
+![image](uploads/ac26373dd6d8efeb2bfe83f3e1f7a669/image.png)
 
 This button creates a new quantity of interest with a new PIRT table. It throws a new QoI creation wizard.
 
@@ -942,64 +941,64 @@ This button creates a new quantity of interest with a new PIRT table. It throws 
 - `Description`: The QoI can be described with a RichText editor with tools to layout the description as a document.
 - The **creation date** will be automatically stored on the new QoI.
 
-![image](uploads/5f8026d4bfd3586db58b476754119491/image.png)
+![image](uploads/bde47e9eb43fe25f9028a8d861403b9d/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 `Back` button opens the cf-plugin `Home View`.
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PIRT Guidance in it. See [PIRT Guidance](#pirt-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for Quantities of Interest:
 
-![image](uploads/1ced04bfc9f3214418f04e07cdc59150/image.png)
+![image](uploads/5a13287a12e2704660cc151d72ba6809/image.png)
 
 ### Phenomena View
 
 The Phenomena view displays the information of a QoI. This view is splitted in two tables, quantity of interest header containing the QoI information and phenomena table to assess criteria credibility.
 
-![image](uploads/e8b6ecc203edfb83389d660bc7a99665/image.png)
+![image](uploads/4fb6c8d93ce967d10ba7eb60f04e0106/image.png)
 
 #### Phenomena Buttons and Actions
 
 ##### Add Phenomenon Group
 
-![image](uploads/a8387e8e52b82d75e674c9403146179c/image.png)
+![image](uploads/2c996842fcfd31c1c8a9b6436d8bbd5a/image.png)
 
 Opens a new dialog to create a new phenomenon group:
 
-![image](uploads/a3d1e7ee088897633e5a458fcd2b0021/image.png)
+![image](uploads/1d85a227afe169d5bdaa5022096e7d1b/image.png)
 
 Required field for phenomenon group is:
 - `Description`: this is the group label or name
 
 ##### Tag QoI
 
-![image](uploads/549667352b30818f546fdb458c1fe2ed/image.png)
+![image](uploads/53e3aa875fca5484512dcb9edb154f81/image.png)
 
 Creates a tag for this QoI. A tag is a copy that can not be edited. It is used to kept the state of a QoI. It helps the user to see the progress and take decision. Each associated phenomenon groups, phenomena and criteria will be copied and tagged.
 
 The user is prompted to confirm the tag action:
 
-![image](uploads/d19f58a3186db05ed94b8b5a00050246/image.png)
+![image](uploads/fb0d330852164fbe583f7a93503cc9b1/image.png)
 
 And is encouraged to enter a `Description` for this tag:
 
-![image](uploads/49ee519ab43af2f055992625e412fcc0/image.png)
+![image](uploads/9971fc9ad609a046ed0ffd1217d3a745/image.png)
 
 ##### Reset
 
-![image](uploads/33adfff400a207266d4bd75d89e1bd7a/image.png)
+![image](uploads/2487945bc3c3c4f0d7911d0368edeb8a/image.png)
 
 Resets the current Quantity of Interest:
 - Delete all variable QoI Headers
@@ -1009,39 +1008,39 @@ Resets the current Quantity of Interest:
 
 The user has to confirm the reset action:
 
-![image](uploads/29cb5eaa53c74614ea97e1ea5af588a8/image.png)
+![image](uploads/1ac2eca37d395f663689489fd0adbb22/image.png)
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 `Back` button opens the cf-plugin `Home View`.
 
 ##### Close
 
-![image](uploads/09464311eb104543e904616d06f01a38/image.png)
+![image](uploads/8209bee319c7d4031fba82985b2a115e/image.png)
 
 This button closes the current Quantity of Interest tab.
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PIRT Guidance in it. See [PIRT Guidance](#pirt-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for PIRT table:
 
-![image](uploads/cdc5afaf90711df40e8e4ba292c34208/image.png)
+![image](uploads/2ac97b7483b96a66ae649b8ca16f4215/image.png)
 
 #### QoI Header Table
 
 The QoI Header table contains QoI information. The information is separated in two types, the fixed fields and the variable ones.
 
-![image](uploads/51a65ce944c77c91fa8e859c61849c33/image.png)
+![image](uploads/a817a653a2cfabbfc87ef6f308da5414/image.png)
 
 The **fixed fields** are:
 - `Name`: the QoI name
@@ -1057,26 +1056,26 @@ The QoI Header table can be hidden by clicking on the topbar containing the *nam
 ##### Edit a RichText field
 The field of type *RichText* are editable y clicking on the following button:
 
-![image](uploads/ef95e4fd72b6952eda2be9db8e366bc4/image.png)
+![image](uploads/82ee13f97c1990e15bf6e2e663004f16/image.png)
 
 A new dialog will popup with the RichText tools:
 
-![image](uploads/e286f241808fd971d0c56cb2fc199f7a/image.png)
+![image](uploads/56238cdbdf6ad804b0a3e17261351b7d/image.png)
 
 ##### View a RichText field
 This type of field can be viewed by clicking on the view icon:
 
-![image](uploads/1e5ae7233b12d621f8112383afce4129/image.png)
+![image](uploads/2e4efb919eb9112601a86b071c130f0f/image.png)
 
 A new dialog will popup with the full content:
 
-![image](uploads/6bb80953aff6d843d1138292ac68ddf7/image.png)
+![image](uploads/b6a115d56098cea61db8fd195a98d009/image.png)
 
 #### Phenomena Table
 
 This table presents the different phenomenon groups with their associated phenomena. The phenomena has several criteria. Information is separated in two types, the fixed columns and variable.
 
-![image](uploads/738063f61b5143753723516e634e5c29/image.png)
+![image](uploads/b825741010b95b5e63ab1183c69c2533/image.png)
 
 #### Phenomena Table columns:
 
@@ -1095,7 +1094,7 @@ This table presents the different phenomenon groups with their associated phenom
     - *Importance*
     - *All the criteria columns*
 
-![image](uploads/a0209b4f33ed032a1916890766f417bf/image.png)
+![image](uploads/5bd19e43077fb84b84bd53276c4687c3/image.png)
 
 The criteria columns of *Levels* type are colored. Their color changes depending of the *Importance* column. All columns of *Level* type has a numerical value. The numerical value is used to be compared with the *Importance* column.
 
@@ -1110,15 +1109,15 @@ See [Generate Configuration for Credibility Project](https://gitlab.com/iwf/cf/w
 
 #### Phenomena Table action buttons:
 
-![image](uploads/14875d343672763000580c3f6c58cc32/image.png)
+![image](uploads/4191dcdc23fb91ea91fc242fd198ff3f/image.png)
 
 ##### Add Phenomenon
 
-![image](uploads/15c18f48be11537baa83403cc3c0be5b/image.png)
+![image](uploads/a259c381ae32feeb0f51756ad89232d0/image.png)
 
 Opens a dialog to add a new phenomenon:
 
-![image](uploads/5395ccffd76421a99bd95ed6707c97d8/image.png)
+![image](uploads/a6de89100ce54294dd80417b881ebe2e/image.png)
 
 Fixed fields for phenomenon are:
 - `Phenomenon group`: the phenomenon group to associate with.
@@ -1131,27 +1130,27 @@ Text or RichText criteria fields will be added at the bottom.
 
 ##### View Phenomenon/Group
 
-![image](uploads/de16b4fc6278fd48e5aa57031fb58ffe/image.png)
+![image](uploads/d1f1cf8a009d15b93efd852192abda4c/image.png)
 
 Opens a new dialog to display the group or phenomenon ranking information:
 
-![image](uploads/e37d2da508555b05bde8c029ed6143e5/image.png)
+![image](uploads/632bcd1f48fa798d14b26fb2292809dd/image.png)
 
 ##### Edit Phenomenon/Group
 
-![image](uploads/323624f36d60bc5db39dfa11e78b0c1a/image.png)
+![image](uploads/e694c995f6fbcf09c0a6799550eedc25/image.png)
 
 Opens a new dialog to edit the group or phenomenon:
 
-![image](uploads/149fe356a1155b690646c56eac1166b1/image.png)
+![image](uploads/95ecef71bf7e7bb9fbc76f93939a4e04/image.png)
 
 ##### Delete Phenomenon/Group
 
-![image](uploads/228abf24424fa1536c026fe762035d06/image.png)
+![image](uploads/31219361896732a120b2118aac8c1b80/image.png)
 
 Deletes the group or phenomenon. A deletion confirmation dialog is opened on click:
 
-![image](uploads/cba997e996be95dd51de796c00253d58/image.png)
+![image](uploads/fbbee10b4f7691ebf9e708046f3861ad/image.png)
 
 If the user confirms deletion, the selected group or phenomenon is deleted with all the associated phenomena and criteria.
 
@@ -1165,7 +1164,7 @@ PCMM also gives tools to summarize the assessments and display the state and pro
 
 **PIRT is a prerequisite to PCMM**, please firstly fill in QoI and PIRT tables:
 
-![image](uploads/847dc26469bc22b4841b55c5232f9f3f/image.png)
+![image](uploads/ede02b2e9e2d782c9691132331ad58b1/image.png)
 
 To start adding evidence and assessments, please select a role in the top-right corner drop-down.
 
@@ -1193,15 +1192,15 @@ This **mode can not be changed** once the credibility process is created.
 
 Each user can change his role. If the user wants to, he has to click in the `Role` dropdown list section in the top-right corner. The role dialog will be displayed. 
 
-![image](uploads/4f0069f1c6cd238e1d0798db3f4095e1/image.png)
+![image](uploads/e6ae71a0f2ac99275aec0a156706dd8c/image.png)
 
 If not defined, the user is prompted to select his role when he tries to access to the evidence or the asses views:
 
-![image](uploads/d86db9a73631e9add3025c68189a5969/image.png)
+![image](uploads/667bf11977afb86ae3b163664fc8d2f6/image.png)
 
 If the user cancels, the following message box is opened:
 
-![image](uploads/e877f91d532067e663ac15db43c3b19d/image.png)
+![image](uploads/1332340dc300f95372c117971f798dab/image.png)
 
 ### PCMM Home View
 
@@ -1209,17 +1208,17 @@ The PCMM Home view displays the progress of the PCMM and the PCMM wheel with the
 
 The PCMM wheel text is adaptive to the view, by default the full PCMM element name is displayed:
 
-![image](uploads/e769282ab99a060e94f81619ca3dcfae/image.png)
+![image](uploads/830131e5eb5598f177f5bd85926837fa/image.png)
 
 But if the available space for the wheel is too small, the PCMM element acronym is displayed:
 
-![image](uploads/afd46051c38d402fdd4a8852b336449a/image.png)
+![image](uploads/57e589e5c66739afaf8280b609f271b7/image.png)
 
 #### PCMM Progress
 
 This section displays the overall progress of the PCMM process including the PCMM Planning, Assess and Evidence phases.
 
-![image](uploads/5b952111155f3cc6851cec721a1dd4fd/image.png)
+![image](uploads/b0ddd2cfdbf11d441576c7a8af2c91bb/image.png)
 
 The progress is indexed by PCMM element. The progress is divided in two major parts, the evidence and the assessment.
 
@@ -1235,21 +1234,21 @@ For example, a PCMM Element has 5 subelements. The progress bar will be divided 
 
 It is possible to tag the PCMM process to a specific state. A `Tags` part is available on the PCMM Home view, below the `Progress` one:
 
-![image](uploads/655552de279ed3939438188ccfca1321/image.png)
+![image](uploads/c599b5059923175783ef6f0ae9aea3f4/image.png)
 
 ##### New Tag
 
 To create a new tag, click on the `Tag` button:
 
-![image](uploads/6f349c1861ee90882907009ddb63cffe/image.png)
+![image](uploads/59b8dd92dbcf4c7f9877688df30694ad/image.png)
 
 A new dialog will popup to enter the tag information:
 
-![image](uploads/6b10f84b939437cd2d48232ea2334de0/image.png)
+![image](uploads/7d25d42dcb0ec933b0fbcb72654a3770/image.png)
 
 The plugin will inform the user of the success of the tag operation:
 
-![image](uploads/ecae0cdf4ae8501700f4e772d38a16df/image.png)
+![image](uploads/70dbf00e9ac2328190986f27a15c57d6/image.png)
 
 ##### Select a Tag
 
@@ -1257,7 +1256,7 @@ By default, the tag `Latest version (working)` is selected. It is the current wo
 
 The user can select an existing tag in the `Tag` list:
 
-![image](uploads/2b8279da81b983297efd39f304a4b1eb/image.png)
+![image](uploads/aae6a0e53a9e01c2f42dd9ffd591d330/image.png)
 
 When a tag is selected, the associated evidence and assessments are loaded. All the PCMM views are available. But **the user can not alter** (create/update/delete) the evidence or assessments once tagged.
 
@@ -1265,23 +1264,23 @@ When a tag is selected, the associated evidence and assessments are loaded. All 
 
 To manage the existing tags, click on the `Manage Tag` button:
 
-![image](uploads/ef7f9b3e89534a58330933f7ea8436ef/image.png)
+![image](uploads/ec5a9f881ed531ccaa3484c144e8ed73/image.png)
 
 A new dialog will popup with a table containing all the existing tags. It is possible to sort the table by each column:
 
-![image](uploads/23fc7eeffd62a3850735684ec4739c95/image.png)
+![image](uploads/942f7c5de68e18ccbfcf32461fdad8d0/image.png)
 
 It is also possible to delete a tag by clicking the `Delete` button:
 
-![image](uploads/069feacf9fa973e9160806d30815cae6/image.png)
+![image](uploads/3dd87f07696af6a5fabcb7c38c61e122/image.png)
 
 or pressing **DEL** key on the keyboard:
 
-![image](uploads/711a9330607a14facde919cca3091cb6/image.png)
+![image](uploads/444ab8ca283a7e1b9871c9d74543b57e/image.png)
 
 The plugin will confirm the deletion success:
 
-![image](uploads/6e3d453017a2255679c141007c54a2c5/image.png)
+![image](uploads/2b858056cb766d180e0cc59345adf059/image.png)
 
 #### PCMM Wheel
 
@@ -1292,45 +1291,45 @@ To start adding evidence and/or add assessment:
   - `Evidence`: manage evidence for this PCMM element. It opens the evidence view (see [PCMM Evidence View](#pcmm-evidence-view)).
   - `Assess`: manage assessments for this PCMM element. It opens the assessment view (see [PCMM Assess View](#pcmm-assess-view)).
 
-![image](uploads/2f243d64698fd0aecfbe7f4cdbabb491/image.png)
+![image](uploads/87d9b9699b90dc376eeecb173c2ee1f5/image.png)
 
 **Important**: This sections requires a role to be defined for the user before it an be used. If there is no role defined, the user is prompted to select a role (see [Change PCMM Role](#change-pcmm-role)).
 
 **Important**: The PCMM Element PMMF (Physics and Material Model Fidelity) needs to define PIRT quantities of interest first:
 
-![image](uploads/a0dbba74bda5af4941633a0f0aa8c109/image.png)
+![image](uploads/ffcd316ca13e0dda43c6667a043a9d3c/image.png)
 
 #### PCMM Home Buttons
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to home page (see [Home section](#home)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for PCMM Home view:
 
-![image](uploads/6002de283a870c5952521dbdae4266ea/image.png)
+![image](uploads/26336b7d77b6494cc8e95101d27e516e/image.png)
 
 ##### Aggregate Individual Assessments
 
-![image](uploads/a936d9ed13d1f4ea71eaf94bad482dba/image.png)
+![image](uploads/47069ebbfcce6f5d867af0097106bc85/image.png)
 
 Open the aggregate view (see [PCMM Aggregate View](#pcmm-aggregate-view)).
 
 ##### PCMM Radar Plot/Quality Stamp
 
-![image](uploads/a200957ee8ea35409971f4a3e82d9fba/image.png)
+![image](uploads/9c0cf33ab6e460c06bcb0c993c400fce/image.png)
 
 Open the PCMM stamp view (see [PCMM Radar Plot/Quality Stamp View](#pcmm-radar-plotquality-stamp-view)).
 
@@ -1342,11 +1341,11 @@ The user and role which created the evidence is referenced in the `User` and `Ro
 
 **In default mode:** The evidence is associated to the subelements:
 
-![image](uploads/2740e7bd036e2e8bd77d494294409245/image.png)
+![image](uploads/e4d77187391aab414e02189beca6b9f7/image.png)
 
 **In simplified mode:** The evidence is associated to the elements:
 
-![image](uploads/290f39574a6ff52abfb2a5f6089ba37c/image.png)
+![image](uploads/444ab41c0a199e2e9eb251f6bc78a377/image.png)
 
 #### PCMM Evidence Table Columns:
 
@@ -1364,11 +1363,11 @@ The user and role which created the evidence is referenced in the `User` and `Ro
 
 Some evidence may have an error or warning label:
 
-![image](uploads/004d1979c605cda0002aaffa4f216094/image.png)
+![image](uploads/ed6796f4ceb3e31228b3efc1f7733af4/image.png)
 
 A tooltip is available to have further information about the warning or error:
 
-![image](uploads/cdd80e0cb9a3677013609986d5936b0d/image.png)
+![image](uploads/9570b731bfc7627eca515b567bbec029/image.png)
 
 This may occur if the evidence has the following problems:
 - **Errors**:
@@ -1378,11 +1377,11 @@ This may occur if the evidence has the following problems:
   - The evidence file is `already associated with another PCMM element/subelement`.
   - The evidence `file changed`. It is possible for the evidence creator to delete this warning message by clicking on the `Edit` button, check the **Remove "file changed" notification**, and click **Update**.
   
-  ![image](uploads/6398bae7f7078edc4d6a8a6c2a8ba2ea/image.png)
+![image](uploads/7897ed9539a78d7c2e35d6b5ea7119a0/image.png)
 
 #### PCMM Evidence Table Actions
 
-![image](uploads/2c7cbc7af8ff5b712d3c8b57e8c94c9c/image.png)
+![image](uploads/59b91374549e08f77ec9e751cfbd5163/image.png)
 
 ##### Add Evidence
 
@@ -1390,21 +1389,21 @@ To add an evidence:
 
 - **Click** on the `Add` button:
 
-![image](uploads/9a24e67b0f5fd7b8a0722d2dc99094dd/image.png)
+![image](uploads/28722777a8f2db8f47f2f24e110adafa/image.png)
 
 **Select/Browse** the `file` or `URL` and enter a `Description`:
 
-![image](uploads/f7592981d7ac02e680d42642e177d643/image.png)
+![image](uploads/f9a2b15653cffb85eeba27cffa3fb858/image.png)
 
 - **Drag and drop** a document from the Eclipse explorator to the destination subelement or element. If the element dragged is not valid or if the source is not valid, the interface will show the forbidden icon on the dropped item.
 
-![image](uploads/3ac3415013eb075204d3e2cbd8ed8c7d/image.png)
+![image](uploads/2f372077c9ea4b00fb52b49572e0d222/image.png)
 
 **Evidence Type**: An evidence can be a file in the Eclipse project or a URL. To select the type, click on the radio button in top of the add evidence dialog:
 
-![image](uploads/3f83e89a1c3eacf4b85735e7775c36ec/image.png)
+![image](uploads/6f0f68285c658fdb9a3e45d6c8cc95ac/image.png)
 
-![image](uploads/420f092aa0dd3eb5fba24f70a042e763/image.png)
+![image](uploads/366bacac873cda5ec0c29300ad2cf40a/image.png)
 
 ##### Open Evidence
 
@@ -1413,7 +1412,7 @@ It is possible to open one or more evidence by:
 - **Selecting** the evidence to open and typing **Enter key** on the keyboard.
 - **Selecting** the evidence to open and clicking the `Open` button:
 
-![image](uploads/42e5fbcfad3ce662c45620df6f6d0efb/image.png)
+![image](uploads/1879b0a284eb8c733a2079b2445ce3fb/image.png)
 
 By default, the evidence is opened by the Eclipse product. It is possible to change this behavior into the Eclipse  preferences (see [Eclipse File Associations](#eclipse-file-associations))
 
@@ -1423,11 +1422,11 @@ Only the user which created the Evidence can edit it.
 
 To edit the Evidence description, click the `Edit` button:
 
-![image](uploads/34c5643f296f9e75801fdd03046cc9e8/image.png)
+![image](uploads/e19b49d30d38dc1182bb7e09b41bac16/image.png)
 
 A new dialog will popup with the **current errors and warnings** and the `Description`:
 
-![image](uploads/3322fab802dd366cb60f4a5a10f97877/image.png)
+![image](uploads/a59f180c1d4a4bf351aee410e8eaa5eb/image.png)
 
 Click `Ok` to save changes.
 
@@ -1438,35 +1437,35 @@ Only the user which created the Evidence can delete it.
 To delete it, do the following:
 - `Click` the `Delete` button:
 
-![image](uploads/cfee80c98f67d44cc4a1a7acdebfe958/image.png)
+![image](uploads/37e82ecab215ce39b2d46970aff3a058/image.png)
 
 - **Select** the evidence to delete and type **"Del" key** on the keyboard.
 
 A confirm box will popup:
 
-![image](uploads/75b18748d7eaaf2d4d19876a269a49ce/image.png)
+![image](uploads/af6797900d88dab6b7185ff095c71a8d/image.png)
 
 #### PCMM Evidence Buttons and Actions
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to PCMM Home page (see [PCMM Home View](#pcmm-home-view)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for PCMM Evidence view:
 
-![image](uploads/5f2afc117663762452ade155f4a59c59/image.png)
+![image](uploads/dfc066048203a3f6e8c97baa59a33c62/image.png)
 
 ### PCMM Assess View
 
@@ -1476,11 +1475,11 @@ An analyst can only assess once a subelement/element per role selected. The anal
 
 __In default mode:__ The assessment are done on the subelement:
 
-![image](uploads/8e70e77c380f28b94ed99e8ed8457dec/image.png)
+![image](uploads/40b847d411707c595ea8bab23ccd6b9a/image.png)
 
 __In simplified mode:__ The assessment are done on the element:
 
-![image](uploads/a72a4ca913963cccf1e4f00430cea7c8/image.png)
+![image](uploads/48a9c3d1cd16db6fb00e9a3066f3df6b/image.png)
 
 #### PCMM Assess Table Columns:
 
@@ -1495,11 +1494,11 @@ __In simplified mode:__ The assessment are done on the element:
 
 #### PCMM Assess Table Actions
 
-![image](uploads/9a413853b47da62e4b0470a7a639f259/image.png)
+![image](uploads/854208905b70d51513a72f05f63fe3fe/image.png)
 
 ##### Open/Examine Evidence
 
-![image](uploads/5aa9d5fe816a9a8819f58167e1044119/image.png)
+![image](uploads/7b433ff96e03011c1a4f8f95ef74e40f/image.png)
 
 To examine evidence click the `Open` button.
 
@@ -1507,7 +1506,7 @@ If there is **only one evidence**, the **evidence will be opened** inside or out
 
 Otherwise, a **list of evidence dialog** will be opened containing all the added evidence for this PCMM element/subelement:
 
-![image](uploads/65b0ce8037d141dc45c75b1cdb408ad4/image.png)
+![image](uploads/11dedef9355d6d47aa1940d7fa59deb9/image.png)
 
 The user has different actions:
 - `Open`: open the evidence
@@ -1519,12 +1518,12 @@ There is different ways to assess:
 - **Double-click** on the PCMM element/subelement row.
 - Click `Add` or `Edit` button:
   - **Add** assessment: by default if there is no assessment for this role and user:
-![image](uploads/ba580c9edb9d6451a3b9bc946d05c146/image.png)
+![image](uploads/1863c565e6d5c0f2073d74e87ba8bf62/image.png)
 
   - **Edit** assessment: present if there is already an assessment for this role and user:
-![image](uploads/fd6ecb737a94acb435a35b7e05cb120f/image.png)
+![image](uploads/4d8dce4e3fb847c90a6fbd8aeab38173/image.png)
 
-![image](uploads/a043097b464061258c62a0c3596eba0b/image.png)
+![image](uploads/d0f8461b1ec77bddbfa808ec681905a0/image.png)
 
 The `Level achieved` and `Comment` fields are mandatory.
 
@@ -1532,39 +1531,39 @@ The `Level achieved` and `Comment` fields are mandatory.
 
 **Important Rule:** It is possible to assess every subelement/element, but it is only possible to give a the lowest level if there is no evidence associated to subelement/element. A warning message is displayed if the user tries to assess with a higher level than permitted:
 
-![image](uploads/b9bd864c845dd73c4607d73b7c1d76ac/image.png)
+![image](uploads/53aae41575bf5cbfa842e20c63f59f22/image.png)
 
 ##### Delete
 
-![image](uploads/de27f8417b4dedbcd67b546e62ddccda/image.png)
+![image](uploads/7bad796a7e28021df0a707873f0046ce/image.png)
 
 The `Delete` button removes the assessment for this user and role. 
 
 A confirmation dialog is opened:
 
-![image](uploads/137d08af2274b25d7fcf8750cfc10eb2/image.png)
+![image](uploads/cbd37ded71c4a54ed43dad23071843eb/image.png)
 
 #### PCMM Assess Buttons and Actions
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to PCMM Home page (see [PCMM Home View](#pcmm-home-view)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for PCMM Assess view:
 
-![image](uploads/abc8bbe4836a2b6fb2421959cd7e6113/image.png)
+![image](uploads/64890e04b6e0aca375e627db1d20d881/image.png)
 
 ### PCMM Aggregate View
 
@@ -1574,15 +1573,15 @@ The aggregate view aggregates all the assessment by subelement and element. It g
 
 __In default mode:__ The aggregation is made for the subelements and the elements.
 
-![image](uploads/50b96bd10cd6424ae4d808f050677783/image.png)
+![image](uploads/2d0b746f26acedc586c8211d5542a256/image.png)
 
 __In simplified mode:__ The aggregation is only made for the elements.
 
-![image](uploads/6fcaa6606493adc92d8061172f91393a/image.png)
+![image](uploads/90fe6325df51295742632e079b2fba74/image.png)
 
 **Warning:** If the PCMM overall progress is not complete, the plugin shows a warning to the user:
 
-![image](uploads/88736fe4f36e240c559d3be86f9b3312/image.png)
+![image](uploads/927a9ddc6806e385c7229da5c1fa5787/image.png)
 
 #### PCMM Aggregate Table Columns:
 
@@ -1596,7 +1595,7 @@ __In simplified mode:__ The aggregation is only made for the elements.
 
 #### PCMM Aggregate Table Filter
 
-![image](uploads/efbc712924c1e04de9dba3e45772e94b/image.png)
+![image](uploads/8c1bbaa55002fadaca2cb0f3f2a21211/image.png)
 
 The aggregate list can be filtered by:
 - `Role`: the role of the assessment creator
@@ -1607,7 +1606,7 @@ The aggregate table data will change depending of the filter selection.
 
 ##### Open/Examine Evidence
 
-![image](uploads/5aa9d5fe816a9a8819f58167e1044119/image.png)
+![image](uploads/b50334c1836210cbcf41c03011c43ece/image.png)
 
 To examine evidence click the `Open` button.
 
@@ -1615,7 +1614,7 @@ If there is **only one evidence**, the **evidence will be opened** inside or out
 
 Otherwise, a **list of evidence dialog** will be opened containing all the added evidence for this PCMM element/subelement:
 
-![image](uploads/65b0ce8037d141dc45c75b1cdb408ad4/image.png)
+![image](uploads/202ee0b4877909f78e2bb880e78d971d/image.png)
 
 The user has different actions:
 - `Open`: open the evidence
@@ -1623,40 +1622,41 @@ The user has different actions:
 
 ##### Details
 
-![image](uploads/297d18795eacfa5be7e8de2710b1ca97/image.png)
+![image](uploads/b0b2c908c4a8b41a9626c8745140dbf6/image.png)
 
 The user can inspect all the assessments done with:
 - **Double-click** the subelement/element.
 - **Click** the `Details` button.
 
 A new dialog is opened containing all the assessments per user and role:
-![image](uploads/90ee57b8f1c93bc8f97c4f97979a26b4/image.png)
+
+![image](uploads/8db25a7b61cb7221b33b9f4651199dff/image.png)
 
 **Tip**: By default all assessments are expanded. But the list of assessments can be very long. It is possible to **collapse** an assessment by **clicking the title** of the assessment description:
 
-![image](uploads/7a75dcb1194520ba8d0bd92e004510d6/image.png)
+![image](uploads/f90b27f0acb570ca36e60d46ae58aad1/image.png)
 
 #### PCMM Aggregate Buttons and Actions
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to PCMM Home page (see [PCMM Home View](#pcmm-home-view)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
 It opens the contextual help for PCMM Aggregate view:
 
-![image](uploads/6b90e9d3dcf8ae3aa82dd328ec58dfe8/image.png)
+![image](uploads/a01f884e23033294b98527e08425b50d/image.png)
 
 ### PCMM Radar Plot/Quality Stamp View
 
@@ -1666,15 +1666,15 @@ In a **low rigor** ModSim project, the aggregation will be computed from the ass
 
 In a **high rigor** project, the aggregation is firstly computed at the PCMM subelement level, then computed from the result of the subelement aggregation to the PCMM element.
 
-![image](uploads/b457b7b753d76f649a5be1563b3afe6e/image.png)
+![image](uploads/e11a0645dbe34ebec0426f369dc973c2/image.png)
 
 **Warning:** If the progress is not complete, the plugin shows a warning:
 
-![image](uploads/35a3d6f5dda37571aff5c222bea1bfcf/image.png)
+![image](uploads/d7cba45bf52ae47917d7188603e9529b/image.png)
 
 #### PCMM Stamp Filter
 
-![image](uploads/050a9179f47fe3547579a0b9d05fdbdc/image.png)
+![image](uploads/b6d9a72ebaeb8f90aedcfaeab673e4e6/image.png)
 
 The aggregate list can be filtered by:
 - `Role`: the role of the assessment creator
@@ -1685,23 +1685,23 @@ The PCMM stamp data will change depending of the filter selection.
 
 ##### Back
 
-![image](uploads/6288fc7442ceac731344769bfe8f41ff/image.png)
+![image](uploads/bfb6dbe6d1cfd61698b50ef3af18f64a/image.png)
 
 Return to PCMM Home page (see [PCMM Home View](#pcmm-home-view)).
 
 ##### Guidance
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 This button opens the `Credibility Framework Guidance` view with the PCMM Guidance in it. See [PCMM Guidance](#pcmm-guidance).
 
 ##### Information
 
-![image](uploads/d86ad7c7cccc2251e923d45a9e75971b/image.png)
+![image](uploads/70b56a1aaec64e809cf97453beb36241/image.png)
 
-It opens the contextual help for PCMM Aggregate view:
+It opens the contextual help for PCMM Stamp view:
 
-![image](uploads/ea7bb0a0942bf048db648ff722769e4c/image.png)
+![image](uploads/6e64e18a76295dbcd843cd0f2f19a759/image.png)
 
 
 
@@ -1723,11 +1723,11 @@ The following references will be managed in the future:
 
 To access the report view, click on the `Credibility Report` tile on the Home view:
 
-![image](uploads/80077f15adfc35afa933d53da42120f1/image.png)
+![image](uploads/760c740296d7fe70d0e4963e251f7177/image.png)
 
 The Report home view appears with its different sections:
 
-![image](uploads/1fe69f7eb3f176b24ba49578c46470e1/image.png)
+![image](uploads/8e1b4ccd932303920e7a9c43727e2e70/image.png)
 
 **Important**: the Credibility Report feature is using ARG (Automati Report Generator) library to create the reports. Please see [How to install ARG](How-to-install-CF-plugin#arg) page.
 
@@ -1735,15 +1735,16 @@ The Report home view appears with its different sections:
 
 This section describes the ARG setup including the executable path, the python pre-script path and python command.
 
-![image](uploads/a08ac508c51a1f2826dc171da7e315a9/image.png)
+![image](uploads/8ad0cbf6999ac1eb5a713f101e80dd30/image.png)
 
+- `Python executable path`: this is the python command name on the system. By default `python` is filled. This field can not be empty.
 - `ARG executable path`: the location of the ARG executable. This is mandatory and setted empty by default.
 - `ARG setenv script path`: this field locates the environment script to execute before generating the report. Setted empty by default, this script is optional.
 - `Use local configuration from Preferences`: by default, the configuration is saved into the `<filename.cf>` file. But it is possible to overwrite the file configuration by the local one with this option. The configuration has to be setted directly into the plugin Preferences.
 
 ##### Open Preferences Button
 
-![image](uploads/a810c6226a81836f7ddceaba6da7e302/image.png)
+![image](uploads/6643fe5e2dca5f73bc6187268a9673a3/image.png)
 
 This button opens the local Preferences. See [Preferences](#preferences) to have furthermore informations about the local configuration.
 
@@ -1751,7 +1752,7 @@ This button opens the local Preferences. See [Preferences](#preferences) to have
 
 This section is used to configure ARG and the report generation:
 
-![image](uploads/f2092a6197deb4922d245f1f83fa46e3/image.png)
+![image](uploads/2dc70da0e8d2e6db7dc2d7cbc97f6336/image.png)
 
 - `Parameters File`: the parameters file stores the report options like the filename, the report title, the author... This file is **generated by CF** to be executed by ARG. CF variables can be used to define the value (see [Variables](#Variables)). By default the `<filename.cf>` folder path is setted.
 - `Structure file`: the structure file stores the report data. The data to be included are defined in the other sections Planning, PIRT and PCMM. This file is **generated by CF** to be executed by ARG. CF variables can be used to define the value (see [Variables](#Variables)). By default the `<filename.cf>` folder path is setted.
@@ -1771,13 +1772,13 @@ This section allows to select the Planning data to embed into the report. The fo
 
 The QoI Planning and PCMM Planning mini-tools are available directly within the associated feature respectively PIRT and PCMM.
 
-![image](uploads/32b2c2c3157f74081c1cded6dfbce4b9/image.png)
+![image](uploads/58a161803a4d17cb701d00a01042ee8f/image.png)
 
 #### PIRT Parameters
 
 The PIRT Parameters section lets select the PIRT data to include into the report. Each Quantity of Interest can be added/removed with its associated tag (into the combobox).
 
-![image](uploads/1a5ae5ee5412d67ab48f7aff11bbcefb/image.png)
+![image](uploads/97d17fbe3d5674adebc000503b3c8e43/image.png)
 
 #### PCMM Parameters
 
@@ -1788,7 +1789,7 @@ The PCMM features can be selected:
 - Evidence with their associated documents
 - Assessments
 
-![image](uploads/a4bbf2f5202f1738b8173898e65ca6b0/image.png)
+![image](uploads/b53b86ba5edfabdc3fc21c23c122455e/image.png)
 
 #### Custom Report Ending
 
@@ -1796,17 +1797,17 @@ Custom Report Ending is an optional feature to allow to append some content to t
 
 This content has to be added as an ARG core structure file `.yml` containing at least one `chapters` tag. Please see [ARG documentation](https://automaticreportgenerator.gitlab.io/arg/) for furthermore informations.
 
-![image](uploads/1faf1d800f33461e90650507e87029a5/image.png)
+![image](uploads/d8b14fa4d368a44cfe793bb4562fb3f1/image.png)
 
 The content will be added to the end of the report:
 
-![image](/uploads/704186f26099ca50a1e68538b5dd190d/image.png)
+![image](uploads/1d426d720562620350949e76928a49e2/image.png)
 
 #### ARG Console
 
 The ARG console is used to display the ARG execution logs:
 
-![image](uploads/aaf175c77c44ff2dc8dc038f32d0a848/image.png)
+![image](uploads/879b27302e3b6c1b15877aebf208dda8/image.png)
 
 #### Document Inlining
 
@@ -1814,11 +1815,11 @@ CF uses ARG to inline evidence and references documents.
 
 - **Images** are automatically inlined as images into the final report:
 
-![image](/uploads/a5406c6f34b08fbb1939b0090bcb4868/image.png)
+![image](uploads/c3dbadea6821607a13a9be291ab8ce1c/image.png)
 
 A caption can be added directly in the user interface. If the caption is left empty, the file name will be used:
 
-![image](/uploads/1ae4e781e3944aec483429cf3b228434/GifMaker_20220106170329052.gif)
+![GifMaker_20220106170329052](uploads/e1b8edff810f106471f1ce0c69c44966/GifMaker_20220106170329052.gif)
 
 - **Word** documents is still in a bêta mode. This option can be activated for PCMM evidence in the [Preferences - Developer Options](#developer-options) and on the Report view [ARG Parameters - Inline Word document](#arg-parameters) section.
 
@@ -1826,50 +1827,49 @@ A caption can be added directly in the user interface. If the caption is left em
 
 Some of the CF features have RichText editors available:
 
-![image](uploads/df89342ce8c0c9f36563fa42a12e69b3/image.png)
+![image](uploads/ae6348b746900d526e4c8de908bfb145/image.png)
 
 ARG is able to render the RichText editors content (based on html) in the final report:
 
-![image](uploads/ccea52d93c7a9c2353f95b8ff367e9f4/image.png)
-
+![image](uploads/8b8675de4a3703cb1ce9ab5a4b5af65d/image.png)
 
 
 ## CF Project Configuration
 [Go back to Contents](#contents)
 
-![image](uploads/108e6e8f5bed2ecc96ea6a180fc48051/image.png)
+![image](uploads/f85e3b7443fca4d14db2ee45a1dd6c91/image.png)
 
 In the top right corner of each page, the `Configuration` button allows to access CF configuration options:
 
-![image](uploads/657c2aee28f2261fd6b26b14da1c327e/image.png)
+![image](uploads/883bac70a002bfb76e756d326611126b/image.png)
 
 The configuration has two tabs:
 - Import Configuration
 - Export Configuration
 
-![image](uploads/a6e6da08ca8faacb327cfe18f162b4ae/image.png)
+![image](uploads/36d3e69203e8b9c32f5aee8390d325e8/image.png)
 
 ### Import Configuration
 
 This tab permits to change the current configuration of each CF feature. It is used to enable/disable CF features too.
 
-![image](uploads/657c2aee28f2261fd6b26b14da1c327e/image.png)
+![image](uploads/2864e8c4f86e5e3df419f931bfcd7ed4/image.png)
 
 Each CF feature can be imported. It contains two buttons:
 
 #### Browse
 
-![image](uploads/ad308359db41dbb1141c821f655c83df/image.png)
+![image](uploads/0e7bf0a8771ef2e5d8e7971dbfaaf986/image.png)
 
 The browse button lets select the `.yml` configuration file for the desired feature.
 
 #### Import
 
-![image](uploads/990b9d5d5aa911e024bf350cf4a3938b/image.png)
+![image](uploads/5906d02869c7a1547a937f228eec9357/image.png)
 
 The `Import` button opens a new dialog. This dialog compares the current configuration with the new one. The user can select the changes to apply. To apply the changes, click on `Confirm Import`:
 
-![image](uploads/91cff13a40f7e2b922938e999ce92466/image.png)
+![image](uploads/741aab88bbde8c4719167751f623397b/image.png)
 
 **Important**: if the user decides to delete an existing field, all the data associated will be deleted.
 
@@ -1879,23 +1879,23 @@ The `Import` button opens a new dialog. This dialog compares the current configu
 
 This tab is used to export the current configuration of each CF feature.
 
-![image](uploads/bfcfefabeb5c6c20ceec1e409e620f0c/image.png)
+![image](uploads/e27faa08b055505892f8e918b7dfeb7a/image.png)
 
 Each CF feature can be exported. It contains two buttons:
 
 #### Browse
 
-![image](uploads/ad308359db41dbb1141c821f655c83df/image.png)
+![image](uploads/02682e9bcd2855ec2bff36baeb22f928/image.png)
 
 The browse button lets select the output `.yml` configuration file for the desired feature.
 
 #### Export
 
-![image](uploads/662200e15aa6cc5a277039fc35611365/image.png)
+![image](uploads/0b51bfbaef156931e35415822de1191b/image.png)
 
 The `Export` button create a new `.yml` file with the configuration of the selected feature. This file can be used to create a new CF file. A confirmation message pops up:
 
-![image](uploads/c0db3dbef6d4397ed0e5478f88e7719a/image.png)
+![image](uploads/322f0e7d5e566823c8fb6c17c6e72ae1/image.png)
 
 **Tip**: use this option to copy a CF project file without data
 
@@ -1908,9 +1908,9 @@ A guidance view called `Credibility Framework Guidance` is available within the 
 
 The guidance view is a separated Eclipse view and can be moved into the Eclipse plugin or outside:
 
-![image](uploads/7e25bfc096f514b3d38a96c534b839fa/image.png)
+![image](uploads/f4f57a46cd24756ed5093a010b231600/image.png)
 
-![image](uploads/92ca7c333e4c7ed98614babfceedcb5d/image.png)
+![image](uploads/79357efd956164a3505896c669c50f14/image.png)
 
 The guidance view also changes according to the credibility process opened and the current view (PIRT, PCMM,...) chosen by the user. The view is opened once for all the credibility process and if closed, disappears for all processes.
 
@@ -1922,16 +1922,16 @@ The currently implemented guidelines are:
 It can be opened by:
 - clicking the `Guidance` button on each view:
 
-![image](uploads/e11ab8339eacd7eefb90c53e377a836b/image.png)
+![image](uploads/2dc9d990372c821da1b88776a1f832bb/image.png)
 
 - within **Eclipse menu**:
   - click `Window > Show View > Others...`:
 
-  ![image](uploads/04dee089f92e2e32f0a3033967dacc56/image.png)
+  ![image](uploads/6cea9d1f19e4203286fbc1e48d5eb4f0/image.png)
 
   - then select `Credibility Framework Guidance` under `Credibility Framework`, and click `Open`:
   
-  ![image](uploads/0142ce26680e11eabb767cf4932bfde7/image.png)
+  ![image](uploads/3e7980aa611aff0dec54f8ef66b307ce/image.png)
 
 ### PIRT Guidance
 
@@ -1939,7 +1939,7 @@ The PIRT Guidance is separated in two sections:
 - `PIRT Guidance Levels`: displays the PIRT Guidance for each adequacy column and level. This comes from the PIRT configuration schema file.
 - `PIRT Level Difference Colors`: lists the difference colors to help the user to fill in the PIRT table.
 
-![image](uploads/d87bb699cea64ed60ebdd940a0f6bc3c/image.png)
+![image](uploads/8c59d8f9d62dc40a02bf35c3d6a52966/image.png)
 
 ### PCMM Guidance
 
@@ -1947,15 +1947,16 @@ The guidance level view displays the description of the levels of each subelemen
 
 By default, the PCMM level view is shown in columns:
 
-![image](uploads/186d1d00ae440f1156d524b546e8e415/image.png)
+![image](uploads/d1c0d49dd83fff84180736c71913ad3e/image.png)
 
 But if the available size is less than 500 pixels, the PCMM level view is shown in row:
 
-![image](uploads/59e8391ffc3aeceda78ad15d191f68ac/image.png)
+![image](uploads/af27976a2d0a60c4bbbe896b588c2875/image.png)
 
 To increase the readability of this table, a tooltip is available with the full content of the row:
 
-![image](uploads/f941870721ec2d973b1ae30d9489d40d/image.png)
+![image](uploads/1fe014276684db996fd27c51b5baee32/image.png)
+
 
 
 ## Concurrency Support
@@ -1964,7 +1965,7 @@ To increase the readability of this table, a tooltip is available with the full 
 
 To enable concurrency support into CF plugin, enable the option into Window > Preferences > Credibility Framework > Developer Options:
 
-![image](uploads/350f56f70b81ced0e151681f28216c0f/image.png)
+![image](uploads/d132eb1d0bd55236a72fdb3b86b50d28/image.png)
 
 ### Create a new web project
 
@@ -1972,39 +1973,39 @@ You will be able to create an existing project with the "New Credibility Process
 
 - Right click the project and select New > Other...:
 
-![image](uploads/bed2e12ed3cad9b7b38ea0cac15faf96/image.png)
+![image](uploads/5c77a790d78cd71bbe6bb6c60885c1ac/image.png)
 
 - Select Credibility Process:
 
-![image](uploads/a2d27ee89ab9e58fbbff47686a150687/image.png)
+![image](uploads/a6a55ed86ca118dde21989d53e01d327/image.png)
 
 - Enter the credibility process name:
 
-![image](uploads/cb849f77b306b479c7b55f84d7c99eb8/image.png)
+![image](uploads/44c4eddfc1567911f1eae19a9955b0cb/image.png)
 
 - Select the project type (Web):
 
-![image](uploads/01e1be432f0515c26c0de7ff26dbca5c/image.png)
+![image](uploads/54b395c7e61c76055def04b5082dacb1/image.png)
 
 - Enter the server URL and click "Test Connection":
 
-![image](uploads/46df00614dabfe5d0e0c07f9f4c245ec/image.png)
+![image](uploads/08c18a02d110d044440fdfa2c3760fb6/image.png)
 
 - Select "New Web Project":
 
-![image](uploads/b74daef28b434be1d93daac2a699e44f/image.png)
+![image](uploads/2baa1fd79cc1cac2d34eae1850c8b07f/image.png)
 
 - Enter the project information and click "Finish":
 
-![image](uploads/90973975e276ddac46aa7f31fa05f554/image.png)
+![image](uploads/80610e49c255bab64ffd7d5cd4fec403/image.png)
 
 - The project will be created and will be prompted to enter your credentials, just click "Connect":
 
-![image](uploads/e085af25a6b00a62bfd5e9c2d8a45ce3/image.png)
+![image](uploads/d9836ad4138b2bd2230fed3d7839563d/image.png)
 
 The web project is open:
 
-![image](uploads/39d835be2aa989c7cdb46fd317220e0f/image.png)
+![image](uploads/d33e010ab9e538815e9277ac8fdfcb0e/image.png)
 
 
 ### Connect to an existing web project
@@ -2013,39 +2014,40 @@ You will be able to connect to an existing project with the "New Credibility Pro
 
 - Right click the project and select New > Other...:
 
-![image](uploads/bed2e12ed3cad9b7b38ea0cac15faf96/image.png)
+![image](uploads/2d0e7504f5862a115790d5e7c2358da5/image.png)
 
 - Select Credibility Process:
 
-![image](uploads/a2d27ee89ab9e58fbbff47686a150687/image.png)
+![image](uploads/250ccc4ee94ddd2d24902536a1892934/image.png)
 
 - Enter the credibility process name:
 
-![image](uploads/cb849f77b306b479c7b55f84d7c99eb8/image.png)
+![image](uploads/a1c50cfbcabbf0ee9618194035caaa18/image.png)
 
 - Select the project type (Web):
 
-![image](uploads/01e1be432f0515c26c0de7ff26dbca5c/image.png)
+![image](uploads/d8791f817cbb6143af854c8a94277312/image.png)
 
 - Enter the server URL and click "Test Connection":
 
-![image](uploads/19f1d6e8dc23981823ba85e527175319/image.png)
+![image](uploads/bcb1e55cc656fccc60c03a49c069ff51/image.png)
 
 - Select "Existing Web Project":
 
-![image](uploads/2821a566cefe9f6190b39aad378822ad/image.png)
+![image](uploads/d642c43a4709c8e3f2dc3e978f5cb558/image.png)
 
 - Select the project and click "Finish":
 
-![image](uploads/ea1ae3e90098da83a3c457477b49b159/image.png)
+![image](uploads/9db061286b39a6ff4136b00d471147da/image.png)
 
 - The project will open and you will be prompted to enter your credentials, just click "Connect":
 
-![image](uploads/ae83b4b5cc01ff8535ce6fb4f6e98ea7/image.png)
+![image](uploads/68aec19a6ae2dcb5c5a0d437baa18c4f/image.png)
 
 The web project is open:
 
-![image](uploads/39d835be2aa989c7cdb46fd317220e0f/image.png)
+![image](uploads/a8db9b403ea6e6e5eb3297a37c277e19/image.png)
+
 
 
 ## Eclipse File Associations
@@ -2055,16 +2057,16 @@ By default, files are opened by the Eclipse product. It is possible to change th
 
 In the toolbar, Go to `Window > Preferences`:
 
-![eclispe-pref](uploads/5797e280fb189de42d75ea08e72fe7d3/eclispe-pref.png)
+![image](uploads/8a0a1d688b8875fcf3742ad8e0d3f42a/image.png)
 
 Then in the left menu, go to `General > Editors > File Associations`:
 
-![eclispe-pref-screen](uploads/4c4dabdfa9c720d836f3c3dad329330b/eclispe-pref-screen.png)
+![image](uploads/92302878949365c010384cf5cc9dfa0a/image.png)
 
 In this screen you can add unknown file extensions and associate them to an editor (internal or external).
 It is also possible to associate the editor by Content-Type. For that, Go to `General > Content Types`:
 
-![eclispe-pref-screen2](uploads/0876713f86e865fe02991785ce178178/eclispe-pref-screen2.png)
+![image](uploads/013cff9ca18890dd527b069bea9306d3/image.png)
 
 
 
@@ -2073,7 +2075,7 @@ It is also possible to associate the editor by Content-Type. For that, Go to `Ge
 
 Eclipse has its own preferences to open a web page or a link. 
 
-![image](uploads/d0618e096ef0e0e828973eb5ef20ff4e/image.png)
+![image](uploads/d4f0ce58bf807111a9b7b46e4223add3/image.png)
 
 To change the Eclipse behavior then follow the below steps:
 - Go to `Windows` -> `Preferences` if on Windows OS (`Eclipse` -> `Preferences` on Mac OS X)
@@ -2082,6 +2084,7 @@ To change the Eclipse behavior then follow the below steps:
 Here you would see the Default system web Browser being selected. Click on New and Select your browser (Safari, Firefox, Chrome or IE) from Applications.
 
 - Click `OK`
+
 
 
 [Go back to the top of the page](#content-body)

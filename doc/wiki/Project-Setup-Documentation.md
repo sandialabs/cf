@@ -6,7 +6,7 @@ This page references the tools and installation setup for a new developer to con
 
 [[_TOC_]]
 
-## Required Softwares
+## Required
 [Go back to Contents](#contents)
 
 ### Pre-requisite
@@ -18,48 +18,43 @@ New developers must install following softwares to contribute on cf plugin:
 
 ### Configure Eclipse
 
-#### Set JDK8
+#### Set JDK11
 
 - Go to `Window > Preferences`
 - Then `Java > Compiler`
-- Select Complier comliance level 1.8
+- Select Complier comliance level 11
 
-![image](uploads/3f0a92f48681aef983fdb75e1c5b5586/image.png)
+![image](uploads/fea967dd619c410b4108d3fc1546cdca/image.png)
 
 - Go to `Window > Preferences`
 - Then `Java > Installed JREs`
-- Check if you are using JDK 8
+- Check if you are using JDK 11
 
-![image](uploads/0423f621d8431d81ea592d915b172cf9/image.png)
+![image](uploads/2a8ace21353f3895714fb82e9f625bd6/image.png)
 
 - If not, click `Add`, select `Standard VM` and `Next`:
 
-![image](uploads/06f46defeae6d1c4295229ad524e1300/image.png)
+![image](uploads/50f6ed007bb4f33defa9dd97158e586f/image.png)
 
 - Click Finish
-- Select jdk 8 and click `Apply and Close`:
-
-![image](uploads/b040b90abd411aabfd15bb19c75e8b0f/image.png)
-
-- Remove jre 8 to avoid confusion
+- Select jdk 11 and click `Apply and Close`
+- Remove jre 11 to avoid confusion
 
 #### Activate warnings on non-externalized strings: 
 
 - Go to `Window > Preferences`
-
 - Then `Java > Compiler > Errors/Warnings`
-
 - Select `Warning` for `Non-externalized string (missing/unused $NON-NLS$ tag)`:
 
-![image](uploads/c12c6c4a185adcbfa703c6e864f8b3c7/image.png)
+![image](uploads/94fdfb5063e13b2aa5591ce7df30a10b/image.png)
 
 The compiler will display a warning next to a non-externalized string, like below:
 
-![Annotation_2020-04-23_112304](uploads/374de958ca6261b4eacff26dc76f93a4/Annotation_2020-04-23_112304.png)
+![image](uploads/70c43f9271f5040d6ea24efe4b4f631c/image.png)
 
 To override the warning, add the following comment next to the line **//$NON-NLS-1$**:
 
-![Annotation_2020-04-23_112319](uploads/d4f14d3f4d751ce35552b7c0ec7eeed1/Annotation_2020-04-23_112319.png)
+![image](uploads/b3cd7ab1506eb72db9e830db2c60f431/image.png)
 
 
 #### Activate warnings on javadoc missings/malformations: 
@@ -70,7 +65,7 @@ To override the warning, add the following comment next to the line **//$NON-NLS
 
 - Select and check boxes as the following:
 
-![image](uploads/dc081363bb2b7898903ad455093b5f10/image.png)
+![image](uploads/75c1f53a06594521c3187e7130ba83da/image.png)
 
 - Apply and rebuild
 
@@ -80,13 +75,13 @@ For the web project, the Server plugin has to installed into Eclipse.
 
 To check its installation, go to `Window > Show view > Other...`, and search for `Server` view.
 
-![image](uploads/0e41090636bf3d2c8840fa4936ed81e5/image.png)
+![image](uploads/a1652a1349ac7ca491580ee80446d75d/image.png)
 
 If the Server view is not there, install it:
 
 - Go to `Help > Eclipse Marketplace`, search for "Eclipse Web Developer Tools" and install it:
 
-![image](uploads/6220580c2d5789601c821cd8a96390a2/image.png)
+![image](uploads/8ca11c5941f664adde98ba419b74ce66/image.png)
 
 - Select All, click `Confirm`, accept licence and click `Finish`. Eclipse will restart and the Server view will be available.
 
@@ -106,15 +101,15 @@ To install it:
 
 - Select `Maven > Discovery` and click on `Open Catalog`
 
-![image](uploads/6bbb8224187de8c5218c78ab2aa1cfff/image.png)
+![image](uploads/8c9f763decb2d9e44c9e727974cd2a98/image.png)
 
 - In the m2e catalog, search for "tycho", select `Tycho Configurator` and click `Finish`:
 
-![image](uploads/a9349498aed8f94beb40d68e69e9345e/image.png)
+![image](uploads/d4e13ccfc3f9b72e526cdd5179a6fcde/image.png)
 
 - Click `Next`:
 
-![image](uploads/16e7532958ec340331c37c74e4d69b0c/image.png)
+![image](uploads/e28b1bba20537fe1f19df314330b2a0a/image.png)
 
 - Accept licence, click `Finish` and `Restart now`. Tycho will be downloaded and installed.
 
@@ -132,7 +127,7 @@ To install it:
      - `Nebula Progress Circle Widget`
      - `Nebula Rich Text Feature`
 
-![image](uploads/54f947fac34eca13fed0f3127ad24ae6/image.png)
+![image](uploads/6d6c2fdd1f06644d4b1cc0783cd558e3/image.png)
 
   - Click `Next`, then `Finish`. Your eclipse will restart and opcoach preferences will be installed.
 
@@ -144,16 +139,16 @@ CF project uses Sonar engine to check the code quality in the CI. To avoid bad p
   - Go to `Help > Eclipse Marketplace...`:
   - Search for `Sonarlint` and install `SonarLint`:
 
-![sonarlint_plugin](uploads/cc84f61b32bac7af20ef02ea05b7e72b/sonarlint_plugin.png)
+![sonarlint_plugin](uploads/72a2b10b9abdcbdd548c753336ea9605/sonarlint_plugin.png)
 
 - Launch Sonar analysis:
 By default, Sonar will be executed on each opened file. A blue underline will appear if the code needs to be refactored. The complete view will appear under the `Problems` view:
 
-![image](uploads/08315651359fb3a0c403c214abccf582/image.png)
+![image](uploads/b00c91fd0670a5f653e8cfbb084e3900/image.png)
 
 You can launch a full scan on an element by right-clicking on it, then `SonarLint > Analyze`. The SonarLint will be opened with all the issues detected:
 
-![image](uploads/9f32d3f3183af855f177451ed0537426/image.png)
+![image](uploads/36eecb475c8726d5b7cdec6f9101e8d5/image.png)
 
 ### SpotBugs
 
@@ -163,13 +158,13 @@ SpotBugs will be executed by the CI (Continuous Integration) pipeline of the pro
   - Go to `Help > Eclipse Marketplace...`:
   - Search for `Spotbugs` and install `SpotBugs Eclipse plugin`:
 
-![image](uploads/4723a845940aa58d96f0dd5b18afc543/image.png)
+![image](uploads/e6a46169de7d5e720ba8d94978869664/image.png)
 
 - Configure SpotBugs:
   - Go to `Window > Preferences`
   - Search for SpotBugs under Java
 
-![image](uploads/4971f73a10cd3feb0d387a24a2856924/image.png)
+![image](uploads/1bb1f01dd1af6469ee4902ba304b7cf4/image.png)
 
   - Set the following preferences:
     - analysis effort: Default
@@ -188,29 +183,29 @@ To manage HSQLDB database, a good way is to use Dbeaver Eclipse plugin.
 
 It is present in the `Eclipse Markerplace` (Menu Help > Eclipse Marketplace...):
 
-![image](uploads/a52316f77e53696bbbe6f09ceda9f3d6/image.png)
+![image](uploads/b8ecd44119407943b916541fc451d97f/image.png)
 
 Once installed, you can create a `New Database Connection` in the menu `Database > New Database Connection`:
 
-![image](uploads/a133cc626acbff369657ea142065dc59/image.png)
+![image](uploads/1c40be405a5d8357b06ff5d8f5e946bb/image.png)
 
 Select `HSQLDB Embedded` in the database type and `Next`:
 
-![image](uploads/327a28546187784b76ed970d974cd7fa/image.png)
+![image](uploads/cb05cf3e3a1a5eaa7bf89ce2267848f7/image.png)
 
 Enter the database information and click `Finish`:
 - `Path`: enter the path of the `<filename>.cf` file temporary folder followed by **\data\credibility** (data is the database container, credibility is the database name)
 - `Username`: SA
 
-![image](uploads/e7c21c638a4e18755c9c553be76782d6/image.png)
+![image](uploads/7557e38887bdc704cd891cf9ec75a73a/image.png)
 
 A `Database Browser` view should appear containing the database schema:
 
-![image](uploads/f73bc47ad9ac245dbdddaccc6581b678/image.png)
+![image](uploads/cf793ae7e8f50c364bfcd4e1a6a3d8c9/image.png)
 
 If it doesn't you can find it in the Eclipse view, menu `Window > Show View > Other...`, search for `Database > Database Browser`:
 
-![image](uploads/ea1d6e7b5bbbeb01f3bd540e44f74a83/image.png)
+![image](uploads/6c33f3341f4fd4201d3a275ec132dd4a/image.png)
 
 ### Lombok
 
@@ -228,11 +223,11 @@ To install it follow this instructions:
 
 - With the above command, an installer will open and would auto scan for the installation of Eclipse IDE. If you already know the IDE installation location, provide it by clicking the “Specify Location” button.
 
-![image](uploads/62f20f2152bc02ac2ddbc33411ef22db/image.png)
+![image](uploads/d27273be7df7eeb2a70afaaedbbd4c2a/image.png)
 
 - Once the wizard has located the IDE installation location, click the “Install button”. Close the Installer when done.
 
-![image](uploads/d34879bce36e45d974561fc9ddd16572/image.png)
+![image](uploads/45cccd2ebc8a6c0e2beda4f83551760d/image.png)
 
 - Restart the Eclipse IDE if already running
 
@@ -246,9 +241,10 @@ To install it:
 
 - Go to `Help > Eclipse Marketplace`, search for "jautodoc" and click `Install`:
 
-![image](uploads/82a38bcc4aac8ebe67dee5d8df8f5f25/image.png)
+![image](uploads/9d685424668e0cdcfdf424078c721cd2/image.png)
 
 - Accept licence, click `Install anyway` and `Restart now`
+
 
 ## Tests
 [Go back to Contents](#contents)
@@ -256,23 +252,22 @@ To install it:
 - Add JUnit 5 to buildpath;
    - Select project `gov.sandia.cf.plugin.tests` buildpath, right click on project `gov.sandia.cf.plugin.tests` and click on `Build Path`, `Configure Build Path`
 
-![2019-08-13_junit5_buildpath1](uploads/da15cb88232b8704ea0c1f8610c8416a/2019-08-13_junit5_buildpath1.PNG)
+![image](uploads/6bae5edaa63567b818f313b6c6c8c42d/image.png)
 
    - Click on `Add Library`
 
-![2019-08-13_junit5_buildpath2](uploads/9079c44196b50d626e21401f6dcaba89/2019-08-13_junit5_buildpath2.PNG)
+![image](uploads/fe8672526678b6098b3cce707b8cf103/image.png)
 
    - Select `JUnit` then `Next`
 
-![2019-08-13_junit5_buildpath3](uploads/cc05ef83c61e668f28ccf8595ea410c0/2019-08-13_junit5_buildpath3.PNG)
+![image](uploads/aae0a1686e1f15d8c19af8e51f64116a/image.png)
 
    - Select `JUnit 5` then `Finish`
 
-![2019-08-13_junit5_buildpath4](uploads/51a89ab02b39e23ed32b87a1eaf79f28/2019-08-13_junit5_buildpath4.PNG)
-
+![image](uploads/fddbd9b0fcf139c031258a4857547804/image.png)
    - Verify that JUnit 5 has been added to buildpath and click `Apply and Close`
 
-![2019-08-13_junit5_buildpath5](uploads/c29da46555515b55b43969e736267858/2019-08-13_junit5_buildpath5.PNG)
+![image](uploads/bd57eee7756269e038e85adfb29827c0/image.png)
 
 - Install mockito plugin in Eclipse:
    - Go to `Help > Install New Software`
@@ -280,7 +275,7 @@ To install it:
    - In **type filter text** field enter "mockito"
    - Select all `Orbit Bundles By Scope: Testing` section and click `Next`, then `Finish`. Your eclipse will restart and logback logger will be installed.
 
-![2019-08-13_mockito_libs](uploads/4aab5da546a95c9060210c7b38be346d/2019-08-13_mockito_libs.PNG)
+![image](uploads/d76019a839fb82352bc18661bc82db1d/image.png)
 
 ## Sources
 [Go back to Contents](#contents)
@@ -296,21 +291,21 @@ Each sub-branch should start with the number of the associated issue into Gitlab
 
 1. In Eclipse workspace, click on `File > Import`:
 
-![Annotation_2020-02-26_141752](uploads/fd685879a37630ecf66596600d089b50/Annotation_2020-02-26_141752.png)
+![image](uploads/32dab33762882f8351cf41d737253de7/image.png)
 
 2. In the Import wizard, select `Maven > Existing Maven Projects`:
 
-![Annotation_2020-02-26_135843](uploads/f18fc1d287e56e0f3c1cd14ed1bc428d/Annotation_2020-02-26_135843.png)
+![image](uploads/5fdc8af0b6cd2ab400daad9b5815b66c/image.png)
 
 3. Click on `Browse` in the next view and select the CF source code in `<git-cf-directory>/src/gov.sandia.cf`:
 
-![Annotation_2020-02-26_141630](uploads/a6016fd6572e6cc2e44728ccfe8046a4/Annotation_2020-02-26_141630.png)
+![image](uploads/92db0b3f69e38c3c8befbd8814f05c92/image.png)
 
-![Annotation_2020-02-26_135913](uploads/07579d18161ea6d720f723d92b953dec/Annotation_2020-02-26_135913.png)
+![image](uploads/0e4a2a3fe0775466e7475440bda73434/image.png)
 
 4. Select `all the Maven projects` and click on `Finish`:
 
-![Annotation_2020-02-26_141528](uploads/40169839f86d4df38b470b84707ebf0b/Annotation_2020-02-26_141528.png)
+![image](uploads/dedb17a93e9891742a1f9f3ee1d3f60f/image.png)
 
 5. Some maven dependencies will be downloaded (like Tycho). Your Eclipse will restart. After that, your project is imported.
 
@@ -342,12 +337,13 @@ CF project uses `Maven Tycho` to compile sources. `Maven Tycho` is a combination
 
 - Open a **command line** tool (Terminal, cmd,...)
 - Go to the CF git repo on your local machine and then **go to** `src\gov.sandia.cf`
-- Type `mvn clean install -DskipTests` to build the project and run unit tests
+- Type `mvn clean install -"Dmaven.test.skip"=true` to build the project and run unit tests
 
 ### Build with Maven
 
 - Open a command line tool (Terminal, cmd,...)
 - Go to the CF git repo on your local machine and then go to `src\gov.sandia.cf`
 - Type `mvn clean install` to build the project and run unit tests
+
 
 [Go back to the top of the page](#content-body)

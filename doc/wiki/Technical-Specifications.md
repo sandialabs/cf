@@ -2,15 +2,20 @@ This page describes credibility framework technical choices and software archite
 
 [Go back to Wiki home page](home)
 
+
 ## Contents
 
 [[_TOC_]]
+
+
 
 ## General Description
 
 [Go back to Contents](#contents)
 
 CF plugin is a local **Eclipse RCP plugin** which can be installed on `Eclipse >= Oxygen 3a` based platforms.
+
+
 
 ## Software Architecture
 
@@ -25,7 +30,7 @@ But the new CF release include a new bêta mode for CF to support concurrency ac
 The project is accessible via a web server but always via the CF plugin UI. It implies having two different deliverables, the CF plugin and the server webapp.
 
 <div align="center">
-![CF_design-Global_Architecture.drawio](uploads/37129690e961cc65c3e61e478f88fb63/CF_design-Global_Architecture.drawio.png)
+![CF_design-Global_Architecture.drawio](uploads/5b5bb941b2ad9bef015eab97b641fa15/CF_design-Global_Architecture.drawio.png)
 </div>
 
 The .cf file is the entry point into the CF application. Two options are available: local or team CF project.
@@ -42,7 +47,6 @@ A database is installed on a MySQL server instance. The application is logically
 This scheme does not describe the authentication mechanism.
 
 **Important**: This architecture does not support report generation on the server side. The user will still need to install ARG and its dependencies; the evidence links must be relative to the local Eclipse workspace.
-
 
 ### Eclipse RCP Java Projects
 
@@ -100,7 +104,7 @@ gov.sandia.cf.root
 All the tiers are designed following the `interface design pattern`. That means that every call to a class and a method is made through an interface. There can be multiple implementation of the same interface. The "caller" tier do not know the implementation but only the interface. The association between the interface and the implementation is made by a specific class called `Manager`. Every tier has a Loader class known by the "caller" tier.
 
 <div align="center">
-![CF_design-Interface_Design_Pattern.drawio](uploads/3829499d1d7805d4797083fb0312a5f9/CF_design-Interface_Design_Pattern.drawio.png)
+![CF_design-Interface_Design_Pattern.drawio](uploads/93d1b47f86282377de1ee2962e3c4cdd/CF_design-Interface_Design_Pattern.drawio.png)
 </div>
 
 
@@ -110,7 +114,7 @@ All the tiers are designed following the `interface design pattern`. That means 
 Below is described the plugin software architecture by component:
 
 <div align="center">
-![CF_design-_client__Software_Architecture.drawio](uploads/4868849442ce4161e3fd517321ce69c0/CF_design-_client__Software_Architecture.drawio.png)
+![CF_design-_client__Software_Architecture.drawio](uploads/aad1816e40f9cfb1bbff1412d550522f/CF_design-_client__Software_Architecture.drawio.png)
 </div>
 
 The plugin is launched by the .cf file call. The `launcher` loads the Eclipse `parts` and the `managers` depending of the project type, local or web.
@@ -130,13 +134,12 @@ Independently of the project type, the components use the shared ones (`common`,
 The server is launched by the administrator.
 
 <div align="center">
-![CF_design-_server__Software_Architecture_.drawio](uploads/4e2d243b493b0555932a8a2a20f196e3/CF_design-_server__Software_Architecture_.drawio.png)
+![CF_design-_server__Software_Architecture_.drawio](uploads/96a8ee9f42bbc9b9ac0bf93ef0df0082/CF_design-_server__Software_Architecture_.drawio.png)
 </div>
 
 It serves REST APIs and wait for HTTP requests from the CF plugin. The `REST API Controllers` get the data from the request as `Model DTO` and convert it into `Model Entities` with the `Mapper` component.
 
 It calls the `Service` layer which handle data and persist it with the `Repository` component.
-
 
 ### Plugin architecture
 
@@ -145,7 +148,7 @@ It calls the `Service` layer which handle data and persist it with the `Reposito
 The CF plugin is developed following the `multi-tier` architecture design pattern. The main content is available into the`gov.sandia.cf.plugin` project:
 
 <div align="center">
-![CF_design-_local__Software_Architecture.drawio](uploads/1ae5eb8b041d0386c70caf0c98a6f9ce/CF_design-_local__Software_Architecture.drawio.png)
+![CF_design-_local__Software_Architecture.drawio](uploads/f04056828966655b9f2746df0e55f67c/CF_design-_local__Software_Architecture.drawio.png)
 </div>
 
 The software architecture is based on multiple layers:
@@ -172,7 +175,7 @@ The `IViewManager` interface is used to define methods for the view managers and
 Here is a schema of the actual implementation:
 
 <div align="center">
-![CF_design-Manager.drawio](uploads/6ebecf10d7f7028c664ddc38070a13e6/CF_design-Manager.drawio.png)
+![CF_design-Manager.drawio](uploads/3a97156dd4190a300f374dacd2cee46c/CF_design-Manager.drawio.png)
 </div>
 
 `CredibilityEditor`: The main entry point of the plugin is the class `CredibilityEditor` which is called when the `<filename>.cf` file is opened. 
@@ -197,10 +200,10 @@ It manages its instance of the `MainViewManager` and the `ApplicationManager`.
 
 The services have to define an interface having the `@Service` annotation from `gov.sandia.cf.application` package. Create the implementation of your interface. The implementation will be automatically found and loaded.
 
-
 #### DAO layer Repositories
 
 The local repositories have to define an interface having the `@Repository` annotation from `gov.sandia.cf.dao` package. Create the implementation of your interface. The implementation will be automatically found and loaded.
+
 
 
 ## Database Model
@@ -212,11 +215,10 @@ CF data are stored into a HSQLDB database. The database schema is the same for a
 For the local implementation, a database folder is created to manage HSQLDB database files. When the plugin is closed, the data persists into a `<filename>.cf` file, which is a zip containing the HSQLDB files.
 
 ### Database Diagram
-
 This diagram describes the data structure by feature (Authentication, Global, PIRT, QoI Planning, PCMM, PCMM Planning, Decision, System Requirements, Uncertainty, Reporting, Settings).
 
 <div align="center">
-![credibility-framework-db-schema.svg](uploads/fe3034ea101a1a0bedb7efe0791df196/credibility-framework-db-schema.svg)
+![credibility-framework-db-schema.svg](uploads/cd7ba261a883f4b0ffd7859a2da1ea8a/credibility-framework-db-schema.svg)
 </div>
 
 You can find the original data model schema in [doc/data model](https://gitlab.com/iwf/cf/-/tree/develop/doc/data%20model) folder. It contains the `.mwb` file to edit with MySQL Workbench, and the exported schemas in PNG and SVG.
@@ -314,14 +316,16 @@ If `database version <= plugin version`, the plugin is launched.
 If `database version > plugin version`, the plugin stops the loading and displays an error message to force the user to update its plugin.
 
 <div align="center">
-![203-plugin-version-behind](/uploads/d15827971ae760ca90bd3eb9192a89fd/203-plugin-version-behind.png)
+![image](uploads/74b2b18629c1f0da8310bf9cf26455b9/image.png)
 </div>
 
 <div align="center">
-![203-plugin-version-behind-error](/uploads/b3b9955f83af8b823bb99d96a26398fc/203-plugin-version-behind-error.png)
+![image](uploads/446c0b29baaf27617460924ef51eb3b0/image.png)
 </div>
 
 After the database version check validated, the current plugin version is setted to the database.
+
+
 
 ## Credibility Files
 
@@ -332,7 +336,7 @@ This files describe the features for a specific CF process. They are not embedde
 They are not mandatory and can be provided during the credibility process creation to enable the associated feature:
 
 <div align="center">
-![image](uploads/1f4f0feafcddca31e45dd681ce257b81/image.png)
+![image](uploads/a207ad865a951e2aac7ed6cdafca5892/image.png)
 </div>
 
 > An examplar of each of the following files is present at [doc/Configuration](https://gitlab.com/iwf/cf/-/tree/develop/doc/Configuration).
@@ -387,15 +391,16 @@ There can be multiple `<filename>.cf` files at the same level or project/folder 
 Because there can be several `<filename>.cf` files in the same folder, each `.cftmp-<filename>.cf` folder is suffixed by the name of the `<filename>.cf` file associated. (e.g. `test.cf` will generate a `.cftmp-test.cf` folder in its project/parent folder path).
 
 The included files/folders are:
+
 - `setup.yml`: this file contains the CF project setup. It's mandatory for a web project and give information about the project id, the server url... but optional for a local project.
 - `data`: this folder contains the HSQLDB folder with HSQL files. On some systems using NFS storage, the data folder could be locked. To allow reopening the database without having to quit the Eclipse application, a new `dataYYYYMMDDHHmmss` folder is created to handle the newly open data.
 
-![image](/uploads/3e436a5750ecdd3b1af8bf29fdf1901e/image.png)
+![image](uploads/d10bef7076902554ccb0ca902b76a4d1/image.png)
 
 - `extract`: it is used to unzip the `<filename>.cf` file content. The folder is deleted after opening.
 - `save`: saving the project data into the `<filename>.cf` file implies selecting the appropriate files. For this purpose the `save` folder is used to prepare the save action. It is deleted after save. The `save` folder always contain a clean `data` folder :
 
-![image](/uploads/f4e285ccd043d59e6f256932e93e1f4e/image.png)
+![image](uploads/7bf7ece82db1395c80ff3bb84043a9c9/image.png)
 
 - ~~`cf-schema.yml`~~: this file was created with CF version <= 0.2.0. It contained the configuration of the all requirements files in one. The file was generated during the CF project creation. it is **not used** anymore and should be automatically deleted after the importation of its data into the database.
 
@@ -419,7 +424,7 @@ During the opening phase, the Credibility plugin do the following tasks:
   - If recoverable, **asks the user** to recover the previous data:
 
 <div align="center">
-![Screen_Shot_2019-11-20_at_12.33.18_PM](/uploads/352bd26f8af2bff0232a4f581b354c19/Screen_Shot_2019-11-20_at_12.33.18_PM.png)
+![image](uploads/a30de1aba8638c8483e5d80188eb5914/image.png)
 </div>
 
 - If the user wants to use the previous data, open the database connection on the `.cftmp-<filename>.cf` temporary folder and load data.
@@ -444,7 +449,7 @@ During the save phase, the Credibility plugin do the following tasks:
 - If all this steps are successful, remove the previous renamed `<filename>.cf` file
 
 <div align="center">
-![Screen_Shot_2019-11-20_at_12.34.43_PM](/uploads/1638bbcc9355e8d1c0f79592cbd28bf9/Screen_Shot_2019-11-20_at_12.34.43_PM.png)
+![image](uploads/d2a4416cf852e8d6c76329d6a9888151/image.png)
 </div>
 
 ##### Close a Credibility process editor:
@@ -454,7 +459,7 @@ During the close phase, the Credibility plugin do the following tasks:
 - Remove the `.cftmp-<filename>.cf` temporary folder
 
 <div align="center">
-![Screen_Shot_2019-11-20_at_12.35.48_PM](/uploads/cb9a9030efd8ec0e93acc257a18a6bd6/Screen_Shot_2019-11-20_at_12.35.48_PM.png)
+![image](uploads/8498e0b30a11a06abb8ceceef0863d7f/image.png)
 </div>
 
 ##### Delete a Credibility process file:
@@ -465,10 +470,11 @@ The class `ResourceDeltaModifier` is listening for a resource deleted event and 
 - If it exists, delete the `.cftmp-<filename>.cf` temporary folder
 
 <div align="center">
-![Annotation_2020-03-10_122310](uploads/d5aeb367f518987d895c437171df3c3b/Annotation_2020-03-10_122310.png)
+![image](uploads/638292ca1c4ad6b48f122b34194a685c/image.png)
 </div>
+
 <div align="center">
-![Annotation_2020-03-10_122331](uploads/230f658d575618db250e0ca257943514/Annotation_2020-03-10_122331.png)
+![image](uploads/08ec4023e0c2f7398ade918b7cb8f81f/image.png)
 </div>
 
 ##### Rename a Credibility process file:
@@ -493,12 +499,12 @@ The class `ResourceDeltaModifier` is listening for a resource moved event and tr
   - Close and reopen the associated cf editor to load the data
 
 
+
 ## GUI Views Architecture
 
 This section describes the architecture of the cf plugin views. The entry point of the plugin is the `CredibilityEditor`. It is launched when a `<filename>.cf` file is opened in Eclipse RCP. 
 
 It loads the `MainViewManager` class. This view manages the behavior of all the other views.
-
 
 ### Managers
 
@@ -521,7 +527,7 @@ They implement the `IViewManager` interface. This interface is used to set to a 
 You can see below a diagram representing the view manager's interactions:
 
 <div align="center">
-![CF_design-UI_view_manager.drawio](uploads/060288daa5e775c08724376f0c780b04/CF_design-UI_view_manager.drawio.png)
+![CF_design-UI_view_manager.drawio](uploads/7ccd3c808d08dfdb5a21c38557631508/CF_design-UI_view_manager.drawio.png)
 </div>
 
 The view managers manage its own view. You can find below a diagram per view manager:
@@ -529,62 +535,63 @@ The view managers manage its own view. You can find below a diagram per view man
 - `HomeViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_home.drawio](uploads/33afe6562561c9bf87d782081a7c6d6b/CF_design-UI_interactions_home.drawio.png)
+![CF_design-UI_interactions_home.drawio](uploads/07aff76b78245232c056f13240f0bc68/CF_design-UI_interactions_home.drawio.png)
 </div>
 
 - `ConfigurationViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_Configuration.drawio](uploads/7ed527a4c42ff2a129fa82cd72d0fe23/CF_design-UI_interactions_Configuration.drawio.png)
+![CF_design-UI_interactions_Configuration.drawio](uploads/ff14d7c46a819d79b86e73aea211ae55/CF_design-UI_interactions_Configuration.drawio.png)
 </div>
 
 - `DecisionViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_Decision.drawio](uploads/184f19ea772a86b6b5210071c563e1b9/CF_design-UI_interactions_Decision.drawio.png)
+![CF_design-UI_interactions_Decision.drawio](uploads/344f3940bd072731e5e80f7ff22d2f9d/CF_design-UI_interactions_Decision.drawio.png)
 </div>
 
 - `IntendedPurposeViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_Intended_Purpose.drawio](uploads/40ccd048c2b14dcc9f0b5cd7c2adf6db/CF_design-UI_interactions_Intended_Purpose.drawio.png)
+![CF_design-UI_interactions_Intended_Purpose.drawio](uploads/0f47983e4dd7292a2b9816adebc92d23/CF_design-UI_interactions_Intended_Purpose.drawio.png)
 </div>
 
 - `PIRTViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_PIRT.drawio](uploads/4a59faaa4e0330062413675ae7a1f4f5/CF_design-UI_interactions_PIRT.drawio.png)
+![CF_design-UI_interactions_PIRT.drawio](uploads/52b70718b389c511b8a48b9c772573ae/CF_design-UI_interactions_PIRT.drawio.png)
 </div>
 
 - `PCMMViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_PCMM.drawio](uploads/f33782e163623b7b8fa37607abc6032c/CF_design-UI_interactions_PCMM.drawio.png)
+![CF_design-UI_interactions_PCMM.drawio](uploads/63e46b9c84c4fc781ae4950a32d9c7f3/CF_design-UI_interactions_PCMM.drawio.png)
 </div>
 
 - `QoIPlanningViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_QoI_Planning.drawio](uploads/ab4ee213110230591c4403cb29bbb297/CF_design-UI_interactions_QoI_Planning.drawio.png)
+![CF_design-UI_interactions_QoI_Planning.drawio](uploads/162e0eef75726239e24c978d51e1091d/CF_design-UI_interactions_QoI_Planning.drawio.png)
 </div>
 
 - `ReportViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_Report.drawio](uploads/a4397c602af54ba006fdd151b4bc2624/CF_design-UI_interactions_Report.drawio.png)
+![CF_design-UI_interactions_Report.drawio](uploads/0fd23a6ca5be8531a8709db4c4f9048f/CF_design-UI_interactions_Report.drawio.png)
 </div>
 
 - `SystemRequirementViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_System_Requirement.drawio](uploads/04cc9822b3147206f5d918cfe63bb65b/CF_design-UI_interactions_System_Requirement.drawio.png)
+![CF_design-UI_interactions_System_Requirement.drawio](uploads/b0ca527458b5417cf5fbf1724b7f4f39/CF_design-UI_interactions_System_Requirement.drawio.png)
 </div>
 
 - `UncertaintyViewManager`:
 
 <div align="center">
-![CF_design-UI_interactions_Uncertainty.drawio](uploads/afc24e90cd7641d38d7a54793c62f516/CF_design-UI_interactions_Uncertainty.drawio.png)
+![CF_design-UI_interactions_Uncertainty.drawio](uploads/beedf5607f62d81d18a16bcb55061da5/CF_design-UI_interactions_Uncertainty.drawio.png)
 </div>
+
 
 #### Guidance View
 
@@ -597,8 +604,9 @@ The guidance view manager is `CFGuidanceViewManager` class and managed the follo
 - `PCMMGuidanceLevelView`: this class displays the PCMM guidelines
 
 <div align="center">
-![CF_design-UI_interactions_Guidance.drawio](uploads/9fdb6ac5eb25edcdbdabf1dd2dad5466/CF_design-UI_interactions_Guidance.drawio.png)
+![CF-UI_interactions_guidance.svg](uploads/a661cf22dd3a64f6dd9b8dcdea14984c/CF-UI_interactions_guidance.svg)
 </div>
+
 
 ### Views Inheritance
 
@@ -631,7 +639,7 @@ Each CF view is divided in multiple components. Each view java class is displayi
 Below is a diagram showing the inheritance between all the views:
 
 <div align="center">
-![CF_design-UI_hierarchy.drawio](uploads/5745884acf301f44418fda0fd641d40e/CF_design-UI_hierarchy.drawio.png)
+![CF_design-UI_hierarchy.drawio](uploads/8d8f74e245c1bc7074c5608081864632/CF_design-UI_hierarchy.drawio.png)
 </div>
 
 ## NGW Integration
