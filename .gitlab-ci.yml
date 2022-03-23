@@ -84,10 +84,10 @@ build and test:
     - cd $PROJECT_ROOT_POM
     - mvn $MAVEN_CLI_OPTS clean install
     # Package Plugin
-    - echo "==================== [build] Copying build into the artifacts folder ====="
+    - echo "==================== [build] Packaging plugin ============================"
     - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/eclipse/
     # Copy test reports
-    - echo "==================== [build] Copying test coverage report into the artifacts folder"
+    - echo "==================== [build] Copying test coverage report ================"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
     - cp tests/gov.sandia.cf.plugin.tests/target/build-test.log ../../target/build-test.log
     # Test and Build webapp
@@ -124,17 +124,17 @@ build and test tag:
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - echo "Creating artifacts folder"
-    - mkdir -p target/build
+    - mkdir -p target/build/eclipse
+    - mkdir -p target/build/webapp
     - mkdir -p target/coverage
     - mkdir -p target/javadoc
   script: 
-    # Copy build
-    - echo "==================== [build] Copying build into the artifacts folder ====="
-    - cp -R build/* target/build/
-    # Test plugin
     - echo "==================== [build] Building and testing CF plugin =============="
     - cd $PROJECT_ROOT_POM
     - mvn $MAVEN_CLI_OPTS clean install
+    # Copy build
+    - echo "==================== [build] Copying build into the artifacts folder ====="
+    - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/eclipse/
     # Copy test reports
     - echo "==================== [build] Copying test coverage report ================"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
@@ -143,6 +143,11 @@ build and test tag:
     - echo "==================== [build] Building and testing CF webapp =============="
     - cd web/gov.sandia.cf.webapp/
     - mvn clean package spring-boot:repackage -Dpackaging=jar
+    # Package webapp
+    - echo "==================== [build] Packaging SpringBoot .jar ==================="
+    - find target/ -name \*.jar -exec cp {} ../../../../target/build/webapp/ \;
+    - mkdir -p ../../../../target/build/webapp/config/
+    - cp src/main/resources/application-prod.properties ../../../../target/build/webapp/config/application.properties
     - cd ../../
     # Generate Javadoc
     - echo "==================== [build] Generating CF Javadoc ======================="
@@ -215,7 +220,7 @@ package:
 ########### Stage release ############
 #####################################
 
-# Release a snapshot
+# Release a snapshot:
 #  - only manually if it is a protected branch
 release snapshot:
   image: alpine:latest
@@ -237,7 +242,7 @@ release snapshot:
     - echo "==================== [release] Cloning CF git repository ================="
     - git clone git@gitlab.com:CredibilityFramework/cf.git cf
     - cd cf
-    - echo "==================== [release] Checkout branch $BRANCH_DEVELOP ==========="
+    - echo "==================== [release] Checkout branch $CI_COMMIT_BRANCH ========="
     - git checkout $CI_COMMIT_BRANCH
     - git branch -a
     - git status
@@ -316,7 +321,8 @@ pages:
   stage: publish
   variables: 
     PACKAGENAME: "gov.sandia.cf" # used into ci/doc/site/unzip-packages.sh script
-    P2_REPO_FILE_PREFIX: "gov.sandia.cf.p2_repo" # used into ci/doc/site/unzip-packages.sh script
+    P2_REPO_FILE_PREFIX: "gov.sandia.cf.p2_repo" # used into ci/doc/site/unzip-packages.sh script     
+    WEBAPP_FILE_PREFIX: "gov.sandia.cf.webapp" # used into ci/doc/site/unzip-packages.sh script                                                                                
     JAVADOC_FILE_PREFIX: "gov.sandia.cf.javadoc" # used into ci/doc/site/unzip-packages.sh script
   before_script:
     - echo "==================== [publish] Install dependencies ===================="
