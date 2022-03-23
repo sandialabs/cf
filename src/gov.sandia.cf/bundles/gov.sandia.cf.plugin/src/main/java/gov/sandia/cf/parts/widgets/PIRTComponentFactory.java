@@ -17,23 +17,24 @@ import org.eclipse.swt.widgets.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ApplicationManager;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
 import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ConstantTheme;
+import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.pirt.editors.PIRTAdequacyColumnLabelProvider;
 import gov.sandia.cf.parts.ui.pirt.editors.PIRTImportanceColumnLabelProvider;
 import gov.sandia.cf.parts.ui.pirt.editors.PIRTPhenTablePhenomenaContentProvider;
 import gov.sandia.cf.parts.viewer.PIRTPhenomenaTreePhenomena;
 import gov.sandia.cf.parts.viewer.TableViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
+import gov.sandia.cf.tools.ColorTools;
 
 /**
  * This class contains methods to create a new PIRT table
@@ -60,11 +61,11 @@ public class PIRTComponentFactory {
 	 * 
 	 * @param parent            the parent composite
 	 * @param pirtConfiguration the pirt configuration
-	 * @param appMgr            the application manager
+	 * @param viewMgr           the view manager
 	 * @return the created pirt table
 	 */
 	public static TableViewerHideSelection createPIRTTable(Composite parent, PIRTSpecification pirtConfiguration,
-			ApplicationManager appMgr) {
+			IViewManager viewMgr) {
 
 		TableViewerHideSelection tableViewerPhenomena = null;
 
@@ -79,8 +80,10 @@ public class PIRTComponentFactory {
 		Table tablePhenomena = tableViewerPhenomena.getTable();
 
 		// Customize table
-		tablePhenomena.setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		tablePhenomena.setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		tablePhenomena.setHeaderBackground(ColorTools.toColor(viewMgr.getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		tablePhenomena.setHeaderForeground(
+				ColorTools.toColor(viewMgr.getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Layout
 		final AutoResizeViewerLayout treeViewerPhenomenaLayout = new AutoResizeViewerLayout(tableViewerPhenomena);
@@ -103,7 +106,8 @@ public class PIRTComponentFactory {
 		// Importance (Level type)
 		TableViewerColumn importanceColumn = new TableViewerColumn(tableViewerPhenomena, SWT.CENTER);
 		importanceColumn.getColumn().setText(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
-		importanceColumn.setLabelProvider(new PIRTImportanceColumnLabelProvider(pirtConfiguration));
+		importanceColumn
+				.setLabelProvider(new PIRTImportanceColumnLabelProvider(pirtConfiguration, viewMgr.getRscMgr()));
 		treeViewerPhenomenaLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.PHEN_VIEW_TREEPHEN_LVL_COLUMN_COEFF, true));
 		columnProperties.add(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
@@ -130,7 +134,7 @@ public class PIRTComponentFactory {
 			}
 
 			if (null != tempColumn) {
-				tempColumn.setLabelProvider(new PIRTAdequacyColumnLabelProvider(pirtConfiguration, column, appMgr));
+				tempColumn.setLabelProvider(new PIRTAdequacyColumnLabelProvider(pirtConfiguration, column, viewMgr));
 			}
 
 			columnProperties.add(column.getName());

@@ -15,9 +15,15 @@ collapse_icon_128_black.png        - Icon made by icon king (https://freeicons.i
 communicate_icon_128.png           - Icon from https://www.iconfinder.com/kitofparts
 communicate_icon_128_primary.png   - Icon from https://www.iconfinder.com/kitofparts
 config_icon_128.png                - Icon from https://www.iconfinder.com/icons/1564529/configuration_mechanism_options_setting_settings_icon
+connect_icon_128.png			   - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license.
+connect_icon_128_white.png	       - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license. Icon colored to white.
+connect_icon_128_gray-dark.png     - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license. Icon colored to gray dark.
 copy_icon_128_black.png			   - Icon from https://www.iconfinder.com/icons/326595/content_copy_duplicate_icon
 delete_icon_128.png                - Icon from https://www.materialui.co/icon/delete
 delete_icon_128_white.png          - Icon from https://www.materialui.co/icon/delete
+disconnect_icon_128.png		       - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license. Added a cross bar.
+disconnect_icon_128_white.png	   - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license. Added a cross bar. Icon colored to white.
+disconnect_icon_128_gray-dark.png  - Icon from https://fontawesome.com/v5.15/icons/wifi?style=solid under Creative Commons Attribution 4.0 International license. Added a cross bar. Icon colored to gray dark.
 duplicate_icon_128.png             - Icon from https://icon-icons.com/icon/duplicate/120027
 duplicate_icon_128_white.png       - Icon from https://icon-icons.com/icon/duplicate/120027
 edit_icon_128.png                  - Icon from https://fontawesome.com/icons/edit?style=regular
@@ -27,6 +33,7 @@ examine_icon_128.png               - Icon made by NoFace from https://www.iconfi
 expand_icon_128_black.png          - Icon made by icon king (https://freeicons.io/profile/3) from www.freeicons.io
 export_icon_128_black.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
 export_icon_128_white.png          - Icon made by amoghdesign (https://www.iconfinder.com/amoghdesign) under Creative Commons 3.0 licence (https://creativecommons.org/licenses/by-nc/3.0/legalcode)
+fail_icon_128_red.png              - Icon made by Freepik from www.flaticon.com
 gen_cf_report_icon_128.png         - Icon from https://www.iconfinder.com/yanlu
 gen_cf_report_icon_128_primary.png - Icon from https://www.iconfinder.com/yanlu
 gen_cf_report_icon_128_white.png   - Icon from https://www.iconfinder.com/yanlu

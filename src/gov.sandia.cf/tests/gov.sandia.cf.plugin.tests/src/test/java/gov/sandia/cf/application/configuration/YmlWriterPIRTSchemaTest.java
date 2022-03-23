@@ -20,11 +20,11 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTSchema;
-import gov.sandia.cf.application.configuration.pirt.YmlWriterPIRTSchema;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.pirt.YmlWriterPIRTSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;

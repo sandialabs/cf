@@ -9,12 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -24,24 +34,25 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGenericParameterApplication;
-import gov.sandia.cf.application.IUncertaintyApplication;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Notification;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.Uncertainty;
-import gov.sandia.cf.model.UncertaintyGroup;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.UncertaintyValue;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.widgets.FormFactory;
+import gov.sandia.cf.parts.widgets.FormFieldWidget;
 import gov.sandia.cf.parts.widgets.GenericValueFieldWidget;
 import gov.sandia.cf.parts.widgets.LinkWidget;
-import gov.sandia.cf.parts.widgets.SelectWidget;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -64,6 +75,16 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	private List<UncertaintyParam> parameters;
 
 	/**
+	 * the Name Text
+	 */
+	private FormFieldWidget<?> txtName;
+
+	/**
+	 * The model
+	 */
+	private Model model;
+
+	/**
 	 * The uncertainty to create
 	 */
 	private Uncertainty uncertainty;
@@ -71,12 +92,12 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	/**
 	 * The uncertainty group selected
 	 */
-	private UncertaintyGroup groupSelected;
+	private Uncertainty groupSelected;
 
 	/**
 	 * Combo viewer
 	 */
-	private SelectWidget<UncertaintyGroup> cbxUncertaintyGroup;
+	private ComboViewer cbxUncertaintyGroup;
 
 	/**
 	 * the button name
@@ -99,19 +120,22 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	 * @param mode          the dialog mode
 	 */
 	public UncertaintyDialog(UncertaintyViewManager viewManager, Shell parentShell, Uncertainty uncertainty,
-			UncertaintyGroup groupSelected, DialogMode mode) {
+			Uncertainty groupSelected, ViewMode mode) {
 		super(viewManager, parentShell);
+
+		// Get model
+		model = getViewManager().getCache().getModel();
 
 		// Set group
 		if (groupSelected != null) {
 			this.groupSelected = groupSelected;
 		} else {
-			this.groupSelected = (uncertainty != null) ? uncertainty.getGroup() : null;
+			this.groupSelected = (uncertainty != null) ? uncertainty.getParent() : null;
 		}
 
 		// Set mode
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		// Parameter columns
@@ -122,7 +146,7 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 		case CREATE:
 			this.uncertainty = new Uncertainty();
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -144,9 +168,21 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	@Override
 	public void create() {
 		super.create();
-		setTitle(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_TITLE));
-		if (mode != DialogMode.VIEW) {
-			setMessage(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_DESCRIPTION), IMessageProvider.INFORMATION);
+
+		if (this.groupSelected == null) {
+			setTitle(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP_TITLE));
+		} else {
+			setTitle(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_TITLE));
+		}
+
+		if (mode != ViewMode.VIEW) {
+			if (this.groupSelected == null) {
+				setMessage(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP_DESCRIPTION),
+						IMessageProvider.INFORMATION);
+			} else {
+				setMessage(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_DESCRIPTION),
+						IMessageProvider.INFORMATION);
+			}
 		}
 	}
 
@@ -185,7 +221,7 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 		formContainer.setLayout(gridLayout);
 
 		// Select content type
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			renderNonEditableContent(formContainer);
 		} else {
 			renderEditableContent(formContainer);
@@ -213,19 +249,33 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 		super.configureShell(newShell);
 
 		// Sets the new title of the dialog
+		String title = RscTools.empty();
 		switch (mode) {
 		case CREATE:
-			newShell.setText(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_ADD));
+			if (this.groupSelected == null) {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_ADD);
+			} else {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_ADD);
+			}
 			break;
 		case UPDATE:
-			newShell.setText(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_EDIT));
+			if (this.groupSelected == null) {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_EDIT);
+			} else {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_EDIT);
+			}
 			break;
 		case VIEW:
-			newShell.setText(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_VIEW));
+			if (this.groupSelected == null) {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_VIEW);
+			} else {
+				title = RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_PAGENAME_VIEW);
+			}
 			break;
 		default:
 			break;
 		}
+		newShell.setText(title);
 	}
 
 	@Override
@@ -242,6 +292,14 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	 */
 	private void renderNonEditableContent(Composite parent) {
 
+		// label Name
+		FormFactory.createLabel(parent,
+				RscTools.getString(RscConst.MSG_LBL_REQUIRED, RscTools.getString(RscConst.MSG_UNCERTAINTY_NAME)));
+
+		// text Name
+		txtName = FormFactory.createNonEditableFormFieldWidget(getViewManager(), parent, FormFieldType.TEXT, null,
+				null);
+
 		// keep viewers in a map
 		parameterViewers = new HashMap<>();
 
@@ -253,19 +311,24 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 
 			for (UncertaintyParam param : parameters) {
 
-				// search the value for the parameter
-				Optional<UncertaintyValue> uncertaintyValue = Optional.empty();
-				if (uncertainty.getUncertaintyParameterList() != null) {
-					uncertaintyValue = uncertainty.getUncertaintyParameterList().stream()
-							.filter(u -> param.equals(u.getParameter())).findFirst();
-				}
+				// check if the parameter is for the current level
+				if (getViewManager().getClientService(IGenericParameterService.class)
+						.isParameterAvailableForLevel(param, getCurrentLevel())) {
 
-				if (uncertaintyValue.isPresent()) {
-					GenericValueFieldWidget<UncertaintyParam> nonEditableField = FormFactory
-							.createNonEditableGenericValueWidget(getViewManager(), parent, param);
+					// search the value for the parameter
+					Optional<UncertaintyValue> uncertaintyValue = Optional.empty();
+					if (uncertainty.getValues() != null) {
+						uncertaintyValue = uncertainty.getValues().stream().filter(u -> param.equals(u.getParameter()))
+								.findFirst();
+					}
 
-					// Add to viewer list
-					parameterViewers.put(param, nonEditableField);
+					if (uncertaintyValue.isPresent()) {
+						GenericValueFieldWidget<UncertaintyParam> nonEditableField = FormFactory
+								.createNonEditableGenericValueWidget(getViewManager(), parent, param);
+
+						// Add to viewer list
+						parameterViewers.put(param, nonEditableField);
+					}
 				}
 			}
 		}
@@ -278,38 +341,103 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	 */
 	private void renderEditableContent(Composite parent) {
 
-		// label Uncertainty Group
-		Label lblUncertaintyGroup = new Label(parent, SWT.NONE);
-		lblUncertaintyGroup.setText(RscTools.getString(RscConst.MSG_LBL_REQUIRED,
-				RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP)));
-
-		// combo Uncertainty Group
-		cbxUncertaintyGroup = FormFactory.createSelectWidget(getViewManager().getRscMgr(), parent, true, null, null);
-		cbxUncertaintyGroup.setEnabled(mode.equals(DialogMode.UPDATE));
-
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-			cbxUncertaintyGroup.setSelectValues(getViewManager().getAppManager()
-					.getService(IUncertaintyApplication.class).getUncertaintyGroupByModel(model));
+		// create parent combobox
+		if (mode != ViewMode.CREATE) {
+			renderParentComboBox(parent);
 		}
-		cbxUncertaintyGroup.addKeyListener(new ComboDropDownKeyListener());
+
+		// label name
+		FormFactory.createLabel(parent,
+				RscTools.getString(RscConst.MSG_LBL_REQUIRED, RscTools.getString(RscConst.MSG_UNCERTAINTY_NAME)));
+
+		// text name
+		txtName = FormFactory.createEditableFormFieldWidget(getViewManager(), parent, FormFieldType.TEXT, null, null);
+		txtName.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				checkNameUnicity();
+			}
+		});
 
 		// keep viewers in a map
 		parameterViewers = new HashMap<>();
 
 		for (UncertaintyParam param : parameters) {
-			// render field
-			GenericValueFieldWidget<UncertaintyParam> editableField = FormFactory
-					.createEditableGenericValueWidget(getViewManager(), parent, param);
 
-			// check link
-			if (FormFieldType.LINK.equals(editableField.getType())) {
-				editableField.addLinkChangedListener(event -> checkLink(editableField.getLinkWidget()));
+			if (getViewManager().getClientService(IGenericParameterService.class).isParameterAvailableForLevel(param,
+					getCurrentLevel())) {
+
+				// render field
+				GenericValueFieldWidget<UncertaintyParam> editableField = FormFactory
+						.createEditableGenericValueWidget(getViewManager(), parent, param);
+
+				// check link
+				if (FormFieldType.LINK.equals(editableField.getType())) {
+					editableField.addLinkChangedListener(event -> checkLink(editableField.getLinkWidget()));
+				}
+
+				// Add to viewer list
+				parameterViewers.put(param, editableField);
 			}
-
-			// Add to viewer list
-			parameterViewers.put(param, editableField);
 		}
+
+		// dialog behavior
+		txtName.setFocus();
+	}
+
+	/**
+	 * Render the uncertainty parameter parent combobox
+	 * 
+	 * @param parent the parent composite
+	 */
+	private void renderParentComboBox(Composite parent) {
+
+		// label uncertainty
+		Label lblParent = new Label(parent, SWT.NONE);
+		lblParent.setText(RscTools.getString(RscConst.MSG_DIALOG_UNCERTAINTY_GROUP));
+
+		// combo uncertainty
+		cbxUncertaintyGroup = new ComboViewer(parent, SWT.BORDER | SWT.READ_ONLY);
+		GridData dataParent = new GridData();
+		dataParent.grabExcessHorizontalSpace = true;
+		dataParent.horizontalAlignment = GridData.FILL;
+		cbxUncertaintyGroup.getCombo().setLayoutData(dataParent);
+		cbxUncertaintyGroup.setContentProvider(new ArrayContentProvider());
+		cbxUncertaintyGroup.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				return ((Uncertainty) element).getFullGeneratedId();
+			}
+		});
+
+		// Initialize input list
+		List<Uncertainty> inputs = new ArrayList<>();
+
+		// Get input list tree
+		if (model != null) {
+
+			List<Uncertainty> roots = getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+					.getUncertaintyGroupByModel(model);
+
+			if (roots != null) {
+
+				// compute uncertainties
+				List<Uncertainty> uncertainties = roots.stream().map(root -> root.getChildrenTree(true))
+						.flatMap(List::stream).collect(Collectors.toList());
+
+				// search for the current uncertainty
+				for (Uncertainty child : uncertainties) {
+					if (groupSelected != null && groupSelected.getLevel().equals(child.getLevel())) {
+						inputs.add(child);
+					}
+				}
+			}
+		}
+
+		cbxUncertaintyGroup.setInput(inputs);
+		cbxUncertaintyGroup.getCombo().addKeyListener(new ComboDropDownKeyListener());
+		cbxUncertaintyGroup.getCombo().setEnabled(true);
 	}
 
 	/**
@@ -317,12 +445,23 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	 */
 	private void loadData() {
 
-		// set uncertainty group selected in parent view
-		if (groupSelected != null && cbxUncertaintyGroup != null) {
-			cbxUncertaintyGroup.setValue(groupSelected);
+		if (uncertainty == null) {
+			return;
 		}
 
-		if (uncertainty != null && uncertainty.getUncertaintyParameterList() != null) {
+		// set uncertainty group selected in parent view
+		if (groupSelected != null && cbxUncertaintyGroup != null) {
+			final ISelection slParent = new StructuredSelection(groupSelected);
+			cbxUncertaintyGroup.setSelection(slParent);
+		}
+
+		// set Uncertainty Name
+		if (txtName != null) {
+			txtName.setValue(uncertainty.getName());
+		}
+
+		// Set generic parameters
+		if (uncertainty.getValues() != null) {
 
 			for (UncertaintyParam parameter : parameters) {
 
@@ -330,15 +469,64 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 				GenericValueFieldWidget<UncertaintyParam> viewer = parameterViewers.get(parameter);
 
 				if (viewer != null) {
-					UncertaintyValue uncertaintyParameterToUpdate = uncertainty
-							.getUncertaintyParameterList().stream().filter(uncertaintyParameterTemp -> viewer
-									.getParameter().equals(uncertaintyParameterTemp.getParameter()))
+					UncertaintyValue uncertaintyParameterToUpdate = uncertainty.getValues().stream()
+							.filter(uncertaintyParameterTemp -> viewer.getParameter()
+									.equals(uncertaintyParameterTemp.getParameter()))
 							.findFirst().orElse(null);
 
 					viewer.setValue(uncertaintyParameterToUpdate);
 				}
 			}
 		}
+	}
+
+	/**
+	 * @return the current level
+	 */
+	private int getCurrentLevel() {
+		int parentLevel = groupSelected != null ? groupSelected.getLevel() : -1;
+		return uncertainty.getId() != null ? uncertainty.getLevel() : parentLevel + 1;
+	}
+
+	/**
+	 * Check the uncertainty name unicity and add a helper if needed under the
+	 * txtName field
+	 */
+	private void checkNameUnicity() {
+		boolean isError = false;
+
+		Notification notification = NotificationFactory.getNewWarning();
+
+		// tests Name
+		if (txtName.getValue() == null || txtName.getValue().isEmpty()) {
+			notification.addMessage(RscTools.getString(RscConst.ERR_UNCERTAINTY_NAME_MANDATORY));
+			isError = true;
+		} else {
+
+			// check if uncertainty name already exists
+			try {
+				boolean existsUncertaintyName = getViewManager().getAppManager().getService(IDecisionApplication.class)
+						.existsDecisionTitle(new Integer[] { uncertainty.getId() }, txtName.getValue());
+				if (existsUncertaintyName) {
+					notification.addMessage(
+							RscTools.getString(RscConst.ERR_UNCERTAINTY_NAME_DUPLICATED, txtName.getValue()));
+					isError = true;
+				}
+			} catch (CredibilityException e) {
+				logger.error("An error occured while retrieving the qoi names", e); //$NON-NLS-1$
+				notification.addMessage(e.getMessage());
+				isError = true;
+			}
+		}
+
+		if (isError) {
+			txtName.setHelper(notification);
+		} else {
+			txtName.clearHelper();
+		}
+
+		// change ok button
+		setEnableOkButton(!isError);
 	}
 
 	/**
@@ -357,7 +545,7 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	@Override
 	protected void okPressed() {
 		// View - Just exit
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 		}
 
@@ -372,18 +560,19 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 	 */
 	private void save() {
 
-		// Save - Validate form and hydrate the uncertainty
+		// retrieve parent selected
+		setParentSelection();
+
 		// Initialize
 		boolean formValid = true;
-		cbxUncertaintyGroup.clearHelper();
+		txtName.clearHelper();
 		parameterViewers.forEach((param, viewer) -> viewer.clearHelper());
 
-		// Check group selection
-		groupSelected = cbxUncertaintyGroup.getValue();
-		if (groupSelected == null) {
+		// check name
+		if (StringUtils.isBlank(txtName.getValue())) {
 			formValid = false;
-			cbxUncertaintyGroup.setHelper(
-					NotificationFactory.getNewError(RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_GROUP)));
+			txtName.setHelper(NotificationFactory.getNewError(RscTools.getString(
+					RscConst.ERR_GENERICPARAM_PARAMETER_REQUIRED, RscTools.getString(RscConst.MSG_UNCERTAINTY_NAME))));
 		}
 
 		// Uncertainty parameter list
@@ -393,7 +582,7 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 		for (UncertaintyValue value : tempValues) {
 
 			// validate constraints
-			Notification notification = getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			Notification notification = getViewManager().getClientService(IGenericParameterService.class)
 					.checkValid(value, tempValues);
 
 			if (notification != null) {
@@ -409,8 +598,11 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 
 		setErrorMessage(null);
 
+		// Set title
+		uncertainty.setName(txtName.getValue());
+
 		// Set Group
-		uncertainty.setGroup(groupSelected);
+		uncertainty.setParent(groupSelected);
 
 		// Set value list
 		List<UncertaintyValue> toPersistValues = new ArrayList<>();
@@ -420,8 +612,8 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 			UncertaintyValue toPersistValue = null;
 			UncertaintyValue existingValue = null;
 
-			if (uncertainty.getUncertaintyParameterList() != null) {
-				existingValue = uncertainty.getUncertaintyParameterList().stream()
+			if (uncertainty.getValues() != null) {
+				existingValue = uncertainty.getValues().stream()
 						.filter(up -> tempValue.getParameter().equals(up.getParameter())).findFirst().orElse(null);
 			}
 
@@ -440,7 +632,7 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 
 			toPersistValues.add(toPersistValue);
 		}
-		uncertainty.setUncertaintyParameterList(toPersistValues);
+		uncertainty.setValues(toPersistValues);
 
 		// Call super
 		super.okPressed();
@@ -470,8 +662,8 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 				continue;
 			}
 
-			if (uncertainty.getUncertaintyParameterList() != null) {
-				genericValue = uncertainty.getUncertaintyParameterList().stream()
+			if (uncertainty.getValues() != null) {
+				genericValue = uncertainty.getValues().stream()
 						.filter(up -> viewer.getParameter().equals(up.getParameter())).findFirst().orElse(null);
 			}
 
@@ -496,4 +688,21 @@ public class UncertaintyDialog extends GenericCFSmallDialog<UncertaintyViewManag
 		return tempValues;
 	}
 
+	/**
+	 * Set the parent selection
+	 */
+	private void setParentSelection() {
+
+		// Check parent selection
+		if (cbxUncertaintyGroup != null) {
+			ISelection selection = cbxUncertaintyGroup.getSelection();
+			if (!selection.isEmpty()) {
+				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+				groupSelected = (Uncertainty) structuredSelection.getFirstElement();
+				if (groupSelected.getId() == null) {
+					groupSelected = null;
+				}
+			}
+		}
+	}
 }

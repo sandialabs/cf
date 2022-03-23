@@ -28,17 +28,14 @@ import org.eclipse.swt.widgets.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
 import gov.sandia.cf.model.PIRTAdequacyColumnGuideline;
 import gov.sandia.cf.model.PIRTLevelDifferenceColor;
 import gov.sandia.cf.model.PIRTLevelImportance;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.IViewManager;
-import gov.sandia.cf.parts.ui.pirt.editors.PIRTGuidanceLevelLabelProvider;
-import gov.sandia.cf.parts.ui.pirt.editors.PIRTGuidelinesLabelProvider;
-import gov.sandia.cf.parts.ui.pirt.editors.PIRTGuidelinesTreeContentProvider;
 import gov.sandia.cf.parts.viewer.TableViewerHideSelection;
 import gov.sandia.cf.parts.viewer.TreeViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;

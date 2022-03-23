@@ -3,10 +3,13 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.theme;
 
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ExpandBar;
+
+import gov.sandia.cf.tools.ColorTools;
 
 /**
  * The Expand Bar Factory
@@ -26,59 +29,66 @@ public class ExpandBarTheme {
 
 	/**
 	 * @param parent the parent composite
+	 * @param rscMgr the resource manager
 	 * @return an expand bar with the default configuration and style.
 	 */
-	public static ExpandBar createExpandBar(Composite parent) {
-		return createExpandBar(parent, SWT.V_SCROLL | SWT.FILL);
+	public static ExpandBar createExpandBar(Composite parent, ResourceManager rscMgr) {
+		return createExpandBar(parent, rscMgr, SWT.V_SCROLL | SWT.FILL);
 	}
 
 	/**
 	 * @param parent     the parent composite
+	 * @param rscMgr     the resource manager
 	 * @param withBorder draw the expand bar border or not
 	 * @return an expand bar with the default configuration and style.
 	 */
-	public static ExpandBar createExpandBar(Composite parent, boolean withBorder) {
-		return createExpandBar(parent, withBorder, SWT.V_SCROLL | SWT.FILL);
+	public static ExpandBar createExpandBar(Composite parent, ResourceManager rscMgr, boolean withBorder) {
+		return createExpandBar(parent, rscMgr, withBorder, SWT.V_SCROLL | SWT.FILL);
 	}
 
 	/**
 	 * @param parent the parent composite
+	 * @param rscMgr the resource manager
 	 * @param style  the style to apply
 	 * @return an expand bar with the default configuration.
 	 */
-	public static ExpandBar createExpandBar(Composite parent, int style) {
+	public static ExpandBar createExpandBar(Composite parent, ResourceManager rscMgr, int style) {
 		boolean withBorder = true;
-		return createExpandBar(parent, withBorder, style);
+		return createExpandBar(parent, rscMgr, withBorder, style);
 	}
 
 	/**
 	 * @param parent     the parent composite
+	 * @param rscMgr     the resource manager
 	 * @param withBorder draw the expand bar border or not
 	 * @param style      the style to apply
 	 * @return an expand bar with the default configuration.
 	 */
-	public static ExpandBar createExpandBar(Composite parent, boolean withBorder, int style) {
+	public static ExpandBar createExpandBar(Composite parent, ResourceManager rscMgr, boolean withBorder, int style) {
 		boolean grabVerticalSpace = false;
-		return createExpandBar(parent, withBorder, grabVerticalSpace, style);
+		return createExpandBar(parent, rscMgr, withBorder, grabVerticalSpace, style);
 	}
 
 	/**
 	 * @param parent            the parent composite
+	 * @param rscMgr            the resource manager
 	 * @param withBorder        draw the expand bar border or not
 	 * @param grabVerticalSpace grab excess vertical space
 	 * @param style             the style to apply
 	 * @return an expand bar with the default configuration.
 	 */
-	public static ExpandBar createExpandBar(Composite parent, boolean withBorder, boolean grabVerticalSpace,
-			int style) {
+	public static ExpandBar createExpandBar(Composite parent, ResourceManager rscMgr, boolean withBorder,
+			boolean grabVerticalSpace, int style) {
 		ExpandBar barHeader = new ExpandBar(parent, style);
 		barHeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, grabVerticalSpace, 1, 1));
 		if (parent != null) {
 			barHeader.setBackground(parent.getBackground());
 		}
-		barHeader.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		barHeader.setForeground(
+				ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		barHeader.addPaintListener(e -> {
-			e.gc.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
+			e.gc.setForeground(
+					ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY)));
 			if (withBorder) {
 				int h = barHeader.getBounds().height;
 				int w = barHeader.getBounds().width;

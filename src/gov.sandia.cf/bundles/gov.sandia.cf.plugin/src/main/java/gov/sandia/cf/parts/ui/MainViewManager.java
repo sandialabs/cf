@@ -36,18 +36,19 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ApplicationManager;
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.IApplicationManager;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
+import gov.sandia.cf.common.IManager;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.launcher.CFCache;
 import gov.sandia.cf.launcher.CredibilityEditor;
-import gov.sandia.cf.launcher.IManager;
 import gov.sandia.cf.model.CFFeature;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMPhase;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.listeners.IBreadCrumbListener;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
+import gov.sandia.cf.parts.services.IClientService;
 import gov.sandia.cf.parts.tools.ViewTools;
 import gov.sandia.cf.parts.ui.configuration.ConfigurationViewManager;
 import gov.sandia.cf.parts.ui.decision.DecisionViewManager;
@@ -62,6 +63,7 @@ import gov.sandia.cf.parts.ui.requirement.SystemRequirementViewManager;
 import gov.sandia.cf.parts.ui.uncertainty.UncertaintyViewManager;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
+import gov.sandia.cf.web.services.IWebClientManager;
 
 /**
  * The credibility view that shows credibility views. All the credibility views
@@ -78,6 +80,7 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 
 	/** Buttons events Properties */
 	public static final String BTN_EVENT_PROPERTY = "BTN_EVENT"; //$NON-NLS-1$
+
 	/** Buttons events VIEW MANAGER */
 	public static final String BTN_VIEWMANAGER = "BTN_VIEWMANAGER"; //$NON-NLS-1$
 
@@ -110,6 +113,9 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 	 */
 	private CredibilityEditor credibilityEditor;
 
+	/** The first opening. */
+	private boolean firstOpening;
+
 	/**
 	 * CrediblityView constructor
 	 * 
@@ -120,6 +126,7 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		Assert.isNotNull(credibilityEditor);
 		this.credibilityEditor = credibilityEditor;
 		viewManagers = new EnumMap<>(CFFeature.class);
+		this.firstOpening = true;
 	}
 
 	/** {@inheritDoc} */
@@ -134,17 +141,24 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		openHome();
 	}
 
-	/**
-	 * @return the credibility Editor
-	 */
 	@Override
 	public CredibilityEditor getCredibilityEditor() {
 		return credibilityEditor;
 	}
 
-	/**
-	 * @return the cf cache
-	 */
+	@Override
+	public boolean isWebConnection() {
+		if (getCredibilityEditor() == null) {
+			return false;
+		}
+		return getCredibilityEditor().isWebConnection();
+	}
+
+	@Override
+	public boolean isLocalFileConnection() {
+		return !isWebConnection();
+	}
+
 	@Override
 	public CFCache getCache() {
 		if (credibilityEditor == null) {
@@ -153,28 +167,27 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		return credibilityEditor.getCache();
 	}
 
-	/**
-	 * @return the application manager
-	 */
 	@Override
-	public ApplicationManager getAppManager() {
+	public IApplicationManager getAppManager() {
 		if (credibilityEditor == null) {
 			return null;
 		}
 		return credibilityEditor.getAppMgr();
 	}
 
-	/**
-	 * Set the view changed properties and mechanisms
-	 */
+	@Override
+	public IWebClientManager getWebClient() {
+		if (credibilityEditor == null) {
+			return null;
+		}
+		return credibilityEditor.getWebClient();
+	}
+
 	@Override
 	public void viewChanged() {
 		this.credibilityEditor.setDirty(true);
 	}
 
-	/**
-	 * Do save the credibility editor
-	 */
 	@Override
 	public void doSave() {
 		// save just after
@@ -341,11 +354,12 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		Model model = getCache().getModel();
 		if (model != null) {
 			List<QuantityOfInterest> qois = getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
-			if ((null == qois || qois.isEmpty())
+			if (firstOpening && (null == qois || qois.isEmpty())
 					&& getAppManager().getService(IPIRTApplication.class).isPIRTEnabled()) {
 				MessageDialog.openWarning(Display.getCurrent().getActiveShell(),
 						RscTools.getString(RscConst.MSG_HOMEVIEW_PCMM_PREREQUISITE_TITLE),
 						RscTools.getString(RscConst.MSG_HOMEVIEW_PCMM_PREREQUISITE_TXT));
+
 			}
 		}
 
@@ -355,6 +369,8 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		}
 
 		openViewManager(CFFeature.PCMM);
+
+		firstOpening = false;
 	}
 
 	/**
@@ -473,6 +489,11 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 	private void openViewManager(CFFeature feature) {
 
 		if (feature != null && viewManagers.get(feature) != null) {
+
+			// trigger quitting previous feature view
+			if (layout.topControl instanceof IViewManager && !layout.topControl.equals(viewManagers.get(feature))) {
+				((IViewManager) layout.topControl).quit();
+			}
 
 			// open home view for the feature
 			viewManagers.get(feature).openHome();
@@ -624,6 +645,8 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 	@Override
 	public void dispose() {
 
+		stop();
+
 		// dispose views
 		for (AViewManager viewMgr : viewManagers.values()) {
 			ViewTools.disposeControl(viewMgr);
@@ -646,6 +669,14 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		CFGuidanceViewManager guidanceViewManager = getGuidanceViewManager();
 		if (guidanceViewManager != null) {
 			guidanceViewManager.reload(credibilityEditor);
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void reloadActiveView() {
+		if (layout.topControl instanceof IViewManager) {
+			((IViewManager) layout.topControl).reloadActiveView();
 		}
 	}
 
@@ -678,5 +709,17 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 	@Override
 	public ResourceManager getRscMgr() {
 		return credibilityEditor.getRscMgr();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public <S extends IClientService> S getClientService(Class<S> interfaceClass) {
+		return credibilityEditor.getClientSrvMgr().getService(interfaceClass);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void quit() {
+		// do nothing by default
 	}
 }

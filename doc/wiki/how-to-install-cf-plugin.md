@@ -1,4 +1,4 @@
-The goal of this page is to explain Credibility Framework plugin installation.
+The goal of this page is to explain Credibility Framework plugin and webapp installation.
 
 [Go back to Wiki home page](home)
 
@@ -6,12 +6,20 @@ The goal of this page is to explain Credibility Framework plugin installation.
 
 [[_TOC_]]
 
-## Obtain Credibility Framework plugin
+## Obtain Credibility Framework
 [Go back to Contents](#contents)
 
-The plugin builds of the Credibility Framework can be found at branch [develop/build](https://gitlab.com/iwf/cf/tree/develop/build) folder
+The builds of the Credibility Framework can be found into [Gitlab Package Registry](https://gitlab.com/iwf/cf/-/packages).
 
-## Install Credibility Framework plugin
+Two zipped files will be available:
+- `gov.sandia.cf.p2_repo.{VERSION}.zip` including the plugin installation folder
+- `gov.sandia.cf.webapp.{VERSION}.zip` containing the webapp jar and the property files
+
+![image](uploads/c55f835bd79ded7c3f03146e71715ab2/image.png)
+
+## Credibility Framework plugin
+
+### Install plugin
 [Go back to Contents](#contents)
 
 1. Download the plugin build 
@@ -72,7 +80,7 @@ https://stackoverflow.com/questions/11219215/eclipse-hangs-when-installing-new-s
 
 ![2019-07-11_restart](uploads/ab88f0d44825cdd0876429e148bfedae/2019-07-11_restart.png)
 
-## Check Credibility Framework plugin installation
+### Check plugin installation
 [Go back to Contents](#contents)
 
 1. Launch Eclipse
@@ -89,7 +97,7 @@ https://stackoverflow.com/questions/11219215/eclipse-hangs-when-installing-new-s
 
 ![image](uploads/0e5b3e168c78a2a20978520256c8fcef/image.png)
 
-## Update Credibility Framework plugin
+### Update plugin
 [Go back to Contents](#contents)
 
 1. Click on menu `Help > Check for updates`:
@@ -122,7 +130,7 @@ Eclipse will check the update sites:
 
 Your plugin is updated.
 
-## Uninstall Credibility Framework plugin
+### Uninstall plugin
 [Go back to Contents](#contents)
 
 1. Launch Eclipse
@@ -148,12 +156,87 @@ Your plugin is updated.
 ![2019-07-11_restart](uploads/23e96f49ccb5b81227bc6ac5913df0f4/2019-07-11_restart.png)
 
 
-## Dependencies
+### Dependencies
 
-### ARG
+#### ARG
 
 CF is using ARG (Automatic Report Generator) project to build and generate reports. See [Credibility Report](functional-specifications#credibility-report) feature description in the functional specifications.
 
 See [ARG Wiki page](https://gitlab.com/AutomaticReportGenerator/arg/-/wikis/home) and/or [ARG documentation page](https://automaticreportgenerator.gitlab.io/arg/) for furthermore informations about how to install ARG.
+
+
+
+## Credibility Framework Webapp
+
+### Create database (and user if necessary)
+
+- Execute the following SQL queries (change user and password by the desired ones):
+
+```sql
+CREATE DATABASE credibility_db;
+
+CREATE USER 'cf_user'@'localhost' IDENTIFIED WITH mysql_native_password BY 'P@s$w0rd';
+
+GRANT ALL PRIVILEGES ON credibility_db.* TO 'cf_user'@'localhost';
+```
+
+### Get springboot webapp archive folder
+
+- Unzip webapp folder into the desired folder
+
+### Configure springboot webapp
+
+- Go into the `config` folder and open the `application.properties` file:
+
+	- Change the database connection and credentials to match your configuration:
+
+```yml
+spring.datasource.url=jdbc:mysql://localhost:3306/credibility_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+spring.datasource.username=cf_user
+spring.datasource.password=P@s$w0rd
+```
+
+### Run springboot webapp
+
+- Open a new terminal into the webapp folder and execute the following command line:
+
+```shell
+java -jar webapp-1.0.1.CSX.jar
+```
+
+- The webapp will run by default on port 8080 (http://localhost:8080/)
+
+- To change default port append `--server.port={NEWPORT}` to the command:
+
+```
+java -jar webapp-1.0.1.CSX.jar --server.port={NEWPORT}
+```
+
+### Test webapp running
+
+- Open the following page into a browser http://localhost:8080/
+
+- You can replace localhost by your local ip address
+
+**Tip:** If the database connection is not successful, the webapp will display an error message in the terminal and stop. Please configure application.properties file.
+
+### Stop springboot webapp
+
+- In the terminal hit `Ctrl` + `C`. This combo will stop the server.
+
+
+### Package (dev)
+
+- Package as SpringBoot .jar file:
+
+```
+mvn clean package spring-boot:repackage -Dpackaging=jar
+```
+
+- Package as java webapp .war file:
+
+```
+mvn clean package spring-boot:repackage -Dpackaging=war
+```
 
 [Go back to the top of the page](#content-body)

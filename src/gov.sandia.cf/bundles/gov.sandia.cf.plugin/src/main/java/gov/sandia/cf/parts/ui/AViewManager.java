@@ -10,13 +10,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
-import gov.sandia.cf.application.ApplicationManager;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
-import gov.sandia.cf.application.configuration.uncertainty.UncertaintySpecification;
+import gov.sandia.cf.application.IApplicationManager;
 import gov.sandia.cf.launcher.CFCache;
 import gov.sandia.cf.launcher.CredibilityEditor;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
+import gov.sandia.cf.model.dto.configuration.UncertaintySpecification;
+import gov.sandia.cf.parts.services.IClientService;
+import gov.sandia.cf.web.services.IWebClientManager;
 
 /**
  * The abstract view manager to handle commons view managers methods.
@@ -44,7 +46,20 @@ public abstract class AViewManager extends Composite implements IViewManager {
 	}
 
 	@Override
-	public ApplicationManager getAppManager() {
+	public boolean isWebConnection() {
+		if (getCredibilityEditor() == null) {
+			return false;
+		}
+		return getCredibilityEditor().isWebConnection();
+	}
+
+	@Override
+	public boolean isLocalFileConnection() {
+		return !isWebConnection();
+	}
+
+	@Override
+	public IApplicationManager getAppManager() {
 		if (getCredibilityEditor() == null) {
 			return null;
 		}
@@ -59,29 +74,37 @@ public abstract class AViewManager extends Composite implements IViewManager {
 		return getCredibilityEditor().getCache();
 	}
 
+	@Override
+	public IWebClientManager getWebClient() {
+		if (getCredibilityEditor() == null) {
+			return null;
+		}
+		return getCredibilityEditor().getWebClient();
+	}
+
 	/**
-	 * @return the PIRT credibility configuration
+	 * @return the PIRT configuration
 	 */
 	public PIRTSpecification getPIRTConfiguration() {
 		return getCache().getPIRTSpecification();
 	}
 
 	/**
-	 * @return the PCMM credibility configuration
+	 * @return the PCMM configuration
 	 */
 	public PCMMSpecification getPCMMConfiguration() {
 		return getCache().getPCMMSpecification();
 	}
 
 	/**
-	 * @return the Communicate credibility configuration
+	 * @return the Uncertainty configuration
 	 */
-	public UncertaintySpecification getCOMConfiguration() {
+	public UncertaintySpecification getUncertaintyConfiguration() {
 		return getCache().getUncertaintySpecification();
 	}
 
 	/**
-	 * @return the Communicate credibility configuration
+	 * @return the Requirement configuration
 	 */
 	public SystemRequirementSpecification getSystemRequirementConfiguration() {
 		return getCache().getSystemRequirementSpecification();
@@ -90,7 +113,7 @@ public abstract class AViewManager extends Composite implements IViewManager {
 	/** {@inheritDoc} */
 	@Override
 	public void viewChanged() {
-		if (getCredibilityEditor() != null) {
+		if (!isWebConnection() && getCredibilityEditor() != null) {
 			getCredibilityEditor().setDirty(true);
 			viewManager.refreshSaveState();
 		}
@@ -200,5 +223,16 @@ public abstract class AViewManager extends Composite implements IViewManager {
 			return null;
 		}
 		return viewManager.getCredibilityEditor();
+	}
+
+	@Override
+	public <S extends IClientService> S getClientService(Class<S> interfaceClass) {
+		return viewManager.getClientService(interfaceClass);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void quit() {
+		// do nothing by default
 	}
 }

@@ -20,11 +20,11 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
-import gov.sandia.cf.application.configuration.decision.DecisionSpecification;
-import gov.sandia.cf.application.configuration.decision.YmlReaderDecisionSchema;
-import gov.sandia.cf.application.configuration.decision.YmlWriterDecisionSchema;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.decision.YmlReaderDecisionSchema;
+import gov.sandia.cf.application.decision.YmlWriterDecisionSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.dto.configuration.DecisionSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;

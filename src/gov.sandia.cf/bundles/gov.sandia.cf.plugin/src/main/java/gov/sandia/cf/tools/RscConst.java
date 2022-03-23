@@ -116,12 +116,10 @@ public class RscConst {
 
 	/* Phenomenon */
 	public static final String EX_PHENOMENON_GROUP_NULL = "ex.phenomenon.group.null"; //$NON-NLS-1$
-	public static final String EX_PHENOMENON_IDLABEL_BLANK = "ex.phenomenon.id_label.blank"; //$NON-NLS-1$
 	public static final String EX_PHENOMENON_NAME_BLANK = "ex.phenomenon.name.blank"; //$NON-NLS-1$
 
 	/* Phenomenon Group */
 	public static final String EX_PHENOMENONGROUP_QOI_NULL = "ex.phenomenon_group.qoi.null"; //$NON-NLS-1$
-	public static final String EX_PHENOMENONGROUP_IDLABEL_BLANK = "ex.phenomenon_group.id_label.blank"; //$NON-NLS-1$
 	public static final String EX_PHENOMENONGROUP_NAME_BLANK = "ex.phenomenon_group.name.blank"; //$NON-NLS-1$
 
 	/* PIRT Adequacy Column */
@@ -186,16 +184,13 @@ public class RscConst {
 	public static final String EX_TAG_USERCREATION_NULL = "ex.tag.user_creation.null"; //$NON-NLS-1$
 
 	/* Uncertainty */
-	public static final String EX_UNCERTAINTY_GROUP_NULL = "ex.com_uncertainty.group.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_USERCREATION_NULL = "ex.com_uncertainty.user_creation.null"; //$NON-NLS-1$
-
-	/* Uncertainty Group */
-	public static final String EX_UNCERTAINTYGROUP_MODEL_NULL = "ex.com_uncertainty_group.model.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTYGROUP_NAME_BLANK = "ex.com_uncertainty_group.name.blank"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_USERCREATION_NULL = "ex.uncertainty.user_creation.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DATECREATION_NULL = "ex.uncertainty.date_creation.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_MODEL_NULL = "ex.uncertainty.model.null"; //$NON-NLS-1$
 
 	/* Uncertainty Parameter */
-	public static final String EX_UNCERTAINTYPARAMETER_UNCERTAINTY_NULL = "ex.com_uncertainty_parameter.com_uncertainty.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTYPARAMETER_GENPARAMETER_NULL = "ex.com_uncertainty_parameter.parameter.blank"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTYPARAMETER_UNCERTAINTY_NULL = "ex.uncertainty_parameter.uncertainty.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTYPARAMETER_GENPARAMETER_NULL = "ex.uncertainty_parameter.parameter.blank"; //$NON-NLS-1$
 
 	/* User */
 	public static final String EX_USER_USERID_BLANK = "ex.user.userID.blank"; //$NON-NLS-1$
@@ -206,6 +201,7 @@ public class RscConst {
 	/* Abstract CRUD Repository */
 	public static final String EX_DAO_CRUD_ENTITYNOTFOUND = "ex.dao.crud.entity_not_found"; //$NON-NLS-1$
 	public static final String EX_DAO_HSQLDB_FILEPATH_NULL = "ex.dao.hsqldb.file_path_null"; //$NON-NLS-1$
+	public static final String EX_DAO_HSQLDB_NOT_CLOSED = "ex.dao.hsqldb.not_closed"; //$NON-NLS-1$
 
 	/* App Manager */
 	public static final String EX_APPMGR_DAOMGR_NULL = "ex.appmgr.daomgr_null"; //$NON-NLS-1$
@@ -215,16 +211,21 @@ public class RscConst {
 	public static final String EX_CFVARRESOLVER_VAR_NOTRECOGNIZED = "ex.cf_var_resolver.variable.not_recognized"; //$NON-NLS-1$
 
 	/* CredibilityEditor */
-	public static final String EX_CREDEDITOR_OPENING = "ex.crededitor.opening"; //$NON-NLS-1$
 	public static final String EX_CREDEDITOR_DBMIGRATION = "ex.crededitor.database_migration"; //$NON-NLS-1$
-	public static final String EX_CREDEDITOR_PLUGIN_VERSION_EMPTY = "ex.crededitor.plugin_version_empty"; //$NON-NLS-1$
-	public static final String EX_CREDEDITOR_VERSION_MISMATCH = "ex.crededitor.version_mismatch"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_LOAD_WEB_CONCURRENCYSUPPORT_NOT_ACTIVATED = "ex.crededitor.load.web.concurrency_support_not_activated"; //$NON-NLS-1$
 	public static final String EX_CREDEDITOR_OPEN_TMPFOLDERCREATIONUNSUCCESSFUL = "ex.crededitor.open.tmp_folder_creation_unsuccessful"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_OPENING = "ex.crededitor.opening"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_PLUGIN_VERSION_EMPTY = "ex.crededitor.plugin_version_empty"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_TMPFOLDER_ACCESSDENIED = "ex.crededitor.tmp_folder.access_denied"; //$NON-NLS-1$
 	public static final String EX_CREDEDITOR_SAVE_DELETEPREVCFUNSUCCESSFUL = "ex.crededitor.save.delete_prev_cf_unsuccessful"; //$NON-NLS-1$
 	public static final String EX_CREDEDITOR_SAVE_TMPFOLDERNULL = "ex.crededitor.save.tmp_folder_null"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_VERSION_MISMATCH = "ex.crededitor.version_mismatch"; //$NON-NLS-1$
+	public static final String EX_CREDEDITOR_CF_FILE_CORRUPTED = "ex.crededitor.cf_file.corrupted"; //$NON-NLS-1$
 
 	/* Configuration Loader */
+	public static final String EX_CONFLOADER_YAML_ENGINE_NULL = "ex.conf_loader.yaml_engine.null"; //$NON-NLS-1$
 	public static final String EX_CONFLOADER_YAMLCONF_NOTEXISTS = "ex.conf_loader.yaml_conf_file.not_exists"; //$NON-NLS-1$
+	public static final String EX_CONFLOADER_YAMLCONF_NOTYML = "ex.conf_loader.yaml_conf_file.not_yml"; //$NON-NLS-1$
 	public static final String EX_CONFLOADER_YAMLFILEREADER_NULL = "ex.conf_loader.yaml_filereader.null"; //$NON-NLS-1$
 	public static final String EX_CONFLOADER_YAMLCONF_DELETION_ERROR = "ex.conf_loader.yaml_conf_file.deletion_impossible"; //$NON-NLS-1$
 	public static final String EX_CONFLOADER_YAMLCONF_EMPTYSPECS = "ex.conf_loader.yaml_conf_file.empty_specs"; //$NON-NLS-1$
@@ -232,6 +233,9 @@ public class RscConst {
 
 	/* DaoManager */
 	public static final String EX_DAOMANAGER_LOADING = "ex.daomanager.loading"; //$NON-NLS-1$
+	public static final String EX_DAOMANAGER_ALREADY_INIT = "ex.daomanager.already_init"; //$NON-NLS-1$
+
+	/* DBMigrationManager */
 	public static final String EX_DBDAOMANAGER_DAOMANAGER_NULL = "ex.dbmigrationmanager.dbmanager_null"; //$NON-NLS-1$
 
 	/* ImageBadget */
@@ -328,13 +332,27 @@ public class RscConst {
 	public static final String MSG_IMPORTAPP_IMPORTNAME_UNCERTAINTYPARAM = "msg.import_app.import_name.uncertainty_param"; //$NON-NLS-1$
 	public static final String MSG_IMPORTAPP_IMPORTNAME_UNCERTAINTYSELECTVALUE = "msg.import_app.import_name.uncertainty_select_value"; //$NON-NLS-1$
 
-	public static final String MSG_IMPORTAPP_IMPORTNAME_UNCERTAINTYGROUP = "msg.import_app.import_name.uncertainty_group"; //$NON-NLS-1$
 	public static final String MSG_IMPORTAPP_IMPORTNAME_UNCERTAINTY = "msg.import_app.import_name.uncertainty"; //$NON-NLS-1$
 	public static final String MSG_IMPORTAPP_IMPORTNAME_UNCERTAINTYVALUE = "msg.import_app.import_name.uncertainty_value"; //$NON-NLS-1$
 
 	public static final String EX_IMPORTAPP_CONF_SCHEMAFILE_NOTEXISTS = "ex.import_app.conf.schema_file_not_exists"; //$NON-NLS-1$
 	public static final String EX_IMPORTAPP_CONF_PCMMSPECS_NULL = "ex.import_app.conf.pcmm_specs_null"; //$NON-NLS-1$
 	public static final String EX_IMPORTAPP_MODELNULL = "ex.import_app.model_null"; //$NON-NLS-1$
+
+	/* Import Uncertainty Application */
+	public static final String ERR_IMPORT_UNCERTAINTY_APP_USER_NULL = "err.import_uncertainty_app.user.null"; //$NON-NLS-1$
+
+	/* Message Route */
+	public static final String EX_MESSAGEROUTE_URI_MEMBERID_NULL = "ex.message_route.uri.memberid_null"; //$NON-NLS-1$
+	public static final String EX_MESSAGEROUTE_URI_MODEL_NULL = "ex.message_route.uri.model_null"; //$NON-NLS-1$
+
+	/* Model Route */
+	public static final String EX_MODELROUTE_URI_MODEL_NULL = "ex.model_route.uri.model_null"; //$NON-NLS-1$
+
+	/* Model Web Client */
+	public static final String EX_MODELWEBCLIENT_LOAD_MODEL_NULL = "ex.model_webclient.load.model_null"; //$NON-NLS-1$
+	public static final String EX_MODELWEBCLIENT_CREATE_MODEL_NULL = "ex.model_webclient.create.model_null"; //$NON-NLS-1$
+	public static final String EX_MODELWEBCLIENT_DELETE_MODEL_NULL = "ex.model_webclient.delete.model_null"; //$NON-NLS-1$
 
 	/* Migration Dao */
 	public static final String EX_MIGRATIONDAO_TASK_NULL = "ex.migration_dao.task_null"; //$NON-NLS-1$
@@ -476,6 +494,7 @@ public class RscConst {
 	public static final String EX_PCMM_EVIDENCE_INVALIDPATH = "ex.pcmm.evidence.invalid_path"; //$NON-NLS-1$
 	public static final String EX_PCMM_EVIDENCE_INVALIDURL = "ex.pcmm.evidence.invalid_url"; //$NON-NLS-1$
 	public static final String EX_PCMM_EVIDENCE_NOASSESSABLE = "ex.pcmm.evidence.no_assessable"; //$NON-NLS-1$
+	public static final String EX_PCMM_EVIDENCE_NOTFOUND = "ex.pcmm.evidence.not_found"; //$NON-NLS-1$
 	public static final String EX_PCMM_EVIDENCE_MORETHANONEASSESSABLE = "ex.pcmm.evidence.more_than_one_assessable"; //$NON-NLS-1$
 	public static final String EX_PCMM_ADDEVIDENCE_ALREADYEXISTS = "ex.pcmm.add_evidence.already_exists"; //$NON-NLS-1$
 	public static final String EX_PCMM_UPDATEEVIDENCE_ELTNULL = "ex.pcmm.update_evidence.evidence_null"; //$NON-NLS-1$
@@ -570,25 +589,17 @@ public class RscConst {
 	/* Intended Purpose Application */
 	public static final String EX_INTENDEDPURPOSE_UPDATE_INTENDEDPURPOSE_NULL = "ex.intended_purpose.update.intended_purpose.null"; //$NON-NLS-1$
 	public static final String EX_INTENDEDPURPOSE_UPDATE_USER_NULL = "ex.intended_purpose.update.user.null"; //$NON-NLS-1$
+	public static final String EX_INTENDEDPURPOSE_UPDATE_MODEL_NULL = "ex.intended_purpose.update.model.null"; //$NON-NLS-1$
 
 	/* Uncertainty Application */
 
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_NULL = "ex.uncertainty.add.uncertainty_group.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_USERNULL = "ex.uncertainty.add.uncertainty_group.user_null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_MODELNULL = "ex.uncertainty.add.uncertainty_group.model_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYROW_NULL = "ex.uncertainty.add.uncertainty_row.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_NULL = "ex.uncertainty.add.uncertainty_row.null"; //$NON-NLS-1$
 	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYROW_USERNULL = "ex.uncertainty.add.uncertainty_row.user_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYGROUP_NULL = "ex.uncertainty.update.uncertainty_group.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYGROUP_IDNULL = "ex.uncertainty.update.uncertainty_group.id_null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_MODELNULL = "ex.uncertainty.add.uncertainty.model_null"; //$NON-NLS-1$
 
 	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_NULL = "ex.uncertainty.update.uncertainty_row.null"; //$NON-NLS-1$
 	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.update.uncertainty_row.id_null"; //$NON-NLS-1$
 	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_USERNULL = "ex.uncertainty.update.uncertainty_row.user_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYGROUP_NULL = "ex.uncertainty.delete.uncertainty_group.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYGROUP_IDNULL = "ex.uncertainty.delete.uncertainty_group.id_null"; //$NON-NLS-1$
 
 	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_NULL = "ex.uncertainty.delete.uncertainty_row.null"; //$NON-NLS-1$
 	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.delete.uncertainty_row.id_null"; //$NON-NLS-1$
@@ -601,6 +612,9 @@ public class RscConst {
 
 	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_NULL = "ex.uncertainty.delete.uncertainty_select_value.null"; //$NON-NLS-1$
 	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_IDNULL = "ex.uncertainty.delete.uncertainty_select_value.id_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_NULL = "ex.uncertainty.delete.uncertainty_constraint.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_IDNULL = "ex.uncertainty.delete.uncertainty_constraint.id_null"; //$NON-NLS-1$
 
 	/* System Requirements Application */
 
@@ -667,6 +681,7 @@ public class RscConst {
 	public static final String MSG_BTN_CLOSE = "msg.btn.close"; //$NON-NLS-1$
 	public static final String MSG_BTN_CONFIGURATION = "msg.btn.configuration"; //$NON-NLS-1$
 	public static final String MSG_BTN_CONFIRM = "msg.btn.confirm"; //$NON-NLS-1$
+	public static final String MSG_BTN_CONNECT = "msg.btn.connect"; //$NON-NLS-1$
 	public static final String MSG_BTN_COPY = "msg.btn.copy"; //$NON-NLS-1$
 	public static final String MSG_BTN_CREATE = "msg.btn.create"; //$NON-NLS-1$
 	public static final String MSG_BTN_DELETE = "msg.btn.delete"; //$NON-NLS-1$
@@ -676,6 +691,7 @@ public class RscConst {
 	public static final String MSG_BTN_EXPORT = "msg.btn.export"; //$NON-NLS-1$
 	public static final String MSG_BTN_IMPORT = "msg.btn.import"; //$NON-NLS-1$
 	public static final String MSG_BTN_OPEN = "msg.btn.open"; //$NON-NLS-1$
+	public static final String MSG_BTN_QUIT = "msg.btn.quit"; //$NON-NLS-1$
 	public static final String MSG_BTN_RESET = "msg.btn.reset"; //$NON-NLS-1$
 	public static final String MSG_BTN_SAVE = "msg.btn.save"; //$NON-NLS-1$
 	public static final String MSG_BTN_SELECT = "msg.btn.select"; //$NON-NLS-1$
@@ -690,6 +706,7 @@ public class RscConst {
 	public static final String MSG_PCMM = "msg.pcmm"; //$NON-NLS-1$
 	public static final String MSG_COM = "msg.communicate"; //$NON-NLS-1$
 	public static final String MSG_UNCERTAINTY = "msg.uncertainty"; //$NON-NLS-1$
+	public static final String MSG_UNCERTAINTY_GROUP = "msg.uncertainty.group"; //$NON-NLS-1$
 	public static final String MSG_SYSREQUIREMENT = "msg.requirement"; //$NON-NLS-1$
 	public static final String MSG_SYSREQUIREMENT_GROUP = "msg.requirement.group"; //$NON-NLS-1$
 	public static final String MSG_CREDIBILITYVIEW_TITLE = "msg.credibility_view.title"; //$NON-NLS-1$
@@ -716,6 +733,8 @@ public class RscConst {
 	public static final String MSG_EDITOR_SAVE_ZIPTASK = "msg.editor.save.zip_task"; //$NON-NLS-1$
 	public static final String MSG_EDITOR_SAVE_REMOVEOLDTASK = "msg.editor.save.remove_old_task"; //$NON-NLS-1$
 	public static final String MSG_EDITOR_DELETE_TMPFOLDER = "msg.editor.delete.tmp_folder"; //$NON-NLS-1$
+	public static final String MSG_CONNECTED = "msg.connected"; //$NON-NLS-1$
+	public static final String MSG_NOT_CONNECTED = "msg.not_connected"; //$NON-NLS-1$
 	public static final String MSG_SAVED = "msg.saved"; //$NON-NLS-1$
 	public static final String MSG_NOT_SAVED = "msg.not_saved"; //$NON-NLS-1$
 	public static final String MSG_VERSION_ORIGIN_BEFORE_0_2_0 = "msg.version_origin_before_0.2.0"; //$NON-NLS-1$
@@ -726,51 +745,102 @@ public class RscConst {
 	/* Widgets */
 	public static final String MSG_LINKWIDGET_BTN_FILE = "msg.link_widget.btn.file"; //$NON-NLS-1$
 	public static final String MSG_LINKWIDGET_BTN_URL = "msg.link_widget.btn.url"; //$NON-NLS-1$
+	public static final String MSG_LINKWIDGET_CAPTION_LBL = "msg.link_widget.caption.lbl"; //$NON-NLS-1$
 	public static final String ERR_LINKWIDGET_FILE_NOTFILE = "err.link_widget.file.not_file"; //$NON-NLS-1$
 	public static final String ERR_LINKWIDGET_URL_NOTVALID = "err.link_widget.url.not_valid"; //$NON-NLS-1$
 
-	/* New Credibility Process Wizard */
-	public static final String MSG_NEWCFPROCESSWIZARD_WINDOWTITLE = "msg.new_cf_process_wizard.window_title"; //$NON-NLS-1$
-	public static final String ERR_NEWCFPROCESSWIZARD_CFFILE_MISSING = "err.new_cf_process_wizard.cf_file.missing"; //$NON-NLS-1$
-	public static final String ERR_NEWCFPROCESSWIZARD_PIRTFILE_MISSING = "err.new_cf_process_wizard.pirt_file.missing"; //$NON-NLS-1$
-	public static final String ERR_NEWCFPROCESSWIZARD_PCMMFILE_MISSING = "err.new_cf_process_wizard.pcmm_file.missing"; //$NON-NLS-1$
-	public static final String ERR_NEWCFPROCESSWIZARD_WORKDIR_MISSING = "err.new_cf_process_wizard.working_dir.missing"; //$NON-NLS-1$
-	public static final String ERR_NEWCFPROCESSWIZARD_ERROR_OCCURED = "err.new_cf_process_wizard.error_occured"; //$NON-NLS-1$
-	/* New File Creation Wizard */
-	public static final String MSG_NEWFILECREATIONWIZARD_PAGENAME = "msg.new_file_creation_wizard.page_name"; //$NON-NLS-1$
-	public static final String MSG_NEWFILECREATIONWIZARD_TITLE = "msg.new_file_creation_wizard.title"; //$NON-NLS-1$
-	public static final String MSG_NEWFILECREATIONWIZARD_DESCRIPTION = "msg.new_file_creation_wizard.description"; //$NON-NLS-1$
-	public static final String ERR_NEWFILECREATIONWIZARD_CFFILEALREADYEXISTS = "err.new_file_creation_wizard.cf_file_already_exists"; //$NON-NLS-1$
-	public static final String MSG_NEWFILECREATIONWIZARD_FILE_NAME = "msg.new_file_creation_wizard.file_name"; //$NON-NLS-1$
-	/* New Credibility Evidence Structure */
+	/* New Credibility Evidence Folder Structure - Wizard */
 	public static final String MSG_EVIDFOLDERSTRUCT_TITLE = "msg.new_cred_evid_folder_structure.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFFOLDERSTRUCTUREWIZARD_WINDOWTITLE = "msg.new_cf_folder_structure_wizard.window_title"; //$NON-NLS-1$
 	public static final String ERR_EVIDFOLDERSTRUCT = "err.new_cred_evid_folder_structure"; //$NON-NLS-1$
 	public static final String ERR_EVIDFOLDERSTRUCT_SETUP_INCOMPLETE = "err.new_cred_evid_folder_structure.setup_incomplete"; //$NON-NLS-1$
 	public static final String ERR_EVIDFOLDERSTRUCT_CONTAINER_NULL = "err.new_cred_evid_folder_structure.container_null"; //$NON-NLS-1$
-	/* Setup Wizard */
-	public static final String MSG_CONFFILEWIZARD_PAGENAME = "msg.conf_file_wizard.page_name"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_TITLE = "msg.conf_file_wizard.title"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_DESCRIPTION = "msg.conf_file_wizard.description"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_PIRT_SCHEMA_PATH = "msg.conf_file_wizard.pirt_schema_path"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_QOIPLANNING_SCHEMA_PATH = "msg.conf_file_wizard.qoiplanning_schema_path"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_PCMM_SCHEMA_PATH = "msg.conf_file_wizard.pcmm_schema_path"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_UNCERTAINTY_SCHEMA_PATH = "msg.conf_file_wizard.uncertainty_schema_path"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_REQUIREMENT_SCHEMA_PATH = "msg.conf_file_wizard.sys_requirement_schema_path"; //$NON-NLS-1$
-	public static final String MSG_CONFFILEWIZARD_DECISION_SCHEMA_PATH = "msg.conf_file_wizard.decision_schema_path"; //$NON-NLS-1$
-
-	public static final String ERR_CONFFILEWIZARD_EMPTYFILE = "err.conf_file_wizard.empty_file"; //$NON-NLS-1$
-	public static final String ERR_CONFFILEWIZARD_BAD_FILE = "err.conf_file_wizard.bad_file"; //$NON-NLS-1$
-	public static final String ERR_CONFFILEWIZARD_SAME_FILES = "err.conf_file_wizard.same_files"; //$NON-NLS-1$
-	public static final String ERR_CONFFILEWIZARD_BAD_FOLDER_PATH = "err.conf_file_wizard.bad_folder_path"; //$NON-NLS-1$
-	public static final String ERR_CONFFILEWIZARD_EVID_PARENT_PATH = "err.conf_file_wizard.lbl_evidence_parent_path"; //$NON-NLS-1$
-	public static final String ERR_CONFFILEWIZARD_CHBX_EVID_STRUCT = "err.conf_file_wizard.chbx_evidence_struct"; //$NON-NLS-1$
-	/* New Credibility Evidence Folder Structure Wizard */
-	public static final String MSG_NEWCFFOLDERSTRUCTUREWIZARD_WINDOWTITLE = "msg.new_cf_folder_structure_wizard.window_title"; //$NON-NLS-1$
 	public static final String ERR_NEWCFFOLDERSTRUCTUREWIZARD_ERROR_OCCURED = "err.new_cf_folder_structure_wizard.error_occured"; //$NON-NLS-1$
-	/* New Credibility Evidence Folder Structure Page */
+	/* New Credibility Evidence Folder Structure - Wizard Page */
 	public static final String MSG_NEWCFFOLDERSTRUCTUREWIZARD_PAGENAME = "msg.new_cf_folder_structure_wizard.page_name"; //$NON-NLS-1$
 	public static final String MSG_NEWCFFOLDERSTRUCTUREWIZARD_PAGETITLE = "msg.new_cf_folder_structure_wizard.page_title"; //$NON-NLS-1$
 	public static final String MSG_NEWCFFOLDERSTRUCTUREWIZARD_PAGEDESC = "msg.new_cf_folder_structure_wizard.page_description"; //$NON-NLS-1$
+
+	/* New Credibility Process - Wizard */
+	public static final String MSG_NEWCFPROCESS_WIZARD_WINDOWTITLE = "msg.new_cf_process_wizard.window_title"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_CFFILE_MISSING = "err.new_cf_process_wizard.cf_file.missing"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_PIRTFILE_MISSING = "err.new_cf_process_wizard.pirt_file.missing"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_PCMMFILE_MISSING = "err.new_cf_process_wizard.pcmm_file.missing"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_WORKDIR_MISSING = "err.new_cf_process_wizard.working_dir.missing"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_ERROR_OCCURED = "err.new_cf_process_wizard.error_occured"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_WEB_PROJECT_TYPE_NULL = "err.new_cf_process_wizard.web.project_type_null"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WIZARD_WEB_MODEL_NULL = "err.new_cf_process_wizard.web.model_null"; //$NON-NLS-1$
+	/* New Credibility Process - File Selection Wizard Page */
+	public static final String MSG_NEWCFPROCESS_FILESELECTION_PAGE_PAGENAME = "msg.new_cf_process_wizard.file_selection_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_FILESELECTION_PAGE_TITLE = "msg.new_cf_process_wizard.file_selection_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_FILESELECTION_PAGE_DESCRIPTION = "msg.new_cf_process_wizard.file_selection_page.description"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_FILESELECTION_PAGE_CFFILEALREADYEXISTS = "err.new_cf_process_wizard.file_selection_page.cf_file_already_exists"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_FILESELECTION_PAGE_FILENAME = "msg.new_cf_process_wizard.file_selection_page.file_name"; //$NON-NLS-1$
+	/* New Credibility Process - Backend Type Selection Wizard Page */
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_PAGENAME = "msg.new_cf_process.backendtype_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_TITLE = "msg.new_cf_process.backendtype_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_DESCRIPTION = "msg.new_cf_process.backendtype_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_LBL = "msg.new_cf_process.backendtype_page.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_LOCALFILE_BTN = "msg.new_cf_process.backendtype_page.local_file.btn"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_BACKENDTYPE_PAGE_WEB_BTN = "msg.new_cf_process.backendtype_page.web.btn"; //$NON-NLS-1$
+	/* New Credibility Process - Local Setup Wizard Page */
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_PAGENAME = "msg.new_cf_process_wizard.localsetup_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_TITLE = "msg.new_cf_process_wizard.localsetup_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_DESCRIPTION = "msg.new_cf_process_wizard.localsetup_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_CONF_FOLDER_PATH = "msg.new_cf_process_wizard.localsetup_page.conf_folder_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_PIRT_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.pirt_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_QOIPLANNING_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.qoiplanning_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_PCMM_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.pcmm_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_UNCERTAINTY_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.uncertainty_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_REQUIREMENT_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.sys_requirement_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_DECISION_SCHEMA_PATH = "msg.new_cf_process_wizard.localsetup_page.decision_schema_path"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUP_PAGE_BTN_ADVANCED = "msg.new_cf_process_wizard.localsetup_page.btn.advanced"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_EMPTYFILE = "err.new_cf_process_wizard.localsetup_page.empty_file"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_BAD_FILE = "err.new_cf_process_wizard.localsetup_page.bad_file"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_SAME_FILES = "err.new_cf_process_wizard.localsetup_page.same_files"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_BAD_CONF_FOLDER_PATH = "err.new_cf_process_wizard.localsetup_page.bad_conf_folder_path"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_BAD_STRUCT_FOLDER_PATH = "err.new_cf_process_wizard.localsetup_page.bad_struct_folder_path"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_EVID_PARENT_PATH = "err.new_cf_process_wizard.localsetup_page.lbl_evidence_parent_path"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_LOCALSETUP_PAGE_CHBX_EVID_STRUCT = "err.new_cf_process_wizard.localsetup_page.chbx_evidence_struct"; //$NON-NLS-1$
+	/* New Credibility Process - Local Setup Advanced Wizard Page */
+	public static final String MSG_NEWCFPROCESS_LOCALSETUPADVANCED_PAGE_TITLE = "msg.new_cf_process_wizard.localsetup_advanced_page.advanced.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_LOCALSETUPADVANCED_PAGE_BTN_BACK_TO_DEFAULT = "msg.new_cf_process_wizard.localsetup_advanced_page.btn.back_to_default"; //$NON-NLS-1$
+	/* New Credibility Process - Web Setup Wizard Page */
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_PAGENAME = "msg.new_cf_process.websetup_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_TITLE = "msg.new_cf_process.websetup_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_DESCRIPTION = "msg.new_cf_process.websetup_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_LBL = "msg.new_cf_process.websetup_page.server.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_TEST_BTN = "msg.new_cf_process.websetup_page.server_test.btn"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_TEST_VALID_LBL = "msg.new_cf_process.websetup_page.server_test.valid.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_TEST_NOTVALID_LBL = "msg.new_cf_process.websetup_page.server_test.not_valid.lbl"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_URL_NOTVALID = "err.new_cf_process.websetup_page.server_url_not_valid"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WEBSETUP_PAGE_SERVER_UNREACHABLE = "err.new_cf_process.websetup_page.server_unreachable"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WEBSETUP_PAGE_BAD_STRUCT_FOLDER_PATH = "err.new_cf_process.websetup_page.bad_struct_folder_path"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WEBSETUP_PAGE_EVID_PARENT_PATH = "err.new_cf_process.websetup_page.lbl_evidence_parent_path"; //$NON-NLS-1$
+	public static final String ERR_NEWCFPROCESS_WEBSETUP_PAGE_CHBX_EVID_STRUCT = "err.new_cf_process.websetup_page.chbx_evidence_struct"; //$NON-NLS-1$
+	/* New Credibility Process - Web Project Type Wizard Page */
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_PAGENAME = "msg.new_cf_process.webproject_type_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_TITLE = "msg.new_cf_process.webproject_type_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_DESCRIPTION = "msg.new_cf_process.webproject_type_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_LBL = "msg.new_cf_process.webproject_type_page.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_NEWPROJECT_BTN = "msg.new_cf_process.webproject_type_page.new_project.btn"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECTTYPE_PAGE_EXISTINGPROJECT_BTN = "msg.new_cf_process.webproject_type_page.existing_project.btn"; //$NON-NLS-1$
+	/* New Credibility Process - Web Project New Setup Wizard Page */
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_PAGENAME = "msg.new_cf_process.webproject_newsetup_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_TITLE = "msg.new_cf_process.webproject_newsetup_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_DESCRIPTION = "msg.new_cf_process.webproject_newsetup_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_LBL = "msg.new_cf_process.webproject_newsetup_page.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_APPLICATION_LBL = "msg.new_cf_process.webproject_newsetup_page.application.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_APPLICATION_HELPER_INFO = "msg.new_cf_process.webproject_newsetup_page.application.helper_info"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_APPLICATION_HELPER_WARN = "msg.new_cf_process.webproject_newsetup_page.application.helper_warn"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_NEWSETUP_PAGE_CONTACT_LBL = "msg.new_cf_process.webproject_newsetup_page.contact.lbl"; //$NON-NLS-1$
+	/* New Credibility Process - Web Project Existing Setup Wizard Page */
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_EXISTINGSETUP_PAGE_PAGENAME = "msg.new_cf_process.webproject_existingsetup_page.page_name"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_EXISTINGSETUP_PAGE_TITLE = "msg.new_cf_process.webproject_existingsetup_page.title"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_EXISTINGSETUP_PAGE_DESCRIPTION = "msg.new_cf_process.webproject_existingsetup_page.description"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_EXISTINGSETUP_PAGE_LBL = "msg.new_cf_process.webproject_existingsetup_page.lbl"; //$NON-NLS-1$
+	public static final String MSG_NEWCFPROCESS_WEBPROJECT_EXISTINGSETUP_PAGE_TABLE_COLUMN_MODEL = "msg.new_cf_process.webproject_existingsetup_page.table_column.model"; //$NON-NLS-1$
+
 	/* Credibility Editor */
 	public static final String WRN_CREDIBILITYEDITOR_CFTMPFOLDER_TITLE = "wrn.credibility_editor.cftmp_exist.title"; //$NON-NLS-1$
 	public static final String WRN_CREDIBILITYEDITOR_CFTMPFOLDER_NOTRECOVERABLE = "wrn.credibility_editor.cftmp_exist.not_recoverable"; //$NON-NLS-1$
@@ -783,6 +853,7 @@ public class RscConst {
 	public static final String ERR_CREDIBILITYEDITOR_SAVING = "err.credibility_editor.saving_impossible"; //$NON-NLS-1$
 	public static final String ERR_CREDIBILITYEDITOR_BADINPUT = "err.credibility_editor.bad_input"; //$NON-NLS-1$
 	public static final String ERR_CREDIBILITYEDITOR_DBMIGRATION_TXT = "err.credibility_editor.database_migration.txt"; //$NON-NLS-1$
+	public static final String ERR_CREDIBILITYEDITOR_DB_NOT_RECOVERABLE = "err.credibility_editor.database_not_recoverable"; //$NON-NLS-1$
 
 	/** Generic Parameter Fields */
 	public static final String ERR_GENERICPARAM_PARAMETER_DESIRED = "err.generic_param.parameter.desired"; //$NON-NLS-1$
@@ -791,6 +862,20 @@ public class RscConst {
 	public static final String ERR_GENERICPARAM_PARAMETER_REQUIRED_CONDITION_NOTVALID = "err.generic_param.parameter.required.condition_not_valid"; //$NON-NLS-1$
 	public static final String ERR_GENERICPARAM_VALUE_CONSTRAINT_NOTVALID = "err.generic_param.value.constraint.not_valid"; //$NON-NLS-1$
 	public static final String ERR_GENERICPARAM_VALUE_CONSTRAINT_EXCEPTION = "err.generic_param.value.constraint.exception"; //$NON-NLS-1$
+
+	/*******************************
+	 * Authentication
+	 */
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_TITLE = "msg.web.dialog.authentication.title"; //$NON-NLS-1$
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_DESCRIPTION = "msg.web.dialog.authentication.desc"; //$NON-NLS-1$
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_SERVER_LBL = "msg.web.dialog.authentication.server.lbl"; //$NON-NLS-1$
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_USERID_LBL = "msg.web.dialog.authentication.userid.lbl"; //$NON-NLS-1$
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_USERPASSWORD_LBL = "msg.web.dialog.authentication.user_password.lbl"; //$NON-NLS-1$
+	public static final String MSG_WEB_DIALOG_AUTHENTICATION_USERPASSWORD_EXPERIMENTAL_HELPER = "msg.web.dialog.authentication.experimental.helper"; //$NON-NLS-1$
+	public static final String ERR_WEB_DIALOG_AUTHENTICATION_LOADUSERFAILS = "err.web.dialog.authentication.load_user_fails"; //$NON-NLS-1$
+	public static final String ERR_WEB_DIALOG_AUTHENTICATION_HOST_UNREACHABLE = "err.web.dialog.authentication.host_unreachable"; //$NON-NLS-1$
+	public static final String ERR_WEB_DIALOG_AUTHENTICATION_INVALID_CREDENTIALS = "err.web.dialog.authentication.invalid_credentials"; //$NON-NLS-1$
+	public static final String ERR_WEB_DIALOG_AUTHENTICATION_INVALID_MODEL = "err.web.dialog.authentication.invalid_model"; //$NON-NLS-1$
 
 	/** Configuration View */
 	public static final String MSG_CONF_VIEW_ITEMTITLE = "msg.conf_view.item_title"; //$NON-NLS-1$
@@ -847,6 +932,9 @@ public class RscConst {
 	public static final String MSG_CONF_EXPORTVIEW_DATA_LBL = "msg.conf_exportview.data_lbl"; //$NON-NLS-1$
 	public static final String MSG_CONF_EXPORTVIEW_DATA_PIRT_LBL = "msg.conf_exportview.data_pirt_lbl"; //$NON-NLS-1$
 	public static final String MSG_CONF_EXPORTVIEW_DATA_PCMM_LBL = "msg.conf_exportview.data_pcmm_lbl"; //$NON-NLS-1$
+	public static final String MSG_CONF_EXPORTVIEW_DATA_INTPURPOSE_LBL = "msg.conf_exportview.data_intendedpurpose_lbl"; //$NON-NLS-1$
+	public static final String MSG_CONF_EXPORTVIEW_DATA_DECISION_LBL = "msg.conf_exportview.data_decision_lbl"; //$NON-NLS-1$
+	public static final String MSG_CONF_EXPORTVIEW_DATA_SYSREQ_LBL = "msg.conf_exportview.data_sysreq_lbl"; //$NON-NLS-1$
 	public static final String MSG_CONF_EXPORTVIEW_DATA_UNCERTAINTY_LBL = "msg.conf_exportview.data_uncertainty_lbl"; //$NON-NLS-1$
 	public static final String MSG_CONF_EXPORTVIEW_NEEDSAVE = "msg.conf_exportview.needs_save"; //$NON-NLS-1$
 	public static final String MSG_CONF_EXPORTVIEW_EXPORT_CANCELLED = "msg.conf_exportview.export.cancelled"; //$NON-NLS-1$
@@ -863,6 +951,9 @@ public class RscConst {
 	public static final String MSG_EXPORTVIEW_PCMM_CHECKBOX_ASSESSMENT = "msg.conf_exportview.pcmm.checkbox_assessment"; //$NON-NLS-1$
 	public static final String MSG_EXPORTVIEW_PCMM_CHECKBOX_EVIDENCE = "msg.conf_exportview.pcmm.checkbox_evidence"; //$NON-NLS-1$
 	public static final String MSG_EXPORTVIEW_PCMM_CHECKBOX_PLANNING = "msg.conf_exportview.pcmm.checkbox_planning"; //$NON-NLS-1$
+	public static final String MSG_EXPORTVIEW_INTPURPOSE_LBL = "msg.conf_exportview.intended_purpose.lbl"; //$NON-NLS-1$
+	public static final String MSG_EXPORTVIEW_DECISION_LBL = "msg.conf_exportview.decision.lbl"; //$NON-NLS-1$
+	public static final String MSG_EXPORTVIEW_SYSREQ_LBL = "msg.conf_exportview.sys_req.lbl"; //$NON-NLS-1$
 	public static final String MSG_EXPORTVIEW_UNCERTAINTY_LBL = "msg.conf_exportview.uncertainty.lbl"; //$NON-NLS-1$
 
 	/** Import Dialog */
@@ -870,6 +961,7 @@ public class RscConst {
 	public static final String MSG_IMPORTDLG_SUBTITLE = "msg.import_dlg.subtitle"; //$NON-NLS-1$
 	public static final String MSG_IMPORTDLG_DESC = "msg.import_dlg.description"; //$NON-NLS-1$
 	public static final String MSG_IMPORTDLG_IMPORTCLASS_TOADD = "msg.import_dlg.lbl.import_class.to_add"; //$NON-NLS-1$
+	public static final String MSG_IMPORTDLG_IMPORTCLASS_TOUPDATE = "msg.import_dlg.lbl.import_class.to_update"; //$NON-NLS-1$
 	public static final String MSG_IMPORTDLG_IMPORTCLASS_TODELETE = "msg.import_dlg.lbl.import_class.to_delete"; //$NON-NLS-1$
 	public static final String MSG_IMPORTDLG_IMPORTCLASS_NOCHANGES = "msg.import_dlg.lbl.import_class.no_changes"; //$NON-NLS-1$
 	public static final String MSG_IMPORTDLG_NOCHANGES = "msg.import_dlg.lbl.no_changes"; //$NON-NLS-1$
@@ -907,6 +999,9 @@ public class RscConst {
 	public static final String MSG_HOMEVIEW_BTN_PCMMASSESS = "msg.home_view.btn.pcmm_assess"; //$NON-NLS-1$
 	public static final String MSG_HOMEVIEW_BTN_DOCSTRUCTURE = "msg.home_view.btn.doc_structure"; //$NON-NLS-1$
 	public static final String MSG_HOMEVIEW_BTN_MARGINBOUNDS = "msg.home_view.btn.margin_bounds"; //$NON-NLS-1$
+	public static final String MSG_HOMEVIEW_BTN_DELETE_PROJECT = "msg.home_view.btn.delete_project"; //$NON-NLS-1$
+	public static final String MSG_HOMEVIEW_BTN_DELETE_PROJECT_CONFIRM = "msg.home_view.btn.delete_project.confirm"; //$NON-NLS-1$
+
 	public static final String ERR_HOMEVIEW_PIRTREFFILE_TITLE = "err.home_view.pirt_ref_file.title"; //$NON-NLS-1$
 	public static final String ERR_HOMEVIEW_PIRTREFFILE_MSG = "err.home_view.pirt_ref_file.msg"; //$NON-NLS-1$
 	public static final String ERR_HOMEVIEW_PCMMREFFILE_TITLE = "err.home_view.pcmm_ref_file.title"; //$NON-NLS-1$
@@ -1056,14 +1151,14 @@ public class RscConst {
 	public static final String PREFS_GLOBAL_DISPLAY_VERSION_NUMBER = "prefs.global.display_version_number"; //$NON-NLS-1$
 	public static final String PREFS_GLOBAL_DISPLAY_VERSION_ORIGIN_NUMBER = "prefs.global.display_version_origin_number"; //$NON-NLS-1$
 	public static final String PREFS_PIRT_QUERY_FILE = "prefs.pirt.query_file"; //$NON-NLS-1$
-	public static final String PREFS_GLOBAL_PYTHON_EXECUTABLE = "prefs.global.python_executable"; //$NON-NLS-1$
 	public static final String PREFS_GLOBAL_ARG_EXECUTABLE = "prefs.global.arg_executable"; //$NON-NLS-1$
 	public static final String PREFS_GLOBAL_ARG_SETENV = "prefs.global.arg_setenv"; //$NON-NLS-1$
 	public static final String PREFS_GLOBAL_OPEN_LINK_BROWSER_OPTION = "prefs.global.open_link_browser_option_key"; //$NON-NLS-1$
 
 	/* Developer Options Preference Page */
 	public static final String PREFS_DEVOPTS_DESCRIPTION = "prefs.devopts.description"; //$NON-NLS-1$
-	public static final String PREFS_DEVOPTS_REPORT_INLINEWORD_KEY = "prefs.devopts.report_inlineword"; //$NON-NLS-1$
+	public static final String PREFS_DEVOPTS_REPORT_INLINEWORD_KEY = "prefs.devopts.report_inlineword.lbl"; //$NON-NLS-1$
+	public static final String PREFS_DEVOPTS_CONCURRENCY_SUPPORT_KEY = "prefs.devopts.concurrency_support.lbl"; //$NON-NLS-1$
 
 	/* PIRT Query Result View */
 	public static final String MSG_PIRT_QUERYRSVIEW_TITLE = "msg.query_rs_view.title"; //$NON-NLS-1$
@@ -1166,6 +1261,7 @@ public class RscConst {
 	public static final String MSG_PCMMEVID_TABLE_COL_ROLE = "msg.pcmm_evidence.table.column.role"; //$NON-NLS-1$
 	public static final String MSG_PCMMEVID_DELETE_CONFIRM_TITLE = "msg.pcmm_evidence.delete_confirm.title"; //$NON-NLS-1$
 	public static final String MSG_PCMMEVID_DELETE_CONFIRM_QUESTION = "msg.pcmm_evidence.delete_confirm.question"; //$NON-NLS-1$
+	public static final String MSG_PCMMEVID_MULTI_DELETE_CONFIRM_QUESTION = "msg.pcmm_evidence.multi.delete_confirm.question"; //$NON-NLS-1$
 	public static final String MSG_PCMMEVID_ADD_TITLE = "msg.pcmm_evidence.add.title"; //$NON-NLS-1$
 	public static final String MSG_PCMMEVID_EDIT_TITLE = "msg.pcmm_evidence.add.title"; //$NON-NLS-1$
 	public static final String ERR_PCMMEVID_ADD_BADSELECT_NOTSUBELEMENT_MSG = "err.pcmm_evidence.add.bad_select.not_subelement.message"; //$NON-NLS-1$
@@ -1188,6 +1284,7 @@ public class RscConst {
 	public static final String MSG_DLG_ADDEVID_LBL_EVID = "msg.dialog.add_evidence.lbl.evidence"; //$NON-NLS-1$
 	public static final String MSG_DLG_ADDEVID_LBL_DESC = "msg.dialog.add_evidence.lbl.desc"; //$NON-NLS-1$
 	public static final String MSG_DLG_ADDEVID_LBL_SECTION = "msg.dialog.add_evidence.lbl.section"; //$NON-NLS-1$
+	public static final String MSG_DLG_ADDEVID_LBL_IMG_CAPTION = "msg.dialog.add_evidence.lbl.image_caption"; //$NON-NLS-1$
 	public static final String MSG_DLG_ADDEVID_DESC = "msg.dialog.add_evidence.desc"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_PCMMEVIDENCE_LBL_REMOVEFILECHANGED = "msg.pcmm_evidence.lbl_remove_file_changed"; //$NON-NLS-1$
 	public static final String ERR_DLG_ADDEVID_FILE_ALREADYEXISTS = "err.dialog.add_evidence.file.already_exists"; //$NON-NLS-1$
@@ -1252,35 +1349,41 @@ public class RscConst {
 	public static final String MSG_INTENDEDPURPOSE_HEADER_LBL = "msg.intended_purpose.header_lbl"; //$NON-NLS-1$
 	public static final String MSG_INTENDEDPURPOSE_DESCRIPTION = "msg.intended_purpose.form.description"; //$NON-NLS-1$
 	public static final String MSG_INTENDEDPURPOSE_REFERENCE = "msg.intended_purpose.form.reference"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_BTN_BACK_TOOLTIP = "msg.intended_purpose.btn.back_tooltip"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_BTN_CANCEL_TOOLTIP = "msg.intended_purpose.btn.cancel_tooltip"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_BTN_EDIT_TOOLTIP = "msg.intended_purpose.btn.edit_tooltip"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_BTN_DONE_TOOLTIP = "msg.intended_purpose.btn.done_tooltip"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_DLG_QUIT_SAVEBEFOREEXIT = "msg.intended_purpose.dlg.quit.save_before_exit"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_LOCKED = "msg.intended_purpose.locked"; //$NON-NLS-1$
+	public static final String MSG_INTENDEDPURPOSE_LOCKED_BY = "msg.intended_purpose.locked_by"; //$NON-NLS-1$
+
+	/* Intended Purpose View */
+	public static final String ERR_INTENDEDPURPOSE_LOCK = "err.intended_purpose.lock"; //$NON-NLS-1$
+	public static final String ERR_INTENDEDPURPOSE_UNLOCK = "err.intended_purpose.unlock"; //$NON-NLS-1$
 
 	/* Uncertainty View */
 	public static final String MSG_UNCERTAINTY_TITLE = "msg.uncertainty.title"; //$NON-NLS-1$
 	public static final String MSG_UNCERTAINTY_BTN_ADD = "msg.uncertainty.btn_add"; //$NON-NLS-1$
 	public static final String MSG_UNCERTAINTY_BTN_ADD_GROUP = "msg.uncertainty.btn_add_group"; //$NON-NLS-1$
 	public static final String MSG_UNCERTAINTY_DELETECONFIRM_TITLE = "msg.uncertainty.delete_confirm.title"; //$NON-NLS-1$
-	public static final String MSG_UNCERTAINTY_GROUP_NAME = "msg.uncertainty_group.name"; //$NON-NLS-1$
-	public static final String MSG_UNCERTAINTY_GROUP = "msg.uncertainty_group"; //$NON-NLS-1$
-	public static final String MSG_UNCERTAINTY_GROUP_DELETECONFIRM = "msg.uncertainty_group.delete_confirm"; //$NON-NLS-1$
+	public static final String MSG_UNCERTAINTY_GROUP_DELETECONFIRM = "msg.uncertainty.group.delete_confirm"; //$NON-NLS-1$
+	public static final String MSG_UNCERTAINTY_NAME = "msg.uncertainty.name"; //$NON-NLS-1$
 	public static final String MSG_UNCERTAINTY_DELETECONFIRM = "msg.uncertainty.delete_confirm"; //$NON-NLS-1$
-
-	/* Uncertainty group dialog */
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_TITLE = "msg.dialog.uncertainty_group.title"; //$NON-NLS-1$
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_DESCRIPTION = "msg.dialog.uncertainty_group.description"; //$NON-NLS-1$
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_ADD = "msg.dialog.uncertainty_group.add"; //$NON-NLS-1$
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_EDIT = "msg.dialog.uncertainty_group.edit"; //$NON-NLS-1$
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_VIEW = "msg.dialog.uncertainty_group.view"; //$NON-NLS-1$
-	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_NAME = "msg.dialog.uncertainty_group.name"; //$NON-NLS-1$
-	public static final String ERR_DIALOG_UNCERTAINTY_GROUP_TITLE = "err.dialog.uncertainty_group.title"; //$NON-NLS-1$
-	public static final String ERR_DIALOG_UNCERTAINTY_GROUP_NAME = "err.dialog.uncertainty_group.name"; //$NON-NLS-1$
-	public static final String ERR_DIALOG_UNCERTAINTY_GROUP_ADD = "err.dialog.uncertainty_group.add"; //$NON-NLS-1$
+	public static final String ERR_UNCERTAINTY_NAME_MANDATORY = "err.uncertainty.name.mandatory"; //$NON-NLS-1$
+	public static final String ERR_UNCERTAINTY_NAME_DUPLICATED = "err.uncertainty.name.duplicated"; //$NON-NLS-1$
 
 	/* Uncertainty dialog */
 	public static final String MSG_DIALOG_UNCERTAINTY_TITLE = "msg.dialog.uncertainty.title"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_UNCERTAINTY_DESCRIPTION = "msg.dialog.uncertainty.description"; //$NON-NLS-1$
+	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_TITLE = "msg.dialog.uncertainty_group.title"; //$NON-NLS-1$
+	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_DESCRIPTION = "msg.dialog.uncertainty_group.description"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_UNCERTAINTY_PAGENAME_ADD = "msg.dialog.uncertainty.add"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_UNCERTAINTY_PAGENAME_EDIT = "msg.dialog.uncertainty.edit"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_UNCERTAINTY_PAGENAME_VIEW = "msg.dialog.uncertainty.view"; //$NON-NLS-1$
 	public static final String MSG_DIALOG_UNCERTAINTY_GROUP = "msg.dialog.uncertainty.group"; //$NON-NLS-1$
+	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_ADD = "msg.dialog.uncertainty_group.add"; //$NON-NLS-1$
+	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_EDIT = "msg.dialog.uncertainty_group.edit"; //$NON-NLS-1$
+	public static final String MSG_DIALOG_UNCERTAINTY_GROUP_PAGENAME_VIEW = "msg.dialog.uncertainty_group.view"; //$NON-NLS-1$
 	public static final String ERR_DIALOG_UNCERTAINTY_TITLE = "err.dialog.uncertainty.title"; //$NON-NLS-1$
 	public static final String ERR_DIALOG_UNCERTAINTY_ADD = "err.dialog.uncertainty.add"; //$NON-NLS-1$
 	public static final String ERR_DIALOG_UNCERTAINTY_GROUP = "err.dialog.uncertainty.group"; //$NON-NLS-1$
@@ -1435,6 +1538,7 @@ public class RscConst {
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_STRUCTUREFILE_EMPTY = "err.reportview.generate_report.structure_file.empty"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_STRUCTUREFILE_NOTEXIST = "err.reportview.generate_report.structure_file.not_exists"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_STRUCTUREFILE_NOTFILE = "err.reportview.generate_report.structure_file.not_file"; //$NON-NLS-1$
+	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_STRUCTUREFILE_SPECIALCHARS = "err.reportview.generate_report.structure_file.special_chars"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_STRUCTUREFILE_SAMEASPARAMETERSFILE = "err.reportview.generate_report.structure_file.same_as_structure_file"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_OUTPUT_EMPTY = "err.reportview.generate_report.output.empty"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_OUTPUT_NOTEXIST = "err.reportview.generate_report.output.not_exists"; //$NON-NLS-1$
@@ -1443,10 +1547,15 @@ public class RscConst {
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_NOTEXIST = "err.reportview.generate_report.custom_ending_file.not_exists"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_NOTFILE = "err.reportview.generate_report.custom_ending_file.not_file"; //$NON-NLS-1$
 
+	public static final String EX_CONFREPORT_COMMAND_NULL = "ex.confreport.command.null"; //$NON-NLS-1$
 	public static final String EX_CONFREPORT_OPTIONS_NULL = "ex.confreport.options.null"; //$NON-NLS-1$
+	public static final String EX_CONFREPORT_PRESCRIPT_FILE_NOTEXISTS = "ex.confreport.pre_script_file.not_exists"; //$NON-NLS-1$
+	public static final String EX_CONFREPORT_PRESCRIPT_FILE_NOTREADABLE = "ex.confreport.pre_script_file.not_readable"; //$NON-NLS-1$
 	public static final String EX_CONFREPORT_ARG_PARAM_NULL = "ex.confreport.arg_parameters.null"; //$NON-NLS-1$
+	public static final String EX_CONFREPORT_TMP_SCRIPT_WRITE_ERROR = "ex.confreport.tmp_script.write_error"; //$NON-NLS-1$
 	public static final String EX_CONFREPORT_YAML_PARAMETERS_FILE_NOTEXISTS = "ex.confreport.yaml_parameters_file.not_exists"; //$NON-NLS-1$
 	public static final String EX_CONFREPORT_YAML_STRUCTURE_FILE_NOTEXISTS = "ex.confreport.yaml_structure_file.not_exists"; //$NON-NLS-1$
+	public static final String EX_REPORTVIEW_REPORT_ALREADYOPENED = "ex.reportview.report.already_opened"; //$NON-NLS-1$
 	public static final String EX_REPORTVIEW_DELETE_REPORT = "ex.reportview.report.delete_error"; //$NON-NLS-1$
 	public static final String EX_REPORTVIEW_OPEN_REPORT = "ex.reportview.report.not_exists"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_ARG_PATH = "err.reportview.report.arg.path"; //$NON-NLS-1$
@@ -1487,6 +1596,7 @@ public class RscConst {
 	 */
 	public static final String MSG_ARG_REPORT_PLANNING_INTENDEDPURPOSE_TITLE = "msg.arg.report.intended_purpose.title"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PLANNING_INTENDEDPURPOSE_STRING = "msg.arg.report.intended_purpose.string"; //$NON-NLS-1$
+	public static final String MSG_ARG_REPORT_PLANNING_INTENDEDPURPOSE_REFERENCE_CAPTION = "msg.arg.report.intended_purpose.reference.caption"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PLANNING_REQUIREMENT_TITLE = "msg.arg.report.planning_requirement.title"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PLANNING_REQUIREMENT_STRING = "msg.arg.report.planning_requirement.string"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PLANNING_QOIPLANNER_TITLE = "msg.arg.report.planning_qoiplanner.title"; //$NON-NLS-1$
@@ -1517,6 +1627,7 @@ public class RscConst {
 	public static final String MSG_ARG_REPORT_PCMM_EVIDENCE_VALUE_ROLE = "msg.arg.report.pcmm.evidence.value.role"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PCMM_EVIDENCE_VALUE_PATH_FILE = "msg.arg.report.pcmm.evidence.value.path_file"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PCMM_EVIDENCE_VALUE_PATH_URL = "msg.arg.report.pcmm.evidence.value.path_url"; //$NON-NLS-1$
+	public static final String MSG_ARG_REPORT_PCMM_EVIDENCE_CAPTION_LBL = "msg.arg.report.pcmm.evidence.caption.label"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PCMM_ASSESSMENT_VALUE_CREATED_AT = "msg.arg.report.pcmm.assessment.value.created_at"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PCMM_ASSESSMENT_VALUE_UPDATED_AT = "msg.arg.report.pcmm.assessment.value.updated_at"; //$NON-NLS-1$
 	public static final String MSG_ARG_REPORT_PCMM_ASSESSMENT_VALUE_COMMENT = "msg.arg.report.pcmm.assessment.value.comment"; //$NON-NLS-1$

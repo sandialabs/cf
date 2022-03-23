@@ -4,7 +4,10 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.viewer;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -173,6 +176,9 @@ public class TreeViewerID extends TreeViewerHideSelection {
 			}
 
 			if (elements != null && !elements.isEmpty()) {
+				elements = elements.stream().sorted(
+						Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())))
+						.collect(Collectors.toList());
 				int index = elements.indexOf(element);
 				if (index < 0) {
 					index = elements.size();
@@ -212,6 +218,8 @@ public class TreeViewerID extends TreeViewerHideSelection {
 				}
 
 				if (elements != null && !elements.isEmpty()) {
+					elements.sort(
+							Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())));
 					int index = elements.indexOf(element);
 					if (index >= 0) {
 						id = index + 1;

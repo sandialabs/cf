@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import gov.sandia.cf.model.Uncertainty;
-import gov.sandia.cf.model.UncertaintyGroup;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 
 /**
  * Provides the content of the Uncertainty table
@@ -29,8 +29,9 @@ public class UncertaintyTreeContentProvider implements ITreeContentProvider {
 	public Object[] getElements(Object inputElement) {
 		List<Object> data = new ArrayList<>();
 		if (inputElement instanceof List) {
-			for (UncertaintyGroup group : ((List<UncertaintyGroup>) inputElement).stream()
-					.filter(UncertaintyGroup.class::isInstance).sorted(Comparator.comparing(UncertaintyGroup::getId))
+			for (Uncertainty group : ((List<Uncertainty>) inputElement)
+					.stream().filter(Uncertainty.class::isInstance).sorted(Comparator
+							.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()))
 					.collect(Collectors.toList())) {
 				data.add(group);
 			}
@@ -41,9 +42,10 @@ public class UncertaintyTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		Object[] tab = null;
-		if (parentElement instanceof UncertaintyGroup) {
-			tab = ((UncertaintyGroup) parentElement).getUncertainties().stream()
-					.sorted(Comparator.comparing(Uncertainty::getId)).toArray();
+		if (parentElement instanceof Uncertainty) {
+			tab = ((Uncertainty) parentElement).getChildren().stream().sorted(
+					Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()))
+					.toArray();
 		}
 		return tab;
 	}
@@ -52,7 +54,7 @@ public class UncertaintyTreeContentProvider implements ITreeContentProvider {
 	public Object getParent(Object element) {
 		Object parent = null;
 		if (element instanceof Uncertainty) {
-			parent = ((Uncertainty) element).getGroup();
+			parent = ((Uncertainty) element).getParent();
 		}
 		return parent;
 	}
@@ -60,9 +62,9 @@ public class UncertaintyTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		boolean hasChildren = false;
-		if (element instanceof UncertaintyGroup) {
-			hasChildren = ((UncertaintyGroup) element).getUncertainties() != null
-					&& !((UncertaintyGroup) element).getUncertainties().isEmpty();
+		if (element instanceof Uncertainty) {
+			hasChildren = ((Uncertainty) element).getChildren() != null
+					&& !((Uncertainty) element).getChildren().isEmpty();
 		}
 		return hasChildren;
 	}

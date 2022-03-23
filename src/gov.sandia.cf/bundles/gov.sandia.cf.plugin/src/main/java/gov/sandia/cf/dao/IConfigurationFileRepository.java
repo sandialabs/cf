@@ -11,6 +11,7 @@ import gov.sandia.cf.model.ConfigurationFile;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IConfigurationFileRepository extends ICRUDRepository<ConfigurationFile, Integer> {
 
 }

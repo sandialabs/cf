@@ -55,6 +55,19 @@ public class QoIPlanningConstraint extends GenericParameterConstraint<QoIPlannin
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(QoIPlanningConstraint importable) {
+
+		if (importable == null) {
+			return false;
+		}
+
+		return StringTools.equals(getRule(), importable.getRule());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(QoIPlanningConstraint importable) {
 
 		if (importable == null) {

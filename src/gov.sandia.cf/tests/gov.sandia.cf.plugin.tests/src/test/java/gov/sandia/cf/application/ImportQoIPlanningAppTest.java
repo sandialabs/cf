@@ -22,6 +22,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.qoiplanning.IImportQoIPlanningApp;
 import gov.sandia.cf.dao.IQoIPlanningConstraintRepository;
 import gov.sandia.cf.dao.IQoIPlanningParamRepository;
 import gov.sandia.cf.dao.IQoIPlanningSelectValueRepository;
@@ -57,7 +59,7 @@ class ImportQoIPlanningAppTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = null;
@@ -69,7 +71,7 @@ class ImportQoIPlanningAppTest extends AbstractTestApplication {
 		assertNotNull(confFile);
 
 		// import
-		getAppManager().getService(IImportQoIPlanningApp.class).importQoIPlanningSpecification(model, confFile);
+		getAppManager().getService(IImportQoIPlanningApp.class).importQoIPlanningSpecification(model, user, confFile);
 
 		// test Parameters
 		List<QoIPlanningParam> paramList = getDaoManager().getRepository(IQoIPlanningParamRepository.class).findAll();

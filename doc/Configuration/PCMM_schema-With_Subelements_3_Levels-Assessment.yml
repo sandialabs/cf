@@ -1,261 +1,1086 @@
-Phases:
-  - "Evidence"
-  - "Assess"
-  - "Aggregate"
-  - "Stamp"
-Roles:
-  - "Customer"
-  - "Analyst"
-  - "Code Developer"
-  - "Experimentalist"
-Levels:
-  Level 0:
-    Code: 0
-    Color: 255,0,0
-  Level 1:
-    Code: 1
-    Color: 255,140,0
-  Level 2:
-    Code: 2
-    Color: 255,255,0
-  Level 3:
-    Code: 3
-    Color: 0,255,0
-Elements:
-  Code Verification:
-    Name: Code Verification
-    Color: 255,160,51 #ffa033
-    Abbreviation: CVER
-    Subelements:
-      Apply Software Quality Engineering (SQE) processes:
-        Name: Apply Software Quality Engineering (SQE) processes
-        Code: CVER1
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-            Descriptors:
-              Descriptor: No identified SQE process
-              Additional Info: This element requires input from a capability developer.
-              Change(s) from previous level: n/a
-              Brief description of evidence relevant to this level: n/a
-              Key Words/Phrases:
-          Level 1:
-            Code: 1
-            Name: Level 1
-            Descriptors:
-              Descriptor: Code capability is managed to identified SQE practices
-              Additional Info:
-              Change(s) from previous level: "Main differences between Level 0 and 1:
-1) Documented SQE process"
-              Brief description of evidence relevant to this level: Documentation of the SQE process applied
-              Key Words/Phrases: '"Managed" = ASC IC management (for example); defined in SNL ASC SQE Guidance'
-          Level 2:
-            Code: 2
-            Name: Level 2
-            Descriptors:
-              Descriptor: Code capability is managed to identified SQE practices. SQE process is managed.
-              Additional Info:
-              Change(s) from previous level: "Main differences between Level 1 and 2:
-1) SQE process is managed
-2)"
-              Brief description of evidence relevant to this level: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices.
-              Key Words/Phrases: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices.
-          Level 3:
-            Code: 3
-            Name: Level 3
-            Descriptors:
-              Descriptor: Code capability is managed to identified SQE practices. SQE process is managed and optimized.
-              Additional Info:
-              Change(s) from previous level: "Main differences between Level 2 and 3:
-1) SQE process is optimized
-2) "
-              Brief description of evidence relevant to this level: 1) Documentation of the SQE process applied. 2) Documentation of the SQE management practices. 3) Documentation supporting achievement of process optimization.
-              Key Words/Phrases: '"Optimized" = as defined in the SNL ASC SQE Guidance'
-      Provide test coverage information:
-        Name: Provide test coverage information
-        Code: CVER2
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Identification of code or algorithm attributes, deficiencies and errors:
-        Name: Identification of code or algorithm attributes, deficiencies and errors
-        Code: CVER3
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Verify compliance to Software Quality Engineering (SQE) processes:
-        Name: Verify compliance to Software Quality Engineering (SQE) processes
-        Code: CVER4
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Technical_review of code verification activities:
-        Name: Technical_review of code verification activities
-        Code: CVER5
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-  Physics And Material Model Fidelity:
-    Name: Physics Models
-    Color: 108,179,17 #6cb311
-    Abbreviation: PMMF
-    Subelements:
-      Characterize completeness versus the PIRT:
-        Name: Characterize completeness versus the PIRT
-        Code: PMMF1
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Quantify model accuracy (i.e., separate effects model validation):
-        Name: Quantify model accuracy (i.e., separate effects model validation)
-        Code: PMMF2
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Assess interpolation vs. extrapolation of physics and material model:
-        Name: Assess interpolation vs. extrapolation of physics and material model
-        Code: PMMF3
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Technical review of physics and material models:
-        Name: Technical review of physics and material models
-        Code: PMMF4
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-  Representation and Geometry Fidelity:
-    Name: Geometry Fidelity
-    Color: 2,142,116 #028e74
-    Abbreviation: RGF
-    Subelements:
-      Characterize Representation and Geometric Fidelity:
-        Name: Characterize Representation and Geometric Fidelity
-        Code: RGF1
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Geometry sensitivity:
-        Name: Geometry sensitivity
-        Code: RGF2
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-      Technical review of representation and geometric fidelity:
-        Name: Technical review of representation and geometric fidelity
-        Code: RGF3
-        Levels:
-          Level 0:
-            Code: 0
-            Name: Level 0
-          Level 1:
-            Code: 1
-            Name: Level 1
-          Level 2:
-            Code: 2
-            Name: Level 2
-          Level 3:
-            Code: 3
-            Name: Level 3
-  
+PCMM:
+  Phases:
+    - "Evidence"
+    - "Assess"
+    - "Aggregate"
+    - "Stamp"
+    - "Planning"
+  Roles:
+    - "Customer"
+    - "System Engineer"
+    - "Analyst"
+    - "Code Developer"
+    - "Experimentalist"
+    - "V&V Partner"
+  Levels:
+    Low:
+      Code: 0
+      Color: 255,0,0
+    Medium:
+      Code: 1
+      Color: 255,192,0
+    High:
+      Code: 2
+      Color: 0,176,80
+  Elements:
+    RGF: 
+      Name: Representation and Geometric Fidelity
+      Abbreviation: RGF
+      Color: 0,142,116
+      Levels: 
+      Subelements: 
+        RGF1: 
+          Name: Characterize Representation and Geometric Fidelity
+          Code: RGF1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        RGF2: 
+          Name: Geometry sensitivity
+          Code: RGF2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        RGF3: 
+          Name: Technical review of representation and geometric fidelity
+          Code: RGF3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+    PMMF: 
+      Name: Physics and Material Model Fidelity
+      Abbreviation: PMMF
+      Color: 108,179,18
+      Levels: 
+      Subelements: 
+        PMMF1: 
+          Name: Characterize completeness versus the PIRT
+          Code: PMMF1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        PMMF2: 
+          Name: Quantify model accuracy (i.e., separate effects model validation)
+          Code: PMMF2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        PMMF3: 
+          Name: Assess interpolation vs. extrapolation of physics and material model
+          Code: PMMF3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        PMMF4: 
+          Name: Technical review of physics and material models
+          Code: PMMF4
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+    CVER: 
+      Name: Code Verification
+      Abbreviation: CVER
+      Color: 255,160,51
+      Levels: 
+      Subelements: 
+        CVER1: 
+          Name: Apply Software Quality Engineering (SQE) processes
+          Code: CVER1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+        CVER2: 
+          Name: Provide test coverage information
+          Code: CVER2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+        CVER3: 
+          Name:  Identification of code or algorithm attributes, deficiencies and errors
+          Code: CVER3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+        CVER4: 
+          Name: Verify compliance to Software Quality Engineering (SQE) processes
+          Code: CVER4
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+        CVER5: 
+          Name: Technical_review of code verification activities
+          Code: CVER5
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Key Words/Phrases: ""
+    SVER: 
+      Name: Solution Verification
+      Abbreviation: SVER
+      Color: 169,44,0
+      Levels: 
+      Subelements: 
+        SVER1: 
+          Name: Quantify numerical solution errors
+          Code: SVER1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        SVER2: 
+          Name: Quantify Uncertainty in Computational (or Numerical) Error
+          Code: SVER2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        SVER3: 
+          Name: Verify simulation input decks
+          Code: SVER3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        SVER4: 
+          Name: Verify simulation post-processor inputs decks
+          Code: SVER4
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        SVER5: 
+          Name: Technical review of solution verification
+          Code: SVER5
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+    VAL: 
+      Name: Validation
+      Abbreviation: VAL
+      Color: 125,13,124
+      Levels: 
+      Subelements: 
+        VAL1: 
+          Name: Define a validation hierarchy
+          Code: VAL1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        VAL2: 
+          Name: Apply a validation hierarchy
+          Code: VAL2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        VAL3: 
+          Name: Quantify physical accuracy 
+          Code: VAL3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        VAL4: 
+          Name: Validation domain vs. application domain 
+          Code: VAL4
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        VAL5: 
+          Name: Technical review of validation 
+          Code: VAL5
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+    UQ: 
+      Name: Uncertainty Quantification
+      Abbreviation: UQ
+      Color: 0,173,208
+      Levels: 
+      Subelements: 
+        UQ1: 
+          Name: Aleatory and epistemic uncertainties identified and characterized.
+          Code: UQ1
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        UQ2: 
+          Name: Perform sensitivity analysis
+          Code: UQ2
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        UQ3: 
+          Name: Quantify impact of uncertainties from UQ1 on quantities of interest
+          Code: UQ3
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        UQ4: 
+          Name: UQ aggregation and roll-up
+          Code: UQ4
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+        UQ5: 
+          Name: Technical review of uncertainty quantification
+          Code: UQ5
+          Levels: 
+            Low: 
+              Code: 0
+              Name: Low
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            Medium: 
+              Code: 1
+              Name: Medium
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+            High: 
+              Code: 2
+              Name: High
+              Descriptors: 
+                Descriptor: ""
+                Additional Info: ""
+                Change(s) from previous level: ""
+                Brief description of evidence relevant to this level: ""
+                Additional evidence from previous level: ""
+                Key Words/Phrases: ""
+  Planning:
+    Planning Fields:
+      Summary:
+        required: Optional
+        type: RichText
+      Notes/Assumptions:
+        required: Optional
+        type: RichText
+      Action Items:
+        required: Optional
+        type: Action Item Table
+    Planning Types:
+      Action Item Table:
+        Identifier:
+          required: Optional
+          type: Text
+        Description:
+          required: Optional
+          type: Text
+        Status:
+          required: Optional
+          type: Select
+          values:
+            - "Open"
+            - "In Progress"
+            - "Resolved"
+            - "Canceled"
+        Status Narrative:
+          required: Optional
+          type: RichText
+        Priority:
+          required: Optional
+          type: Select
+          values:
+            - "High"
+            - "Medium"
+            - "Low"
+        Owner:
+          required: Optional
+          type: Text
+        Created Date:
+          required: Optional
+          type: Date
+        Planned Completion Date:
+          required: Optional
+          type: Date
+        Actual Completion Date:
+          required: Optional
+          type: Date
+    Planning Questions:
+      RGF:
+        RGF1:
+          - "Has the model been de-featured and to what extent are the primary and secondary features included (ex. Fillets, bolts, holes, cables, etc)?"
+        RGF2:
+          - "How is the computational error due to the given level of geometric resolution expected to influence the QOIs (perform simulations for varying levels of de-featuring)?"
+          - "For which major features has the sensitivity been quantified (few, some, all)?"
+        RGF3:
+          - "Has the representation/geometry for the simulation been rigorously checked (by the analyst, by other analysts, by multiple other users, peer review panel (external or internal))?"
+      PMMF:
+        PMMF1:
+          - "To what extent do the phenomena covered in the PIRT align with the major physics that are included in the application model, and are the same capabilities that were assessed in the PIRT applicableimulation been rigorously checked (by the analyst, by other analysts, by multiple other users, peer review panel (external or internal))?"
+        PMMF2:
+          - "Which individual phenomena have specific validation comparisons?"
+          - "How were the existing validation comparisons conducted (quantitative vs. qualitative), and how was experimental uncertainty/error in the test data incorporated?"
+        PMMF3:
+          - "To what extent does the application domain intersect the validation domain for this physics and material model (does not intersect, partially intersects, entirely contained)?"
+        PMMF4:
+          - "Have the physics and material models, PIRT coverage and model accuracy been subjected to peer review (by the team, internal, external), and where are these results documented?"
+      CVER:
+        CVER1:
+          - "Is the code capability managed to identified SQE practices? If so, reference them."
+          - "How is the SQE process managed and optimized?"
+        CVER2:
+          - "What regression tests and verification test suite (VERTS) are available for the code capabilities?"
+          - "How well are the code features required for the intended application covered by the VERTS?"
+        CVER3:
+          - "How well are the code/algorithm attributes, deficiencies and errors from VERTS known?"
+          - "How are these errors mapped to the intended application?"
+        CVER4:
+          - "How has the SQE process been reviewed (none, self-assessment, external, certification)?"
+        CVER5:
+          - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+      SVER:
+        SVER1:
+          - "How have numerical errors incurred from spatial, temporal, and stochastic resolution been accounted for (qualitative vs. quantitative)?"
+          - "How are these errors expected to impact all of the relevant QoIs?"
+        SVER2:
+          - "Are there appropriate error bars for the stochastic error for all the relevant QoIs?"
+        SVER3:
+          - "How and by whom has the accuracy of the input decks for the simulation been checked (by the analyst, by other analysts, by multiple other users)?"
+        SVER4:
+          - "Is a common set of post-processing tools used for the analysis, and are they held to a common set of SQE standards?"
+          - "How and by whom has the accuracy of the inputs to the post-processing tools been checked (by the analyst, by other analysts, by multiple other users)?"
+        SVER5:
+          - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+      VAL:
+        VAL1:
+          - "Has a validation hierarchy been defined (i.e., mapping from material to component to subsystem to full system levels)?"
+        VAL2:
+          - "What is the methodology for how available experimental data connects the levels of the hierarchy?"
+          - "Have the steps in this methodology been performed (i.e., have quantitative comparisons been made at different levels of the hierarchy)?"
+        VAL3:
+          - "What is the rigor of the validation comparisons (i.e., are they quantitative or qualitative)?"
+          - "Do the validation comparisons include uncertainty/error in the test data and model outputs?"
+        VAL4:
+          - "Is the application of the model an extrapolation from the conditions where test data is available for validation, and to what extent (materials, environments, hardware, etc.)?"
+          - "What evidence exists that provides confidence in the ability to extrapolate?"
+        VAL5:
+          - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"
+      UQ:
+        UQ1:
+          - "Has an inventory of uncertainty sources been taken, and have they been classified according to these forms?"
+          - "What is the source of information (e.g., legacy, literature, direct measurement, calibration, etc.) that is used for uncertainty characterization (e.g., classification as aleatory vs. epistemic, uncertainty representation, distributional assumptions, etc.)?"
+        UQ2:
+          - "How have the most important uncertainty sources for the relevant QoIs been identified (e.g., SME judgment, local sensitivity analysis, global sensitivity analysis, etc.)?"
+        UQ3:
+          - "Have identified sources of uncertainty (see 1 above) been propagated to the important output QoIs?"
+          - "What is the procedure for propagation and what additional errors are introduced?"
+        UQ4:
+          - "How have sources of uncertainty been combined and transferred across different levels of the system (i.e., validation hierarchy) and to the application domain?"
+        UQ5:
+          - "Have these activities been subjected to peer review (by the team, internal, external), and where are these results documented?"

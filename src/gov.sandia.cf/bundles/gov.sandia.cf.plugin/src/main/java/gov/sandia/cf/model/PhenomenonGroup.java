@@ -73,7 +73,6 @@ public class PhenomenonGroup implements Serializable, IEntity<PhenomenonGroup, I
 	 * The idLabel field linked to ID_LABEL column
 	 */
 	@Column(name = "ID_LABEL")
-	@NotBlank(message = RscConst.EX_PHENOMENONGROUP_IDLABEL_BLANK)
 	private String idLabel;
 
 	/**

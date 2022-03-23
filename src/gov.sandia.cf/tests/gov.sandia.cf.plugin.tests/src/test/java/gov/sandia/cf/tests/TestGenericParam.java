@@ -23,6 +23,17 @@ public class TestGenericParam extends GenericParameter<TestGenericParam> {
 	private List<TestGenericParam> children;
 	private List<GenericParameterSelectValue<TestGenericParam>> parameterValueList;
 	private List<GenericParameterConstraint<TestGenericParam>> constraintList;
+	private TestGenericParam parent;
+
+	@Override
+	public TestGenericParam getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(TestGenericParam parent) {
+		this.parent = parent;
+	}
 
 	@Override
 	public List<GenericParameter<TestGenericParam>> getChildren() {

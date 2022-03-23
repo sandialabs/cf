@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -33,24 +32,15 @@ import org.hsqldb.cmdline.SqlToolError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.common.ServiceLoader;
 import gov.sandia.cf.dao.IDBMigrationManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IMigrationLogRepository;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
-import gov.sandia.cf.dao.migration.tasks.Task_001_QoIITag;
-import gov.sandia.cf.dao.migration.tasks.Task_002_RichTextContent;
-import gov.sandia.cf.dao.migration.tasks.Task_003_PlanningFieldLongVarchar;
-import gov.sandia.cf.dao.migration.tasks.Task_004_GenericParameterRequired;
-import gov.sandia.cf.dao.migration.tasks.Task_005_ConfigurationFileTable;
-import gov.sandia.cf.dao.migration.tasks.Task_006_SystemRequirementStatementField;
-import gov.sandia.cf.dao.migration.tasks.Task_007_ARGParametersLongVarcharFields;
-import gov.sandia.cf.dao.migration.tasks.Task_008_UnknownCreationUserXorDate;
-import gov.sandia.cf.dao.migration.tasks.Task_009_EvidenceValueToGson;
-import gov.sandia.cf.dao.migration.tasks.Task_010_ARGParam_Variable;
-import gov.sandia.cf.dao.migration.tasks.Task_011_EvidenceNoAssessable;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
+import gov.sandia.cf.launcher.CFTmpFolderManager;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.FileTools;
@@ -77,7 +67,7 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 	/**
 	 * The database manager
 	 */
-	private DaoManager daoManager;
+	private IDaoManager daoManager;
 
 	/**
 	 * QUERIES
@@ -115,28 +105,12 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 	/** SQL QUOTE character */
 	public static final String SQL_QUOTE_CHAR = "\'";//$NON-NLS-1$
 
-	private static final Map<Integer, IMigrationTask> MIGRATION_TASKS;
-	static {
-		MIGRATION_TASKS = new TreeMap<>();
-		MIGRATION_TASKS.put(1, new Task_001_QoIITag());
-		MIGRATION_TASKS.put(2, new Task_002_RichTextContent());
-		MIGRATION_TASKS.put(3, new Task_003_PlanningFieldLongVarchar());
-		MIGRATION_TASKS.put(4, new Task_004_GenericParameterRequired());
-		MIGRATION_TASKS.put(5, new Task_005_ConfigurationFileTable());
-		MIGRATION_TASKS.put(6, new Task_006_SystemRequirementStatementField());
-		MIGRATION_TASKS.put(7, new Task_007_ARGParametersLongVarcharFields());
-		MIGRATION_TASKS.put(8, new Task_008_UnknownCreationUserXorDate());
-		MIGRATION_TASKS.put(9, new Task_009_EvidenceValueToGson());
-		MIGRATION_TASKS.put(10, new Task_010_ARGParam_Variable());
-		MIGRATION_TASKS.put(11, new Task_011_EvidenceNoAssessable());
-	}
-
 	/**
 	 * The constructor
 	 * 
 	 * @param daoManager the dao manager
 	 */
-	public EclipseLinkMigrationManager(DaoManager daoManager) {
+	public EclipseLinkMigrationManager(IDaoManager daoManager) {
 		if (daoManager == null) {
 			throw new IllegalArgumentException(RscTools.getString(RscConst.EX_DBDAOMANAGER_DAOMANAGER_NULL));
 		}
@@ -194,14 +168,16 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 	}
 
 	/**
+	 * Gets the tasks to execute.
+	 *
 	 * @param unitOfWork used to execute sql queries
 	 * @return the sql scripts list to execute on the current database version. This
 	 *         method get the current version from VERSION column in the MODEL table
 	 *         and compare it with the name of the scripts listed into the
 	 *         SCRIPT_FOLDER_PATH.
+	 * @throws URISyntaxException            if the script path is not valid.
 	 * @throws IOException                   if an error occured while reading
 	 *                                       script.
-	 * @throws URISyntaxException            if the script path is not valid.
 	 * @throws CredibilityMigrationException if one task is not valid
 	 */
 	public SortedMap<Integer, IMigrationTask> getTasksToExecute(UnitOfWork unitOfWork)
@@ -209,15 +185,43 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 
 		SortedMap<Integer, IMigrationTask> tasksToExecute = new TreeMap<>();
 
+		SortedMap<Integer, IMigrationTask> tasks = getMigrationTasks();
+
 		// check task to execute
 		// the tasks are ordered in the treemap. Use the same order
-		for (Entry<Integer, IMigrationTask> entry : MIGRATION_TASKS.entrySet()) {
+		for (Entry<Integer, IMigrationTask> entry : tasks.entrySet()) {
 			if (isValidScript(entry.getValue(), unitOfWork)) {
 				tasksToExecute.put(entry.getKey(), entry.getValue());
 			}
 		}
 
 		return tasksToExecute;
+	}
+
+	/**
+	 * Gets the tasks.
+	 *
+	 * @return the tasks
+	 * @throws CredibilityMigrationException the credibility migration exception
+	 */
+	public SortedMap<Integer, IMigrationTask> getMigrationTasks() throws CredibilityMigrationException {
+
+		SortedMap<Integer, IMigrationTask> tasks = new TreeMap<>();
+		List<Class<?>> taskClasses = ServiceLoader.load(MigrationTask.class, this.getClass().getPackage().getName());
+
+		for (Class<?> taskClass : taskClasses) {
+			if (IMigrationTask.class.isAssignableFrom(taskClass)) {
+				MigrationTask annotation = taskClass.getAnnotation(MigrationTask.class);
+				int id = annotation.id();
+				try {
+					tasks.put(id, (IMigrationTask) taskClass.newInstance());
+				} catch (InstantiationException | IllegalAccessException e1) {
+					throw new CredibilityMigrationException(e1);
+				}
+			}
+		}
+
+		return tasks;
 	}
 
 	/**
@@ -397,7 +401,7 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 	 * 
 	 * @param errorlog the error log
 	 */
-	private static void createErrorLogFileInWorkspace(DaoManager daoManager, String errorlog) {
+	private static void createErrorLogFileInWorkspace(IDaoManager daoManager, String errorlog) {
 
 		try {
 
@@ -407,7 +411,7 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 			if (dbFolder.exists()) {
 
 				String cfFileName = dbFolder.getParentFile().getName()
-						.replaceAll(FileTools.CREDIBILITY_TMP_FOLDER_ZIPPED_NAME, RscTools.empty())
+						.replaceAll(CFTmpFolderManager.CREDIBILITY_TMP_FOLDER_ZIPPED_NAME, RscTools.empty())
 						.replaceFirst(RscTools.HYPHEN, RscTools.empty());
 				File cfFileFolder = dbFolder.getParentFile().getParentFile();
 				String errorFilePath = cfFileFolder.getPath() + FileTools.PATH_SEPARATOR + cfFileName + RscTools.HYPHEN
@@ -437,11 +441,6 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 			sqlVar = sqlVar.replace(SQL_QUOTE_CHAR, SQL_QUOTE_CHAR + SQL_QUOTE_CHAR);
 		}
 		return sqlVar;
-	}
-
-	@SuppressWarnings("javadoc")
-	public static Map<Integer, IMigrationTask> getMigrationTasks() {
-		return MIGRATION_TASKS;
 	}
 
 }

@@ -22,14 +22,22 @@ import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IExportApplication;
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPCMMPlanningApplication;
-import gov.sandia.cf.application.IUncertaintyApplication;
-import gov.sandia.cf.application.IUserApplication;
-import gov.sandia.cf.application.configuration.ExportOptions;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.exports.IExportApplication;
+import gov.sandia.cf.application.global.IUserApplication;
+import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.Decision;
+import gov.sandia.cf.model.DecisionParam;
 import gov.sandia.cf.model.GenericParameter;
+import gov.sandia.cf.model.IntendedPurpose;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
@@ -40,10 +48,14 @@ import gov.sandia.cf.model.PCMMPlanningQuestionValue;
 import gov.sandia.cf.model.PCMMPlanningTableItem;
 import gov.sandia.cf.model.PCMMPlanningValue;
 import gov.sandia.cf.model.QuantityOfInterest;
+import gov.sandia.cf.model.SystemRequirement;
+import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.Tag;
-import gov.sandia.cf.model.UncertaintyGroup;
+import gov.sandia.cf.model.Uncertainty;
+import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.preferences.PrefTools;
+import gov.sandia.cf.tools.FileExtension;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -105,9 +117,9 @@ public class ExportConfigurationViewController {
 		if (selectedPath != null) {
 
 			// check yml extension and append
-			if (!FileTools.hasExtension(selectedPath, FileTools.YML)
-					&& !FileTools.hasExtension(selectedPath, FileTools.YAML)) {
-				selectedPath += FileTools.YML;
+			if (!FileTools.hasExtension(selectedPath, FileExtension.YML.getExtension())
+					&& !FileTools.hasExtension(selectedPath, FileExtension.YAML.getExtension())) {
+				selectedPath += FileExtension.YML.getExtension();
 			}
 
 			textWidget.setText(selectedPath);
@@ -381,10 +393,8 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export data
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportData(
-					new File(view.getTextDataSchemaPath()), exportOptions,
-					view.getViewManager().getCache().getPCMMSpecification(),
-					view.getViewManager().getCOMConfiguration());
+			view.getViewManager().getAppManager().getService(IExportApplication.class)
+					.exportData(new File(view.getTextDataSchemaPath()), exportOptions);
 
 			// Inform success
 			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
@@ -400,6 +410,8 @@ public class ExportConfigurationViewController {
 	}
 
 	/**
+	 * Check save need.
+	 *
 	 * @return true if the user confirm save need, otherwise false.
 	 */
 	private boolean checkSaveNeed() {
@@ -419,6 +431,8 @@ public class ExportConfigurationViewController {
 	}
 
 	/**
+	 * Gets the export options.
+	 *
 	 * @return the export options depending of the user selection
 	 */
 	private Map<ExportOptions, Object> getExportOptions() {
@@ -428,15 +442,138 @@ public class ExportConfigurationViewController {
 		options.put(ExportOptions.MODEL, view.getViewManager().getCache().getModel());
 		options.put(ExportOptions.USER_LIST,
 				view.getViewManager().getAppManager().getService(IUserApplication.class).getUsers());
+		options.put(ExportOptions.PCMM_ROLE_LIST, view.getViewManager().getCache().getPCMMSpecification().getRoles());
+
+		options.putAll(getIntendedPurposeExportOptions());
+		options.putAll(getDecisionExportOptions());
+		options.putAll(getSystemRequirementExportOptions());
+		options.putAll(getUncertaintyExportOptions());
 
 		options.putAll(getPIRTExportOptions());
 		options.putAll(getPCMMExportOptions());
-		options.putAll(getUncertaintyExportOptions());
 
 		return options;
 	}
 
 	/**
+	 * Gets the intended purpose export options.
+	 *
+	 * @return the intended purpose export options
+	 */
+	private Map<ExportOptions, Object> getIntendedPurposeExportOptions() {
+
+		// Initialize
+		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
+
+		// Intended Purpose - is selected?
+		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, view.isIntendedPurposeSelected());
+
+		// Intended Purpose - get data
+		try {
+			IntendedPurpose intendedPurpose = view.getViewManager().getAppManager()
+					.getService(IIntendedPurposeApp.class).get(view.getViewManager().getCache().getModel());
+			options.put(ExportOptions.INTENDED_PURPOSE, intendedPurpose);
+		} catch (CredibilityException e) {
+			logger.error(e.getMessage());
+			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+		}
+
+		return options;
+	}
+
+	/**
+	 * Gets the decision export options.
+	 *
+	 * @return the Decision export options depending of the user selection
+	 */
+	private Map<ExportOptions, Object> getDecisionExportOptions() {
+
+		// Initialize
+		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
+
+		// Decision - Get generation parameters
+		options.put(ExportOptions.DECISION_INCLUDE, view.isDecisionSelected());
+
+		// Decision specification
+		options.put(ExportOptions.DECISION_SPECIFICATION, view.getViewManager().getCache().getDecisionSpecification());
+
+		// Decision - get Decision parameters
+		List<DecisionParam> parameters = view.getViewManager().getCache().getDecisionSpecification().getParameters();
+		options.put(ExportOptions.DECISION_PARAMETERS, parameters);
+
+		// Decision - get Decision values
+		List<Decision> values = view.getViewManager().getAppManager().getService(IDecisionApplication.class)
+				.getDecisionRootByModel(view.getViewManager().getCache().getModel());
+		options.put(ExportOptions.DECISION_LIST, values);
+
+		return options;
+	}
+
+	/**
+	 * Gets the system requirement export options.
+	 *
+	 * @return the System Requirement export options depending of the user selection
+	 */
+	private Map<ExportOptions, Object> getSystemRequirementExportOptions() {
+
+		// Initialize
+		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
+
+		// System Requirement - Get generation parameters
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, view.isSystemRequirementSelected());
+
+		// System Requirement specification
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_SPECIFICATION,
+				view.getViewManager().getCache().getSystemRequirementSpecification());
+
+		// System Requirement - get System Requirement parameters
+		List<SystemRequirementParam> parameters = view.getViewManager().getCache().getSystemRequirementSpecification()
+				.getParameters();
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_PARAMETERS, parameters);
+
+		// System Requirement - get System Requirement values
+		List<SystemRequirement> values = view.getViewManager().getAppManager()
+				.getService(ISystemRequirementApplication.class)
+				.getRequirementRootByModel(view.getViewManager().getCache().getModel());
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, values);
+
+		return options;
+	}
+
+	/**
+	 * Gets the uncertainty export options.
+	 *
+	 * @return the Uncertainty export options depending of the user selection
+	 */
+	private Map<ExportOptions, Object> getUncertaintyExportOptions() {
+
+		// Initialize
+		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
+
+		// Uncertainty - Get generation parameters
+		options.put(ExportOptions.UNCERTAINTY_INCLUDE, view.isUncertaintySelected());
+
+		// Uncertainty specification
+		options.put(ExportOptions.UNCERTAINTY_SPECIFICATION,
+				view.getViewManager().getCache().getUncertaintySpecification());
+
+		// Uncertainty - get uncertainty parameters and their content
+		List<UncertaintyParam> parameters = view.getViewManager().getCache().getUncertaintySpecification()
+				.getParameters();
+		options.put(ExportOptions.UNCERTAINTY_PARAMETERS, parameters);
+
+		// Uncertainty - get uncertainty groups and their content
+		List<Uncertainty> uncertaintyGroupList = view.getViewManager().getAppManager()
+				.getService(IUncertaintyApplication.class)
+				.getUncertaintyGroupByModel(view.getViewManager().getCache().getModel());
+		options.put(ExportOptions.UNCERTAINTY_GROUP_LIST, uncertaintyGroupList);
+
+		return options;
+	}
+
+	/**
+	 * Gets the PIRT export options.
+	 *
 	 * @return the PIRT export options depending of the user selection
 	 */
 	private Map<ExportOptions, Object> getPIRTExportOptions() {
@@ -446,6 +583,9 @@ public class ExportConfigurationViewController {
 
 		// PIRT- Get generation parameters
 		options.put(ExportOptions.PIRT_INCLUDE, view.isPIRTSelected());
+
+		// PIRT specification
+		options.put(ExportOptions.PIRT_SPECIFICATION, view.getViewManager().getCache().getPIRTSpecification());
 
 		// PIRT - get tree selected QoIs
 		List<QuantityOfInterest> qoiList = null;
@@ -460,6 +600,8 @@ public class ExportConfigurationViewController {
 	}
 
 	/**
+	 * Gets the PCMM export options.
+	 *
 	 * @return the PCMM options depending of the user selection
 	 */
 	private Map<ExportOptions, Object> getPCMMExportOptions() {
@@ -471,10 +613,20 @@ public class ExportConfigurationViewController {
 		// PCMM - get selected tags
 		List<Tag> pcmmTagList = getSelectedTagList();
 
+		// PCMM specification
+		options.put(ExportOptions.PCMM_SPECIFICATION, view.getViewManager().getCache().getPCMMSpecification());
+
 		// PCMM - Options
 		PCMMMode mode = view.getViewManager().getPCMMConfiguration().getMode();
 		options.put(ExportOptions.PCMM_INCLUDE, view.isPCMMSelected());
 		options.put(ExportOptions.PCMM_MODE, mode);
+		options.put(ExportOptions.PCMM_ROLE_LIST, view.getViewManager().getCache().getPCMMSpecification().getRoles());
+		options.put(ExportOptions.PCMM_ELEMENTS, view.getViewManager().getCache().getPCMMSpecification().getElements());
+		options.put(ExportOptions.PCMM_PLANNING_PARAMETERS,
+				view.getViewManager().getCache().getPCMMSpecification().getPlanningFields());
+		options.put(ExportOptions.PCMM_PLANNING_QUESTIONS,
+				view.getViewManager().getCache().getPCMMSpecification().getPlanningQuestions());
+
 		options.put(ExportOptions.PCMM_TAG_LIST, pcmmTagList);
 		options.put(ExportOptions.PCMM_PLANNING_INCLUDE, view.isPCMMPlanningSelected());
 		options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, view.isPCMMAssessmentSelected());
@@ -492,14 +644,11 @@ public class ExportConfigurationViewController {
 			/**
 			 * PCMM data
 			 */
-			IPCMMApplication pcmmApp = view.getViewManager().getAppManager().getService(IPCMMApplication.class);
-			IPCMMPlanningApplication pcmmPlanningApp = view.getViewManager().getAppManager()
-					.getService(IPCMMPlanningApplication.class);
-
 			// Get planning parameters
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(GenericParameter.Filter.PARENT, null);
-			List<PCMMPlanningParam> planningParameters = pcmmPlanningApp.getPlanningFieldsBy(filters);
+			List<PCMMPlanningParam> planningParameters = view.getViewManager().getAppManager()
+					.getService(IPCMMPlanningApplication.class).getPlanningFieldsBy(filters);
 			options.put(ExportOptions.PCMM_PLANNING_PARAMETERS, planningParameters);
 
 			// Get planning questions & values
@@ -517,30 +666,36 @@ public class ExportConfigurationViewController {
 
 					// Questions
 					pcmmPlanningQuestions.put(pcmmElement,
-							pcmmPlanningApp.getPlanningQuestionsByElement(pcmmElement, mode));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningQuestionsByElement(pcmmElement, mode));
 
 					// Question Values
 					pcmmPlanningQuestionValues.put(pcmmElement,
-							pcmmPlanningApp.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTagList));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTagList));
 
 					// Parameter values
 					pcmmPlanningValues.put(pcmmElement,
-							pcmmPlanningApp.getPlanningValueByElement(pcmmElement, mode, pcmmTagList));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningValueByElement(pcmmElement, mode, pcmmTagList));
 
 					// Parameter table item values
 					pcmmPlanningItems.put(pcmmElement,
-							pcmmPlanningApp.getPlanningTableItemByElement(pcmmElement, mode, pcmmTagList));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningTableItemByElement(pcmmElement, mode, pcmmTagList));
 
 				}
 
 				// Evidences
 				if (view.isPCMMEvidenceSelected()) {
-					pcmmEvidence.put(pcmmElement, pcmmApp.getEvidenceByTag(pcmmTagList));
+					pcmmEvidence.put(pcmmElement, view.getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceByTag(pcmmTagList));
 				}
 
 				// Assessments
 				if (view.isPCMMAssessmentSelected()) {
-					pcmmAssessments.put(pcmmElement, pcmmApp.getAssessmentByTag(pcmmTagList));
+					pcmmAssessments.put(pcmmElement, view.getViewManager().getAppManager()
+							.getService(IPCMMAssessmentApp.class).getAssessmentByTag(pcmmTagList));
 				}
 			}
 
@@ -571,6 +726,8 @@ public class ExportConfigurationViewController {
 	}
 
 	/**
+	 * Gets the selected tag list.
+	 *
 	 * @return the list of selected tags
 	 */
 	private List<Tag> getSelectedTagList() {
@@ -592,26 +749,6 @@ public class ExportConfigurationViewController {
 		}
 
 		return pcmmTagList;
-	}
-
-	/**
-	 * @return the Uncertainty export options depending of the user selection
-	 */
-	private Map<ExportOptions, Object> getUncertaintyExportOptions() {
-
-		// Initialize
-		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
-
-		// Uncertainty - Get generation parameters
-		options.put(ExportOptions.UNCERTAINTY_INCLUDE, view.isUncertaintySelected());
-
-		// Uncertainty - get uncertainty groups and their content
-		List<UncertaintyGroup> uncertaintyGroupList = view.getViewManager().getAppManager()
-				.getService(IUncertaintyApplication.class)
-				.getUncertaintyGroupByModel(view.getViewManager().getCache().getModel());
-		options.put(ExportOptions.UNCERTAINTY_GROUP_LIST, uncertaintyGroupList);
-
-		return options;
 	}
 
 }

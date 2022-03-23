@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMPlanningQuestionConstraint;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMPlanningQuestionConstraintRepository extends ICRUDRepository<PCMMPlanningQuestionConstraint, Integer> {
 
 }

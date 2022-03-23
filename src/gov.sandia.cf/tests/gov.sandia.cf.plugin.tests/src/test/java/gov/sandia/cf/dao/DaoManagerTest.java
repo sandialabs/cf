@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import gov.sandia.cf.dao.CredibilityDaoRuntimeException.CredibilityDaoRuntimeMessage;
 import gov.sandia.cf.dao.impl.CriterionRepository;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException.CredibilityServiceRuntimeMessage;
 
 /**
  * @author Didier Verstraete
@@ -69,9 +71,9 @@ class DaoManagerTest extends AbstractTestDao {
 	void test_getRepository_NotFound() {
 		try {
 			getDaoManager().getRepository(IDaoRepositoryNotFound.class);
-		} catch (CredibilityDaoRuntimeException e) {
-			assertEquals(CredibilityDaoRuntimeMessage.NOT_FOUND.getMessage(IDaoRepositoryNotFound.class.getName()),
-					e.getMessage());
+		} catch (CredibilityServiceRuntimeException e) {
+			assertEquals(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE
+					.getMessage(IDaoRepositoryNotFound.class.getName(), Repository.class.getName()), e.getMessage());
 		}
 	}
 

@@ -19,6 +19,7 @@ import gov.sandia.cf.model.User;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMAssessmentRepository extends ICRUDRepository<PCMMAssessment, Integer> {
 
 	/**

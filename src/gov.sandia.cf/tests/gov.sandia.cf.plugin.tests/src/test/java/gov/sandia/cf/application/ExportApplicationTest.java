@@ -16,20 +16,31 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.decision.DecisionSpecification;
-import gov.sandia.cf.application.configuration.decision.YmlReaderDecisionSchema;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTSchema;
-import gov.sandia.cf.application.configuration.qoiplanning.QoIPlanningSpecification;
-import gov.sandia.cf.application.configuration.qoiplanning.YmlReaderQoIPlanningSchema;
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
-import gov.sandia.cf.application.configuration.requirement.YmlReaderSystemRequirementSchema;
-import gov.sandia.cf.application.configuration.uncertainty.UncertaintySpecification;
-import gov.sandia.cf.application.configuration.uncertainty.YmlReaderUncertaintySchema;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.decision.IImportDecisionApp;
+import gov.sandia.cf.application.decision.YmlReaderDecisionSchema;
+import gov.sandia.cf.application.pcmm.IImportPCMMApp;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pirt.IImportPIRTApp;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.qoiplanning.IImportQoIPlanningApp;
+import gov.sandia.cf.application.qoiplanning.IQoIPlanningApplication;
+import gov.sandia.cf.application.qoiplanning.YmlReaderQoIPlanningSchema;
+import gov.sandia.cf.application.requirement.IImportSysRequirementApp;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.YmlReaderSystemRequirementSchema;
+import gov.sandia.cf.application.uncertainty.IImportUncertaintyApp;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.application.uncertainty.YmlReaderUncertaintySchema;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
+import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.DecisionSpecification;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
+import gov.sandia.cf.model.dto.configuration.QoIPlanningSpecification;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
+import gov.sandia.cf.model.dto.configuration.UncertaintySpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.WorkspaceTools;
 
@@ -52,14 +63,14 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, confFile);
+		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, user, confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("ModSim_Decision", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -83,14 +94,14 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/QoI_Planning-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportQoIPlanningApp.class).importQoIPlanningSpecification(model, confFile);
+		getAppManager().getService(IImportQoIPlanningApp.class).importQoIPlanningSpecification(model, user, confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("QoI_Planning", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -115,14 +126,14 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, confFile);
+		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, user, confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("PIRT-schema", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -145,7 +156,7 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools
@@ -153,7 +164,7 @@ class ExportApplicationTest extends AbstractTestApplication {
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, confFile);
+		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, user, confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("PCMM-schema", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -176,14 +187,14 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/Uncertainty_Parameter_v0.0.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportUncertaintyApp.class).importUncertaintySpecification(model, confFile);
+		getAppManager().getService(IImportUncertaintyApp.class).importUncertaintySpecification(model, user, confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("Uncertainty-schema", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$
@@ -208,14 +219,15 @@ class ExportApplicationTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/Requirement_Parameter-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import configuration
-		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, confFile);
+		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, user,
+				confFile);
 
 		// export
 		File exportConfFile = File.createTempFile("SysRequirement-schema", ".yml", getTestTempFolder()); //$NON-NLS-1$ //$NON-NLS-2$

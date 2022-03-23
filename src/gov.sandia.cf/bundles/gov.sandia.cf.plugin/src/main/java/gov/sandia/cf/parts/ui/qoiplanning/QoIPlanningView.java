@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -20,6 +22,10 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -35,7 +41,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.QuantityOfInterest;
@@ -48,6 +54,7 @@ import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.ViewTools;
 import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.ui.MainViewManager;
+import gov.sandia.cf.parts.ui.pirt.QoIDropSupport;
 import gov.sandia.cf.parts.ui.pirt.editors.QoIDescriptionLabelProvider;
 import gov.sandia.cf.parts.ui.pirt.editors.QoILabelProvider;
 import gov.sandia.cf.parts.ui.pirt.editors.QoINameLabelProvider;
@@ -59,6 +66,7 @@ import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.viewer.editors.GenericTableLabelProvider;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -269,9 +277,15 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 		// Columns - Id
 		columnProperties.add(treeViewer.getIdColumn().getColumn().getText());
-		treeViewer.getIdColumn().setLabelProvider(new QoILabelProvider() {
+		treeViewer.getIdColumn().setLabelProvider(new QoILabelProvider(getViewManager().getRscMgr()) {
 			@Override
 			public String getText(Object element) {
+				if (element instanceof QuantityOfInterest) {
+					if (StringUtils.isBlank(((QuantityOfInterest) element).getGeneratedId())) {
+						((QuantityOfInterest) element).setGeneratedId(treeViewer.getIdColumnText(element));
+					}
+					return ((QuantityOfInterest) element).getGeneratedId();
+				}
 				return treeViewer.getIdColumnText(element);
 			}
 		});
@@ -279,7 +293,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		// Columns - Symbol
 		TreeViewerColumn symbolColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		symbolColumn.getColumn().setText(PIRTQoITableQoI.getColumnSymbolProperty());
-		symbolColumn.setLabelProvider(new QoINameLabelProvider(getViewManager()));
+		symbolColumn.setLabelProvider(new QoINameLabelProvider(getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.GENPARAM_TABLE_TEXT_COLUMN_COEFF, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnSymbolProperty());
@@ -287,7 +301,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		// Columns - Description
 		TreeViewerColumn descriptionColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		descriptionColumn.getColumn().setText(PIRTQoITableQoI.getColumnDescriptionProperty());
-		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider());
+		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider(getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.GENPARAM_TABLE_TEXT_COLUMN_COEFF, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnDescriptionProperty());
@@ -303,7 +317,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 							private QoILabelProvider getPIRTQoILabelProvider() {
 								if (labelprovider == null) {
-									labelprovider = new QoILabelProvider();
+									labelprovider = new QoILabelProvider(getViewManager().getRscMgr());
 								}
 								return labelprovider;
 							}
@@ -334,6 +348,9 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		treeViewer.setColumnProperties(columnProperties.stream().toArray(String[]::new));
 		treeViewer.setContentProvider(new QoITreeContentProvider());
 
+		// add drag and drop support on tree to move, reorder
+		addDragAndDropSupport();
+
 		// Refresh
 		treeViewer.refresh(true);
 
@@ -357,7 +374,8 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 	 */
 	private void renderMainTableInit() {
 		// Tree - Create
-		treeViewer = new TreeViewerID(compositeTable, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		treeViewer = new TreeViewerID(compositeTable,
+				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		GridData gdViewer = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 
 		Tree tree = treeViewer.getTree();
@@ -377,8 +395,10 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		tree.setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
 	/**
@@ -644,6 +664,32 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 				treeViewer.setSelection(new StructuredSelection());
 			}
 		});
+	}
+
+	/**
+	 * Add drag and drop support to the tree
+	 */
+	private void addDragAndDropSupport() {
+
+		// drag support
+		Transfer[] transferTypesDrag = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		treeViewer.addDragSupport(DND.DROP_MOVE, transferTypesDrag, new DragSourceAdapter() {
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				IStructuredSelection selection = treeViewer.getStructuredSelection();
+				Object firstElement = selection.getFirstElement();
+
+				if (LocalSelectionTransfer.getTransfer().isSupportedType(event.dataType)
+						&& firstElement instanceof QuantityOfInterest) {
+					event.data = firstElement;
+				}
+			}
+		});
+
+		// drop support
+		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new QoIDropSupport(viewCtrl, treeViewer));
 	}
 
 	/**

@@ -11,6 +11,7 @@ import gov.sandia.cf.model.QoIPlanningConstraint;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IQoIPlanningConstraintRepository extends ICRUDRepository<QoIPlanningConstraint, Integer> {
 
 }

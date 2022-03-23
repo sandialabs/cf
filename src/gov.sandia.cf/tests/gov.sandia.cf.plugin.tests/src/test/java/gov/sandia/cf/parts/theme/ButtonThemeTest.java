@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
+import gov.sandia.cf.tools.ColorTools;
+
 @RunWith(JUnitPlatform.class)
 class ButtonThemeTest {
 
@@ -27,14 +29,18 @@ class ButtonThemeTest {
 	void defaultButton() {
 		// Get parent
 		Shell parent = new Shell();
+		ResourceManager resourceManager = new LocalResourceManager(JFaceResources.getResources(), parent);
 
 		// Create button
-		ButtonTheme bt = new ButtonTheme(parent, SWT.NONE);
+		ButtonTheme bt = new ButtonTheme(resourceManager, parent, SWT.NONE);
 
 		// Default
-		assertEquals(bt.getBackground(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		assertEquals(bt.getForeground(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		assertEquals(bt.getBackground(),
+				ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		assertEquals(bt.getForeground(),
+				ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
+		parent.dispose();
 	}
 
 	@Test
@@ -67,12 +73,16 @@ class ButtonThemeTest {
 
 		// Test disabled
 		assertEquals(false, bt.getEnabled());
-		assertNotEquals(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), bt.getBackground());
+		assertNotEquals(ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+				bt.getBackground());
 		bt.setEnabled(true);
 
 		assertEquals("My_button", bt.getText());//$NON-NLS-1$
-		assertEquals(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), bt.getBackground());
-		assertEquals(ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+		assertEquals(ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+				bt.getBackground());
+		assertEquals(
+				ColorTools.toColor(resourceManager,
+						ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN))),
 				bt.getForeground());
 		assertEquals(listener, bt.getListeners(SWT.Selection)[0]);
 		assertEquals(data.get("BTN_ID"), bt.getData("BTN_ID"));//$NON-NLS-1$ //$NON-NLS-2$
@@ -92,8 +102,11 @@ class ButtonThemeTest {
 		options.put(ButtonTheme.OPTION_OUTLINE, true);
 
 		ButtonTheme bt = new ButtonTheme(resourceManager, parent, SWT.NONE, options);
-		assertEquals(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), bt.getForeground());
-		assertEquals(ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+		assertEquals(ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+				bt.getForeground());
+		assertEquals(
+				ColorTools.toColor(resourceManager,
+						ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN))),
 				bt.getBackground());
 
 		parent.dispose();
@@ -115,8 +128,11 @@ class ButtonThemeTest {
 
 		ButtonTheme bt = new ButtonTheme(resourceManager, parent, SWT.NONE, options);
 		assertEquals(true, bt.getEnabled());
-		assertEquals(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), bt.getBackground());
-		assertEquals(ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+		assertEquals(ColorTools.toColor(resourceManager, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)),
+				bt.getBackground());
+		assertEquals(
+				ColorTools.toColor(resourceManager,
+						ConstantTheme.getAssociatedColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN))),
 				bt.getForeground());
 
 		parent.dispose();

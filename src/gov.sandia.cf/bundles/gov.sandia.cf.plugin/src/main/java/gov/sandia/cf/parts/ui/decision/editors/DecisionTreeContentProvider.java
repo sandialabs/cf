@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import gov.sandia.cf.model.Decision;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 
 /**
  * Provides the content of the Decision table
@@ -20,16 +21,14 @@ import gov.sandia.cf.model.Decision;
  */
 public class DecisionTreeContentProvider implements ITreeContentProvider {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getElements(Object inputElement) {
 		List<Object> data = new ArrayList<>();
 		if (inputElement instanceof List) {
-			for (Decision decision : ((List<Decision>) inputElement).stream().filter(e -> e instanceof Decision)
-					.sorted(Comparator.comparing(Decision::getGeneratedId)).collect(Collectors.toList())) {
+			for (Decision decision : ((List<Decision>) inputElement).stream().filter(Decision.class::isInstance)
+					.sorted(Comparator.comparing(Decision::getGeneratedId, new StringWithNumberAndNullableComparator()))
+					.collect(Collectors.toList())) {
 				data.add(decision);
 			}
 		}
@@ -41,7 +40,8 @@ public class DecisionTreeContentProvider implements ITreeContentProvider {
 		Object[] tab = null;
 		if (parentElement instanceof Decision) {
 			tab = ((Decision) parentElement).getChildren().stream()
-					.sorted(Comparator.comparing(Decision::getGeneratedId)).toArray();
+					.sorted(Comparator.comparing(Decision::getGeneratedId, new StringWithNumberAndNullableComparator()))
+					.toArray();
 		}
 		return tab;
 	}

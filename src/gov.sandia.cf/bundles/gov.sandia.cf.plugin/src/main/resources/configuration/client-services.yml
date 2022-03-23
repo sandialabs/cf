@@ -1,0 +1,2 @@
+services:
+   - gov.sandia.cf.parts.services.genericparam.IGenericParameterService

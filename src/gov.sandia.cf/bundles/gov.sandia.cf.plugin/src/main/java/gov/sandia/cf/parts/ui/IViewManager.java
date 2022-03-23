@@ -9,10 +9,12 @@ import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 
-import gov.sandia.cf.application.ApplicationManager;
+import gov.sandia.cf.application.IApplicationManager;
 import gov.sandia.cf.launcher.CFCache;
 import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
+import gov.sandia.cf.parts.services.IClientService;
+import gov.sandia.cf.web.services.IWebClientManager;
 
 /**
  * 
@@ -29,9 +31,16 @@ public interface IViewManager {
 	CredibilityEditor getCredibilityEditor();
 
 	/**
+	 * @param <S>            the service interface inherited IApplication class
+	 * @param interfaceClass the service interface class
+	 * @return the associated service if found, otherwise null
+	 */
+	<S extends IClientService> S getClientService(Class<S> interfaceClass);
+
+	/**
 	 * @return the application manager
 	 */
-	ApplicationManager getAppManager();
+	IApplicationManager getAppManager();
 
 	/**
 	 * @return the cf cache
@@ -43,6 +52,25 @@ public interface IViewManager {
 	 *         colors, images, cursors...)
 	 */
 	ResourceManager getRscMgr();
+
+	/**
+	 * @return the application manager
+	 */
+	IWebClientManager getWebClient();
+
+	/**
+	 * Checks if is web connection.
+	 *
+	 * @return true, if is web
+	 */
+	boolean isWebConnection();
+
+	/**
+	 * Checks if is local file connection.
+	 *
+	 * @return true, if is local file
+	 */
+	boolean isLocalFileConnection();
 
 	/**
 	 * @param view the view to get the items
@@ -71,6 +99,11 @@ public interface IViewManager {
 	 * Reload the view manager
 	 */
 	void reload();
+
+	/**
+	 * Reload active view.
+	 */
+	void reloadActiveView();
 
 	/**
 	 * @return true if the credibility editor needs to be saved, otherwise false.
@@ -170,5 +203,10 @@ public interface IViewManager {
 	 * @param button the button to set
 	 */
 	void plugBackHomeButton(Button button);
+
+	/**
+	 * Quit the view manager.
+	 */
+	void quit();
 
 }

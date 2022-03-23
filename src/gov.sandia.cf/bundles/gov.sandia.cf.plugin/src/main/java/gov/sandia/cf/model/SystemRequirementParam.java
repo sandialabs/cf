@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -49,6 +51,22 @@ public class SystemRequirementParam extends GenericParameter<SystemRequirementPa
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parameter", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
 	private List<SystemRequirementConstraint> constraintList;
+	/**
+	 * The parameter parent
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private SystemRequirementParam parent;
+
+	@Override
+	public SystemRequirementParam getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(SystemRequirementParam parent) {
+		this.parent = parent;
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -110,6 +128,14 @@ public class SystemRequirementParam extends GenericParameter<SystemRequirementPa
 		} else {
 			this.constraintList = null;
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(SystemRequirementParam newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
 	}
 
 	/**

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -43,8 +44,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
@@ -52,6 +52,7 @@ import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QuantityOfInterest;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ButtonTheme;
@@ -78,6 +79,7 @@ import gov.sandia.cf.parts.viewer.TreeViewerID;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -315,8 +317,16 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		treeViewer.getIdColumn().setLabelProvider(new PIRTPhenomenaColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof Phenomenon) {
-					((Phenomenon) element).setIdLabel(treeViewer.getIdColumnText(element));
+				if (element instanceof PhenomenonGroup) {
+					if (StringUtils.isBlank(((PhenomenonGroup) element).getIdLabel())) {
+						((PhenomenonGroup) element).setIdLabel(treeViewer.getIdColumnText(element));
+					}
+					return ((PhenomenonGroup) element).getIdLabel();
+				} else if (element instanceof Phenomenon) {
+					if (StringUtils.isBlank(((Phenomenon) element).getIdLabel())) {
+						((Phenomenon) element).setIdLabel(treeViewer.getIdColumnText(element));
+					}
+					return ((Phenomenon) element).getIdLabel();
 				}
 				return treeViewer.getIdColumnText(element);
 			}
@@ -346,7 +356,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		importanceColumn.getColumn().setText(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
 		importanceColumn
 				.setEditingSupport(new PIRTPhenomenonImportanceCellEditor(importanceColumn.getViewer(), viewCtrl));
-		importanceColumn.setLabelProvider(new PIRTImportanceColumnLabelProvider(pirtConfiguration));
+		importanceColumn.setLabelProvider(
+				new PIRTImportanceColumnLabelProvider(pirtConfiguration, getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.PHEN_VIEW_TREEPHEN_LVL_COLUMN_COEFF, true));
 		columnProperties.add(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
@@ -385,8 +396,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 							new PIRTPhenomenonLevelCellEditor(tempColumn.getViewer(), viewCtrl, column));
 					treeViewerLayout.addColumnData(
 							new ColumnWeightData(PartsResourceConstants.PHEN_VIEW_TREEPHEN_LVL_COLUMN_COEFF, true));
-					tempColumn.setLabelProvider(new PIRTAdequacyColumnLabelProvider(pirtConfiguration, column,
-							getViewManager().getAppManager()));
+					tempColumn.setLabelProvider(
+							new PIRTAdequacyColumnLabelProvider(pirtConfiguration, column, getViewManager()));
 				}
 
 				if (null != tempColumn) {
@@ -433,7 +444,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	 */
 	private void renderMainTableInit() {
 		// Create
-		treeViewer = new TreeViewerID(compositeTable, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		treeViewer = new TreeViewerID(compositeTable,
+				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		GridData gdViewer = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 
 		Tree tree = treeViewer.getTree();
@@ -444,8 +456,10 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		FancyToolTipSupport.enableFor(treeViewer, ToolTip.NO_RECREATE);
 
 		// Customize table
-		tree.setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		tree.setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Layout
 		final AutoResizeViewerLayout treeLayout = new AutoResizeViewerLayout(treeViewer);
@@ -769,20 +783,12 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 					event.data = firstElement;
 				}
 			}
-
-			@Override
-			public void dragFinished(DragSourceEvent event) {
-				// reload PIRT tree
-				if (getViewManager().isDirty()) {
-					refresh();
-				}
-			}
-
 		});
 
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
-		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new PIRTPhenomenonDropSupport(this, treeViewer));
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
+				new PIRTPhenomenonDropSupport(viewCtrl, treeViewer));
 	}
 
 	/**
@@ -893,13 +899,16 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 		@Override
 		public Color getBackground(Object element) {
-			return (element instanceof PhenomenonGroup) ? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)
-					: null;
+			return (element instanceof PhenomenonGroup) ? ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)) : null;
 		}
 
 		@Override
 		public Color getForeground(Object element) {
-			return (element instanceof PhenomenonGroup) ? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE) : null;
+			return (element instanceof PhenomenonGroup)
+					? ColorTools.toColor(getViewManager().getRscMgr(),
+							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE))
+					: null;
 		}
 	}
 

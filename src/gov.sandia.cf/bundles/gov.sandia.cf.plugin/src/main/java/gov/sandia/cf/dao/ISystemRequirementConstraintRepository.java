@@ -11,6 +11,7 @@ import gov.sandia.cf.model.SystemRequirementConstraint;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface ISystemRequirementConstraintRepository extends ICRUDRepository<SystemRequirementConstraint, Integer> {
 
 }

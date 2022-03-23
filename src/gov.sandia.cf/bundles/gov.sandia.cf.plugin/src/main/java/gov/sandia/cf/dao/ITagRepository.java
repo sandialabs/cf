@@ -11,6 +11,7 @@ import gov.sandia.cf.model.Tag;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface ITagRepository extends ICRUDRepository<Tag, Integer> {
 
 }

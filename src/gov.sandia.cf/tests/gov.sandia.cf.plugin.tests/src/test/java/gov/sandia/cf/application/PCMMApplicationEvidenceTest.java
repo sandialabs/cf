@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Model;
@@ -97,7 +98,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		evidence.setUserCreation(defaultUser);
 		evidence.setRoleCreation(defaultRole);
 		evidence.setSubelement(subelement);
-		PCMMEvidence addedEvidence = getPCMMApp().addEvidence(evidence);
+		PCMMEvidence addedEvidence = getPCMMEvidenceApp().addEvidence(evidence);
 
 		// Test creation
 		assertNotNull(addedEvidence);
@@ -109,7 +110,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		// ************************
 		// Get Evidence by Id
 		// ************************
-		PCMMEvidence evidenceById = getPCMMApp().getEvidenceById(addedEvidence.getId());
+		PCMMEvidence evidenceById = getPCMMEvidenceApp().getEvidenceById(addedEvidence.getId());
 
 		// Check
 		assertNotNull(evidenceById);
@@ -127,7 +128,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		// ******************************
 		// Check tag is associated
 		// ******************************
-		List<PCMMEvidence> evidenceByTag = getPCMMApp().getEvidenceByTag(createdTag);
+		List<PCMMEvidence> evidenceByTag = getPCMMEvidenceApp().getEvidenceByTag(createdTag);
 
 		// Check evidence list
 		assertNotNull(evidenceByTag);
@@ -153,21 +154,21 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		addedEvidence.setName("My_Evidence_Updated"); //$NON-NLS-1$
 
 		// Update
-		updatedEvidence = getPCMMApp().updateEvidence(addedEvidence);
+		updatedEvidence = getPCMMEvidenceApp().updateEvidence(addedEvidence);
 		assertEquals(addedEvidence.getName(), updatedEvidence.getName());
 		assertNotNull(updatedEvidence);
 
 		// ******************************
 		// Get all evidences
 		// ******************************
-		List<PCMMEvidence> evidences = getPCMMApp().getAllEvidence();
+		List<PCMMEvidence> evidences = getPCMMEvidenceApp().getAllEvidence();
 		assertFalse(evidences.isEmpty());
 
 		// ******************************
 		// Delete evidence
 		// ******************************
-		getPCMMApp().deleteEvidence(updatedEvidence);
-		assertNull(getPCMMApp().getEvidenceById(updatedEvidence.getId()));
+		getPCMMEvidenceApp().deleteEvidence(updatedEvidence);
+		assertNull(getPCMMEvidenceApp().getEvidenceById(updatedEvidence.getId()));
 
 		// ************************
 		// Create evidence
@@ -180,14 +181,14 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		evidence.setDescription("My_Description"); //$NON-NLS-1$
 		evidence.setElement(element);
 		List<PCMMEvidence> addedEvidenceList = new ArrayList<>();
-		addedEvidence = getPCMMApp().addEvidence(evidence);
+		addedEvidence = getPCMMEvidenceApp().addEvidence(evidence);
 		addedEvidenceList.add(addedEvidence);
 
 		// ******************************
 		// Delete evidence List
 		// ******************************
-		getPCMMApp().deleteEvidence(addedEvidenceList);
-		assertNull(getPCMMApp().getEvidenceById(addedEvidenceList.get(0).getId()));
+		getPCMMEvidenceApp().deleteEvidence(addedEvidenceList);
+		assertNull(getPCMMEvidenceApp().getEvidenceById(addedEvidenceList.get(0).getId()));
 
 		// clear
 		newFile.getProject().delete(true, new NullProgressMonitor());
@@ -201,7 +202,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		// Check Evidence null
 		// ************************
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getAppManager().getService(IPCMMApplication.class).getEvidenceById(null);
+			getAppManager().getService(IPCMMEvidenceApp.class).getEvidenceById(null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_GETEVIDENCEBYID_IDNULL), e.getMessage());
 	}
@@ -223,7 +224,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		evidence.setUserCreation(newUser);
 		evidence.setRoleCreation(newRole);
 		evidence.setSubelement(newPCMMSubelement);
-		PCMMEvidence addedEvidence = getPCMMApp().addEvidence(evidence);
+		PCMMEvidence addedEvidence = getPCMMEvidenceApp().addEvidence(evidence);
 
 		// Test creation
 		assertNotNull(addedEvidence);
@@ -239,7 +240,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		// Check Evidence null
 		// ************************
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(null);
+			getPCMMEvidenceApp().addEvidence(null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDEVIDENCE_EVIDENCENULL), e.getMessage());
 	}
@@ -258,7 +259,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence user null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertTrue(e.getCause() instanceof ConstraintViolationException);
 		assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
@@ -277,7 +278,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence role null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDPATH, evidence2.getPath()), e.getMessage());
 	}
@@ -296,7 +297,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence role null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertTrue(e.getCause() instanceof ConstraintViolationException);
 		assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
@@ -318,7 +319,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDPATH, evidence2.getPath()), e.getMessage());
 	}
@@ -335,7 +336,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDPATH, evidence2.getPath()), e.getMessage());
 	}
@@ -352,7 +353,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDURL, evidence2.getPath()), e.getMessage());
 	}
@@ -369,7 +370,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDURL, evidence2.getPath()), e.getMessage());
 	}
@@ -386,7 +387,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDURL, evidence2.getPath()), e.getMessage());
 	}
@@ -406,7 +407,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence already exists with same path
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDEVIDENCE_ALREADYEXISTS, evidence2.getPath(),
 				evidence2.getElement().getName()), e.getMessage());
@@ -429,7 +430,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence already exists with same path
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence2);
+			getPCMMEvidenceApp().addEvidence(evidence2);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDEVIDENCE_ALREADYEXISTS, evidence2.getPath(),
 				evidence2.getSubelement().getName()), e.getMessage());
@@ -454,7 +455,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		evidence2.setFilePath(evidence.getPath());
 
 		// Check Evidence already exists with same path
-		evidence2 = getPCMMApp().addEvidence(evidence2);
+		evidence2 = getPCMMEvidenceApp().addEvidence(evidence2);
 		assertNotNull(evidence2);
 		assertNotNull(evidence2.getId());
 
@@ -478,7 +479,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		evidence2.setFilePath(evidence.getPath());
 
 		// Check Evidence already exists with same path
-		evidence2 = getPCMMApp().addEvidence(evidence2);
+		evidence2 = getPCMMEvidenceApp().addEvidence(evidence2);
 		assertNotNull(evidence2);
 		assertNotNull(evidence2.getId());
 
@@ -496,7 +497,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence);
+			getPCMMEvidenceApp().addEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_NOASSESSABLE), e.getMessage());
 	}
@@ -514,7 +515,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addEvidence(evidence);
+			getPCMMEvidenceApp().addEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_MORETHANONEASSESSABLE), e.getMessage());
 	}
@@ -526,7 +527,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(null);
+			getPCMMEvidenceApp().updateEvidence(null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEEVIDENCE_ELTNULL), e.getMessage());
 	}
@@ -538,7 +539,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence id null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEEVIDENCE_IDNULL), e.getMessage());
 	}
@@ -552,7 +553,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDPATH, evidence.getPath()), e.getMessage());
 	}
@@ -566,7 +567,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDPATH, evidence.getPath()), e.getMessage());
 	}
@@ -580,7 +581,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_INVALIDURL, evidence.getPath()), e.getMessage());
 	}
@@ -598,7 +599,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence already exists with same path
 		// update without path changes
-		evidence = getPCMMApp().updateEvidence(evidence);
+		evidence = getPCMMEvidenceApp().updateEvidence(evidence);
 		assertNotNull(evidence);
 		assertEquals(evidenceId, evidence.getId());
 		assertEquals("My new description<li></li>", evidence.getDescription()); //$NON-NLS-1$
@@ -617,7 +618,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_NOASSESSABLE), e.getMessage());
 	}
@@ -635,7 +636,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence path null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateEvidence(evidence);
+			getPCMMEvidenceApp().updateEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_EVIDENCE_MORETHANONEASSESSABLE), e.getMessage());
 	}
@@ -649,7 +650,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().deleteEvidence(evidence);
+			getPCMMEvidenceApp().deleteEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_DELETEEVIDENCE_ELTNULL), e.getMessage());
 	}
@@ -662,7 +663,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// Check Evidence id null
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().deleteEvidence(evidence);
+			getPCMMEvidenceApp().deleteEvidence(evidence);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_DELETEEVIDENCE_IDNULL), e.getMessage());
 	}
@@ -673,7 +674,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		// Check Evidence list null
 		List<PCMMEvidence> addedEvidenceList = null;
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().deleteEvidence(addedEvidenceList);
+			getPCMMEvidenceApp().deleteEvidence(addedEvidenceList);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_DELETEEVIDENCE_ELTNULL), e.getMessage());
 	}
@@ -688,14 +689,14 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		IFile file = TestEntityFactory.getNewFile("DesiredProject", "evidence.txt"); //$NON-NLS-1$ //$NON-NLS-2$
 		PCMMEvidence newPCMMEvidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element, file);
 		newPCMMEvidence.setDateFile(DateTools.getDefault1900Date()); // to bypass date file change on filesystem
-		getPCMMApp().updateEvidence(newPCMMEvidence);
+		getPCMMEvidenceApp().updateEvidence(newPCMMEvidence);
 
 		// change the file content
 		String initialString = "text"; //$NON-NLS-1$
 		file.appendContents(new ByteArrayInputStream(initialString.getBytes()), true, true, new NullProgressMonitor());
 
 		// test
-		boolean evidenceChanged = getPCMMApp().evidenceChanged(newPCMMEvidence);
+		boolean evidenceChanged = getPCMMEvidenceApp().evidenceChanged(newPCMMEvidence);
 		assertTrue(evidenceChanged);
 
 		// delete file
@@ -710,7 +711,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence newPCMMEvidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null, newFile);
 
 		// test
-		boolean evidenceChanged = getPCMMApp().evidenceChanged(newPCMMEvidence);
+		boolean evidenceChanged = getPCMMEvidenceApp().evidenceChanged(newPCMMEvidence);
 		assertFalse(evidenceChanged);
 
 		// delete file
@@ -733,13 +734,13 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence evidenceFileChanged = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element,
 				file);
 		evidenceFileChanged.setDateFile(DateTools.getDefault1900Date()); // to bypass date file change on filesystem
-		getPCMMApp().updateEvidence(evidenceFileChanged);
+		getPCMMEvidenceApp().updateEvidence(evidenceFileChanged);
 
 		// evidence 3: everything is fine
 		PCMMEvidence evidenceOk = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 
 		// test
-		Map<PCMMEvidence, Map<NotificationType, List<String>>> evidenceNotifications = getPCMMApp()
+		Map<PCMMEvidence, Map<NotificationType, List<String>>> evidenceNotifications = getPCMMEvidenceApp()
 				.getAllEvidenceNotifications();
 		assertTrue(evidenceNotifications.get(evidenceFileDoesNotExist).get(NotificationType.WARN).isEmpty());
 		assertFalse(evidenceNotifications.get(evidenceFileDoesNotExist).get(NotificationType.ERROR).isEmpty());
@@ -767,13 +768,13 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence evidenceFileChanged = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element,
 				file);
 		evidenceFileChanged.setDateFile(DateTools.getDefault1900Date()); // to bypass date file change on filesystem
-		getPCMMApp().updateEvidence(evidenceFileChanged);
+		getPCMMEvidenceApp().updateEvidence(evidenceFileChanged);
 
 		// evidence 3: everything is fine
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 
 		// test
-		int evidenceNotifications = getPCMMApp().findEvidenceWarningNotification();
+		int evidenceNotifications = getPCMMEvidenceApp().findEvidenceWarningNotification();
 		assertEquals(1, evidenceNotifications);
 
 		// delete file
@@ -796,13 +797,13 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence evidenceFileChanged = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element,
 				file);
 		evidenceFileChanged.setDateFile(DateTools.getDefault1900Date()); // to bypass date file change on filesystem
-		getPCMMApp().updateEvidence(evidenceFileChanged);
+		getPCMMEvidenceApp().updateEvidence(evidenceFileChanged);
 
 		// evidence 3: everything is fine
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 
 		// test
-		int evidenceNotifications = getPCMMApp().findEvidenceErrorNotification();
+		int evidenceNotifications = getPCMMEvidenceApp().findEvidenceErrorNotification();
 		assertEquals(1, evidenceNotifications);
 
 		// delete file
@@ -818,7 +819,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		newPCMMEvidence.setFilePath("MyProject/File.txt"); //$NON-NLS-1$
 
 		// test
-		Map<NotificationType, List<String>> evidenceNotifications = getPCMMApp()
+		Map<NotificationType, List<String>> evidenceNotifications = getPCMMEvidenceApp()
 				.getEvidenceNotifications(newPCMMEvidence, newPCMMEvidence.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.ERROR));
 		assertTrue(evidenceNotifications.get(NotificationType.ERROR).contains(RscTools
@@ -832,14 +833,14 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		IFile file = TestEntityFactory.getNewFile("DesiredProject", "evidence.txt"); //$NON-NLS-1$ //$NON-NLS-2$
 		PCMMEvidence newPCMMEvidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element, file);
 		newPCMMEvidence.setDateFile(DateTools.getDefault1900Date()); // to bypass date file change on filesystem
-		getPCMMApp().updateEvidence(newPCMMEvidence);
+		getPCMMEvidenceApp().updateEvidence(newPCMMEvidence);
 
 		// change the file content
 		String initialString = "text"; //$NON-NLS-1$
 		file.appendContents(new ByteArrayInputStream(initialString.getBytes()), true, true, new NullProgressMonitor());
 
 		// test
-		Map<NotificationType, List<String>> evidenceNotifications = getPCMMApp()
+		Map<NotificationType, List<String>> evidenceNotifications = getPCMMEvidenceApp()
 				.getEvidenceNotifications(newPCMMEvidence, newPCMMEvidence.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.WARN));
 		assertTrue(evidenceNotifications.get(NotificationType.WARN).contains(
@@ -861,7 +862,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, elt2, file);
 
 		// test
-		Map<NotificationType, List<String>> evidenceNotifications = getPCMMApp().getEvidenceNotifications(evid1,
+		Map<NotificationType, List<String>> evidenceNotifications = getPCMMEvidenceApp().getEvidenceNotifications(evid1,
 				evid1.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.WARN));
 
@@ -879,7 +880,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, elt1, file);
 
 		// test
-		Map<NotificationType, List<String>> evidenceNotifications = getPCMMApp().getEvidenceNotifications(evid1,
+		Map<NotificationType, List<String>> evidenceNotifications = getPCMMEvidenceApp().getEvidenceNotifications(evid1,
 				evid1.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.ERROR));
 
@@ -901,8 +902,8 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, elt2, file);
 
 		// test
-		Map<NotificationType, String> evidenceNotifications = getPCMMApp().getDuplicatedEvidenceNotification(evid1,
-				evid1.getId());
+		Map<NotificationType, String> evidenceNotifications = getPCMMEvidenceApp()
+				.getDuplicatedEvidenceNotification(evid1, evid1.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.WARN));
 
 		// delete file
@@ -920,8 +921,8 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, elt1, file);
 
 		// test
-		Map<NotificationType, String> evidenceNotifications = getPCMMApp().getDuplicatedEvidenceNotification(evid1,
-				evid1.getId());
+		Map<NotificationType, String> evidenceNotifications = getPCMMEvidenceApp()
+				.getDuplicatedEvidenceNotification(evid1, evid1.getId());
 		assertTrue(evidenceNotifications.containsKey(NotificationType.ERROR));
 
 		// delete file
@@ -938,10 +939,10 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 		PCMMEvidence evidenceTag = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 		evidenceTag.setTag(tag);
-		getPCMMApp().updateEvidence(evidenceTag);
+		getPCMMEvidenceApp().updateEvidence(evidenceTag);
 
 		// test
-		List<PCMMEvidence> evidenceByTag = getPCMMApp().getEvidenceByTag(tag);
+		List<PCMMEvidence> evidenceByTag = getPCMMEvidenceApp().getEvidenceByTag(tag);
 		assertTrue(evidenceByTag.contains(evidenceTag));
 		assertFalse(evidenceByTag.contains(evidence));
 	}
@@ -955,13 +956,13 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 		PCMMEvidence evidenceTag1 = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 		evidenceTag1.setTag(tag1);
-		getPCMMApp().updateEvidence(evidenceTag1);
+		getPCMMEvidenceApp().updateEvidence(evidenceTag1);
 		PCMMEvidence evidenceTag2 = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, element);
 		evidenceTag2.setTag(tag2);
-		getPCMMApp().updateEvidence(evidenceTag2);
+		getPCMMEvidenceApp().updateEvidence(evidenceTag2);
 
 		// test
-		List<PCMMEvidence> evidenceByTag = getPCMMApp().getEvidenceByTag(Arrays.asList(tag1, tag2));
+		List<PCMMEvidence> evidenceByTag = getPCMMEvidenceApp().getEvidenceByTag(Arrays.asList(tag1, tag2));
 		assertTrue(evidenceByTag.contains(evidenceTag1));
 		assertTrue(evidenceByTag.contains(evidenceTag2));
 		assertFalse(evidenceByTag.contains(evidence));
@@ -980,7 +981,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 				"http://test.com"); //$NON-NLS-1$
 
 		// test
-		List<PCMMEvidence> evidenceList = getPCMMApp().findDuplicateEvidenceByPath(evidence1);
+		List<PCMMEvidence> evidenceList = getPCMMEvidenceApp().findDuplicateEvidenceByPath(evidence1);
 		assertTrue(evidenceList.contains(evidence1));
 		assertTrue(evidenceList.contains(evidence2));
 		assertFalse(evidenceList.contains(evidence3));
@@ -998,7 +999,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// test
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().checkEvidenceWithSamePathInAssessable("http://my.com", null, element); //$NON-NLS-1$
+			getPCMMEvidenceApp().checkEvidenceWithSamePathInAssessable("http://my.com", null, element); //$NON-NLS-1$
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDEVIDENCE_ALREADYEXISTS, "http://my.com", //$NON-NLS-1$
 				element.getName() + ", " + element.getName()), e.getMessage()); //$NON-NLS-1$
@@ -1017,7 +1018,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// test
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().checkEvidenceWithSamePathInAssessable(file.getFullPath().toString(), null, element);
+			getPCMMEvidenceApp().checkEvidenceWithSamePathInAssessable(file.getFullPath().toString(), null, element);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDEVIDENCE_ALREADYEXISTS, file.getFullPath().toString(), // $NON-NLS-1$
 				element.getName() + ", " + element.getName()), e.getMessage()); //$NON-NLS-1$
@@ -1037,7 +1038,7 @@ class PCMMApplicationEvidenceTest extends AbstractTestApplication {
 
 		// test
 		try {
-			getPCMMApp().checkEvidenceWithSamePathInAssessable("http://myEvidence.com", null, element); //$NON-NLS-1$
+			getPCMMEvidenceApp().checkEvidenceWithSamePathInAssessable("http://myEvidence.com", null, element); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}

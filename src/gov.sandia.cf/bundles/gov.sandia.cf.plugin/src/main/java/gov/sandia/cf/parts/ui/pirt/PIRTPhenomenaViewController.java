@@ -11,14 +11,14 @@ import org.eclipse.jface.window.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.model.QoIHeaderParts;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTPhenomenonDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTPhenomenonGroupDialog;
@@ -168,7 +168,7 @@ public class PIRTPhenomenaViewController {
 
 			// open creation dialog
 			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected(), null, DialogMode.CREATE);
+					view.getQoISelected(), null, ViewMode.CREATE);
 			PhenomenonGroup groupToCreate = dialog.openDialog();
 
 			// create group
@@ -225,7 +225,7 @@ public class PIRTPhenomenaViewController {
 
 		// open creation dialog
 		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(), phenGroups, null,
-				groupSelected, DialogMode.CREATE);
+				groupSelected, ViewMode.CREATE);
 		Phenomenon phenomenonToCreate = dialog.openDialog();
 
 		if (phenomenonToCreate == null) {
@@ -296,7 +296,7 @@ public class PIRTPhenomenaViewController {
 
 			// open update dialog
 			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected(), group, DialogMode.VIEW);
+					view.getQoISelected(), group, ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -314,7 +314,7 @@ public class PIRTPhenomenaViewController {
 
 			// open view dialog
 			PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected().getPhenomenonGroupList(), phenomenon, null, DialogMode.VIEW);
+					view.getQoISelected().getPhenomenonGroupList(), phenomenon, null, ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -350,7 +350,7 @@ public class PIRTPhenomenaViewController {
 
 		// open update dialog
 		PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-				view.getQoISelected(), group, DialogMode.UPDATE);
+				view.getQoISelected(), group, ViewMode.UPDATE);
 		PhenomenonGroup groupUpdated = dialog.openDialog();
 
 		if (groupUpdated != null) {
@@ -384,47 +384,59 @@ public class PIRTPhenomenaViewController {
 		Phenomenon phenomenonToUpdate = phenomenon;
 		PhenomenonGroup previousGroup = phenomenonToUpdate.getPhenomenonGroup();
 		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(),
-				view.getQoISelected().getPhenomenonGroupList(), phenomenonToUpdate, null, DialogMode.UPDATE);
+				view.getQoISelected().getPhenomenonGroupList(), phenomenonToUpdate, null, ViewMode.UPDATE);
 		Phenomenon phenomenonUpdated = dialog.openDialog();
 
 		if (phenomenonUpdated != null) {
-			updatePhenomenon(phenomenonUpdated);
+			try {
+				updatePhenomenon(phenomenonUpdated);
 
-			PhenomenonGroup newGroup = phenomenonUpdated.getPhenomenonGroup();
+				PhenomenonGroup newGroup = phenomenonUpdated.getPhenomenonGroup();
 
-			// update phenomenon group lists
-			if (previousGroup != null && newGroup != null) {
-				previousGroup.getPhenomenonList().remove(phenomenonToUpdate);
-				newGroup.getPhenomenonList().add(phenomenonUpdated);
+				// update phenomenon group lists
+				if (previousGroup != null && newGroup != null) {
+					previousGroup.getPhenomenonList().remove(phenomenonToUpdate);
+					newGroup.getPhenomenonList().add(phenomenonUpdated);
+				}
+
+				// reload data model
+				view.refresh();
+			} catch (CredibilityException e) {
+				logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$
+						+ e.getMessage(), e);
+				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENOMENON) + e.getMessage());
 			}
 
-			// reload data model
-			view.refresh();
-
-			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
 		}
 	}
 
 	/**
-	 * Update Phenomenon entity
-	 * 
+	 * Update Phenomenon entity.
+	 *
 	 * @param phenomenon the phenomenon to update
+	 * @return the phenomenon
+	 * @throws CredibilityException the credibility exception
 	 */
-	public void updatePhenomenon(Phenomenon phenomenon) {
-		try {
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).updatePhenomenon(phenomenon);
+	public Phenomenon updatePhenomenon(Phenomenon phenomenon) throws CredibilityException {
 
-			// Refresh view
-			view.getViewManager().viewChanged();
-			view.refresh();
-
-		} catch (CredibilityException e) {
-			logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$
-					+ e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
-					RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENOMENON) + e.getMessage());
+		if (phenomenon == null) {
+			return null;
 		}
+
+		Phenomenon updatePhenomenon = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
+				.updatePhenomenon(phenomenon);
+
+		// Refresh parent
+		PhenomenonGroup newGroup = updatePhenomenon.getPhenomenonGroup();
+		if (newGroup != null) {
+			view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(newGroup);
+		}
+
+		// Refresh view
+		view.getViewManager().viewChanged();
+
+		return updatePhenomenon;
 	}
 
 	/**
@@ -688,4 +700,68 @@ public class PIRTPhenomenaViewController {
 		}
 	}
 
+	/**
+	 * Reorder phenomenon groups.
+	 *
+	 * @param group    the group
+	 * @param newIndex the new index
+	 * @throws CredibilityException the credibility exception
+	 */
+	public void reorderPhenomenonGroups(PhenomenonGroup group, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenonGroups(group,
+				newIndex);
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Reorder phenomena for group.
+	 *
+	 * @param group the group
+	 * @throws CredibilityException the credibility exception
+	 */
+	public void reorderPhenomenaForGroup(PhenomenonGroup group) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenaForGroup(group);
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Reorder phenomenon.
+	 *
+	 * @param phenomenon the phenomenon
+	 * @param newIndex   the new index
+	 * @throws CredibilityException the credibility exception
+	 */
+	public void reorderPhenomenon(Phenomenon phenomenon, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomena(phenomenon, newIndex);
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Refresh phenomenon group.
+	 *
+	 * @param group the group
+	 */
+	public void refreshPhenomenonGroup(PhenomenonGroup group) {
+		view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(group);
+	}
+
+	/**
+	 * Refresh if changed.
+	 */
+	public void refreshIfChanged() {
+
+		// Refresh
+		if (view.getViewManager().isDirty()) {
+			view.refresh();
+		}
+	}
 }

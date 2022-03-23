@@ -55,6 +55,14 @@ public class QoIPlanningSelectValue extends GenericParameterSelectValue<QoIPlann
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(QoIPlanningSelectValue newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(QoIPlanningSelectValue importable) {
 
 		if (importable == null) {

@@ -10,12 +10,12 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.QoIHeader;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.constants.TableHeaderBarButtonType;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.model.QoIHeaderParts;
 import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaView;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTQoIDescriptionDialog;
@@ -79,7 +79,7 @@ public class PIRTPhenTableHeaderContentProvider implements IStructuredContentPro
 			descriptionHeader.setBtnListener(event -> {
 				// open description dialog
 				PIRTQoIDescriptionDialog qoiDescriptionDialog = new PIRTQoIDescriptionDialog(parent.getViewManager(),
-						parent.getShell(), (null != qoi.getTagDate()) ? DialogMode.VIEW : DialogMode.UPDATE);
+						parent.getShell(), (null != qoi.getTagDate()) ? ViewMode.VIEW : ViewMode.UPDATE);
 				// update qoi
 				updateQoI(qoiDescriptionDialog.openDialog(qoi));
 			});

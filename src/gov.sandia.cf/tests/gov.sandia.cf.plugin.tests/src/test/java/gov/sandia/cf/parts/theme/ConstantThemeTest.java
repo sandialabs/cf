@@ -4,12 +4,9 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.theme;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Display;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
@@ -21,18 +18,15 @@ class ConstantThemeTest {
 	void test() {
 
 		// Null
-		Color colorNull = ConstantTheme.getColor(null);
-		assertNull(colorNull);
-
-		Color colorNullAssoc = ConstantTheme.getAssociatedColor(null);
-		assertEquals(colorNullAssoc, new Color(Display.getCurrent(), 0, 0, 0));
+		String colorNullAssoc = ConstantTheme.getAssociatedColor(null);
+		assertEquals(colorNullAssoc, "0, 0, 0"); //$NON-NLS-1$
 
 		// Black
-		Color black = ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
-		assertEquals(black, new Color(Display.getCurrent(), 0, 0, 0));
+		String black = ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+		assertEquals(black, "0, 0, 0"); //$NON-NLS-1$
 
-		Color blackAssoc = ConstantTheme.getAssociatedColor(black);
-		assertEquals(blackAssoc, new Color(Display.getCurrent(), 255, 255, 255));
+		String blackAssoc = ConstantTheme.getAssociatedColor(black);
+		assertEquals(blackAssoc, "255, 255, 255"); //$NON-NLS-1$
 
 		// Required colors
 		assertTrue(ConstantTheme.existColor(ConstantTheme.COLOR_NAME_NO_COLOR));

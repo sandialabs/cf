@@ -5,6 +5,7 @@ package gov.sandia.cf.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -165,17 +166,31 @@ public class PCMMLevel implements Serializable, IEntity<PCMMLevel, Integer>, IIm
 		this.levelDescriptorList = levelDescriptorList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean sameAs(PCMMLevel newImportable) {
+	public boolean sameKey(PCMMLevel newImportable) {
+		return newImportable != null && Objects.equals(getCode(), newImportable.getCode());
+	}
 
-		if (newImportable == null) {
+	@Override
+	public boolean sameAs(PCMMLevel importable) {
+
+		if (importable == null) {
 			return false;
 		}
 
-		boolean sameName = StringTools.equals(getName(), newImportable.getName());
-		boolean sameCode = MathTools.equals(getCode(), newImportable.getCode());
+		boolean sameName = StringTools.equals(getName(), importable.getName());
+		boolean sameCode = MathTools.equals(getCode(), importable.getCode());
+		boolean sameElement = (getElement() == null && importable.getElement() == null)
+				|| (getElement() != null && importable.getElement() != null
+						&& StringTools.equals(getElement().getName(), importable.getElement().getName()));
+		boolean sameSubelement = (getSubelement() == null && importable.getSubelement() == null)
+				|| (getSubelement() != null && importable.getSubelement() != null
+						&& StringTools.equals(getSubelement().getName(), importable.getSubelement().getName()));
 
-		return sameName && sameCode;
+		return sameName && sameCode && sameElement && sameSubelement;
 	}
 
 	@Override

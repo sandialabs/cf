@@ -21,11 +21,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMAggregationLevel;
 import gov.sandia.cf.model.PCMMLevel;
 import gov.sandia.cf.model.PCMMLevelColor;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -95,8 +96,8 @@ class PCMMApplicationLevelTest extends AbstractTestApplication {
 		// Closest Level by code
 		// ******************************
 		// Empty list
-		PCMMAggregationLevel closestLevelEmpty = getAppManager().getService(IPCMMApplication.class)
-				.getClosestLevelForCode(PCMMConfiguration, null, 1);
+		PCMMAggregationLevel closestLevelEmpty = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, null,
+				1);
 		assertNull(closestLevelEmpty);
 
 		PCMMLevel level0 = new PCMMLevel();
@@ -123,26 +124,24 @@ class PCMMApplicationLevelTest extends AbstractTestApplication {
 		levelList.add(level3);
 
 		// Find closest
-		PCMMAggregationLevel closestLevel5 = getAppManager().getService(IPCMMApplication.class)
-				.getClosestLevelForCode(PCMMConfiguration, levelList, 5);
-		PCMMAggregationLevel closestLevel0 = getAppManager().getService(IPCMMApplication.class)
-				.getClosestLevelForCode(PCMMConfiguration, levelList, -1);
-		PCMMAggregationLevel closestLevel2 = getAppManager().getService(IPCMMApplication.class)
-				.getClosestLevelForCode(PCMMConfiguration, levelList, 2);
+		PCMMAggregationLevel closestLevel5 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList,
+				5);
+		PCMMAggregationLevel closestLevel0 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList,
+				-1);
+		PCMMAggregationLevel closestLevel2 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList,
+				2);
 
 		// Tests standard
 		assertEquals(Integer.valueOf(-1), closestLevel0.getCode());
 		assertEquals(Integer.valueOf(2), closestLevel2.getCode());
 		assertEquals(Integer.valueOf(5), closestLevel5.getCode());
-		closestLevel5 = getAppManager().getService(IPCMMApplication.class).getClosestLevelForCode(PCMMConfiguration,
-				levelList, 5);
+		closestLevel5 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList, 5);
 		assertNotNull(closestLevel5);
 		assertEquals(Integer.valueOf(5), closestLevel5.getCode());
 
 		// Double Same code
 		levelList.add(level2);
-		closestLevel2 = getAppManager().getService(IPCMMApplication.class).getClosestLevelForCode(PCMMConfiguration,
-				levelList, 2);
+		closestLevel2 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList, 2);
 		assertEquals(Integer.valueOf(2), closestLevel2.getCode());
 
 		// Null cases
@@ -153,14 +152,13 @@ class PCMMApplicationLevelTest extends AbstractTestApplication {
 
 		// Double Code null
 		levelList.add(levelNull);
-		closestLevel2 = getAppManager().getService(IPCMMApplication.class).getClosestLevelForCode(PCMMConfiguration,
-				levelList, 2);
+		closestLevel2 = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList, 2);
 		assertEquals(closestLevel2.getCode(), Integer.valueOf(2));
 
 		// One null
 		levelList.add(null);
-		PCMMAggregationLevel closestLevelN = getAppManager().getService(IPCMMApplication.class)
-				.getClosestLevelForCode(PCMMConfiguration, levelList, 0);
+		PCMMAggregationLevel closestLevelN = getPCMMAggregateApp().getClosestLevelForCode(PCMMConfiguration, levelList,
+				0);
 		assertEquals(closestLevelN.getCode(), Integer.valueOf(0));
 	}
 

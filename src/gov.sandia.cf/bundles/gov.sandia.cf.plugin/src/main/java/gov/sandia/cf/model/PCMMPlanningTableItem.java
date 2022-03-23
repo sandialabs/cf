@@ -134,6 +134,11 @@ public class PCMMPlanningTableItem extends GenericValueTaggable<PCMMPlanningPara
 	}
 
 	@Override
+	public String getItemTitle() {
+		return getReadableValue();
+	}
+
+	@Override
 	public String toString() {
 		return "PCMMPlanningTableItem [parameter=" + parameter + ", element=" + element + ", subelement=" + subelement //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				+ ", valueList=" + valueList + "]"; //$NON-NLS-1$ //$NON-NLS-2$

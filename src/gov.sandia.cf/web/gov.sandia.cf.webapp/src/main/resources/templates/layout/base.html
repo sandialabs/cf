@@ -1,0 +1,33 @@
+<!--templates/layout/base.twig-->
+<!DOCTYPE html>
+<html class="full-height" xmlns:th="http://www.thymeleaf.org"
+    th:fragment="main-fragment (title, subtitle, jsTop, mainContent, jsBottom)">
+
+<head>
+    <meta charset="utf-8" />
+    <title th:text="${title} + ' - ' + ${subtitle}"></title>
+<!--     <link th:rel="stylesheet" type="text/css" th:href="@{/assets/css/vendor.css}" /> -->
+<!--     <div th:replace="${jsTop} ?: ~{}"></div> -->
+</head>
+
+<body>
+<!--     <header> -->
+<!--         <div id="home-nav" th:replace="~{fragments/app-fragments :: nav-default}"></div> -->
+<!--         <div id="home-header" -->
+<!--             th:replace="~{fragments/app-fragments :: header-top(title=${title}, subtitle=${subtitle})}"></div> -->
+<!--     </header> -->
+
+    <div class="alert alert-success text-center" role="alert" th:text="${success}" th:if="${success}"></div>
+    <div class="alert alert-info text-center" role="alert" th:text="${info}" th:if="${info}"></div>
+    <div class="alert alert-danger text-center" role="alert" th:text="${error}" th:if="${error}"></div>
+   
+    <div id="msg-events" class="alert alert-info text-center" style="visibility: hidden;" role="alert" th:text="${info}"></div>
+
+    <div th:replace="${mainContent} ?: ~{}"></div>
+
+<!--     <script th:src="@{/assets/js/vendor.min.js}"></script> -->
+<!--     <div th:replace="${jsBottom} ?: ~{}"></div> -->
+
+</body>
+
+</html>

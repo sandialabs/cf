@@ -55,6 +55,14 @@ public class DecisionSelectValue extends GenericParameterSelectValue<DecisionPar
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(DecisionSelectValue newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(DecisionSelectValue importable) {
 
 		if (importable == null) {

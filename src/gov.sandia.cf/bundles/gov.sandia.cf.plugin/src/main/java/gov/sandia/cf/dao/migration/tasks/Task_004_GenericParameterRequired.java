@@ -8,11 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.persistence.sessions.UnitOfWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.migration.EclipseLinkMigrationManager;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.Model;
@@ -36,7 +39,12 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
+@MigrationTask(name = "0.6.0-iwfcf-378-genericparamrequired-task", id = 4)
 public class Task_004_GenericParameterRequired implements IMigrationTask {
+	/**
+	 * the logger
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Task_004_GenericParameterRequired.class);
 
 	private static final Map<Class<? extends GenericParameter<?>>, String> PARAM_TABLE;
 	static {
@@ -48,22 +56,22 @@ public class Task_004_GenericParameterRequired implements IMigrationTask {
 		PARAM_TABLE.put(UncertaintyParam.class, "COM_UNCERTAINTY_PARAM"); //$NON-NLS-1$
 	}
 
-	private static final String TASK_NAME = "0.6.0-iwfcf-378-genericparamrequired-task"; //$NON-NLS-1$
-
 	private static final String QUERY_DROP_FIELD = "ALTER TABLE {0} DROP COLUMN IS_REQUIRED;"; //$NON-NLS-1$
 	private static final String QUERY_UPDATE_FIELD_OPTIONAL = "UPDATE {0} SET REQUIRED=''false'' WHERE IS_REQUIRED=false;"; //$NON-NLS-1$
 	private static final String QUERY_UPDATE_FIELD_REQUIRED = "UPDATE {0} SET REQUIRED=''true'' WHERE IS_REQUIRED=true;"; //$NON-NLS-1$
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
+
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));

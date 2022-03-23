@@ -25,7 +25,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAggregateApp;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMAggregation;
@@ -41,6 +42,7 @@ import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.tools.ViewTools;
 import gov.sandia.cf.parts.widgets.PCMMChartFactory;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -126,7 +128,8 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		 */
 		// main composite
 		mainComposite = new Composite(this, SWT.BORDER);
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		drawMainComposite();
 
 		/**
@@ -188,7 +191,8 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		// label Filters
 		Label lblFilter = new Label(formFilterContainer, SWT.LEFT);
 		lblFilter.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_LABEL));
-		lblFilter.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		lblFilter.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData lblFilterGridData = new GridData();
 		lblFilter.setLayoutData(lblFilterGridData);
 		FontTools.setBoldFont(getViewManager().getRscMgr(), lblFilter);
@@ -277,21 +281,21 @@ public class PCMMStampView extends ACredibilityPCMMView {
 				filters.put(PCMMAssessment.Filter.TAG, getViewManager().getSelectedTag());
 
 				if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())) {
-					this.aggregation = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					this.aggregation = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 							.aggregateSubelements(getViewManager().getPCMMConfiguration(), elements, filters);
 
 					// check the completeness of the assessments
-					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMApplication.class)
+					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 							.isCompleteAggregation(model, getViewManager().getSelectedTag())) {
 						MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMSTAMP_DIALOG_TITLE),
 								RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_MSG));
 					}
 				} else if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())) {
-					this.aggregation = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					this.aggregation = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 							.aggregateAssessmentSimplified(getViewManager().getPCMMConfiguration(), elements, filters);
 
 					// check the completeness of the assessments
-					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMApplication.class)
+					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 							.isCompleteAggregationSimplified(model, getViewManager().getSelectedTag())) {
 						MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMSTAMP_DIALOG_TITLE),
 								RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_SIMPLIFIED_MSG));

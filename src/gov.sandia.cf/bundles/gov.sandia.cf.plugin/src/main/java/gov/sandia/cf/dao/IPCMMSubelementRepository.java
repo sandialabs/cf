@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMSubelement;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMSubelementRepository extends ICRUDRepository<PCMMSubelement, Integer> {
 
 }

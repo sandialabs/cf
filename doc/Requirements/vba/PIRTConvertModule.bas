@@ -11,6 +11,7 @@ Const LevelDifferenceColoringSheet As String = "Level Difference Coloring"
 'Generation Configuration
 Const ymlExtension As String = ".yml"
 Const GLB_INDENT As String = "  "
+Const RootElementName = "PIRT"
 
 'Export PIRT configuration to yml file
 Sub ExportPIRTExcelToYaml()
@@ -19,6 +20,7 @@ Sub ExportPIRTExcelToYaml()
     Pathname = Application.ActiveWorkbook.Path
     Filename = Left(Application.ActiveWorkbook.Name, (InStrRev(Application.ActiveWorkbook.Name, ".", -1, vbTextCompare) - 1))
     FilePath = Pathname & "\" & Filename & ymlExtension
+        Prefix = GLB_INDENT
     
     'Create Yml File
     Call CreateYmlFile(FilePath)
@@ -27,13 +29,14 @@ Sub ExportPIRTExcelToYaml()
     Call AddLevelDifferenceColoringRgbValues(LevelDifferenceColoringSheet)
     
     'exports common content to yml
-    Call ExportContentToYml(FilePath, HeaderSheet)
-    Call ExportContentToYml(FilePath, AdequacySheet)
-    Call ExportContentToYml(FilePath, LevelsSheet)
-    Call ExportContentToYml(FilePath, LevelDifferenceColoringSheet)
+    Call CreateRootElementToYaml(FilePath, RootElementName)
+    Call ExportContentToYml(FilePath, HeaderSheet, Prefix)
+    Call ExportContentToYml(FilePath, AdequacySheet, Prefix)
+    Call ExportContentToYml(FilePath, LevelsSheet, Prefix)
+    Call ExportContentToYml(FilePath, LevelDifferenceColoringSheet, Prefix)
     
     'exports Ranking Guidelines to yml
-    Call ExportRankingGuidelinesToYml(FilePath, RankingGuidelinesSheet)
+    Call ExportRankingGuidelinesToYml(FilePath, RankingGuidelinesSheet, Prefix)
     
     'deletes rgb colors value from cells
     Call DeleteLevelDifferenceColoringRgbValues(LevelDifferenceColoringSheet)
@@ -49,8 +52,22 @@ Private Sub CreateYmlFile(FilePath)
     
 End Sub
 
+'Create root element
+Private Sub CreateRootElementToYaml(FilePath, RootElement)
+
+    'Open the file
+    Filenum = FreeFile
+    Open FilePath For Append As #Filenum
+
+    'Print the Root label
+    Print #Filenum, RootElement & ":"
+
+    Close #Filenum
+
+End Sub
+
 'Export sheets content to yml
-Private Sub ExportContentToYml(FilePath, PIRTSheet)
+Private Sub ExportContentToYml(FilePath, PIRTSheet, Prefix)
 
     'Sheet
     Dim Sheet As Worksheet
@@ -65,13 +82,13 @@ Private Sub ExportContentToYml(FilePath, PIRTSheet)
                  
     'Comments
     Comment = Sheet.Range("A1").Value
-    Print #Filenum, "#" & Comment
+    Print #Filenum, Prefix & "#" & Comment
     
     'Sheetname section
-    Print #Filenum, """" & Sheet.Name & """:"
+    Print #Filenum, Prefix & """" & Sheet.Name & """:"
            
     'Fields section
-    Print #Filenum, GLB_INDENT & """Fields"":"
+    Print #Filenum, Prefix & GLB_INDENT & """Fields"":"
     
     Dim rowCount As Long
     rowCount = Sheet.Cells(Sheet.Rows.Count, "B").End(xlUp).Row
@@ -91,7 +108,7 @@ Private Sub ExportContentToYml(FilePath, PIRTSheet)
                 Name = "- """ & Name & """"
             End If
             
-            Print #Filenum, GLB_INDENT & GLB_INDENT & Name
+            Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & Name
             
             'Parse field attributes
             For c = 3 To columnCount
@@ -104,7 +121,7 @@ Private Sub ExportContentToYml(FilePath, PIRTSheet)
                     AttributeHeader = Replace(AttributeHeader, """", "\""")
                     AttributeValue = Replace(AttributeValue, """", "\""")
                     
-                    Print #Filenum, GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & AttributeHeader & """" & ": """ & AttributeValue & """"
+                    Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & AttributeHeader & """" & ": """ & AttributeValue & """"
                 End If
             Next c
         End If
@@ -115,7 +132,7 @@ Private Sub ExportContentToYml(FilePath, PIRTSheet)
 End Sub
 
 'Export Ranking Guidelines to yml
-Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet)
+Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet, Prefix)
 
     'Sheet
     Dim Sheet As Worksheet
@@ -131,10 +148,10 @@ Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet)
     LevelsTag = "Levels"
         
     'Print Sheetname section
-    Print #Filenum, """" & Sheet.Name & """:"
+    Print #Filenum, Prefix & """" & Sheet.Name & """:"
            
     'Print Guidelines section
-    Print #Filenum, GLB_INDENT & """" & RankingGuidelinesTag & """:"
+    Print #Filenum, Prefix & GLB_INDENT & """" & RankingGuidelinesTag & """:"
      
     'Fields parsing
     AdequacyColumnName = ""
@@ -158,16 +175,16 @@ Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet)
                 AdequacyColumnName = Sheet.Range("B" & r).Value
             
                 'Adequacy Column Name
-                Print #Filenum, GLB_INDENT & GLB_INDENT & """" & AdequacyColumnName & """: "
+                Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & """" & AdequacyColumnName & """: "
                 
                 AdequacyColumnDescription = Sheet.Range("C" & r).Value
                 AdequacyColumnDescription = Replace(AdequacyColumnDescription, """", "\""")
             
                 'Adequacy Column Description
-                Print #Filenum, GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & DescriptionTag & """: """ & AdequacyColumnDescription & """"
+                Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & DescriptionTag & """: """ & AdequacyColumnDescription & """"
                 
                 'Adequacy Column Levels
-                Print #Filenum, GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & LevelsTag & """:"
+                Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & LevelsTag & """:"
                 
             End If
         
@@ -184,7 +201,7 @@ Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet)
                 'Do not parse the adequacy column header
                 If LevelName <> "" And LevelDescription <> "" Then
                     'Adequacy Column Name
-                    Print #Filenum, GLB_INDENT & GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & LevelName & """: """ & LevelDescription & """"
+                    Print #Filenum, Prefix & GLB_INDENT & GLB_INDENT & GLB_INDENT & GLB_INDENT & """" & LevelName & """: """ & LevelDescription & """"
                 End If
             Else
                 AdequacyColumnName = ""
@@ -195,8 +212,11 @@ Private Sub ExportRankingGuidelinesToYml(FilePath, PIRTSheet)
         LastAdequacyColumnName = AdequacyColumnName
         
     Next r
+    
+    Close #Filenum
 
 End Sub
+
 'Add Level Difference Coloring Cells color values
 Private Sub AddLevelDifferenceColoringRgbValues(levelDifferenceColoringSheetName)
 
@@ -217,10 +237,12 @@ Private Sub AddLevelDifferenceColoringRgbValues(levelDifferenceColoringSheetName
     Range("C" & rowCount).NumberFormat = "@"
     
 End Sub
+
 'Convert a color to rgb format
 Private Function ConvertColorToRgb(color)
     ConvertColorToRgb = (color Mod 256) & "," & ((color \ 256) Mod 256) & "," & (color \ 65536)
 End Function
+
 'Delete Level Difference Coloring Cells color values
 Private Sub DeleteLevelDifferenceColoringRgbValues(levelDifferenceColoringSheetName)
     Dim ShTest1 As Worksheet

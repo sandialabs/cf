@@ -15,11 +15,13 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.dao.IDBManager;
+import gov.sandia.cf.exceptions.CredibilityDatabaseInvalidException;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
@@ -51,10 +53,6 @@ public class HSQLDBDaoManager implements IDBManager {
 	/** The connection PASSWORD property */
 	public static final String CONNECTION_PROP_PASSWORD = "password"; //$NON-NLS-1$
 
-	/**
-	 * The stored data hsqldb folder name.
-	 */
-	public static final String DB_HSQLDB_DIRECTORY_NAME = FileTools.CREDIBILITY_DATABASE_FOLDER_DEFAULT_NAME;
 	/**
 	 * The stored data hsqldb file name. This file must be stored in the
 	 * DB_HSQLDB_DIRECTORY_NAME folder associated to the modSim project
@@ -131,7 +129,9 @@ public class HSQLDBDaoManager implements IDBManager {
 	 */
 	@Override
 	public EntityManager getEntityManager() {
-		return entityManager;
+		synchronized (entityManager) {
+			return entityManager;
+		}
 	}
 
 	/**
@@ -146,20 +146,21 @@ public class HSQLDBDaoManager implements IDBManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void initialize(String path) throws CredibilityException, SQLException {
-		this.databaseDirectoryPath = path + FileTools.PATH_SEPARATOR + DB_HSQLDB_DIRECTORY_NAME;
+	public void initialize(String path)
+			throws CredibilityException, SQLException, IOException, CredibilityDatabaseInvalidException {
+		this.databaseDirectoryPath = path;
 		initialize();
 	}
 
 	/**
-	 * Initialize the entitymanager to connect the param connectionUrl database
-	 * 
-	 * @param connectionUrl
-	 * 
-	 * @throws CredibilityException
-	 * @throws SQLException
+	 * Initialize the entitymanager to connect the param connectionUrl database.
+	 *
+	 * @throws CredibilityException                the credibility exception
+	 * @throws SQLException                        the SQL exception
+	 * @throws CredibilityDatabaseInvalidException the credibility database invalid
+	 *                                             exception
 	 */
-	private void initialize() throws CredibilityException, SQLException {
+	private void initialize() throws CredibilityException, SQLException, CredibilityDatabaseInvalidException {
 		if (databaseDirectoryPath == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_DAO_HSQLDB_FILEPATH_NULL));
 		}
@@ -178,9 +179,14 @@ public class HSQLDBDaoManager implements IDBManager {
 		// setting database path property
 		Map<String, String> properties = new HashMap<>();
 		properties.put(JDBC_URL, connectionUrl);
-		properties.put(JDBC_HSQLDB_LOCK_FILE, JDBC_FALSE);
 		factory = Persistence.createEntityManagerFactory(entityPersistUnit, properties);
-		entityManager = factory.createEntityManager();
+		try {
+			entityManager = factory.createEntityManager();
+		} catch (PersistenceException e) {
+			throw new CredibilityDatabaseInvalidException(e);
+		} catch (Exception e) {
+			throw new CredibilityException(e);
+		}
 
 		logger.debug("New database connection set on: {}", connectionUrl); //$NON-NLS-1$
 	}
@@ -190,19 +196,40 @@ public class HSQLDBDaoManager implements IDBManager {
 	 */
 	@Override
 	public void close() throws CredibilityException {
-		// ending database connection
+
+		// closing entity manager (database connection)
 		if (entityManager != null && entityManager.isOpen()) {
-			logger.debug("Shutdown HSQLDB"); //$NON-NLS-1$
-			if (entityManager.getTransaction().isActive()) {
-				entityManager.getTransaction().rollback();
+			synchronized (entityManager) {
+				if (entityManager.getTransaction().isActive()) {
+					entityManager.getTransaction().commit();
+				}
+				entityManager.close();
 			}
-			entityManager.getTransaction().begin();
-			entityManager.createNativeQuery(QUERY_SHUTDOWN).executeUpdate();
-			entityManager.getTransaction().commit();
-			entityManager.close();
 		}
+
+		// closing entity manager factory (database shutdown)
 		if (factory != null && factory.isOpen()) {
-			factory.close();
+
+			// get new entity manager to execute SHUTDOWN query
+			try {
+				EntityManager toClose = factory.createEntityManager();
+				synchronized (toClose) {
+					toClose.getTransaction().begin();
+					toClose.createNativeQuery(QUERY_SHUTDOWN).executeUpdate();
+					toClose.getTransaction().commit();
+					toClose.close();
+				}
+			} catch (Exception e) {
+				throw new CredibilityException(e);
+			} finally {
+
+				// close factory
+				factory.close();
+
+				String url = JDBC_HSQLDB_URL_PREFIX + databaseDirectoryPath + FileTools.PATH_SEPARATOR
+						+ DB_HSQLDB_DEFAULT_NAME;
+				logger.info("Shutdown HSQL database and close connection at {}", url); //$NON-NLS-1$
+			}
 		}
 	}
 
@@ -234,20 +261,4 @@ public class HSQLDBDaoManager implements IDBManager {
 		File file = new File(databaseDirectoryPath);
 		return file.exists();
 	}
-
-	/**
-	 * If exists, deletes database files contained in @param dbContainerPath
-	 * 
-	 * @param dbContainerPath the database container path
-	 * @throws IOException if the database file can not be found
-	 */
-	public static void dropDatabaseFiles(String dbContainerPath) throws IOException {
-		if (dbContainerPath != null) {
-			File dbPath = new File(dbContainerPath + FileTools.PATH_SEPARATOR + DB_HSQLDB_DIRECTORY_NAME);
-			if (dbPath.exists()) {
-				FileTools.deleteDirectoryRecursively(dbPath);
-			}
-		}
-	}
-
 }

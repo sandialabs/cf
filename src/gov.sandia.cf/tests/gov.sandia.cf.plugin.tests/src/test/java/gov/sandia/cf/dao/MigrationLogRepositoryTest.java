@@ -204,7 +204,7 @@ class MigrationLogRepositoryTest extends AbstractTestRepository<MigrationLog, In
 			}
 
 			@Override
-			public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+			public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 				return true;
 			}
 		};

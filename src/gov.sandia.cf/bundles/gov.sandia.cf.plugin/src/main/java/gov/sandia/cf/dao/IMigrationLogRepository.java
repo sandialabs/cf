@@ -13,6 +13,7 @@ import gov.sandia.cf.model.MigrationLog;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IMigrationLogRepository extends ICRUDRepository<MigrationLog, Integer> {
 
 	/**

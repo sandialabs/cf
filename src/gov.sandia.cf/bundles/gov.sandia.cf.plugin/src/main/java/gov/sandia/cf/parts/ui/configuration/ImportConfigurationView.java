@@ -18,12 +18,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.decision.YmlReaderDecisionSchema;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTSchema;
-import gov.sandia.cf.application.configuration.qoiplanning.YmlReaderQoIPlanningSchema;
-import gov.sandia.cf.application.configuration.requirement.YmlReaderSystemRequirementSchema;
-import gov.sandia.cf.application.configuration.uncertainty.YmlReaderUncertaintySchema;
+import gov.sandia.cf.application.decision.YmlReaderDecisionSchema;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.qoiplanning.YmlReaderQoIPlanningSchema;
+import gov.sandia.cf.application.requirement.YmlReaderSystemRequirementSchema;
+import gov.sandia.cf.application.uncertainty.YmlReaderUncertaintySchema;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -31,6 +31,7 @@ import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.widgets.ImportSelectorWidget;
 import gov.sandia.cf.preferences.PrefTools;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -130,7 +131,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
 		firstScroll.setContent(mainComposite);
@@ -155,8 +157,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_QOIPLANNING_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_QOIPLANNING);
 		String preferenceKey = PrefTools.CONF_IMPORT_QOIPLANNING_SCHEMA_FILE_LAST_PATH_KEY;
-		textQoIPlanningSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textQoIPlanningSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
+				title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -184,8 +186,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_PIRT_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_PIRT);
 		String preferenceKey = PrefTools.CONF_IMPORT_PIRT_SCHEMA_FILE_LAST_PATH_KEY;
-		textPIRTSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textPIRTSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
+				message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -213,8 +215,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_PCMM_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_PCMM);
 		String preferenceKey = PrefTools.CONF_IMPORT_PCMM_SCHEMA_FILE_LAST_PATH_KEY;
-		textPCMMSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textPCMMSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
+				message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -242,8 +244,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_UNCERTAINTY_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_UNCERTAINTY);
 		String preferenceKey = PrefTools.CONF_IMPORT_UNCERTAINTY_SCHEMA_FILE_LAST_PATH_KEY;
-		textUncertaintySchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textUncertaintySchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
+				title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -272,8 +274,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_REQUIREMENTS_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_SYSREQUIREMENT);
 		String preferenceKey = PrefTools.CONF_IMPORT_REQUIREMENTS_SCHEMA_FILE_LAST_PATH_KEY;
-		textRequirementsSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textRequirementsSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
+				title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -301,8 +303,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_DECISION_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_DECISION);
 		String preferenceKey = PrefTools.CONF_IMPORT_DECISION_SCHEMA_FILE_LAST_PATH_KEY;
-		textDecisionSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title, message, fileType,
-				preferenceKey) {
+		textDecisionSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
+				message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity

@@ -8,14 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.persistence.sessions.UnitOfWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.ISystemRequirementParamRepository;
 import gov.sandia.cf.dao.ISystemRequirementRepository;
 import gov.sandia.cf.dao.ISystemRequirementSelectValueRepository;
 import gov.sandia.cf.dao.ISystemRequirementValueRepository;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.GenericParameter;
@@ -41,9 +44,12 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Maxime N.
  */
+@MigrationTask(name = "0.6.0-iwfcf-405-sysreq-statement-task6", id = 6)
 public class Task_006_SystemRequirementStatementField implements IMigrationTask {
-
-	private static final String TASK_NAME = "0.6.0-iwfcf-405-sysreq-statement-task6"; //$NON-NLS-1$
+	/**
+	 * the logger
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Task_006_SystemRequirementStatementField.class);
 
 	/**
 	 * The statement query parameter
@@ -75,13 +81,15 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
+
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		// Check DAO
 		if (daoManager == null || daoManager.getEntityManager() == null) {
@@ -139,7 +147,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param params     the requirement parameters
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteAllRequirementParam(DaoManager daoManager, List<SystemRequirementParam> params)
+	public void deleteAllRequirementParam(IDaoManager daoManager, List<SystemRequirementParam> params)
 			throws CredibilityException {
 		if (params != null) {
 			for (SystemRequirementParam param : params) {
@@ -155,7 +163,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param param      the requirement parameter
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteRequirementParam(DaoManager daoManager, SystemRequirementParam param)
+	public void deleteRequirementParam(IDaoManager daoManager, SystemRequirementParam param)
 			throws CredibilityException {
 
 		if (param == null) {
@@ -187,7 +195,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param values     the requirement values
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteAllRequirementValue(DaoManager daoManager, List<SystemRequirementValue> values)
+	public void deleteAllRequirementValue(IDaoManager daoManager, List<SystemRequirementValue> values)
 			throws CredibilityException {
 		if (values != null) {
 			for (SystemRequirementValue value : values) {
@@ -203,7 +211,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param value      the requirement value
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteRequirementValue(DaoManager daoManager, SystemRequirementValue value)
+	public void deleteRequirementValue(IDaoManager daoManager, SystemRequirementValue value)
 			throws CredibilityException {
 
 		if (value == null) {
@@ -223,7 +231,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param selectValues the requirement select values
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteAllRequirementSelectValue(DaoManager daoManager, List<SystemRequirementSelectValue> selectValues)
+	public void deleteAllRequirementSelectValue(IDaoManager daoManager, List<SystemRequirementSelectValue> selectValues)
 			throws CredibilityException {
 		if (selectValues != null) {
 			for (SystemRequirementSelectValue select : selectValues) {
@@ -239,7 +247,7 @@ public class Task_006_SystemRequirementStatementField implements IMigrationTask 
 	 * @param select     the requirement select value
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteRequirementSelectValue(DaoManager daoManager, SystemRequirementSelectValue select)
+	public void deleteRequirementSelectValue(IDaoManager daoManager, SystemRequirementSelectValue select)
 			throws CredibilityException {
 
 		if (select == null) {

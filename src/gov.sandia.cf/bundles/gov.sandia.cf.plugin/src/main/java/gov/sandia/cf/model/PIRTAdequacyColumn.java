@@ -142,6 +142,14 @@ public class PIRTAdequacyColumn
 		this.type = type;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PIRTAdequacyColumn newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
 	@Override
 	public boolean sameAs(PIRTAdequacyColumn newImportable) {
 

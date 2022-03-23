@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PIRTAdequacyColumnLevelGuideline;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPIRTAdequacyLevelGuidelineRepository
 		extends ICRUDRepository<PIRTAdequacyColumnLevelGuideline, Integer> {
 

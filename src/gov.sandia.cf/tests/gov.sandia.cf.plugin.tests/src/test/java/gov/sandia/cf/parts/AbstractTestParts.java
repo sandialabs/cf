@@ -8,9 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,7 +22,7 @@ import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
+import gov.sandia.cf.tools.FileTools;
 import junit.runner.Version;
 
 /**
@@ -87,9 +84,7 @@ public class AbstractTestParts {
 	public void afterTest() {
 		if (createdFolder != null && createdFolder.exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(createdFolder.getPath());
-				Files.walk(createdFolder.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
-						.forEach(File::delete);
+				FileTools.deleteDirectoryRecursively(createdFolder);
 				assertFalse("Directory still exists", createdFolder.exists()); //$NON-NLS-1$
 			} catch (IOException e) {
 				fail(e.getMessage());

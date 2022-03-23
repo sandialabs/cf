@@ -203,20 +203,6 @@ public class PartsResourceConstants {
 	public static final String DIR_IMG_DESCRIPTOR = ISharedImages.IMG_OBJ_FOLDER;
 
 	/**
-	 * Rich Text editor
-	 */
-	public static final String RICH_EDITOR_TOOLBAR = "[" //$NON-NLS-1$
-			+ "{ name: 'clipboard', groups: [ 'undo', 'clipboard' ] }," //$NON-NLS-1$
-			+ "{ name: 'other' }," //$NON-NLS-1$
-			+ "{ name: 'styles' }," //$NON-NLS-1$
-			+ "'/'," //$NON-NLS-1$
-			+ "{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] }," //$NON-NLS-1$
-			+ "{ name: 'colors' }," //$NON-NLS-1$
-			+ "{ name: 'paragraph', groups: [ 'list', 'indent', 'align' ] }," //$NON-NLS-1$
-			+ "]"; //$NON-NLS-1$
-	public static final String RICH_EDITOR_EMPTY_TOOLBAR = "[]"; //$NON-NLS-1$
-
-	/**
 	 * Do not instantiate.
 	 */
 	private PartsResourceConstants() {

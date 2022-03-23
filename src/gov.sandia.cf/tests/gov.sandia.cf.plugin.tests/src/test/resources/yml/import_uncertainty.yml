@@ -1,0 +1,98 @@
+Uncertainty Parameters:
+  Description:
+    level: ">=2"
+    required: "Required"
+    type: "Text"
+  Type:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Select"
+    values:
+      - "epistemic"
+      - "epistemic - model form"
+      - "aleatory"
+  Characterization:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Select"
+    values:
+      - "interval"
+      - "distributional"
+      - "discrete"
+      - "not characterized"
+  Parameters:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Text"
+  Model Feature:
+    level: ">=2"
+    required: "Required"
+    type: "Select"
+    values:
+      - "yes"
+      - "no"
+      - "N/A"
+  Comment:
+    level: ">=2"
+    required: "Optional"
+    type: "RichText"
+  Feasible Physical Range:
+    level: ">=2"
+    required: "Desired"
+    type: "Text"
+  References:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Link"
+uncertaintyGroups:
+  - name: "Numerical"
+    children:
+    - name: "E"
+      values:
+      - parameter:
+          name: "Description"
+        value: "Elastic modulus"
+      - parameter:
+          name: "Type"
+        value: "aleatory"
+      - parameter:
+          name: "Characterization"
+        value: "distributional"
+      - parameter:
+          name: "Parameters"
+        value: "normal, C.o.V.=0.076"
+      - parameter:
+          name: "Model Feature?"
+        value: "yes"
+      - parameter:
+          name: "Feasible Physical Range"
+        value: ">0.0"
+      - parameter:
+          name: "References"
+        value: "http://www.assakkaf.com/Papers/Journals/Uncertainties_in_Material_Strength_Geometric_and_Load_Variables.pdf"
+    - name: "FTY"
+      values:
+      - parameter:
+          name: "Description"
+        value: "Tensile yield strength"
+      - parameter:
+          name: "Type"
+        value: "aleatory"
+      - parameter:
+          name: "Characterization"
+        value: "distributional"
+      - parameter:
+          name: "Parameters"
+        value: "lognormal, C.o.V=0.124"
+      - parameter:
+          name: "Model Feature?"
+        value: "yes"
+      - parameter:
+          name: "Feasible Physical Range"
+        value: ">0.0"
+      - parameter:
+          name: "References"
+        value: "http://www.assakkaf.com/Papers/Journals/Uncertainties_in_Material_Strength_Geometric_and_Load_Variables.pdf"
+  - name: "Parametric"
+  - name: "Model Form"
+  - name: "Environment"

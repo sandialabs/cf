@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.dao.IARGParametersQoIOptionRepository;
 import gov.sandia.cf.dao.IPhenomenonGroupRepository;
 import gov.sandia.cf.dao.IPhenomenonRepository;

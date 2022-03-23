@@ -8,11 +8,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGenericParameterApplication;
-import gov.sandia.cf.application.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.SystemRequirement;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -53,7 +53,7 @@ public class SystemRequirementViewController {
 	void addRequirement(SystemRequirement parent) {
 		// Open dialog in View Mode
 		SystemRequirementDialog dialog = new SystemRequirementDialog(view.getViewManager(), view.getShell(), null,
-				parent, DialogMode.CREATE);
+				parent, ViewMode.CREATE);
 		SystemRequirement requirement = dialog.openDialog();
 
 		if (requirement != null) {
@@ -80,7 +80,7 @@ public class SystemRequirementViewController {
 
 				// Refresh
 				view.refresh();
-				
+
 			} catch (CredibilityException e) {
 				MessageDialog.openError(view.getShell(),
 						RscTools.getString(RscConst.MSG_DIALOG_SYSREQUIREMENT_GROUP_NAME),
@@ -97,8 +97,9 @@ public class SystemRequirementViewController {
 	 */
 	void openAll(SystemRequirement requirement) {
 		if (requirement != null && requirement.getRequirementParameterList() != null) {
-			requirement.getRequirementParameterList().forEach(u -> view.getViewManager().getAppManager()
-					.getService(IGenericParameterApplication.class).openLinkValue(u));
+			requirement.getRequirementParameterList()
+					.forEach(u -> view.getViewManager().getClientService(IGenericParameterService.class)
+							.openLinkValue(u, view.getViewManager().getCache().getOpenLinkBrowserOpts()));
 		}
 	}
 
@@ -126,7 +127,7 @@ public class SystemRequirementViewController {
 		} else {
 			// Open dialog in View Mode
 			SystemRequirementDialog dialog = new SystemRequirementDialog(view.getViewManager(), view.getShell(),
-					requirement, requirement.getParent(), DialogMode.VIEW);
+					requirement, requirement.getParent(), ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -134,45 +135,63 @@ public class SystemRequirementViewController {
 	/**
 	 * Update SystemRequirement
 	 * 
-	 * @param requirement the system requirement to update
+	 * @param systemRequirement the systemRequirement to update
 	 */
-	void updateRequirementAction(SystemRequirement requirement) {
+	void updateRequirementAction(SystemRequirement systemRequirement) {
+
+		// Keep previous group
+		SystemRequirement previousGroup = systemRequirement.getParent();
+
 		// Open dialog in View Mode
-		SystemRequirement oldParent = requirement.getParent();
 		SystemRequirementDialog dialog = new SystemRequirementDialog(view.getViewManager(), view.getShell(),
-				requirement, oldParent, DialogMode.UPDATE);
-		SystemRequirement requirementToUpdate = dialog.openDialog();
+				systemRequirement, previousGroup, ViewMode.UPDATE);
+		SystemRequirement systemRequirementToUpdate = dialog.openDialog();
 
-		if (requirementToUpdate != null) {
-			try {
-				// Create
-				SystemRequirement requirementUpdated = view.getViewManager().getAppManager()
-						.getService(ISystemRequirementApplication.class)
-						.updateRequirement(requirementToUpdate, view.getViewManager().getCache().getUser());
-
-				// Refresh parent
-				SystemRequirement newParent = requirementUpdated.getParent();
-				if (newParent != null) {
-					view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
-							.refresh(newParent);
-				}
-				if (oldParent != null && !oldParent.equals(newParent)) {
-					view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
-							.refresh(oldParent);
-				}
-
-				// Fire view change to save credibility file
-				view.getViewManager().viewChanged();
-
-				// Refresh
-				view.refresh();
-			} catch (CredibilityException e) {
-				MessageDialog.openError(view.getShell(),
-						RscTools.getString(RscConst.MSG_DIALOG_SYSREQUIREMENT_GROUP_NAME),
-						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_ADDING_PHENGROUP)
-								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
-			}
+		// Update
+		try {
+			updateSystemRequirement(systemRequirementToUpdate);
+		} catch (CredibilityException e) {
+			logger.error("An error occured while updating systemRequirement: {}", RscTools.carriageReturn() //$NON-NLS-1$
+					+ e.getMessage(), e);
+			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_SYSREQUIREMENT_TITLE),
+					e.getMessage());
 		}
+
+		if (previousGroup != null && !previousGroup.equals(systemRequirement.getParent())) {
+			view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
+					.refresh(previousGroup);
+		}
+
+		refreshIfChanged();
+	}
+
+	/**
+	 * Update SystemRequirement.
+	 *
+	 * @param systemRequirement the systemRequirement to update
+	 * @throws CredibilityException the credibility exception
+	 */
+	SystemRequirement updateSystemRequirement(SystemRequirement systemRequirement) throws CredibilityException {
+
+		if (systemRequirement == null) {
+			return null;
+		}
+
+		// Update
+		SystemRequirement systemRequirementUpdated = view.getViewManager().getAppManager()
+				.getService(ISystemRequirementApplication.class)
+				.updateRequirement(systemRequirement, view.getViewManager().getCache().getUser());
+
+		// Refresh parent
+		SystemRequirement newGroup = systemRequirementUpdated.getParent();
+		if (newGroup != null) {
+			view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class).refresh(newGroup);
+		}
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+
+		return systemRequirementUpdated;
 	}
 
 	/**
@@ -249,4 +268,63 @@ public class SystemRequirementViewController {
 		}
 	}
 
+	/**
+	 * Reorder all.
+	 *
+	 * @return true, if successful
+	 */
+	protected boolean reorderAll() {
+		try {
+
+			// reorder
+			view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class).reorderAll(
+					view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser());
+
+			// fire view change to save credibility file
+			view.getViewManager().viewChanged();
+
+		} catch (CredibilityException e) {
+			logger.error("Impossible to reorder all uncertainties: {}", e.getMessage(), e);//$NON-NLS-1$
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Reorder systemRequirement.
+	 *
+	 * @param systemRequirement the systemRequirement
+	 * @param newIndex          the new index
+	 * @throws CredibilityException the credibility exception
+	 */
+	void reorder(SystemRequirement systemRequirement, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
+				.reorderSystemRequirement(systemRequirement, newIndex, view.getViewManager().getCache().getUser());
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Refresh systemRequirement.
+	 *
+	 * @param systemRequirement the systemRequirement
+	 */
+	void refreshSystemRequirement(SystemRequirement systemRequirement) {
+		view.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
+				.refresh(systemRequirement);
+	}
+
+	/**
+	 * Refresh if changed.
+	 */
+	public void refreshIfChanged() {
+
+		// Refresh
+		if (view.getViewManager().isDirty()) {
+			view.refresh();
+		}
+	}
 }

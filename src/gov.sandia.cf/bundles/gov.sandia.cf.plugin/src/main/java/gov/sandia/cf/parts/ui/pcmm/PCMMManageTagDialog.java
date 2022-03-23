@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
@@ -58,6 +58,7 @@ import gov.sandia.cf.parts.viewer.TableViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.viewer.editors.GenericTableListContentProvider;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -158,8 +159,10 @@ public class PCMMManageTagDialog extends GenericCFDialog<PCMMViewManager> {
 		tableTag.getTable().setLinesVisible(true);
 
 		// Header colors
-		tableTag.getTable().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
-		tableTag.getTable().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		tableTag.getTable().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+		tableTag.getTable().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 
 		// Tree - Layout
 		final AutoResizeViewerLayout viewerLayout = new AutoResizeViewerLayout(tableTag);

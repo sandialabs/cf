@@ -29,6 +29,7 @@ import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.FontTools;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -65,9 +66,11 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	/**
 	 * Save State elements
 	 */
-	private Composite saveState;
+	private Composite statusComposite;
 	private ButtonTheme btnState;
 	private CLabel lblState;
+
+	private ButtonTheme btnConfig;
 
 	/**
 	 * The constructor
@@ -96,39 +99,21 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		gridTitleLayout.marginHeight = 0;
 		gridTitleLayout.verticalSpacing = 0;
 
-		// Header - Save state
-		saveState = new Composite(headerComposite, SWT.LEFT);
-		saveState.setLayout(new GridLayout(3, false));
-		saveState.setLayoutData(new GridData());
+		// Header - Status composite
+		statusComposite = new Composite(headerComposite, SWT.LEFT);
+		statusComposite.setLayout(new GridLayout(3, false));
+		statusComposite.setLayoutData(new GridData());
 
-		// Initialize save label
-		lblState = new CLabel(saveState, SWT.LEFT);
-		lblState.setLayoutData(new GridData());
-		FontTools.setBoldFont(viewManager.getRscMgr(), lblState);
-
-		// Button save
-		Map<String, Object> btnStateOptions = new HashMap<>();
-		btnStateOptions.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_SAVE));
-		btnStateOptions.put(ButtonTheme.OPTION_OUTLINE, false);
-		btnStateOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_SAVE);
-		btnStateOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
-		btnStateOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> {
-			if (event != null) {
-				getViewManager().getCredibilityEditor().doSave(new NullProgressMonitor());
-				refresh();
-			}
-		});
-		btnState = new ButtonTheme(viewManager.getRscMgr(), saveState, SWT.LEFT, btnStateOptions);
-		btnState.setLayoutData(new GridData());
-		btnState.setVisible(false);
-
-		refreshSaveState();
+		// Initialize - Status composite
+		renderStatusComposite();
+		refreshStatusComposite();
 
 		// Header - label title
 		lblTitle = new CLabel(headerComposite, SWT.CENTER);
 		FontTools.setTitleFont(viewManager.getRscMgr(), lblTitle);
 		lblTitle.setText(getTitle());
-		lblTitle.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		lblTitle.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData gdTitle = new GridData(SWT.CENTER, SWT.NONE, true, true);
 		lblTitle.setLayoutData(gdTitle);
 
@@ -138,9 +123,9 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		btnManageTagOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnManageTagOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CONFIG);
 		btnManageTagOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnConfig = new ButtonTheme(viewManager.getRscMgr(), headerComposite, SWT.CENTER,
-				btnManageTagOptions);
+		btnConfig = new ButtonTheme(viewManager.getRscMgr(), headerComposite, SWT.CENTER, btnManageTagOptions);
 		getViewManager().plugConfigurationButton(btnConfig);
+		refreshConfigurationButton();
 
 		// initialize lbl information variables
 		GC gcButtonConf = new GC(btnConfig);
@@ -164,7 +149,7 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 			public void handleEvent(Event event) {
 				if (lblTitleSize > 0) {
 					// delete the lbl version if there is no space
-					boolean visible = headerComposite.getSize().x > saveState.getSize().x + lblTitleSize
+					boolean visible = headerComposite.getSize().x > statusComposite.getSize().x + lblTitleSize
 							+ lblVersionSize + (margin * 2);
 					if (previousVisible != visible) {
 						if (visible) {
@@ -178,6 +163,37 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 				}
 			}
 		});
+	}
+
+	private void renderStatusComposite() {
+		// Initialize save label
+		lblState = new CLabel(statusComposite, SWT.LEFT);
+		lblState.setLayoutData(new GridData());
+		FontTools.setBoldFont(viewManager.getRscMgr(), lblState);
+
+		// Button save
+		Map<String, Object> btnStateOptions = new HashMap<>();
+		btnStateOptions.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_SAVE));
+		btnStateOptions.put(ButtonTheme.OPTION_OUTLINE, false);
+		btnStateOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_SAVE);
+		btnStateOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
+		btnStateOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> {
+			if (event != null) {
+				getViewManager().getCredibilityEditor().doSave(new NullProgressMonitor());
+				refresh();
+			}
+		});
+		btnState = new ButtonTheme(viewManager.getRscMgr(), statusComposite, SWT.LEFT, btnStateOptions);
+		btnState.setLayoutData(new GridData());
+		btnState.setVisible(false);
+	}
+
+	/**
+	 * Refresh configuration button.
+	 */
+	private void refreshConfigurationButton() {
+		// TODO to implement with web
+		btnConfig.setEnabled(!getViewManager().isWebConnection());
 	}
 
 	/**
@@ -204,8 +220,10 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 				if (itemPart != null) {
 					final BreadcrumbItem item = new BreadcrumbItem(breadCrumb, SWT.PUSH);
 					item.setText(itemPart.getName());
-					item.setTextColor(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
-					item.setTextColorSelected(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+					item.setTextColor(ColorTools.toColor(getViewManager().getRscMgr(),
+							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
+					item.setTextColorSelected(ColorTools.toColor(getViewManager().getRscMgr(),
+							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 					item.setWidth(item.getWidth() + 15);
 					item.setAlignment(SWT.CENTER);
 					addItemListener(item, itemPart);
@@ -275,20 +293,64 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	 */
 	public void refresh() {
 		reload();
-		refreshSaveState();
+		refreshStatusComposite();
 	}
 
 	/**
 	 * Refresh save state
 	 */
-	public void refreshSaveState() {
+	public void refreshStatusComposite() {
+
+		if (getViewManager().isWebConnection()) {
+			refreshWebStatus();
+		} else {
+			refreshLocalStatus();
+		}
+
+		// Layout
+		statusComposite.layout();
+	}
+
+	/**
+	 * Refresh web status.
+	 */
+	private void refreshWebStatus() {
+		if (getViewManager().getCredibilityEditor().isConnected()) {
+
+			// Connected
+			lblState.setText(RscTools.getString(RscConst.MSG_CONNECTED));
+			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_CONNECT,
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE)));
+		} else {
+
+			// Disconnected
+			lblState.setText(RscTools.getString(RscConst.MSG_NOT_CONNECTED));
+			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_DISCONNECT,
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK)));
+			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK)));
+			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
+		}
+	}
+
+	/**
+	 * Refresh local status.
+	 */
+	private void refreshLocalStatus() {
 		if (!getViewManager().getCredibilityEditor().isDirty()) {
 			// Saved
 			lblState.setText(RscTools.getString(RscConst.MSG_SAVED));
 			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_UPTODATE,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
-			lblState.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
-			lblState.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN));
+			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)));
 
 			// Hide save button
 			btnState.setVisible(false);
@@ -297,15 +359,14 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 			lblState.setText(RscTools.getString(RscConst.MSG_NOT_SAVED));
 			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_CLOSE,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
-			lblState.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
-			lblState.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW));
+			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
+			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW)));
 
 			// Show save button
 			btnState.setVisible(true);
 		}
-
-		// Layout
-		saveState.layout();
 	}
 
 	/**
@@ -319,13 +380,15 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	}
 
 	/**
-	 * Display a new question message
-	 * 
+	 * Display a new question message.
+	 *
 	 * @param title   the message title
 	 * @param message the message
+	 * 
+	 * @return the question answer
 	 */
-	public void displayQuestion(String title, String message) {
-		MessageDialog.openQuestion(getShell(), title, message);
+	public boolean displayQuestion(String title, String message) {
+		return MessageDialog.openQuestion(getShell(), title, message);
 	}
 
 	/**

@@ -11,6 +11,7 @@ import gov.sandia.cf.model.ARGParametersQoIOption;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IARGParametersQoIOptionRepository extends ICRUDRepository<ARGParametersQoIOption, Integer> {
 
 }

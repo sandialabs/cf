@@ -41,8 +41,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
@@ -68,6 +68,7 @@ import gov.sandia.cf.parts.widgets.CollapsibleWidget;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.preferences.PrefTools;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -103,19 +104,22 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	private Text textDecisionSchemaPath;
 	private Text textExportDataPath;
 
+	private CheckboxTreeViewer pirtQoITree;
+	private CheckboxTreeViewer pcmmTagTree;
+
+	private Text textSysRequirementsSchemaPath;
+	private Text textQoIPlanningSchemaPath;
+
+	// data
 	private Button pirtCheckbox;
 	private Button pcmmCheckbox;
 	private Button pcmmCheckboxPlanning;
 	private Button pcmmCheckboxAssessment;
 	private Button pcmmCheckboxEvidence;
-
-	private CheckboxTreeViewer pirtQoITree;
-	private CheckboxTreeViewer pcmmTagTree;
-
+	private Button intendedPurposeCheckbox;
+	private Button decisionCheckbox;
+	private Button systemRequirementCheckbox;
 	private Button uncertaintyCheckbox;
-
-	private Text textSysRequirementsSchemaPath;
-	private Text textQoIPlanningSchemaPath;
 
 	/**
 	 * @param viewManager the view manager
@@ -188,7 +192,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
 		firstScroll.setContent(mainComposite);
@@ -668,14 +673,23 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), exportPathComposite, null,
 				optionsBtnBrowse);
 
+		// render Intended Purpose selection
+		renderIntendedPurposeData(dataComposite);
+
+		// render Decision selection
+		renderDecisionData(dataComposite);
+
+		// render System Requirement selection
+		renderSystemRequirementData(dataComposite);
+
+		// render Uncertainty selection
+		renderUncertaintyData(dataComposite);
+
 		// render PIRT selection
 		renderPIRTData(dataComposite);
 
 		// render PCMM selection
 		renderPCMMData(dataComposite);
-
-		// render Uncertainty selection
-		renderUncertaintyData(dataComposite);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -763,8 +777,10 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		pirtQoITree.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		pirtQoITree.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		pirtQoITree.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		pirtQoITree.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Initialize data
 		List<String> columnProperties = new ArrayList<>();
@@ -774,7 +790,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Name
 		TreeViewerColumn nameColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		nameColumn.getColumn().setText(PIRTQoITableQoI.getColumnSymbolProperty());
-		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewManager()));
+		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnSymbolProperty());
@@ -782,7 +798,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Description
 		TreeViewerColumn descriptionColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		descriptionColumn.getColumn().setText(PIRTQoITableQoI.getColumnDescriptionProperty());
-		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider());
+		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider(getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnDescriptionProperty());
@@ -790,7 +806,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Creation Date
 		TreeViewerColumn creationDateColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		creationDateColumn.getColumn().setText(PIRTQoITableQoI.getColumnCreationDateProperty());
-		creationDateColumn.setLabelProvider(new QoICreationDateLabelProvider());
+		creationDateColumn.setLabelProvider(new QoICreationDateLabelProvider(getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnPixelData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_CREATIONDATECOLUMN_WIDTH, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnCreationDateProperty());
@@ -938,8 +954,10 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		pcmmTagTree.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		pcmmTagTree.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		pcmmTagTree.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		pcmmTagTree.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Initialize data
 		List<String> columnProperties = new ArrayList<>();
@@ -1065,27 +1083,95 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
+	 * Render Intended Purpose data composite
+	 */
+	private void renderIntendedPurposeData(Composite parent) {
+		// main composite
+		Composite dataComposite = new Composite(parent, SWT.FILL);
+		GridLayout gridLayout = new GridLayout(1, true);
+		dataComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		dataComposite.setLayout(gridLayout);
+		dataComposite.setBackground(dataComposite.getParent().getBackground());
+
+		// collapse
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
+				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_INTPURPOSE_LBL), true, true);
+		intendedPurposeCheckbox = collapse.getCheckbox();
+
+		// export description
+		CLabel label = new CLabel(dataComposite, SWT.NONE);
+		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_INTPURPOSE_LBL));
+		label.setBackground(label.getParent().getBackground());
+		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+	}
+
+	/**
+	 * Render Decision data composite
+	 */
+	private void renderDecisionData(Composite parent) {
+		// main composite
+		Composite dataComposite = new Composite(parent, SWT.FILL);
+		GridLayout gridLayout = new GridLayout(1, true);
+		dataComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		dataComposite.setLayout(gridLayout);
+		dataComposite.setBackground(dataComposite.getParent().getBackground());
+
+		// collapse
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
+				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_DECISION_LBL), true, true);
+		decisionCheckbox = collapse.getCheckbox();
+
+		// export description
+		CLabel label = new CLabel(dataComposite, SWT.NONE);
+		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_DECISION_LBL));
+		label.setBackground(label.getParent().getBackground());
+		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+	}
+
+	/**
+	 * Render System Requirement data composite
+	 */
+	private void renderSystemRequirementData(Composite parent) {
+		// main composite
+		Composite dataComposite = new Composite(parent, SWT.FILL);
+		GridLayout gridLayout = new GridLayout(1, true);
+		dataComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		dataComposite.setLayout(gridLayout);
+		dataComposite.setBackground(dataComposite.getParent().getBackground());
+
+		// collapse
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
+				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_SYSREQ_LBL), true, true);
+		systemRequirementCheckbox = collapse.getCheckbox();
+
+		// export description
+		CLabel label = new CLabel(dataComposite, SWT.NONE);
+		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_SYSREQ_LBL));
+		label.setBackground(label.getParent().getBackground());
+		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+	}
+
+	/**
 	 * Render Uncertainty data composite
 	 */
 	private void renderUncertaintyData(Composite parent) {
-		// Uncertainty main composite
-		Composite uncertaintyDataComposite = new Composite(parent, SWT.FILL);
+		// main composite
+		Composite dataComposite = new Composite(parent, SWT.FILL);
 		GridLayout gridLayout = new GridLayout(1, true);
-		uncertaintyDataComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-		uncertaintyDataComposite.setLayout(gridLayout);
-		uncertaintyDataComposite.setBackground(uncertaintyDataComposite.getParent().getBackground());
+		dataComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+		dataComposite.setLayout(gridLayout);
+		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
-		// Uncertainty collapse
-		CollapsibleWidget pcmmCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				uncertaintyDataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_UNCERTAINTY_LBL), true,
-				true);
-		uncertaintyCheckbox = pcmmCollapse.getCheckbox();
+		// collapse
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
+				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_UNCERTAINTY_LBL), true, true);
+		uncertaintyCheckbox = collapse.getCheckbox();
 
-		// Uncertainty export description
-		CLabel lblUncertainty = new CLabel(uncertaintyDataComposite, SWT.NONE);
-		lblUncertainty.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_UNCERTAINTY_LBL));
-		lblUncertainty.setBackground(lblUncertainty.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblUncertainty);
+		// export description
+		CLabel label = new CLabel(dataComposite, SWT.NONE);
+		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_UNCERTAINTY_LBL));
+		label.setBackground(label.getParent().getBackground());
+		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
 	}
 
 	/**
@@ -1229,6 +1315,33 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	 */
 	boolean isPCMMAssessmentSelected() {
 		return pcmmCheckboxAssessment != null && pcmmCheckboxAssessment.getSelection();
+	}
+
+	/**
+	 * Checks if is intended purpose selected.
+	 *
+	 * @return true, if is intended purpose selected
+	 */
+	boolean isIntendedPurposeSelected() {
+		return intendedPurposeCheckbox != null && intendedPurposeCheckbox.getSelection();
+	}
+
+	/**
+	 * Checks if is decision selected.
+	 *
+	 * @return true, if is decision selected
+	 */
+	boolean isDecisionSelected() {
+		return decisionCheckbox != null && decisionCheckbox.getSelection();
+	}
+
+	/**
+	 * Checks if is system requirement selected.
+	 *
+	 * @return true, if is system requirement selected
+	 */
+	boolean isSystemRequirementSelected() {
+		return systemRequirementCheckbox != null && systemRequirementCheckbox.getSelection();
 	}
 
 	/**

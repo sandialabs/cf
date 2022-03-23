@@ -18,6 +18,7 @@ import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 
@@ -152,7 +153,7 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 	 */
 	public void refreshSaveState() {
 		if (null != this.stackLayout.topControl) {
-			((ACredibilityView<?>) this.stackLayout.topControl).refreshSaveState();
+			((ACredibilityView<?>) this.stackLayout.topControl).refreshStatusComposite();
 		}
 	}
 
@@ -228,6 +229,13 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 		// reload views
 		if (requirementView != null) {
 			requirementView.reload();
+		}
+	}
+
+	@Override
+	public void reloadActiveView() {
+		if (stackLayout.topControl instanceof ICredibilityView) {
+			((ICredibilityView) stackLayout.topControl).reload();
 		}
 	}
 

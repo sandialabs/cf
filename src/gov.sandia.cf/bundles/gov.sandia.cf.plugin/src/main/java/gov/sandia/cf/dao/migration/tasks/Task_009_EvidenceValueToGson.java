@@ -9,10 +9,11 @@ import org.eclipse.persistence.sessions.UnitOfWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.migration.EclipseLinkMigrationManager;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.tools.RscConst;
@@ -28,13 +29,12 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  */
+@MigrationTask(name = "0.6.0-iwfcf-425-evidenceValuesToGson-task9", id = 9)
 public class Task_009_EvidenceValueToGson implements IMigrationTask {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(Task_009_EvidenceValueToGson.class);
-
-	private static final String TASK_NAME = "0.6.0-iwfcf-425-evidenceValuesToGson-task9"; //$NON-NLS-1$
 
 	/**
 	 * Types
@@ -61,17 +61,20 @@ public class Task_009_EvidenceValueToGson implements IMigrationTask {
 	private static final String QUERY_UPDATE_EVIDENCE_VALUE_BY_TYPE = "UPDATE " + EVIDENCE_TABLE + " SET " //$NON-NLS-1$ //$NON-NLS-2$
 			+ EVIDENCE_VALUE_COLUMN + "={0} WHERE " + EVIDENCE_TYPE_COLUMN + "=''{1}''"; //$NON-NLS-1$ //$NON-NLS-2$
 
+	private static final String QUERY_UPDATE_EVIDENCE_VALUE_WITHOUT_TYPE = "UPDATE " + EVIDENCE_TABLE + " SET " //$NON-NLS-1$ //$NON-NLS-2$
+			+ EVIDENCE_VALUE_COLUMN + "={0}"; //$NON-NLS-1$
+
 	private static final String QUERY_DROP_FIELD = "ALTER TABLE " + EVIDENCE_TABLE + " DROP COLUMN {0};"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 
-		logger.info("Starting migration Task: " + TASK_NAME); //$NON-NLS-1$
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));
@@ -104,12 +107,13 @@ public class Task_009_EvidenceValueToGson implements IMigrationTask {
 
 			changed = true;
 		}
-		// if the type column does not exist, put the values as files
+		// if the type column does not exist, put the values as files (for old<=0.2.0 or
+		// recent versions>0.6.0)
 		else if (!existsTypeInEvidenceTable && existsPathInEvidenceTable) {
 
 			// change evidence value to Gson with default type file
 			unitOfWork.executeNonSelectingSQL(
-					MessageFormat.format(QUERY_UPDATE_EVIDENCE_VALUE_BY_TYPE, GSON_FILE_VALUE, TYPE_FILE));
+					MessageFormat.format(QUERY_UPDATE_EVIDENCE_VALUE_WITHOUT_TYPE, GSON_FILE_VALUE));
 
 			changed = true;
 		}

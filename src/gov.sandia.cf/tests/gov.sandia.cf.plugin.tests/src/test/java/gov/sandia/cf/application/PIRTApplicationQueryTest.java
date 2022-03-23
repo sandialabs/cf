@@ -17,9 +17,10 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTQuery;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
+import gov.sandia.cf.model.dto.configuration.PIRTQuery;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**

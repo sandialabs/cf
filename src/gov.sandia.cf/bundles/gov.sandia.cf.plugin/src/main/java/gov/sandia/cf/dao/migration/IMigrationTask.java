@@ -3,7 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao.migration;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 
 /**
@@ -29,5 +29,5 @@ public interface IMigrationTask {
 	 * @return true if the database changed, otherwise false.
 	 * @throws CredibilityMigrationException if a migration exception occurs
 	 */
-	boolean execute(DaoManager daoManager) throws CredibilityMigrationException;
+	boolean execute(IDaoManager daoManager) throws CredibilityMigrationException;
 }

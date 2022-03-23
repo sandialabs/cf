@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMLevel;
 import gov.sandia.cf.model.PCMMLevelDescriptor;
@@ -35,6 +36,8 @@ class PCMMApplicationLevelDescriptorTest extends AbstractTestApplication {
 	 * the logger
 	 */
 	public static Logger logger = LoggerFactory.getLogger(PCMMApplicationLevelDescriptorTest.class);
+
+	private Random random = new Random();
 
 	@Test
 	void testLevelDescriptorCRUDWorking() {
@@ -189,7 +192,6 @@ class PCMMApplicationLevelDescriptorTest extends AbstractTestApplication {
 		int leftLimit = 97; // letter 'a'
 		int rightLimit = 122; // letter 'z'
 		int targetStringLength = 1501;
-		Random random = new Random();
 
 		String generatedString = random.ints(leftLimit, rightLimit + 1).limit(targetStringLength)
 				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();

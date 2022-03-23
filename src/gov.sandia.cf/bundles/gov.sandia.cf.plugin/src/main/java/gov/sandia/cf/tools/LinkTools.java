@@ -11,9 +11,9 @@ import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.OpenLinkBrowserOption;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 
 /**
  * This class gives methods for links
@@ -63,6 +63,8 @@ public class LinkTools {
 	}
 
 	/**
+	 * Gets the type.
+	 *
 	 * @param value the gson value to extract
 	 * @return the type
 	 */
@@ -78,6 +80,8 @@ public class LinkTools {
 	}
 
 	/**
+	 * Gets the path.
+	 *
 	 * @param value the gson value to extract
 	 * @return the path
 	 */
@@ -87,6 +91,23 @@ public class LinkTools {
 			ParameterLinkGson linkGson = GsonTools.getFromGson(value, ParameterLinkGson.class);
 			if (linkGson != null) {
 				path = linkGson.value;
+			}
+		}
+		return path;
+	}
+
+	/**
+	 * Gets the caption.
+	 *
+	 * @param value the gson value to extract
+	 * @return the path
+	 */
+	public static String getCaption(String value) {
+		String path = null;
+		if (value != null) {
+			ParameterLinkGson linkGson = GsonTools.getFromGson(value, ParameterLinkGson.class);
+			if (linkGson != null) {
+				path = linkGson.caption;
 			}
 		}
 		return path;

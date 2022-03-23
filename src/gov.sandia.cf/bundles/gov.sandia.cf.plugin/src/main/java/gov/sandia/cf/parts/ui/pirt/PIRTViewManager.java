@@ -18,12 +18,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTQuery;
 import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.model.QuantityOfInterest;
+import gov.sandia.cf.model.dto.configuration.PIRTQuery;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 import gov.sandia.cf.tools.DateTools;
@@ -341,7 +342,7 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 	public void refreshSaveState() {
 		mapQoIItem.forEach((key, view) -> {
 			if (null != view.getControl()) {
-				((ACredibilityView<?>) view.getControl()).refreshSaveState();
+				((ACredibilityView<?>) view.getControl()).refreshStatusComposite();
 			}
 		});
 	}
@@ -448,15 +449,17 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 	@Override
 	public void reload() {
 		mapQoIItem.forEach((id, view) -> {
-			if (view != null) {
-				if (view.getControl() instanceof PIRTQoIView) {
-					((PIRTQoIView) view.getControl()).reload();
-				} else if (view.getControl() instanceof PIRTPhenomenaView) {
-					((PIRTPhenomenaView) view.getControl()).reload();
-				} else if (view.getControl() instanceof PIRTQueryResultView) {
-					((PIRTQueryResultView<?>) view.getControl()).reload();
-				}
+			if (view != null && view.getControl() instanceof ICredibilityView) {
+				((ICredibilityView) view.getControl()).reload();
 			}
 		});
+	}
+
+	@Override
+	public void reloadActiveView() {
+		if (folder != null && folder.getSelection() != null
+				&& folder.getSelection().getControl() instanceof ICredibilityView) {
+			((ICredibilityView) folder.getSelection().getControl()).reload();
+		}
 	}
 }

@@ -8,11 +8,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
-import gov.sandia.cf.application.IGenericParameterApplication;
+import gov.sandia.cf.application.decision.IDecisionApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Decision;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -56,12 +56,12 @@ public class DecisionViewController {
 
 		// Open dialog in View Mode
 		DecisionDialog dialog = new DecisionDialog(view.getViewManager(), view.getShell(), null, parent,
-				DialogMode.CREATE);
+				ViewMode.CREATE);
 		Decision decision = dialog.openDialog();
 
 		if (decision != null) {
 			try {
-				// Set User
+				// Set Id
 				decision.setGeneratedId(view.getIdColumnText(decision));
 
 				// Create
@@ -95,8 +95,9 @@ public class DecisionViewController {
 	 */
 	void openAllDecisionValues(Decision decision) {
 		if (decision != null && decision.getDecisionList() != null) {
-			decision.getDecisionList().forEach(u -> view.getViewManager().getAppManager()
-					.getService(IGenericParameterApplication.class).openLinkValue(u));
+			decision.getDecisionList()
+					.forEach(u -> view.getViewManager().getClientService(IGenericParameterService.class)
+							.openLinkValue(u, view.getViewManager().getCache().getOpenLinkBrowserOpts()));
 		}
 	}
 
@@ -124,7 +125,7 @@ public class DecisionViewController {
 		} else {
 			// Open dialog in View Mode
 			DecisionDialog dialog = new DecisionDialog(view.getViewManager(), view.getShell(), decision,
-					decision.getParent(), DialogMode.VIEW);
+					decision.getParent(), ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -148,37 +149,57 @@ public class DecisionViewController {
 	 */
 	void updateDecisionAction(Decision decision) {
 
+		// Keep previous group
+		Decision previousGroup = decision.getParent();
+
 		// Open dialog in View Mode
-		Decision oldParent = decision.getParent();
-		DecisionDialog dialog = new DecisionDialog(view.getViewManager(), view.getShell(), decision, oldParent,
-				DialogMode.UPDATE);
+		DecisionDialog dialog = new DecisionDialog(view.getViewManager(), view.getShell(), decision, previousGroup,
+				ViewMode.UPDATE);
 		Decision decisionToUpdate = dialog.openDialog();
 
-		if (decisionToUpdate != null) {
-			try {
-				// Create
-				Decision decisionUpdated = view.getViewManager().getAppManager().getService(IDecisionApplication.class)
-						.updateDecision(decisionToUpdate, view.getViewManager().getCache().getUser());
-
-				// Refresh parent
-				Decision newParent = decisionUpdated.getParent();
-				if (newParent != null) {
-					view.getViewManager().getAppManager().getService(IDecisionApplication.class).refresh(newParent);
-				}
-				if (oldParent != null && !oldParent.equals(newParent)) {
-					view.getViewManager().getAppManager().getService(IDecisionApplication.class).refresh(oldParent);
-				}
-
-				// Fire view change to save credibility file
-				view.getViewManager().viewChanged();
-
-				// Refresh
-				view.refresh();
-			} catch (CredibilityException e) {
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_DECISION_TITLE),
-						RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
-			}
+		// Update
+		try {
+			updateDecision(decisionToUpdate);
+		} catch (CredibilityException e) {
+			logger.error("An error occured while updating decision: {}", RscTools.carriageReturn() //$NON-NLS-1$
+					+ e.getMessage(), e);
+			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_DECISION_TITLE),
+					e.getMessage());
 		}
+
+		if (previousGroup != null && !previousGroup.equals(decision.getParent())) {
+			view.getViewManager().getAppManager().getService(IDecisionApplication.class).refresh(previousGroup);
+		}
+
+		refreshIfChanged();
+	}
+
+	/**
+	 * Update Decision.
+	 *
+	 * @param decision the decision to update
+	 * @return
+	 * @throws CredibilityException the credibility exception
+	 */
+	Decision updateDecision(Decision decision) throws CredibilityException {
+
+		if (decision == null) {
+			return null;
+		}
+		// Update
+		Decision decisionUpdated = view.getViewManager().getAppManager().getService(IDecisionApplication.class)
+				.updateDecision(decision, view.getViewManager().getCache().getUser());
+
+		// Refresh parent
+		Decision newGroup = decisionUpdated.getParent();
+		if (newGroup != null) {
+			view.getViewManager().getAppManager().getService(IDecisionApplication.class).refresh(newGroup);
+		}
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+
+		return decisionUpdated;
 	}
 
 	/**
@@ -239,6 +260,65 @@ public class DecisionViewController {
 				logger.error("An error occured while deleting decision: {}", decision //$NON-NLS-1$
 						+ RscTools.carriageReturn() + e.getMessage(), e);
 			}
+		}
+	}
+
+	/**
+	 * Reorder all.
+	 *
+	 * @return true, if successful
+	 */
+	protected boolean reorderAll() {
+		try {
+
+			// reorder
+			view.getViewManager().getAppManager().getService(IDecisionApplication.class).reorderAll(
+					view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser());
+
+			// fire view change to save credibility file
+			view.getViewManager().viewChanged();
+
+		} catch (CredibilityException e) {
+			logger.error("Impossible to reorder all uncertainties: {}", e.getMessage(), e);//$NON-NLS-1$
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Reorder decision.
+	 *
+	 * @param decision the decision
+	 * @param newIndex the new index
+	 * @throws CredibilityException the credibility exception
+	 */
+	void reorder(Decision decision, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IDecisionApplication.class).reorderDecision(decision, newIndex,
+				view.getViewManager().getCache().getUser());
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Refresh decision.
+	 *
+	 * @param decision the decision
+	 */
+	void refreshDecision(Decision decision) {
+		view.getViewManager().getAppManager().getService(IDecisionApplication.class).refresh(decision);
+	}
+
+	/**
+	 * Refresh if changed.
+	 */
+	public void refreshIfChanged() {
+
+		// Refresh
+		if (view.getViewManager().isDirty()) {
+			view.refresh();
 		}
 	}
 }

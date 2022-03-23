@@ -28,6 +28,7 @@ import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.widgets.CollapsibleWidget;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.SelectWidget;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -124,7 +125,8 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
 		firstScroll.setContent(mainComposite);
@@ -161,8 +163,7 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
 
 		// text path
-		cbxOpenLinkOpts = FormFactory.createSelectWidget(getViewManager().getRscMgr(),
-				schemaComposite, true, null,
+		cbxOpenLinkOpts = FormFactory.createSelectWidget(getViewManager().getRscMgr(), schemaComposite, true, null,
 				Arrays.asList(OpenLinkBrowserOption.values()));
 		cbxOpenLinkOpts.setValue(null);
 

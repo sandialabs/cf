@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -29,8 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.dao.AbstractTestDao;
 import gov.sandia.cf.dao.DaoManager;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
+import gov.sandia.cf.tools.FileTools;
 import junit.runner.Version;
 
 /**
@@ -56,7 +56,7 @@ class EclipseLinkMigrationManagerExecutionTest {
 	/**
 	 * the dao manager
 	 */
-	private static DaoManager daoManager;
+	private static IDaoManager daoManager;
 
 	private File createdFolder;
 
@@ -81,7 +81,7 @@ class EclipseLinkMigrationManagerExecutionTest {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
+	public IDaoManager getDaoManager() {
 		return daoManager;
 	}
 
@@ -121,8 +121,7 @@ class EclipseLinkMigrationManagerExecutionTest {
 		getDaoManager().stop();
 		if (createdFolder != null && createdFolder.exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(createdFolder.getPath());
-				Files.deleteIfExists(createdFolder.toPath());
+				FileTools.deleteDirectoryRecursively(createdFolder);
 			} catch (IOException e) {
 				fail("Exception during temporary folders deletion", e); //$NON-NLS-1$
 			}
@@ -136,7 +135,7 @@ class EclipseLinkMigrationManagerExecutionTest {
 	public static void clean() {
 		daoManager.stop();
 		try {
-			HSQLDBDaoManager.dropDatabaseFiles(TEMP_FOLDER.getRoot().toString());
+			FileTools.deleteDirectoryRecursively(TEMP_FOLDER.getRoot());
 		} catch (IOException e) {
 			fail("Exception during temporary folders deletion", e); //$NON-NLS-1$
 		}

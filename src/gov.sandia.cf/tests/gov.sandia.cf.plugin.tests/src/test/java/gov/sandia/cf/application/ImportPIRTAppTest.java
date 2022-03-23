@@ -21,7 +21,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.pirt.IImportPIRTApp;
 import gov.sandia.cf.dao.IPIRTAdequacyColumnGuidelineRepository;
 import gov.sandia.cf.dao.IPIRTAdequacyColumnRepository;
 import gov.sandia.cf.dao.IPIRTAdequacyLevelGuidelineRepository;
@@ -39,6 +40,7 @@ import gov.sandia.cf.model.PIRTDescriptionHeader;
 import gov.sandia.cf.model.PIRTLevelDifferenceColor;
 import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -63,14 +65,14 @@ class ImportPIRTAppTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import
-		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, confFile);
+		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, user, confFile);
 
 		// test PIRT headers
 		List<PIRTDescriptionHeader> pirtDescriptionHeader = getPIRTApp().getPIRTDescriptionHeader();
@@ -90,7 +92,6 @@ class ImportPIRTAppTest extends AbstractTestApplication {
 		// test PIRT level difference colors
 		List<PIRTLevelDifferenceColor> pirtLevelDifferenceColor = getPIRTApp().getPIRTLevelDifferenceColor();
 		assertNotNull(pirtLevelDifferenceColor);
-
 		assertEquals(3, pirtLevelDifferenceColor.size());
 
 		// test PIRT ranking guidelines
@@ -98,7 +99,7 @@ class ImportPIRTAppTest extends AbstractTestApplication {
 		assertNotNull(pirtAdequacyColumnGuideline);
 		assertEquals(5, pirtAdequacyColumnGuideline.size());
 
-		// test PIRT ranking guidelines
+		// test PIRT ranking level guidelines
 		List<PIRTAdequacyColumnLevelGuideline> pirtAdequacyColumnLevelGuideline = getDaoManager()
 				.getRepository(IPIRTAdequacyLevelGuidelineRepository.class).findAll();
 		assertNotNull(pirtAdequacyColumnLevelGuideline);

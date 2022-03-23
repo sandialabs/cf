@@ -3,7 +3,6 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.widgets;
 
-import java.awt.GridLayout;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,9 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -30,23 +32,27 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-import gov.sandia.cf.application.IGenericParameterApplication;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.GenericParameterSelectValue;
 import gov.sandia.cf.model.ISelectValue;
 import gov.sandia.cf.model.Notification;
+import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.NotificationType;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
+import gov.sandia.cf.parts.constants.RichTextEditorConstants;
 import gov.sandia.cf.parts.dialogs.NewFileTreeSelectionDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
+import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.CursorTools;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.tools.ImageTools;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.widgets.TextWidget.TextWidgetType;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -206,7 +212,11 @@ public class FormFactory {
 
 		// button
 		ButtonTheme button = new ButtonTheme(rscMgr, parent, SWT.CENTER, buttonOptions);
-		button.setLayoutData(new GridData());
+		if (parent.getLayout() instanceof GridLayout) {
+			button.setLayoutData(new GridData());
+		} else if (parent.getLayout() instanceof RowLayout) {
+			button.setLayoutData(new RowData());
+		}
 		button.setData(layoutData);
 
 		return button;
@@ -351,6 +361,27 @@ public class FormFactory {
 	}
 
 	/**
+	 * Creates a new Form object.
+	 *
+	 * @param parent the parent composite
+	 * @param value  the value to display
+	 * @param style  the style
+	 * @return a new label correctly filled
+	 */
+	public static Label createNonEditableText(Composite parent, String value, int style) {
+
+		Label text = new Label(parent, style);
+		GridData dataComments = new GridData();
+		dataComments.heightHint = LABEL_HEIGHT_HINT;
+		dataComments.grabExcessHorizontalSpace = true;
+		dataComments.horizontalAlignment = GridData.FILL;
+		text.setLayoutData(dataComments);
+		text.setText(value != null ? value : RscTools.empty());
+
+		return text;
+	}
+
+	/**
 	 * @param rscMgr the resource manager used to manage the resources (fonts,
 	 *               colors, images, cursors...)
 	 * @param parent the parent composite
@@ -367,7 +398,7 @@ public class FormFactory {
 		link.setLayoutData(dataComments);
 		link.setText(value);
 		link.setEnabled(true);
-		link.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE));
+		link.setForeground(ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE)));
 		CursorTools.setCursor(rscMgr, link, SWT.CURSOR_HAND);
 		link.addListener(SWT.MouseDown, event -> link.notifyListeners(SWT.Selection, event));
 
@@ -384,7 +415,9 @@ public class FormFactory {
 		// configure richtext editor
 		RichTextEditorConfiguration editConfig = new RichTextEditorConfiguration();
 		editConfig.setToolbarCollapsible(true);
-		editConfig.setOption(RichTextEditorConfiguration.TOOLBAR_GROUPS, PartsResourceConstants.RICH_EDITOR_TOOLBAR);
+		editConfig.setOption(RichTextEditorConfiguration.TOOLBAR_GROUPS, RichTextEditorConstants.DEFAULT_TOOLBAR);
+		editConfig.setOption(RichTextEditorConstants.DISABLE_NATIVE_SPELL_CHECKER, Boolean.FALSE);
+		editConfig.setOption(RichTextEditorConfiguration.REMOVE_PLUGINS, RichTextEditorConstants.PLUGINS_TO_REMOVE);
 
 		// create richText
 		RichTextEditor richtext = new RichTextEditor(parent, editConfig, SWT.BORDER);
@@ -429,23 +462,27 @@ public class FormFactory {
 	public static RichTextWidget createRichTextWidget(ResourceManager rscMgr, Composite parent, boolean expanded,
 			boolean editable) {
 		return createRichTextWidget(rscMgr, parent, RscTools.getString(RscConst.MSG_RICHTEXT_CLICK_BAR_DEFAULT), null,
-				expanded, editable);
+				expanded, editable, true);
 	}
 
 	/**
-	 * @param rscMgr    the resource manager used to manage the resources (fonts,
-	 *                  colors, images, cursors...)
-	 * @param parent    the parent composite
-	 * @param labelText the header label text
-	 * @param id        the id data to associate
-	 * @param expanded  is expanded?
-	 * @param editable  is editable?
+	 * Creates a new Form object.
+	 *
+	 * @param rscMgr      the resource manager used to manage the resources (fonts,
+	 *                    colors, images, cursors...)
+	 * @param parent      the parent composite
+	 * @param labelText   the header label text
+	 * @param id          the id data to associate
+	 * @param expanded    is expanded?
+	 * @param editable    is editable?
+	 * @param collapsible is collapsible?
 	 * @return a new rich text editor correctly filled and fitted
 	 */
 	public static RichTextWidget createRichTextWidget(ResourceManager rscMgr, Composite parent, String labelText,
-			Object id, boolean expanded, boolean editable) {
+			Object id, boolean expanded, boolean editable, boolean collapsible) {
 
-		RichTextWidget richtextWidget = new RichTextWidget(rscMgr, parent, SWT.NONE, labelText, expanded, editable);
+		RichTextWidget richtextWidget = new RichTextWidget(rscMgr, parent, SWT.NONE, labelText, expanded, editable,
+				collapsible);
 		richtextWidget.setData(FormFactory.COLUMN_ID_PROPERTY, id);
 		richtextWidget.setBackground(parent.getBackground());
 
@@ -453,11 +490,14 @@ public class FormFactory {
 	}
 
 	/**
+	 * Creates a new non editable richtext viewer.
+	 *
+	 * @param rscMgr the rsc mgr
 	 * @param parent the parent composite
 	 * @param value  the value to display
 	 * @return a new browser correctly filled
 	 */
-	public static Browser createNonEditableRichText(Composite parent, String value) {
+	public static Browser createNonEditableRichText(ResourceManager rscMgr, Composite parent, String value) {
 
 		Browser text = new Browser(parent, SWT.LEFT | SWT.WRAP);
 		GridData dataComments = new GridData();
@@ -475,6 +515,7 @@ public class FormFactory {
 		text.setText(header + value + footer);
 		text.setFocus();
 		text.setBackground(parent.getBackground());
+		text.setForeground(ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 
 		return text;
 	}
@@ -684,7 +725,7 @@ public class FormFactory {
 		if (parent != null && parameter != null && viewManager != null) {
 
 			// the label name
-			String labelName = viewManager.getAppManager().getService(IGenericParameterApplication.class)
+			String labelName = viewManager.getClientService(IGenericParameterService.class)
 					.getParameterNameWithRequiredPrefix(parameter);
 
 			// label
@@ -703,6 +744,15 @@ public class FormFactory {
 	public static Image getQuestionIcon(ResourceManager rscMgr) {
 		return ImageTools.getImage(rscMgr,
 				Display.getCurrent().getSystemImage(SWT.ICON_QUESTION).getImageData().scaledTo(16, 16));
+	}
+
+	/**
+	 * @param rscMgr the resource manager used to manage the resources (fonts,
+	 *               colors, images, cursors...)
+	 * @return a new success image scaled 16x16
+	 */
+	public static Image getSuccessIcon(ResourceManager rscMgr) {
+		return IconTheme.getIconImage(rscMgr, IconTheme.ICON_NAME_UPTODATE, ConstantTheme.COLOR_NAME_GREEN, 16);
 	}
 
 	/**
@@ -736,45 +786,24 @@ public class FormFactory {
 	}
 
 	/**
+	 * @param rscMgr       the resource manager
 	 * @param notification the notification
 	 * @return the notification color associated
 	 */
-	public static Color getNotificationColor(Notification notification) {
+	public static Color getNotificationColor(ResourceManager rscMgr, Notification notification) {
 		if (notification == null) {
 			return null;
 		}
 
 		if (NotificationType.INFO.equals(notification.getType())) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE);
+			return ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE));
 		} else if (NotificationType.WARN.equals(notification.getType())) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE);
+			return ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE));
 		} else if (NotificationType.ERROR.equals(notification.getType())) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED);
+			return ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED));
 		}
 
-		return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
-	}
-
-	/**
-	 * @param rscMgr       the resource manager used to manage the resources (fonts,
-	 *                     colors, images, cursors...)
-	 * @param notification the notification
-	 * @return the notification icon associated
-	 */
-	public static Image getNotificationIcon(ResourceManager rscMgr, Notification notification) {
-		if (notification == null) {
-			return null;
-		}
-
-		if (NotificationType.INFO.equals(notification.getType())) {
-			return FormFactory.getInfoIcon(rscMgr);
-		} else if (NotificationType.WARN.equals(notification.getType())) {
-			return FormFactory.getWarningIcon(rscMgr);
-		} else if (NotificationType.ERROR.equals(notification.getType())) {
-			return FormFactory.getErrorIcon(rscMgr);
-		}
-
-		return null;
+		return ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 	}
 
 	/**
@@ -808,8 +837,8 @@ public class FormFactory {
 		textARGVersion.setBackground(parent.getBackground());
 		if (notification.getMessages() != null)
 			textARGVersion.setText(String.join(RscTools.CARRIAGE_RETURN, notification.getMessages()));
-		textARGVersion.setForeground(getNotificationColor(notification));
-		textARGVersion.setImage(getNotificationIcon(rscMgr, notification));
+		textARGVersion.setForeground(getNotificationColor(rscMgr, notification));
+		textARGVersion.setImage(NotificationFactory.getNotificationIcon(rscMgr, notification));
 		return textARGVersion;
 	}
 }

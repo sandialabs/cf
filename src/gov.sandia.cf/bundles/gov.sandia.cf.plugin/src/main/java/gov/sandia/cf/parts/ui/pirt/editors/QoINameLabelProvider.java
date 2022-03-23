@@ -3,13 +3,12 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pirt.editors;
 
-import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.graphics.Image;
 
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
-import gov.sandia.cf.parts.ui.IViewManager;
 
 /**
  * The QoI name column label provider
@@ -20,18 +19,12 @@ import gov.sandia.cf.parts.ui.IViewManager;
 public class QoINameLabelProvider extends QoILabelProvider {
 
 	/**
-	 * The view manager
-	 */
-	private IViewManager viewMgr;
-
-	/**
 	 * Constructor
 	 * 
-	 * @param viewMgr the view manager
+	 * @param rscMgr the view manager
 	 */
-	public QoINameLabelProvider(IViewManager viewMgr) {
-		Assert.isNotNull(viewMgr);
-		this.viewMgr = viewMgr;
+	public QoINameLabelProvider(ResourceManager rscMgr) {
+		super(rscMgr);
 	}
 
 	@Override
@@ -45,10 +38,10 @@ public class QoINameLabelProvider extends QoILabelProvider {
 			QuantityOfInterest qoi = (QuantityOfInterest) element;
 			Image qoiIcon = null;
 			if (qoi.getTagDate() != null) {
-				qoiIcon = IconTheme.getIconImage(viewMgr.getRscMgr(), IconTheme.ICON_NAME_TAG,
+				qoiIcon = IconTheme.getIconImage(getRscMgr(), IconTheme.ICON_NAME_TAG,
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN));
 			} else {
-				qoiIcon = IconTheme.getIconImage(viewMgr.getRscMgr(), IconTheme.ICON_NAME_EMPTY,
+				qoiIcon = IconTheme.getIconImage(getRscMgr(), IconTheme.ICON_NAME_EMPTY,
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 			}
 			return qoiIcon;

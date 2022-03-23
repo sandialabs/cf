@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMLevelColor;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMLevelColorRepository extends ICRUDRepository<PCMMLevelColor, Integer> {
 
 }

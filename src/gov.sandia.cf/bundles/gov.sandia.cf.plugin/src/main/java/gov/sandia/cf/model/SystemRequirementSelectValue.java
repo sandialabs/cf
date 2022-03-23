@@ -55,6 +55,14 @@ public class SystemRequirementSelectValue extends GenericParameterSelectValue<Sy
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(SystemRequirementSelectValue newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(SystemRequirementSelectValue importable) {
 		
 		if (importable == null) {

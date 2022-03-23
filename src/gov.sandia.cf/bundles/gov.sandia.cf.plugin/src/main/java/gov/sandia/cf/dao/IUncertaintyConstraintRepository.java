@@ -11,6 +11,7 @@ import gov.sandia.cf.model.UncertaintyConstraint;
  * @author Dider Verstraete
  *
  */
+@Repository
 public interface IUncertaintyConstraintRepository extends ICRUDRepository<UncertaintyConstraint, Integer> {
 
 }

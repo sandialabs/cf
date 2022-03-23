@@ -4,9 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.ui.report;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -29,16 +27,16 @@ import org.eclipse.swt.widgets.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
-import gov.sandia.cf.application.IIntendedPurposeApp;
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPCMMPlanningApplication;
-import gov.sandia.cf.application.IReportARGExecutionApp;
-import gov.sandia.cf.application.ISystemRequirementApplication;
-import gov.sandia.cf.application.IUncertaintyApplication;
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.ARGType;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.ARGParametersQoIOption;
@@ -56,6 +54,8 @@ import gov.sandia.cf.model.PCMMPlanningQuestionValue;
 import gov.sandia.cf.model.PCMMPlanningValue;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
+import gov.sandia.cf.model.dto.arg.ARGType;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.dialogs.NewFileTreeSelectionDialog;
 import gov.sandia.cf.parts.widgets.FormFactory;
@@ -406,10 +406,8 @@ public class ReportViewController {
 			view.getTxtConsole().getTextWidget().setText(consoleLog.toString());
 			view.getTxtConsole().setTopIndex(view.getTxtConsole().getTextWidget().getLineCount() - 1);
 
-		} catch (URISyntaxException | IOException | CredibilityException e) {
+		} catch (CredibilityException e) {
 			logger.warn(e.getMessage());
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
-					e.getMessage());
 		}
 
 		return argType;
@@ -503,22 +501,6 @@ public class ReportViewController {
 			view.getTxtConsole().getTextWidget().setText(consoleLog.toString());
 			view.getTxtConsole().setTopIndex(view.getTxtConsole().getTextWidget().getLineCount() - 1);
 		}
-	}
-
-	/**
-	 * update if the value of the txtArgSetupPython changed and set argParameters
-	 * python path, otherwise do nothing.
-	 */
-	void changedARGSetupPython(String value) {
-
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getPythonExecPath())) {
-			return;
-		}
-
-		// update
-		view.getArgParameters().setPythonExecPath(FileTools.getNormalizedPath(Paths.get(value)));
-		updateARGParameters();
 	}
 
 	/**
@@ -1074,7 +1056,6 @@ public class ReportViewController {
 
 		// set execution settings
 		if (Boolean.TRUE.equals(copy.getUseArgLocalConf())) {
-			copy.setPythonExecPath(PrefTools.getPythonExecutablePath());
 			copy.setArgExecPath(PrefTools.getARGExecutablePath());
 			copy.setArgPreScript(PrefTools.getARGSetEnvScriptPath());
 		}
@@ -1091,7 +1072,7 @@ public class ReportViewController {
 
 		// set inlining
 		boolean enableInlining = PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY);
-		copy.setInlineWordDoc(enableInlining && copy.getInlineWordDoc());
+		copy.setInlineWordDoc(enableInlining && Boolean.TRUE.equals(copy.getInlineWordDoc()));
 
 		return copy;
 	}
@@ -1129,22 +1110,20 @@ public class ReportViewController {
 
 		// PLANNING - Get generation parameters
 		options.put(ExportOptions.PLANNING_INCLUDE, view.getChboxPlanning().getSelection());
-		options.put(ExportOptions.PLANNING_INTENDEDPURPOSE_INCLUDE,
-				view.getChboxPlanningIntendedPurpose().getSelection());
-		options.put(ExportOptions.PLANNING_REQUIREMENT_INCLUDE,
-				view.getChboxPlanningSystemRequirement().getSelection());
-		options.put(ExportOptions.PLANNING_QOI_PLANNER_INCLUDE, view.getChboxPlanningQoIPlanner().getSelection());
+		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, view.getChboxPlanningIntendedPurpose().getSelection());
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, view.getChboxPlanningSystemRequirement().getSelection());
+		options.put(ExportOptions.QOI_PLANNER_INCLUDE, view.getChboxPlanningQoIPlanner().getSelection());
 		options.put(ExportOptions.PLANNING_UNCERTAINTY_INCLUDE, view.getChboxPlanningUncertainty().getSelection());
-		options.put(ExportOptions.PLANNING_DECISION_INCLUDE, view.getChboxPlanningDecision().getSelection());
+		options.put(ExportOptions.DECISION_INCLUDE, view.getChboxPlanningDecision().getSelection());
 
 		// PLANNING section
 		options.put(ExportOptions.INTENDED_PURPOSE,
 				view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class).get(model));
-		options.put(ExportOptions.PLANNING_REQUIREMENTS, view.getViewManager().getAppManager()
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, view.getViewManager().getAppManager()
 				.getService(ISystemRequirementApplication.class).getRequirementWithChildrenByModel(model));
 		options.put(ExportOptions.PLANNING_UNCERTAINTIES, view.getViewManager().getAppManager()
 				.getService(IUncertaintyApplication.class).getUncertaintyGroupByModel(model));
-		options.put(ExportOptions.PLANNING_DECISIONS, view.getViewManager().getAppManager()
+		options.put(ExportOptions.DECISION_LIST, view.getViewManager().getAppManager()
 				.getService(IDecisionApplication.class).getDecisionRootByModel(model));
 	}
 
@@ -1200,16 +1179,11 @@ public class ReportViewController {
 			options.put(ExportOptions.PCMM_EVIDENCE_INCLUDE, view.getChboxPcmmEvidence().getSelection());
 			options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, view.getChboxPcmmAssessment().getSelection());
 
-			// Get Elements
-			// PCMM Applications
-			IPCMMPlanningApplication pcmmPlanningApp = view.getViewManager().getAppManager()
-					.getService(IPCMMPlanningApplication.class);
-			IPCMMApplication pcmmApp = view.getViewManager().getAppManager().getService(IPCMMApplication.class);
-
 			// Get planning parameters
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(GenericParameter.Filter.PARENT, null);
-			List<PCMMPlanningParam> planningParameters = pcmmPlanningApp.getPlanningFieldsBy(filters);
+			List<PCMMPlanningParam> planningParameters = view.getViewManager().getAppManager()
+					.getService(IPCMMPlanningApplication.class).getPlanningFieldsBy(filters);
 			options.put(ExportOptions.PCMM_PLANNING_PARAMETERS, planningParameters);
 
 			// Get planning questions & values
@@ -1221,7 +1195,8 @@ public class ReportViewController {
 
 			try {
 				// PCMM Elements
-				List<PCMMElement> pcmmElements = pcmmApp.getElementList(model);
+				List<PCMMElement> pcmmElements = view.getViewManager().getAppManager()
+						.getService(IPCMMApplication.class).getElementList(model);
 				options.put(ExportOptions.PCMM_ELEMENTS, pcmmElements);
 
 				// PCMM Data
@@ -1229,21 +1204,26 @@ public class ReportViewController {
 
 					// Planning Questions
 					pcmmPlanningQuestions.put(pcmmElement,
-							pcmmPlanningApp.getPlanningQuestionsByElement(pcmmElement, mode));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningQuestionsByElement(pcmmElement, mode));
 
 					// Planning Question Values
 					pcmmPlanningQuestionValues.put(pcmmElement,
-							pcmmPlanningApp.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTag));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTag));
 
 					// Planning Parameter values
 					pcmmPlanningValues.put(pcmmElement,
-							pcmmPlanningApp.getPlanningValueByElement(pcmmElement, mode, pcmmTag));
+							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+									.getPlanningValueByElement(pcmmElement, mode, pcmmTag));
 
 					// Evidence
-					pcmmEvidences.put(pcmmElement, pcmmApp.getEvidenceByTag(pcmmTag));
+					pcmmEvidences.put(pcmmElement, view.getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceByTag(pcmmTag));
 
 					// Assessments
-					pcmmAssessments.put(pcmmElement, pcmmApp.getAssessmentByTag(pcmmTag));
+					pcmmAssessments.put(pcmmElement, view.getViewManager().getAppManager()
+							.getService(IPCMMAssessmentApp.class).getAssessmentByTag(pcmmTag));
 				}
 
 				// Planning

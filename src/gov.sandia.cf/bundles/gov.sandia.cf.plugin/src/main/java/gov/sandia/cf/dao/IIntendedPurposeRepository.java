@@ -12,6 +12,7 @@ import gov.sandia.cf.model.Model;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IIntendedPurposeRepository extends ICRUDRepository<IntendedPurpose, Integer> {
 
 	/**

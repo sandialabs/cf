@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.ApplicationManager;
 import gov.sandia.cf.dao.AbstractTestDao;
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
 import junit.runner.Version;
 
@@ -57,11 +57,6 @@ abstract class AbstractConfigurationTest {
 	 */
 	private static ApplicationManager appMgr;
 
-	/**
-	 * The dao manager
-	 */
-	private static DaoManager daoMgr;
-
 	@BeforeAll
 	public static void initializeAll() {
 		try {
@@ -71,10 +66,9 @@ abstract class AbstractConfigurationTest {
 			// Create folder
 			TEMP_FOLDER.create();
 
-			daoMgr = new DaoManager(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
-
 			// load application layer classes
-			appMgr = new ApplicationManager(daoMgr);
+			appMgr = new ApplicationManager();
+			appMgr.getDaoManager().setPersistUnitName(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
 
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -101,7 +95,6 @@ abstract class AbstractConfigurationTest {
 		appMgr.stop();
 		if (newFolder != null && newFolder.exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(newFolder.getPath());
 				Files.walk(newFolder.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
 						.forEach(File::delete);
 				assertFalse("Directory still exists", newFolder.exists()); //$NON-NLS-1$
@@ -139,7 +132,7 @@ abstract class AbstractConfigurationTest {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
-		return daoMgr;
+	public IDaoManager getDaoManager() {
+		return appMgr.getDaoManager();
 	}
 }

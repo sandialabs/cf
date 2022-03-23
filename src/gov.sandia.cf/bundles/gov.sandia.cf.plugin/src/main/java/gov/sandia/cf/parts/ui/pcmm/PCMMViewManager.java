@@ -21,19 +21,19 @@ import org.eclipse.ui.PartInitException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMPhase;
-import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 import gov.sandia.cf.tools.NetTools;
@@ -293,7 +293,7 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	 */
 	public void refreshSaveState() {
 		if (null != this.stackLayout.topControl) {
-			((ACredibilityView<?>) this.stackLayout.topControl).refreshSaveState();
+			((ACredibilityView<?>) this.stackLayout.topControl).refreshStatusComposite();
 		}
 	}
 
@@ -368,22 +368,6 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	 */
 	public void openPCMMHelpLevelView() {
 		viewManager.openHelpLevelView();
-	}
-
-	/**
-	 * Open the PCMM evidence view
-	 * 
-	 * @param subelt the subelement to open
-	 */
-	public void openPCMMEvidenceView(PCMMSubelement subelt) {
-
-		if (subelt != null) {
-			// call the open evidence view on the pcmm element
-			openPCMMEvidenceView(subelt.getElement());
-
-			// set the pcmm subelement to select it in the evidence view
-			this.pcmmEvidenceView.setSubelementSelected(subelt);
-		}
 	}
 
 	/**
@@ -708,6 +692,13 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		}
 		if (pcmmStampView != null) {
 			pcmmStampView.reload();
+		}
+	}
+
+	@Override
+	public void reloadActiveView() {
+		if (stackLayout.topControl instanceof ICredibilityView) {
+			((ICredibilityView) stackLayout.topControl).reload();
 		}
 	}
 }

@@ -48,7 +48,7 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.YmlReaderEvidenceFolderStructure;
+import gov.sandia.cf.application.imports.YmlReaderEvidenceFolderStructure;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.launcher.CredibilityEditor;
@@ -236,8 +236,8 @@ public class WorkspaceTools {
 	 */
 	public static String getActiveWorkingDirPath() {
 		CredibilityEditor editor = getActiveEditor();
-		if (editor != null) {
-			IFolder workDir = getTempFolder(editor.getInputFile());
+		if (editor != null && editor.getCfTmpFolderMgr() != null) {
+			IFolder workDir = editor.getCfTmpFolderMgr().getTempIFolder();
 			return workDir != null ? workDir.getFullPath().toString() : RscTools.empty();
 		}
 		return RscTools.empty();
@@ -249,20 +249,6 @@ public class WorkspaceTools {
 	public static String getActiveProjectPathToString() {
 		IProject project = getActiveProject();
 		return project != null ? project.getFullPath().toString() : RscTools.empty();
-	}
-
-	/**
-	 * @param inputFile the input file
-	 * @return the temporary folder for the specified cf file
-	 */
-	public static IFolder getTempFolder(IFile inputFile) {
-		if (inputFile != null && inputFile.getParent() != null) {
-			IPath cfTmpFolderPath = inputFile.getParent().getFullPath()
-					.append(FileTools.CREDIBILITY_TMP_FOLDER_DEFAULT_PREFIX + inputFile.getName());
-			return getFolderInWorkspaceForPath(cfTmpFolderPath);
-		} else {
-			return null;
-		}
 	}
 
 	/**

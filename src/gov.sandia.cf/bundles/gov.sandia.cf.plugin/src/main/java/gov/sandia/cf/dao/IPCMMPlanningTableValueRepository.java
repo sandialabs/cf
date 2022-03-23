@@ -11,5 +11,6 @@ import gov.sandia.cf.model.PCMMPlanningTableValue;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMPlanningTableValueRepository extends ICRUDRepository<PCMMPlanningTableValue, Integer> {
 }

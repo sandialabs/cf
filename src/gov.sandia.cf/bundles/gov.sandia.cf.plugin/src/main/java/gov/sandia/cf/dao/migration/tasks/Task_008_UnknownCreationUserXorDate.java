@@ -10,12 +10,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.IQoIHeaderRepository;
 import gov.sandia.cf.dao.IQuantityOfInterestRepository;
 import gov.sandia.cf.dao.IUserRepository;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.Model;
@@ -37,21 +38,22 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  */
+@MigrationTask(name = "0.6.0-iwfcf-422-unknowncreationuser-task8", id = 8)
 public class Task_008_UnknownCreationUserXorDate implements IMigrationTask {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(Task_008_UnknownCreationUserXorDate.class);
 
-	private static final String TASK_NAME = "0.6.0-iwfcf-422-unknowncreationuser-task8"; //$NON-NLS-1$
-
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
+
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));
@@ -124,7 +126,7 @@ public class Task_008_UnknownCreationUserXorDate implements IMigrationTask {
 	 * @return true if the database changed, otherwise false
 	 * @throws CredibilityException if an exception occurs during update
 	 */
-	private boolean setQoICreationUserMissing(DaoManager daoManager, User unknownUser) throws CredibilityException {
+	private boolean setQoICreationUserMissing(IDaoManager daoManager, User unknownUser) throws CredibilityException {
 
 		// search for qoi without creation user
 		Map<EntityFilter, Object> filters = new HashMap<>();
@@ -154,7 +156,7 @@ public class Task_008_UnknownCreationUserXorDate implements IMigrationTask {
 	 * @return true if the database changed, otherwise false
 	 * @throws CredibilityException if an exception occurs during update
 	 */
-	private boolean setQoIHeaderCreationUserMissing(DaoManager daoManager, User unknownUser)
+	private boolean setQoIHeaderCreationUserMissing(IDaoManager daoManager, User unknownUser)
 			throws CredibilityException {
 
 		// search for qoi without creation user
@@ -183,7 +185,7 @@ public class Task_008_UnknownCreationUserXorDate implements IMigrationTask {
 	 * @return true if the database changed, otherwise false
 	 * @throws CredibilityException if an exception occurs during update
 	 */
-	private boolean setQoICreationDateMissing(DaoManager daoManager) throws CredibilityException {
+	private boolean setQoICreationDateMissing(IDaoManager daoManager) throws CredibilityException {
 
 		// search for qoi without creation user
 		Map<EntityFilter, Object> filters = new HashMap<>();
@@ -209,7 +211,7 @@ public class Task_008_UnknownCreationUserXorDate implements IMigrationTask {
 	 * @return true if the database changed, otherwise false
 	 * @throws CredibilityException if an exception occurs during update
 	 */
-	private boolean setQoIHeaderCreationDateMissing(DaoManager daoManager) throws CredibilityException {
+	private boolean setQoIHeaderCreationDateMissing(IDaoManager daoManager) throws CredibilityException {
 
 		// search for qoi without creation user
 		Map<EntityFilter, Object> filters = new HashMap<>();

@@ -1,4 +1,4 @@
-PIRT:
+PIRT_QUERY:
     Queries:    
         CRITERION_ALL:
             Name: List all criterion

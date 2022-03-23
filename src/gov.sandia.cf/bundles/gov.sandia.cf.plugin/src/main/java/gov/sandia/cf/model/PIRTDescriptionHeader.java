@@ -125,6 +125,14 @@ public class PIRTDescriptionHeader
 		this.idLabel = idLabel;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PIRTDescriptionHeader newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
 	@Override
 	public boolean sameAs(PIRTDescriptionHeader newImportable) {
 

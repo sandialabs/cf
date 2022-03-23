@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -51,10 +50,6 @@ public class CredibilityPreferencePage extends org.eclipse.jface.preference.Fiel
 		// add PIRT query file path preference
 //		addField(new FileFieldEditor(PrefTools.PIRT_QUERY_FILE_PATH_KEY,
 //				RscTools.getString(RscConst.PREFS_PIRT_QUERY_FILE), getFieldEditorParent()));
-
-		// add Python installation directory preference
-		addField(new StringFieldEditor(PrefTools.GLOBAL_PYTHON_EXECUTABLE_PATH_KEY,
-				RscTools.getString(RscConst.PREFS_GLOBAL_PYTHON_EXECUTABLE), getFieldEditorParent()));
 
 		// add ARG installation directory preference
 		addField(new FileFieldEditor(PrefTools.GLOBAL_ARG_EXECUTABLE_PATH_KEY,
