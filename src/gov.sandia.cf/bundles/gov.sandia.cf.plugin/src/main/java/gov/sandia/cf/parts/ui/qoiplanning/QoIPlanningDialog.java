@@ -26,8 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGenericParameterApplication;
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Model;
@@ -37,8 +36,9 @@ import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.QoIPlanningValue;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.FormFieldWidget;
@@ -105,7 +105,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 	 * @param mode        the dialog mode
 	 */
 	public QoIPlanningDialog(QoIPlanningViewManager viewManager, Shell parentShell, QuantityOfInterest qoi,
-			DialogMode mode) {
+			ViewMode mode) {
 		super(viewManager, parentShell);
 
 		// Get model
@@ -113,7 +113,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 
 		// Set mode
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		// Parameter columns
@@ -124,7 +124,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 		case CREATE:
 			this.qoi = new QuantityOfInterest();
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -150,7 +150,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 	public void create() {
 		super.create();
 		setTitle(RscTools.getString(RscConst.MSG_QOIPLANNING_DIALOG_TITLE));
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			setMessage(RscTools.getString(RscConst.MSG_QOIPLANNING_DIALOG_DESCRIPTION), IMessageProvider.INFORMATION);
 		}
 	}
@@ -226,7 +226,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 		formContainer.setLayout(gridLayout);
 
 		// Select content type
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			renderNonEditableContent(formContainer);
 		} else {
 			renderEditableContent(formContainer);
@@ -463,7 +463,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 	@Override
 	protected void okPressed() {
 		// View - Just exit
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 		}
 
@@ -497,7 +497,7 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 		for (QoIPlanningValue value : tempValues) {
 
 			// validate constraints
-			Notification notification = getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			Notification notification = getViewManager().getClientService(IGenericParameterService.class)
 					.checkValid(value, tempValues);
 
 			if (notification != null) {

@@ -11,6 +11,7 @@ import gov.sandia.cf.model.QoIPlanningSelectValue;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IQoIPlanningSelectValueRepository extends ICRUDRepository<QoIPlanningSelectValue, Integer> {
 
 }

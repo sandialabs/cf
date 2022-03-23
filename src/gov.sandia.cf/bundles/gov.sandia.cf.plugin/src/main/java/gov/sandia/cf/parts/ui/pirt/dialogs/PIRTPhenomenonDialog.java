@@ -24,7 +24,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
@@ -32,8 +31,9 @@ import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
 import gov.sandia.cf.parts.tools.FontTools;
@@ -118,7 +118,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 	 * @param firstGroupSelected the phenomenon group to select by default
 	 */
 	public PIRTPhenomenonDialog(PIRTViewManager viewManager, Shell parentShell, List<PhenomenonGroup> existingGroups,
-			Phenomenon phenomenon, PhenomenonGroup firstGroupSelected, DialogMode mode) {
+			Phenomenon phenomenon, PhenomenonGroup firstGroupSelected, ViewMode mode) {
 		super(viewManager, parentShell);
 		this.existingGroups = existingGroups;
 		if (firstGroupSelected != null) {
@@ -131,19 +131,19 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 		case CREATE:
 			this.phenomenon = new Phenomenon();
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
 			this.phenomenon = phenomenon;
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_UPDATE);
-			this.mode = DialogMode.UPDATE;
+			this.mode = ViewMode.UPDATE;
 			break;
 
 		case VIEW:
 			this.phenomenon = phenomenon;
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CLOSE);
-			this.mode = DialogMode.VIEW;
+			this.mode = ViewMode.VIEW;
 			break;
 		default:
 			break;
@@ -157,7 +157,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 	public void create() {
 		super.create();
 		setTitle(RscTools.getString(RscConst.MSG_DIALOG_PHEN_TITLE));
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			setMessage(RscTools.getString(RscConst.MSG_DIALOG_PHEN_MESSAGE), IMessageProvider.INFORMATION);
 		}
 	}
@@ -210,7 +210,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 		logger.debug("Render PIRT Phenomenon dialog content"); //$NON-NLS-1$
 
 		PIRTSpecification configuration = getViewManager().getCache().getPIRTSpecification();
-		boolean editable = (mode != DialogMode.VIEW);
+		boolean editable = (mode != ViewMode.VIEW);
 
 		// label Phenomenon Group
 		FormFactory.createLabel(parent, RscTools.getString(RscConst.MSG_DIALOG_PHEN_GROUP));
@@ -220,7 +220,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 				existingGroups);
 		cbxPhenomenonGroup.addKeyListener(new ComboDropDownKeyListener());
 		cbxPhenomenonGroup.addListener(SWT.Modify, event -> isValid());
-		cbxPhenomenonGroup.setEnabled(mode.equals(DialogMode.UPDATE));
+		cbxPhenomenonGroup.setEnabled(mode.equals(ViewMode.UPDATE));
 
 		// label Text
 		FormFactory.createLabel(parent, RscTools.getString(RscConst.MSG_DIALOG_PHEN_LABEL));
@@ -443,7 +443,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 	@Override
 	protected void okPressed() {
 
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 			return;
 		}

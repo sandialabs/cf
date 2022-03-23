@@ -8,9 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,9 +22,17 @@ import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.exports.IExportApplication;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAggregateApp;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.dao.AbstractTestDao;
-import gov.sandia.cf.dao.DaoManager;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
+import gov.sandia.cf.dao.IDaoManager;
+import gov.sandia.cf.tools.FileTools;
 import junit.runner.Version;
 
 /**
@@ -54,11 +59,6 @@ class AbstractTestApplication {
 	private static ApplicationManager appMgr;
 
 	/**
-	 * The dao manager
-	 */
-	private static DaoManager daoMgr;
-
-	/**
 	 * A temporary folder under the main temporary folder
 	 */
 	private File createdFolder;
@@ -74,10 +74,9 @@ class AbstractTestApplication {
 
 			TEMP_FOLDER.create();
 
-			daoMgr = new DaoManager(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
-
 			// load application layer classes
-			appMgr = new ApplicationManager(daoMgr);
+			appMgr = new ApplicationManager();
+			appMgr.getDaoManager().setPersistUnitName(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
 
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -110,9 +109,7 @@ class AbstractTestApplication {
 		appMgr.stop();
 		if (createdFolder != null && createdFolder.exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(createdFolder.getPath());
-				Files.walk(createdFolder.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
-						.forEach(File::delete);
+				FileTools.deleteDirectoryRecursively(createdFolder);
 				assertFalse("Directory still exists", createdFolder.exists()); //$NON-NLS-1$
 			} catch (IOException e) {
 				fail(e.getMessage());
@@ -138,6 +135,7 @@ class AbstractTestApplication {
 	public static void clean() {
 		appMgr.stop();
 		TEMP_FOLDER.delete();
+		assertFalse("Directory still exists", TEMP_FOLDER.getRoot().exists()); //$NON-NLS-1$
 		logger.info("Test ending"); //$NON-NLS-1$
 	}
 
@@ -151,8 +149,8 @@ class AbstractTestApplication {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
-		return daoMgr;
+	public IDaoManager getDaoManager() {
+		return appMgr.getDaoManager();
 	}
 
 	/**
@@ -167,6 +165,33 @@ class AbstractTestApplication {
 	 */
 	public IPCMMApplication getPCMMApp() {
 		return getAppManager().getService(IPCMMApplication.class);
+	}
+
+	/**
+	 * Gets the PCMM evidence app.
+	 *
+	 * @return the PCMM evidence app
+	 */
+	public IPCMMEvidenceApp getPCMMEvidenceApp() {
+		return getAppManager().getService(IPCMMEvidenceApp.class);
+	}
+
+	/**
+	 * Gets the PCMM assessment app.
+	 *
+	 * @return the PCMM assessment app
+	 */
+	public IPCMMAssessmentApp getPCMMAssessmentApp() {
+		return getAppManager().getService(IPCMMAssessmentApp.class);
+	}
+
+	/**
+	 * Gets the PCMM aggregate app.
+	 *
+	 * @return the PCMM aggregate app
+	 */
+	public IPCMMAggregateApp getPCMMAggregateApp() {
+		return getAppManager().getService(IPCMMAggregateApp.class);
 	}
 
 	/**

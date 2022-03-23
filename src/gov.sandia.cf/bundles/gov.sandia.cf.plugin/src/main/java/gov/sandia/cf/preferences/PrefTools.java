@@ -48,6 +48,8 @@ public class PrefTools {
 	/**
 	 * Global CF Preferences
 	 */
+	/** GLOBAL CONFIGURATION FOLDER LAST PATH preference key */
+	public static final String CONF_SCHEMA_FOLDER_LAST_PATH_KEY = "conf_schema_folder_last_path"; //$NON-NLS-1$
 	/** DECISION SCHEMA FILE LAST PATH preference key */
 	public static final String DECISION_SCHEMA_FILE_LAST_PATH_KEY = "decision_schema_file_last_path"; //$NON-NLS-1$
 	/** PIRT SCHEMA FILE LAST PATH preference key */
@@ -66,20 +68,31 @@ public class PrefTools {
 	public static final String GLOBAL_DISPLAY_VERSION_NUMBER_PATH_KEY = "global_display_version_number_path"; //$NON-NLS-1$
 	/** DISPLAY CREATION VERSION NUMBER preference key */
 	public static final String GLOBAL_DISPLAY_VERSION_ORIGIN_NUMBER_PATH_KEY = "global_display_version_origin_number_path"; //$NON-NLS-1$
-	/** PYTHON EXECUTABLE PATH preference key */
-	public static final String GLOBAL_PYTHON_EXECUTABLE_PATH_KEY = "global_python_executable_path_key"; //$NON-NLS-1$
 	/** ARG EXECUTABLE PATH preference key */
 	public static final String GLOBAL_ARG_EXECUTABLE_PATH_KEY = "global_arg_executable_path_key"; //$NON-NLS-1$
 	/** ARG SETENV SCRIPT PATH preference key */
 	public static final String GLOBAL_ARG_SETENV_SCRIPT_PATH_KEY = "global_arg_setenv_path"; //$NON-NLS-1$
 	/** DEFAULT BROWSER FOR LINKS preference key */
 	public static final String GLOBAL_OPEN_LINK_BROWSER_OPTION_KEY = "global_open_link_browser_option_key"; //$NON-NLS-1$
+	/** The Constant WEB_SERVER_URL. */
+	public static final String WEB_SERVER_URL = "web_server_url_key"; //$NON-NLS-1$
+
+	/**
+	 * PCMM Preferences
+	 */
+	/** The Constant PCMM_EVIDENCE_FILE_LAST_PATH_KEY. */
+	public static final String PCMM_EVIDENCE_FILE_LAST_PATH_KEY = "pcmm_evidence_file_last_path"; //$NON-NLS-1$
 
 	/**
 	 * CF Developer Options Preferences
 	 */
+	/** The Constant DEVOPTS_REPORT_INLINEWORD_KEY. */
 	public static final String DEVOPTS_REPORT_INLINEWORD_KEY = "devopts_report_inlineword_key"; //$NON-NLS-1$
+	/** The Constant DEVOPTS_CONCURRENCY_SUPPORT_KEY. */
+	public static final String DEVOPTS_CONCURRENCY_SUPPORT_KEY = "devopts_concurrency_support_key"; //$NON-NLS-1$
 
+	
+	
 	/**
 	 * Configuration import constants
 	 */
@@ -138,9 +151,6 @@ public class PrefTools {
 		// pirt query path
 		setPreferenceDefault(PIRT_QUERY_FILE_PATH_KEY, RscTools.empty());
 
-		// python executable path
-		setPreferenceDefault(GLOBAL_PYTHON_EXECUTABLE_PATH_KEY, GLOBAL_PYTHON_EXECUTABLE_PATH_DEFAULTVALUE);
-
 		// arg executable path
 		setPreferenceDefault(GLOBAL_ARG_EXECUTABLE_PATH_KEY, RscTools.empty());
 
@@ -168,13 +178,6 @@ public class PrefTools {
 	 */
 	public static Boolean getGlobalDisplayVersionOriginNumber() {
 		return getPreferenceBoolean(GLOBAL_DISPLAY_VERSION_ORIGIN_NUMBER_PATH_KEY);
-	}
-
-	/**
-	 * @return the global python installation directory path
-	 */
-	public static String getPythonExecutablePath() {
-		return getPreference(GLOBAL_PYTHON_EXECUTABLE_PATH_KEY);
 	}
 
 	/**

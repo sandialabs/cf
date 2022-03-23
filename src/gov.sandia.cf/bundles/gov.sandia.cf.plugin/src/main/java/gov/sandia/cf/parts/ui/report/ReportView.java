@@ -3,8 +3,6 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.report;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,13 +43,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.IReportARGExecutionApp;
-import gov.sandia.cf.application.configuration.arg.ARGBackendDefault;
-import gov.sandia.cf.application.configuration.arg.ARGReportTypeDefault;
-import gov.sandia.cf.application.configuration.arg.ARGType;
-import gov.sandia.cf.application.configuration.arg.YmlARGStructure;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.constants.arg.ARGBackendDefault;
+import gov.sandia.cf.constants.arg.ARGReportTypeDefault;
+import gov.sandia.cf.constants.arg.ARGVersion;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.ARGParametersQoIOption;
@@ -62,6 +59,7 @@ import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.comparator.QoiTaggedComparator;
 import gov.sandia.cf.model.comparator.TagComparatorByDateTag;
 import gov.sandia.cf.model.comparator.VersionComparator;
+import gov.sandia.cf.model.dto.arg.ARGType;
 import gov.sandia.cf.parts.dialogs.ContainerPickerDialog;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -73,6 +71,7 @@ import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.TextWidget;
 import gov.sandia.cf.preferences.PrefTools;
 import gov.sandia.cf.tools.CFVariableResolver;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.HelpTools;
@@ -111,7 +110,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	/**
 	 * ARG Setup
 	 */
-	private TextWidget txtArgSetupPython;
 	private TextWidget txtArgSetupExecutable;
 	private TextWidget txtArgSetupPreScript;
 	private CLabel textARGVersion;
@@ -319,9 +317,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			txtConsole.getTextWidget().setText(consoleLog.toString());
 			txtConsole.setTopIndex(txtConsole.getTextWidget().getLineCount() - 1);
 
-		} catch (URISyntaxException | IOException | CredibilityException e) {
+		} catch (CredibilityException e) {
 			logger.warn(e.getMessage());
-			MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
 		}
 
 		return argVersion;
@@ -337,13 +334,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			if (chboxUseARGLocalConf != null) {
 				chboxUseARGLocalConf.setSelection(Boolean.TRUE.equals(argParameters.getUseArgLocalConf()));
 				chboxUseARGLocalConf.notifyListeners(SWT.Selection, new Event());
-			}
-			if (txtArgSetupPython != null) {
-				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
-					txtArgSetupPython.setValue(PrefTools.getPythonExecutablePath());
-				} else {
-					txtArgSetupPython.setValue(argParameters.getPythonExecPath());
-				}
 			}
 			if (txtArgSetupExecutable != null) {
 				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
@@ -393,11 +383,12 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 
 		// Get ARG version
 		String argVersion = getARGVersion();
-		int versionComparison = new VersionComparator().compare(YmlARGStructure.ARG_VERSION, argVersion);
+		int versionComparison = new VersionComparator().compare(ARGVersion.ARG_VERSION, argVersion);
 		if (versionComparison > 0) {
 			textARGVersion.setText(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_VERSION_WARN, argVersion,
-					YmlARGStructure.ARG_VERSION));
-			textARGVersion.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE));
+					ARGVersion.ARG_VERSION));
+			textARGVersion.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE)));
 			textARGVersion.setVisible(true);
 			textARGVersion.setImage(FormFactory.getWarningIcon(getViewManager().getRscMgr()));
 			((GridData) textARGVersion.getLayoutData()).heightHint = textARGVersion.computeSize(SWT.DEFAULT,
@@ -468,13 +459,13 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			pirtQoIList = getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
 		}
 
-		// Render
-		refreshPIRTQoIList();
-
 		// load checkbox
 		if (argParameters != null && chboxPirt != null) {
 			chboxPirt.setSelection(Boolean.TRUE.equals(argParameters.getPirtEnabled()));
 		}
+
+		// Render
+		refreshPIRTQoIList();
 	}
 
 	/**
@@ -489,6 +480,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		if (argParameters != null) {
 			if (chboxPcmm != null) {
 				chboxPcmm.setSelection(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
+				cbxPcmmTag.getControl().setEnabled(chboxPcmm.getSelection());
 			}
 			if (chboxPcmmPlanning != null) {
 				chboxPcmmPlanning.setSelection(Boolean.TRUE.equals(argParameters.getPcmmPlanningEnabled()));
@@ -552,7 +544,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		mainComposite = new Composite(firstScroll, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
 		firstScroll.setContent(mainComposite);
@@ -645,20 +638,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
 				SWT.FILL | SWT.BORDER, argSetupComposite);
 		pirtCollapse.setLabel(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE));
-
-		// Python executable - Label
-		CLabel argPythonLabel = new CLabel(argSetupComposite, SWT.NONE);
-		argPythonLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
-		argPythonLabel.setText(RscTools.getString(RscConst.PREFS_GLOBAL_PYTHON_EXECUTABLE));
-		argPythonLabel.setBackground(argPythonLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), argPythonLabel);
-
-		// Python executable - Label Content
-		txtArgSetupPython = FormFactory.createTextWidget(getViewManager().getRscMgr(), argSetupComposite, true, null);
-		txtArgSetupPython.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		txtArgSetupPython.setEnabled(true);
-		txtArgSetupPython.setBackground(txtArgSetupPython.getParent().getBackground());
-		txtArgSetupPython.addListener(SWT.KeyUp, e -> viewCtrl.changedARGSetupPython(txtArgSetupPython.getValue()));
 
 		// ARG executable - Label
 		CLabel argExecLabel = new CLabel(argSetupComposite, SWT.NONE);
@@ -816,17 +795,14 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 						openPreferences();
 					}
 				}
-				txtArgSetupPython.setValue(PrefTools.getPythonExecutablePath());
 				txtArgSetupExecutable.setValue(PrefTools.getARGExecutablePath());
 				txtArgSetupPreScript.setValue(PrefTools.getARGSetEnvScriptPath());
 			} else {
-				txtArgSetupPython.setValue(StringTools.getOrEmpty(argParameters.getPythonExecPath()));
 				txtArgSetupExecutable.setValue(StringTools.getOrEmpty(argParameters.getArgExecPath()));
 				txtArgSetupPreScript.setValue(StringTools.getOrEmpty(argParameters.getArgPreScript()));
 			}
 
 			// enable/disable widgets
-			txtArgSetupPython.setEnabled(!chboxUseARGLocalConf.getSelection());
 			txtArgSetupExecutable.setEnabled(!chboxUseARGLocalConf.getSelection());
 			txtArgSetupPreScript.setEnabled(!chboxUseARGLocalConf.getSelection());
 			btnBrowseARGExecutable.setEnabled(!chboxUseARGLocalConf.getSelection());

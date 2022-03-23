@@ -11,11 +11,11 @@ import gov.sandia.cf.model.User;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IUserRepository extends ICRUDRepository<User, Integer> {
 
 	/**
-	 * @param userID
-	 *            the user id to search
+	 * @param userID the user id to search
 	 * @return the user associated to the parameter userID
 	 */
 	User findByUserId(String userID);

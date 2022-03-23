@@ -40,8 +40,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
@@ -51,6 +52,7 @@ import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMLevel;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
@@ -461,7 +463,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					filters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 							.getEvidenceBy(filters);
 
 					// Get number of PCMMEvidence
@@ -484,7 +486,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					filters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 							.getEvidenceBy(filters);
 
 					// Get number of PCMMEvidence
@@ -807,8 +809,10 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		levelAchievedColumn.setEditingSupport(levelAchievedEditingSupport);
 
 		// cells modifier
-		treeViewerPCMM.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		treeViewerPCMM.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		treeViewerPCMM.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewerPCMM.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		treeViewerPCMM.getTree().addListener(SWT.MeasureItem, new Listener() {
 
 			private TreeItem previousItem = null;
@@ -1056,7 +1060,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 			elements.forEach(elt -> elt.getSubElementList().forEach(sub -> {
 				List<PCMMAssessment> assessments = null;
 				try {
-					assessments = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 							.getAssessmentByRoleAndUserAndSubeltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
 									getViewManager().getCache().getUser(), sub, getViewManager().getSelectedTag());
 				} catch (CredibilityException e) {
@@ -1077,7 +1081,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 			elements.forEach(elt -> {
 				List<PCMMAssessment> assessments = null;
 				try {
-					assessments = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 							.getAssessmentByRoleAndUserAndEltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
 									getViewManager().getCache().getUser(), elt, getViewManager().getSelectedTag());
 				} catch (CredibilityException e) {
@@ -1179,19 +1183,22 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			// PCMM Element in gray
 			if (element instanceof PCMMElement) {
-				return isFromCurrentPCMMElement(((PCMMElement) element))
-						? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)
-						: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						isFromCurrentPCMMElement(((PCMMElement) element))
+								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)
+								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else if (element instanceof PCMMSubelement) {
-				return isFromCurrentPCMMElement(((PCMMSubelement) element).getElement())
-						? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
-						: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						isFromCurrentPCMMElement(((PCMMSubelement) element).getElement())
+								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
+								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
 			// PCMM Element in gray
-			return isFromCurrentPCMMElement(((PCMMElement) element))
-					? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
-					: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					isFromCurrentPCMMElement(((PCMMElement) element))
+							? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
+							: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 		}
 
 		return null;
@@ -1206,16 +1213,19 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	public Color getTreeCellForeground(Object element) {
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			if (element instanceof PCMMElement) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			} else if (element instanceof PCMMSubelement) {
-				return isFromCurrentPCMMElement((((PCMMSubelement) element).getElement()))
-						? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
-						: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						isFromCurrentPCMMElement((((PCMMSubelement) element).getElement()))
+								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
+								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
-			return isFromCurrentPCMMElement(((PCMMElement) element))
-					? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
-					: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					isFromCurrentPCMMElement(((PCMMElement) element))
+							? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
+							: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 		}
 		return null;
 	}

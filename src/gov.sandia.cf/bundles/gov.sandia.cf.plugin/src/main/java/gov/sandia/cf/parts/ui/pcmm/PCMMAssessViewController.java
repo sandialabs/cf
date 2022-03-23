@@ -11,7 +11,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
@@ -158,7 +158,7 @@ public class PCMMAssessViewController {
 				updatedAssessment.setUserCreation(currentUser);
 
 				// create the assessment
-				view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 						.addAssessment(updatedAssessment);
 
 				// trigger view change to save
@@ -195,7 +195,7 @@ public class PCMMAssessViewController {
 					}
 
 					// Update the assessment
-					view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+					view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 							.updateAssessment(updatedAssessment, currentUser, currentRole);
 
 					// trigger view change to save
@@ -295,11 +295,11 @@ public class PCMMAssessViewController {
 
 					// persist modifications in database
 					if (creationMode) {
-						view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 								.addAssessment(assessment);
 
 					} else {
-						view.getViewManager().getAppManager().getService(IPCMMApplication.class).updateAssessment(
+						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
 								assessment, view.getViewManager().getCache().getUser(),
 								view.getViewManager().getCache().getCurrentPCMMRole());
 					}
@@ -386,11 +386,11 @@ public class PCMMAssessViewController {
 
 					// persist modifications in database
 					if (creationMode) {
-						view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 								.addAssessment(assessment);
 
 					} else {
-						view.getViewManager().getAppManager().getService(IPCMMApplication.class).updateAssessment(
+						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
 								assessment, view.getViewManager().getCache().getUser(),
 								view.getViewManager().getCache().getCurrentPCMMRole());
 					}
@@ -423,13 +423,13 @@ public class PCMMAssessViewController {
 	 */
 	void clearAssessment(Integer id, Role role, User user, PCMMElement element) throws CredibilityException {
 		// Get assessments to clear
-		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 				.getAssessmentByRoleAndUserAndEltAndTag(role, user, element, view.getViewManager().getSelectedTag());
 
 		// Delete assessments
 		for (PCMMAssessment assessment : assessments) {
 			if (id == null || (!id.equals(assessment.getId()))) {
-				view.getViewManager().getAppManager().getService(IPCMMApplication.class).deleteAssessment(assessment);
+				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
 			}
 
 		}
@@ -446,14 +446,14 @@ public class PCMMAssessViewController {
 	 */
 	void clearAssessment(Integer id, Role role, User user, PCMMSubelement subelement) throws CredibilityException {
 		// Get assessments to clear
-		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 				.getAssessmentByRoleAndUserAndSubeltAndTag(role, user, subelement,
 						view.getViewManager().getSelectedTag());
 
 		// Delete assessments
 		for (PCMMAssessment assessment : assessments) {
 			if (id == null || (!id.equals(assessment.getId()))) {
-				view.getViewManager().getAppManager().getService(IPCMMApplication.class).deleteAssessment(assessment);
+				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
 			}
 
 		}
@@ -486,7 +486,7 @@ public class PCMMAssessViewController {
 				try {
 
 					// delete the assessment
-					view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+					view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 							.deleteAssessment(assessment);
 
 					// trigger view change

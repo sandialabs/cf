@@ -14,6 +14,7 @@ import gov.sandia.cf.model.PCMMPlanningQuestion;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMPlanningQuestionRepository extends ICRUDRepository<PCMMPlanningQuestion, Integer> {
 
 	/**

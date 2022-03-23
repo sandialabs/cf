@@ -20,11 +20,11 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IQoIPlanningApplication;
-import gov.sandia.cf.application.configuration.qoiplanning.QoIPlanningSpecification;
-import gov.sandia.cf.application.configuration.qoiplanning.YmlReaderQoIPlanningSchema;
-import gov.sandia.cf.application.configuration.qoiplanning.YmlWriterQoIPlanningSchema;
+import gov.sandia.cf.application.qoiplanning.IQoIPlanningApplication;
+import gov.sandia.cf.application.qoiplanning.YmlReaderQoIPlanningSchema;
+import gov.sandia.cf.application.qoiplanning.YmlWriterQoIPlanningSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.dto.configuration.QoIPlanningSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;

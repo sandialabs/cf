@@ -13,47 +13,46 @@ Credibility Framework features need to be easily configured by a non-programmer.
 
 To convert `Excel` data to `Yml`, we use `VBA macro` embedded in the `Excel` file. After `Excel` file save, the `VBA macro` is executed and creates a new `Yml` file with the `Excel` file data.
 
-The vba macro are into the following folder [doc/Requirements/vba](https://gitlab.com/CredibilityFramework/cf/-/tree/develop/doc/Requirements/vba).
+The vba macro are into the following folder [doc/Requirements/vba](https://gitlab.com/iwf/cf/-/tree/develop/doc/Requirements/vba).
 
 ## Examples
 [Go back to Contents](#contents)
 
-The requirement files are present into [doc/Requirements](https://gitlab.com/CredibilityFramework/cf/-/tree/develop/doc/Requirements) folder.
+The requirement files are present into [doc/Requirements](https://gitlab.com/iwf/cf/-/tree/develop/doc/Requirements) folder.
 
 ### PIRT
 
 [PIRT_schema-V0.3.xlsm](uploads/85248b78f2f14b71ec9133875a908bb2/PIRT_schema-V0.3.xlsm)
 
-
 ### PCMM
 
 - Elements and subelements with five levels of assessment and planning:
 
-[PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.xlsm](uploads/3a948678bfac3e7b1eb5afe3cab96004/PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.xlsm)
+[PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.xlsm](uploads/14678c8240e9de6147ac92fce31fb597/PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.xlsm)
 
 - Elements only with five levels of assessment and planning:
 
-[PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.xlsm](uploads/569d8c407d0ff7d4eda1b1a506befb2e/PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.xlsm)
+[PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.xlsm](uploads/ddc0cf049250b2b18544ad0c911e0349/PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.xlsm)
 
 - Elements only with three levels of assessment and planning:
 
-[PCMM_schema-No_Subelements-3_Levels-Assessment-v0.2.xlsm](uploads/1382fb14005b60b57f17268f35922f8e/PCMM_schema-No_Subelements-3_Levels-Assessment-v0.2.xlsm)
+[PCMM_schema-No_Subelements-3_Levels-Assessment-v0.2.xlsm](uploads/9814521bdf9e1aed8fdb0c1995bf8c76/PCMM_schema-No_Subelements-3_Levels-Assessment-v0.2.xlsm)
 
 ### Analyst Decision
 
-[ModSim_Decision-v0.1.xlsm](uploads/78d746bf01701989c3be2f628047cbef/ModSim_Decision-v0.1.xlsm)
+[ModSim_Decision-v0.1.xlsm](uploads/e364266c8b60e2a4ca4bc24d357eaadf/ModSim_Decision-v0.1.xlsm)
 
 ### Quantity of Interest Planning
 
-[QoI_Planning-v0.2.xlsm](uploads/cca1b4f6d4f272ee8516a2f2c36a997f/QoI_Planning-v0.2.xlsm)
+[QoI_Planning-v0.2.xlsm](uploads/5685c047da159fdc325b77045b60e0eb/QoI_Planning-v0.2.xlsm)
 
 ### System Requirements
 
-[Requirement_Parameter-v0.1.xlsm](uploads/1fe10e0603d8287a36d2956c37b9c2bf/Requirement_Parameter-v0.1.xlsm)
+[Requirement_Parameter-v0.1.xlsm](uploads/e3408d4ff4d3c9c6ffe357c54147aab2/Requirement_Parameter-v0.1.xlsm)
 
 ### Uncertainty
 
-[Uncertainty_Parameter-v0.2.xlsm](uploads/0516f5f2ee84186080205c0ce7960c1c/Uncertainty_Parameter-v0.2.xlsm)
+[Uncertainty_Parameter-v0.2.xlsm](uploads/7cead57a5cf81e0bdb97a60067f2f5d6/Uncertainty_Parameter-v0.2.xlsm)
 
 ## Export Excel Requirement file to a Yml CF Configuration File
 [Go back to Contents](#contents)
@@ -68,19 +67,19 @@ To manage Excel macro you need to enable the Developer tab on Excel (see [How to
 - Go to `Developer` tab and click on `Visual Basic` button:
 
 <div align="center">
-![image](uploads/158eb3cbc6d1e970a781aa173defc4fb/image.png)
+![Annotation_2020-03-18_151352](uploads/ae03096b5703f366a96a454152c2d0ab/Annotation_2020-03-18_151352.png)
 </div>
 
 - Right-click on `Microsoft Excel Objects`:
 
 <div align="center">
-![image](uploads/f020caf14a6e09cd0ed47a98f8eaf775/image.png)
+![Annotation_2020-03-18_151413](uploads/2b367d45df478dba6d9832e643c69ad0/Annotation_2020-03-18_151413.png)
 </div>
 
 - Click on `Import a file`:
 
 <div align="center">
-![image](uploads/feb690a93d46e23f558e5d0bb7af1f45/image.png)
+![Annotation_2020-03-18_151425](uploads/597ecbe7c1a04bc9c0ceb86c5255b7ed/Annotation_2020-03-18_151425.png)
 </div>
 
 - Select the `Excel macro file *.bas`:
@@ -88,20 +87,20 @@ To manage Excel macro you need to enable the Developer tab on Excel (see [How to
   - For PCMM, select the file `PCMMConvertModule.bas`
 
 <div align="center">
-![image](uploads/bdea2f47378ed705262f662183381348/image.png)
+![Annotation_2020-03-18_160251](uploads/0307702e7bf166ee1cd41d5ff8199fd8/Annotation_2020-03-18_160251.png)
 </div>
 
 - You should have the macro into `Modules`:
 
 <div align="center">
-![image](uploads/4765968de02cb2237cfb39f9480402ed/image.png)
+![Annotation_2020-03-18_151505](uploads/6a4a41274d17d94c611dab6d7e57252c/Annotation_2020-03-18_151505.png)
 </div>
 
 2. **Run** the macro:
 - In the Developer tab, click on `Macros` button:
 
 <div align="center">
-![image](uploads/62a2ad8d59fe9f99729597c5c44def75/image.png)
+![Annotation_2020-03-18_151518](uploads/74631dc6c6d15971ce595b2f732af454/Annotation_2020-03-18_151518.png)
 </div>
 
 - **Select** the macro and click on `Run`:
@@ -109,12 +108,12 @@ To manage Excel macro you need to enable the Developer tab on Excel (see [How to
   - For PCMM, select the file `ExportPCMMToYaml` macro
 
 <div align="center">
-![image](uploads/446a946c09788e2618d750845fff41bf/image.png)
+![Annotation_2020-03-18_151530](uploads/a71faa4422e9f71c71c39aac99c07b1a/Annotation_2020-03-18_151530.png)
 </div>
 - You should have the generated yml file in the same path as your Excel Requirement file:
 
 <div align="center">
-![image](uploads/e5a0144ad2f01f1b777f267953408c6e/image.png)
+![Annotation_2020-03-18_151548](uploads/97ddb9c8f2d7ef5f4e50d7f6a7ce6bd3/Annotation_2020-03-18_151548.png)
 </div>
 
 ## How to turn on `Developer` tab:
@@ -123,21 +122,21 @@ To manage Excel macro you need to enable the Developer tab on Excel (see [How to
 - **Right click** anywhere on the **ribbon**, and then click `Customize the Ribbon`:
 
 <div align="center">
-![image](uploads/6adea0eb6e5762318b71a8e61cd41977/image.png)
+![image](uploads/c2fd71544bc3b8413ac53d8828b3b6ba/image.png)
 </div>
 
 - Under Customize the Ribbon, on the right side of the dialog box, select `Main tabs` (if necessary):
 - Check the `Developer` check box:
 
 <div align="center">
-![image](uploads/f0e423f70bd81c149fe15278330aa215/image.png)
+![image](uploads/9be2dfed44ea4a87d8a8b1fd751c0dfc/image.png)
 </div>
 
 - Click `OK`
 - You can find the Developer tab next to the View tab:
 
 <div align="center">
-![image](uploads/4e4003055b0825f145d9c85cc73a20d3/image.png)
+![image](uploads/bcb487799345b12ed1fe1de7dd25e18b/image.png)
 </div>
 
 ## PIRT Configuration
@@ -151,7 +150,7 @@ The PIRT Excel files contains 5 tabs:
 - `Level Difference Coloring`
 
 <div align="center">
-![image](uploads/48cfd76eab76f1d43c7e7698cb0e5a6f/image.png)
+![image](uploads/4eafa3e2c8cec9437ee057f51a2579a0/image.png)
 </div>
 
 The expected elements of configuration for PIRT feature are:
@@ -186,22 +185,22 @@ The cell A1 of each tab may contain a comment describing the tab content.
 This tab gives the PIRT guidelines. The user can add as much guidelines as needed. Each level guideline must be separated by at least one empty row. The VBA macro will inspect column B to search for a PIRT criteria name.
 
 <div align="center">
-![image](uploads/712b1c8df0664db1599e3651e8baffcb/image.png)
+![image](uploads/78bd60bc6fc24787ec0ffb5478ad0602/image.png)
 </div>
 
 <div align="center">
-![image](uploads/ef6dd93b51f9d4bb80247636917e9aac/image.png)
+![image](uploads/d4534d245f93c91f275b5cd96543ec71/image.png)
 </div>
 
 ### Header tab
 This tab contains the PIRT view header table fields. The user can add as much field as he wants. The field names must be added in column B, starting at cell B3.
 
 <div align="center">
-![image](uploads/409e96d2fafd93afdd430db28660517d/image.png)
+![2019-07-22_pirt-conf-excel-header](uploads/ae4fa24cb9e1f460f98344b7b5b03f0c/2019-07-22_pirt-conf-excel-header.PNG)
 </div>
 
 <div align="center">
-![image](uploads/885acd956c7fb1f005ee565073d98c2a/image.png)
+![image](uploads/130d64060bc2c6dc81d6c3f7d0c7c86c/image.png)
 </div>
 
 ### Adequacy tab
@@ -212,16 +211,16 @@ This tab contains the criterion columns to add to the phenomenon description tab
 Currently, two types are supported, *Levels* for the criterion importance and *Text* for free text value. The user can add as much field as he wants. The field names must be added in column B, starting at cell B3 and type in column C starting at cell C3.
 
 <div align="center">
-![image](uploads/c37eb6390dadc97bc6288f35b69e30bc/image.png)
+![2019-07-22_pirt-conf-excel-adequacy](uploads/63dc90a51248cb6376e95aec1c3a9afb/2019-07-22_pirt-conf-excel-adequacy.PNG)
 </div>
 
 <div align="center">
-![image](uploads/ee3968d0be66abaa00323ed7c76daa90/image.png)
+![image](uploads/1a82ccd89fa4ceed652304fa979b1536/image.png)
 </div>
 
 Here are columns of type `Levels`:
 <div align="center">
-![image](uploads/ff9df3b3b7f09b349f7a4169deab85d4/image.png)
+![image](uploads/603ea8bc92a38fc735e6774d3dc2327c/image.png)
 </div>
 
 ### Levels tab
@@ -233,11 +232,10 @@ This tab is to define *Levels* type. This type is associated to an adequacy colu
 The user can add as much Levels as he wants. The field names must be added in column B starting at cell B3, the NumericalValue must be added in column C, starting at cell C3 and Label must be added in column D starting at cell D3.
 
 <div align="center">
-![image](uploads/f5c998ee68924c5259f9b0a86e82995c/image.png)
+![2019-07-22_pirt-conf-excel-levels](uploads/8c8a26ae8aed3b915d4efa1ede6ba08e/2019-07-22_pirt-conf-excel-levels.PNG)
 </div>
-
 <div align="center">
-![image](uploads/8f615647d9d1592be8046daf1e18d6e4/image.png)
+![image](uploads/27b835573893645cce6ac75a8af3a1ff/image.png)
 </div>
 
 ### Level Difference Coloring tab
@@ -264,11 +262,11 @@ This values must not be modified because it is fixed and cf-plugin code links to
 - `Description`: the description of the level color displayed in the [PIRT Guidance](functional-specifications#pirt-guidance).
 
 <div align="center">
-![image](uploads/919e8ae6e89e9dab5edfbc0539ef916c/image.png)
+![image](uploads/e829f88c36a026d3c49159f9de5a6aa2/image.png)
 </div>
 
 <div align="center">
-![image](uploads/13d5923f7afcf704b4bf7a8d159f048f/image.png)
+![image](uploads/51e18a3334b8c6d8287ab3e2b9152c93/image.png)
 </div>
 
 ## PCMM Configuration
@@ -337,7 +335,7 @@ The mode is defined by the presence of PCMM Subelements in the `PCMM-Elements` t
 Each PCMM Element must define its subelements under the element name. At least one row must be left blank to indicates to the macro a new PCMM Element. The PCMM Element abbreviation needs to be defined to find the PCMM Element tab corresponding.
 
 <div align="center">
-![image](uploads/14127eb7d66a9c89b96cac7db71230de/image.png)
+![image](uploads/d62cd1b1ad3557e3c4a6be3f57885ce9/image.png)
 </div>
 
 - **Low rigor**:
@@ -345,7 +343,7 @@ Each PCMM Element must define its subelements under the element name. At least o
 At least one row must be left blank to indicates to the macro a new PCMM Element. The PCMM Element abbreviation needs to be defined to find the PCMM Element tab corresponding.
 
 <div align="center">
-![image](uploads/f9d97ed8124129656520106ccc93ac74/image.png)
+![image](uploads/45482bd5d07d11a91897d438837d6cf0/image.png)
 </div>
 
 ### `PCMM-{element-abbrev}` tab
@@ -362,7 +360,7 @@ The `PCMM-{element-abbrev}` tab (where {element-abbrev} is the abbreviation of t
 Each PCMM Subelement must define its levels under the subelement name. At least one row must be left blank to indicates to the macro a new PCMM Subelement. 
 
 <div align="center">
-![image](uploads/505a53059009af4510bc661917f2460d/image.png)
+![image](uploads/ac6a44a080be6571e8836781fc4579b8/image.png)
 </div>
 
 - **Low rigor**:
@@ -370,7 +368,7 @@ Each PCMM Subelement must define its levels under the subelement name. At least 
 There is only the levels defined.
 
 <div align="center">
-![image](uploads/dd621c57a90744de15112534f2b45e4f/image.png)
+![image](uploads/2fca0e746d504bd465c75a72b9241b5a/image.png)
 </div>
 
 ### `PCMM-Levels` tab
@@ -380,7 +378,7 @@ The levels tab lists all the **available levels** to assess the evidence with th
 - `Column C`: is for the level color (color is converted to rgb by the VBA macro)
 
 <div align="center">
-![image](uploads/f4f5b51a50b53cc74154b495a086acbd/image.png)
+![image](uploads/af28c09774c1b57a53707de05f39d0f9/image.png)
 </div>
 
 ### `PCMM-Activities` tab
@@ -393,7 +391,7 @@ This tab lists all the **available options** of the PCMM feature. VBA macro is i
 - `Stamp`: the aggregation view of all the assessments as a radar chart (see [PCMM Radar Plot/Quality Stamp View](functional-specifications#pcmm-radar-plotquality-stamp-view))
 
 <div align="center">
-![image](uploads/27d9f5d3c1a708e764d1e9a23c9480f5/image.png)
+![image](uploads/d82f081615d9d893b6886cbcb396fdbf/image.png)
 </div>
 
 ### `PCMM-Roles` tab
@@ -401,7 +399,7 @@ This tab lists all the **available options** of the PCMM feature. VBA macro is i
 This tab lists all the **available roles** to add evidence and assess. VBA macro is inspecting `column B`. The roles are free to edit and will be attached to an user (see [Assessor and Role](functional-specifications#assessor-and-role)).
 
 <div align="center">
-![image](uploads/69ffff4b2d23cea5e5052f14e5ab779e/image.png)
+![image](uploads/78497f09287fec6fbd37df997ff03288/image.png)
 </div>
 
 ### `PCMM-Planning-Questions` tab
@@ -411,16 +409,16 @@ The planning question tab lists all the **planning questions** to fill and to as
 - `Column C to the end`: is for the planning questions. Each question is added to a new column. All the questions will be associated to the PCMM element or subelement which is on the same row
 
 <div align="center">
-![image](uploads/c8d4722b66f3f6a97beb5537d134fa52/image.png)
+![image](uploads/8db4d4806373428bef55638b0389597f/image.png)
 </div>
 
 ### `PCMM-Planning-Data Model` tab
 
-<div align="center">![image](uploads/1b92daf0c9a455a359e0b1e02507ea10/image.png)</div>
+<div align="center">![image](uploads/bf5edbe93da6084647075d4db6800350/image.png)</div>
 
 The levels tab lists all the **available levels** to assess the evidence with their columns:
 - `Column A`: references the Planning fields to associate to each subelement (high rigor mode) or to each element (low rigor mode). It is possible to enter a non predefined type. This type has to be defined further in this spreadsheet (e.g. action Item Table)
-<div align="center">![image](uploads/45b4157fd4ce0ac23000062f95b8cc46/image.png)</div>
+<div align="center">![image](uploads/3b71dcc221edfdb3022e779e41e566b0/image.png)</div>
 
 - `Column B`: is for the level name
 - `Column C`: is for the level color (color is converted to rgb by the VBA macro)
@@ -430,7 +428,7 @@ Each row of the definition table is identified:
 - `Row 2`: is the variable required?
 - `Row 3`: the variable type
 
-![image](uploads/78576becc3b660c47cc2d71d1814d327/image.png)
+![image](uploads/9b504ebaaf71dba7e33db5d3ea29d55e/image.png)
 
 ## Generic Parameters Configuration
 
@@ -441,17 +439,13 @@ This features displays tables and trees, and need to define each column behavior
 ### Field Description
 
 The first column of the spreadsheet is for the type definition associated to variable. This types are:
-
 - `level`: the level of availability of the field in the tree. `*` or empty means always available. `>=2` means the field can not be defined for the root and its first child. It will be available for the subchild and after. It is optional.
-
 - `default`: the default value of this field. It is optional.
-
 - `required`: is the field required? It is optional. Default value is `Optional`. 
 Available values are: 
   - `false` or `Optional`: the field is optional
   - `true` or `Required`: the field is mandatory
   - `Desired`: the field is optional but a warning message will be shown to incitate to complete it
-
 - `type`: the field type definition. It is **mandatory**. 
 Available values are:
   - `Credibility_Element`: the PCMM element to associate
@@ -462,13 +456,10 @@ Available values are:
   - `Select`: a select box with values taken into the `values` type
   - `System_Requirement`: the System Requirement to associate
   - `Text`: a simple text value
-
 - `values`: It is optional. Lists all the exhaustive possible values for this field. 
+- `constraints`: It is optional. Defines the field validation rules as a list. It is possible to reference another field with brackets (e.g; - ">${Minimum Value}"). One constraint per row.
 
-- `constraints`: It is optional. Defines the field validation rules as a list. It is possible to reference another field with the name (e.g; - "Minimum Value"). It will be automatically converted. One constraint per row.
-
-<div align="center">![image](uploads/583871d0db640513e345d1d19bc14c57/image.png)</div>
-
+<div align="center">![image](uploads/667ce283ec7b2966f45d5719e1eca13c/image.png)</div>
 
 ### Complex values
 
@@ -525,10 +516,14 @@ This spreadsheet is based on the [Generic Parameters Configuration](#generic-par
 ## Uncertainty Configuration
 [Go back to Contents](#contents)
 
-The Uncertainty Excel file contains different tabs. The feature definition is into `Data Model` tab.
+The Uncertainty Excel file contains different tabs:
+- `Data Model`: contains the feature definition
+- `Inventory`: lists the predefined data to import into the CF project
 
 You can find an example in [Uncertainty Parameters](#uncertainty) section.
 
 This spreadsheet is based on the [Generic Parameters Configuration](#generic-parameters-configuration) above. It generates a `yml` structure under the root key `Uncertainty Parameters`.
+
+
 
 [Go back to the top of the page](#content-body)

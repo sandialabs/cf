@@ -6,11 +6,7 @@ package gov.sandia.cf.parts;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -25,8 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.ApplicationManager;
 import gov.sandia.cf.dao.AbstractTestDao;
-import gov.sandia.cf.dao.DaoManager;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
+import gov.sandia.cf.dao.IDaoManager;
+import gov.sandia.cf.tools.FileTools;
 import junit.runner.Version;
 
 /**
@@ -48,11 +44,6 @@ public class AbstractIntegrationTestParts extends AbstractTestParts {
 	private static ApplicationManager appMgr;
 
 	/**
-	 * The dao manager
-	 */
-	private static DaoManager daoMgr;
-
-	/**
 	 * Initialize the test
 	 */
 	@BeforeAll
@@ -63,10 +54,9 @@ public class AbstractIntegrationTestParts extends AbstractTestParts {
 
 			TEMP_FOLDER.create();
 
-			daoMgr = new DaoManager(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
-
 			// load application layer classes
-			appMgr = new ApplicationManager(daoMgr);
+			appMgr = new ApplicationManager();
+			appMgr.getDaoManager().setPersistUnitName(AbstractTestDao.ENTITY_PERSIST_UNIT_NAME_TEST);
 
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -99,9 +89,7 @@ public class AbstractIntegrationTestParts extends AbstractTestParts {
 		appMgr.stop();
 		if (getTestTempFolder() != null && getTestTempFolder().exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(getTestTempFolder().getPath());
-				Files.walk(getTestTempFolder().toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
-						.forEach(File::delete);
+				FileTools.deleteDirectoryRecursively(getTestTempFolder());
 				assertFalse("Directory still exists", getTestTempFolder().exists()); //$NON-NLS-1$
 			} catch (IOException e) {
 				fail(e.getMessage());
@@ -140,8 +128,8 @@ public class AbstractIntegrationTestParts extends AbstractTestParts {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
-		return daoMgr;
+	public IDaoManager getDaoManager() {
+		return appMgr.getDaoManager();
 	}
 
 }

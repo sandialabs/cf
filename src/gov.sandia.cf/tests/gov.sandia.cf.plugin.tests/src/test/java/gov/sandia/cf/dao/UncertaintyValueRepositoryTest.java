@@ -51,7 +51,7 @@ class UncertaintyValueRepositoryTest
 	UncertaintyValue getModelFulfilled(UncertaintyValue model) {
 		// populate
 		UncertaintyParam newUncertaintyParam = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), null, null);
-		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
 
 		fulfillModelStrings(model);

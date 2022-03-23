@@ -38,6 +38,10 @@ public class DeveloperOptionsPreferencePage extends org.eclipse.jface.preference
 		addField(new BooleanFieldEditor(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY,
 				RscTools.getString(RscConst.PREFS_DEVOPTS_REPORT_INLINEWORD_KEY), getFieldEditorParent()));
 
+		// add concurrency support developer option
+		addField(new BooleanFieldEditor(PrefTools.DEVOPTS_CONCURRENCY_SUPPORT_KEY,
+				RscTools.getString(RscConst.PREFS_DEVOPTS_CONCURRENCY_SUPPORT_KEY), getFieldEditorParent()));
+
 	}
 
 	/** {@inheritDoc} */

@@ -42,8 +42,10 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMAggregateApp;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMAggregation;
@@ -54,6 +56,7 @@ import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
@@ -425,7 +428,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 					entityFilters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 							.getEvidenceBy(entityFilters);
 
 					// Get number of PCMMEvidence
@@ -448,7 +451,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 					entityFilters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 							.getEvidenceBy(entityFilters);
 
 					// Get number of PCMMEvidence
@@ -695,8 +698,10 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 			treeViewerPCMM.setContentProvider(new PCMMAssessTreeSimplifiedContentProvider());
 		}
 		// Tree - Customize
-		treeViewerPCMM.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		treeViewerPCMM.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		treeViewerPCMM.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewerPCMM.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		treeViewerPCMM.getTree().addListener(SWT.MeasureItem, new Listener() {
 
 			private TreeItem previousItem = null;
@@ -891,26 +896,26 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 					if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 						// Aggregate sub-elements
-						aggregatedSubelementsMap = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						aggregatedSubelementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 								.aggregateAssessments(pcmmConfiguration, elements, filters);
 
 						// Aggregate elements
-						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 								.aggregateSubelements(pcmmConfiguration, aggregatedSubelementsMap);
 
 						// Check the completeness of the assessments (don't display when filtering)
-						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMApplication.class)
+						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 								.isCompleteAggregation(model, getViewManager().getSelectedTag())) {
 							MessageDialog.openWarning(getShell(),
 									RscTools.getString(RscConst.MSG_PCMMAGGREG_DIALOG_TITLE),
 									RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_MSG));
 						}
 					} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
-						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 								.aggregateAssessmentSimplified(pcmmConfiguration, elements, filters);
 
 						// Check the completeness of the assessments (don't display when filtering)
-						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMApplication.class)
+						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
 								.isCompleteAggregationSimplified(model, getViewManager().getSelectedTag())) {
 							MessageDialog.openWarning(getShell(),
 									RscTools.getString(RscConst.MSG_PCMMAGGREG_DIALOG_TITLE),
@@ -956,7 +961,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		// label Filters
 		Label lblFilter = new Label(formFilterContainer, SWT.LEFT);
 		lblFilter.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_LABEL));
-		lblFilter.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		lblFilter.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData lblFilterGridData = new GridData();
 		lblFilter.setLayoutData(lblFilterGridData);
 		FontTools.setBoldFont(getViewManager().getRscMgr(), lblFilter);
@@ -1070,7 +1076,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 		List<PCMMAssessment> assessmentByElement;
 		try {
-			assessmentByElement = getViewManager().getAppManager().getService(IPCMMApplication.class)
+			assessmentByElement = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 					.getAssessmentByElement(element, filters);
 			PCMMAggregationDetailsDialog dlg = new PCMMAggregationDetailsDialog(getViewManager(), getShell(),
 					assessmentByElement, element);
@@ -1092,7 +1098,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		List<PCMMAssessment> assessmentBySubelement;
 		try {
 			// Get assessment details
-			assessmentBySubelement = getViewManager().getAppManager().getService(IPCMMApplication.class)
+			assessmentBySubelement = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 					.getAssessmentBySubelement(subElement, filters);
 
 			// Open dialog
@@ -1135,13 +1141,16 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			// PCMM Element in gray
 			if (element instanceof PCMMElement) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			} else if (element instanceof PCMMSubelement) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
 			// PCMM Element in gray
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
 		return null;
@@ -1156,13 +1165,16 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	private Color getTreeCellForeground(Object element) {
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			if (element instanceof PCMMElement) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			} else if (element instanceof PCMMSubelement) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 		return null;
 	}

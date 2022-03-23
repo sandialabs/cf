@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMPlanningSelectValue;
  * @author Maxime N.
  *
  */
+@Repository
 public interface IPCMMPlanningSelectValueRepository extends ICRUDRepository<PCMMPlanningSelectValue, Integer> {
 
 }

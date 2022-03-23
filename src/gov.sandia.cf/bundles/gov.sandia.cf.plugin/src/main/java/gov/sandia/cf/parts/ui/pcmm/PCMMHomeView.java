@@ -36,15 +36,15 @@ import org.jfree.experimental.chart.swt.ChartComposite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMPhase;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
@@ -182,7 +182,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	private void renderPage() {
 		// Initialize
 		mainComposite = new Composite(this, SWT.BORDER);
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Render the main composite
 		renderMain();
@@ -437,7 +438,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			progressBarComposite.setLayoutData(gdProgressBar);
 			progressBarComposite.setLayout(new GridLayout());
 			Label progressionLabel = new Label(progressBarComposite, SWT.NONE);
-			progressionLabel.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+			progressionLabel.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			progressionLabel.setText(RscTools.getString(RscConst.MSG_PCMMHOME_LBL_PROGRESS));
 			FontTools.setSubtitleFont(getViewManager().getRscMgr(), progressionLabel);
 			new PCMMProgressBarPart(getViewManager(), progressBarComposite, new ArrayList<>(elements.values()),
@@ -449,7 +451,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			tagBarComposite.setLayoutData(gdTagBar);
 			tagBarComposite.setLayout(new GridLayout());
 			Label tagTitle = new Label(tagBarComposite, SWT.NONE);
-			tagTitle.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+			tagTitle.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			tagTitle.setText(RscTools.getString(RscConst.MSG_TAG_PART_TITLE));
 			FontTools.setSubtitleFont(getViewManager().getRscMgr(), tagTitle);
 			pcmmTagPart = new PCMMTagPart(getViewManager(), tagBarComposite, this, tagList,
@@ -609,9 +612,9 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 				if (onHoverElement != null && onHoverElement.getName() != null) {
 					// paint section
 					((RingPlot) chartComposite.getChart().getPlot()).setSectionPaint(onHoverElement.getName(),
-							ColorTools.stringRGBToAwtColor(onHoverElement.getColor()));
+							ColorTools.toAwtColor(onHoverElement.getColor()));
 					((RingPlot) chartComposite.getChart().getPlot()).setSectionOutlinePaint(onHoverElement.getName(),
-							ColorTools.stringRGBToAwtColor(ColorTools.DEFAULT_STRINGRGB_COLOR));
+							ColorTools.toAwtColor(ColorTools.DEFAULT_STRINGRGB_COLOR));
 					((RingPlot) chartComposite.getChart().getPlot()).setSectionOutlineStroke(onHoverElement.getName(),
 							new BasicStroke(1.0f));
 

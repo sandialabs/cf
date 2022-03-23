@@ -6,8 +6,8 @@ package gov.sandia.cf.application;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +24,10 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.arg.ARGBackendDefault;
-import gov.sandia.cf.application.impl.ReportARGExecutionApp;
+import gov.sandia.cf.application.report.IReportARGApplication;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.application.report.ReportARGExecutionApp;
+import gov.sandia.cf.constants.arg.ARGBackendDefault;
 import gov.sandia.cf.dao.IARGParametersRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
@@ -205,7 +207,7 @@ class ReportARGExecutionAppTest extends AbstractTestApplication {
 		ARGParameters parameters = getAppManager().getService(IReportARGExecutionApp.class)
 				.addDefaultARGParameters(newFile.getParent().getFullPath());
 		parameters.setArgPreScript(WorkspaceTools.getStaticFilePath("report/arg/setEnvEcho")); //$NON-NLS-1$
-
+		parameters.setOutput(getTestTempFolder().getPath());
 		assertNotNull(
 				getAppManager().getService(IReportARGExecutionApp.class).getARGTypes(parameters, errorLog, infoLog));
 
@@ -242,6 +244,7 @@ class ReportARGExecutionAppTest extends AbstractTestApplication {
 		IFile newFile = TestEntityFactory.getNewFile("MyProject", "file.cf"); //$NON-NLS-1$ //$NON-NLS-2$
 		ARGParameters parameters = getAppManager().getService(IReportARGExecutionApp.class)
 				.addDefaultARGParameters(newFile.getParent().getFullPath());
+		parameters.setOutput(getTestTempFolder().getPath());
 		parameters.setArgPreScript(WorkspaceTools.getStaticFilePath("report/arg/setEnvEcho")); //$NON-NLS-1$
 
 		assertNotNull(

@@ -7,4 +7,5 @@ bin/
 */build/
 **/target/
 .dbeaver
-*.project
+.vscode
+.project

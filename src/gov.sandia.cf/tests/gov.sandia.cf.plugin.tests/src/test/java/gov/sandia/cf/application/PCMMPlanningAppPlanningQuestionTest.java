@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.YmlGenericSchema;
+import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.dao.IPCMMPlanningQuestionRepository;
 import gov.sandia.cf.dao.IPCMMPlanningQuestionValueRepository;
 import gov.sandia.cf.exceptions.CredibilityException;

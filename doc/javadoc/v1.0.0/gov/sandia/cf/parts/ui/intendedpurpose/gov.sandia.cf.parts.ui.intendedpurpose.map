@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./IntendedPurposeView.html" title="gov.sandia.cf.parts.ui.intendedpurpose.IntendedPurposeView" alt="" coords="16,115,504,243"/>
-<area shape="rect" id="node1" href="./IntendedPurposeView.html" title="&lt;TABLE&gt;" alt="" coords="5,109,515,248"/>
-<area shape="rect" id="node2_1" href="./IntendedPurposeViewController.html" title="gov.sandia.cf.parts.ui.intendedpurpose.IntendedPurposeViewController" alt="" coords="549,166,749,191"/>
-<area shape="rect" id="node2" href="./IntendedPurposeViewController.html" title="&lt;TABLE&gt;" alt="" coords="539,155,760,203"/>
-<area shape="rect" id="node3_2" href="./IntendedPurposeViewManager.html" title="gov.sandia.cf.parts.ui.intendedpurpose.IntendedPurposeViewManager" alt="" coords="795,11,1371,347"/>
-<area shape="rect" id="node3" href="./IntendedPurposeViewManager.html" title="&lt;TABLE&gt;" alt="" coords="784,5,1381,352"/>
-</map>

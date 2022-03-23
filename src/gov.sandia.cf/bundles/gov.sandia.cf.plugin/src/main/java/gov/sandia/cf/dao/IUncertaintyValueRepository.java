@@ -11,6 +11,7 @@ import gov.sandia.cf.model.UncertaintyValue;
  * @author Maxime N.
  *
  */
+@Repository
 public interface IUncertaintyValueRepository extends ICRUDRepository<UncertaintyValue, Integer> {
 
 }

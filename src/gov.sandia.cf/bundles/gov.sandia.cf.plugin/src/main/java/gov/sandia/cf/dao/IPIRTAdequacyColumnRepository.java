@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PIRTAdequacyColumn;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPIRTAdequacyColumnRepository extends ICRUDRepository<PIRTAdequacyColumn, Integer> {
 
 }

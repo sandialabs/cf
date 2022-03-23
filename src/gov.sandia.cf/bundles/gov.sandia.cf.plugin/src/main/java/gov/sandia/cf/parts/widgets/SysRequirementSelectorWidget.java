@@ -14,7 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import gov.sandia.cf.application.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.ui.IViewManager;

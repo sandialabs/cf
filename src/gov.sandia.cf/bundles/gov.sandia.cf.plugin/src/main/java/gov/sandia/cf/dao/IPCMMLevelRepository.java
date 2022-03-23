@@ -15,6 +15,7 @@ import gov.sandia.cf.model.PCMMSubelement;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMLevelRepository extends ICRUDRepository<PCMMLevel, Integer> {
 	/**
 	 * Find levels by PCMMElement

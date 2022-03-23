@@ -11,6 +11,7 @@ import gov.sandia.cf.model.GlobalConfiguration;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IGlobalConfigurationRepository extends ICRUDRepository<GlobalConfiguration, Integer> {
 
 }

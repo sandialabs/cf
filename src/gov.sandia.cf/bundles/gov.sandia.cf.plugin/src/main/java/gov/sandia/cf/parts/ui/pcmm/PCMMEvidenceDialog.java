@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.IAssessable;
 import gov.sandia.cf.model.NotificationFactory;
@@ -37,12 +37,13 @@ import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.LinkWidget;
 import gov.sandia.cf.parts.widgets.RichTextWidget;
 import gov.sandia.cf.parts.widgets.TextWidget;
+import gov.sandia.cf.preferences.PrefTools;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -76,6 +77,11 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	private TextWidget sectionText;
 
 	/**
+	 * Caption Text
+	 */
+	private TextWidget imageCaptionText;
+
+	/**
 	 * Input description
 	 */
 	private RichTextWidget editorDescription;
@@ -103,12 +109,12 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	 * @param mode        the dialog mode
 	 */
 	public PCMMEvidenceDialog(PCMMViewManager viewManager, Shell parentShell, PCMMEvidence evidence, IAssessable item,
-			DialogMode mode) {
+			ViewMode mode) {
 		super(viewManager, parentShell);
 
 		// Set mode
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		// Manage view mode
@@ -121,7 +127,7 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 			}
 			this.item = item;
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -149,7 +155,7 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	public void create() {
 		super.create();
 		setTitle(RscTools.getString(RscConst.MSG_DIALOG_PCMMEVIDENCE_TITLE));
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			setMessage(RscTools.getString(RscConst.MSG_DIALOG_PCMMEVIDENCE_DESCRIPTION), IMessageProvider.INFORMATION);
 		}
 	}
@@ -203,6 +209,8 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 
+		int evidenceDialogWidth = 1200;
+
 		logger.debug("Create Evidence dialog area"); //$NON-NLS-1$
 
 		Composite container = (Composite) super.createDialogArea(parent);
@@ -210,7 +218,7 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		// scroll container
 		ScrolledComposite scrollContainer = new ScrolledComposite(container, SWT.V_SCROLL);
 		GridData scrollScData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scrollScData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
+		scrollScData.widthHint = evidenceDialogWidth;
 		scrollScData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
 		scrollContainer.setLayoutData(scrollScData);
 		scrollContainer.setLayout(new GridLayout());
@@ -218,14 +226,14 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		// form container
 		Composite formContainer = new Composite(scrollContainer, SWT.NONE);
 		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
+		scData.widthHint = evidenceDialogWidth;
 		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
 		formContainer.setLayoutData(scData);
 		GridLayout gridLayout = new GridLayout(2, false);
 		formContainer.setLayout(gridLayout);
 
 		// Select content type
-		if (DialogMode.VIEW.equals(mode)) {
+		if (ViewMode.VIEW.equals(mode)) {
 			renderNonEditableContent(formContainer);
 		} else {
 			renderEditableContent(formContainer);
@@ -258,16 +266,30 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		}
 
 		// set evidence
-		evidenceLink.setValue(evidence.getValue());
+		// if evidence value is null or empty, set last file path preference
+		if (evidence.getValue() == null || StringUtils.isBlank(evidence.getValue())) {
+			String lastFilePath = PrefTools.getPreference(PrefTools.PCMM_EVIDENCE_FILE_LAST_PATH_KEY);
+			if (!StringUtils.isBlank(lastFilePath)) {
+				evidenceLink.setFileDefaultBrowserValue(lastFilePath);
+			}
+		} else {
+			// else set evidence value
+			evidenceLink.setValue(evidence.getValue());
+		}
 
 		// set section
 		sectionText.setValue(evidence.getSection());
+
+		// set section
+		if (imageCaptionText != null) {
+			imageCaptionText.setValue(evidence.getImageCaption());
+		}
 
 		// set description
 		editorDescription.setValue(evidence.getDescription());
 
 		// check new values
-		if (!DialogMode.CREATE.equals(mode) || evidence.getValue() != null) {
+		if (!ViewMode.CREATE.equals(mode) || evidence.getValue() != null) {
 			checkEvidence();
 		}
 	}
@@ -288,6 +310,12 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		FormFactory.createFormLabel(parent, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_SECTION));
 		sectionText = FormFactory.createTextWidget(getViewManager().getRscMgr(), parent, false, null);
 
+		// caption text
+		if (FormFieldType.LINK_FILE.equals(evidence.getType()) && FileTools.isImage(evidence.getPath())) {
+			FormFactory.createFormLabel(parent, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_IMG_CAPTION));
+			imageCaptionText = FormFactory.createTextWidget(getViewManager().getRscMgr(), parent, false, null);
+		}
+
 		// editor description
 		FormFactory.createFormLabel(parent, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_DESC));
 		editorDescription = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), parent, true, false);
@@ -303,12 +331,12 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		// evidence link
 		FormFactory.createFormLabel(parent,
 				RscTools.getString(RscConst.MSG_LBL_REQUIRED, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_EVID)));
-		evidenceLink = FormFactory.createLinkWidget(parent, getViewManager(), null, DialogMode.CREATE.equals(mode));
+		evidenceLink = FormFactory.createLinkWidget(parent, getViewManager(), null, true);
 		evidenceLink.addChangedListener(e -> checkEvidence());
 
 		// render the file changed checkbox
-		if (DialogMode.UPDATE.equals(mode)
-				&& getViewManager().getAppManager().getService(IPCMMApplication.class).evidenceChanged(evidence)) {
+		if (ViewMode.UPDATE.equals(mode)
+				&& getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).evidenceChanged(evidence)) {
 			renderFileChanged(parent);
 		}
 
@@ -321,6 +349,12 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 				checkEvidence();
 			}
 		});
+
+		// caption text
+		if (FormFieldType.LINK_FILE.equals(evidence.getType()) && FileTools.isImage(evidence.getPath())) {
+			FormFactory.createFormLabel(parent, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_IMG_CAPTION));
+			imageCaptionText = FormFactory.createTextWidget(getViewManager().getRscMgr(), parent, true, null);
+		}
 
 		// editor description
 		FormFactory.createFormLabel(parent, RscTools.getString(RscConst.MSG_DLG_ADDEVID_LBL_DESC));
@@ -353,7 +387,7 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	@Override
 	protected void okPressed() {
 		// View - Just exit
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 		}
 
@@ -384,29 +418,26 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 			return;
 		}
 
-		// Create mode
-		if (DialogMode.CREATE.equals(mode)) {
-
-			// name
-			String name = evidenceLink.getValue();
-			if (FormFieldType.LINK_FILE.equals(evidenceLink.getLinkTypeSelected())) {
-				name = evidenceLink.getFilename();
-			}
-			evidence.setName(name);
-
-			// path
-			if (FormFieldType.LINK_FILE.equals(evidenceLink.getLinkTypeSelected())) {
-				evidence.setFilePath(evidenceLink.getValue());
-			} else if (FormFieldType.LINK_URL.equals(evidenceLink.getLinkTypeSelected())) {
-				evidence.setURL(evidenceLink.getValue());
-			}
+		// name
+		String name = evidenceLink.getValue();
+		if (FormFieldType.LINK_FILE.equals(evidenceLink.getLinkTypeSelected())) {
+			name = evidenceLink.getFilename();
 		}
+		evidence.setName(name);
+
+		// set path, type and caption
+		evidence.setValue(evidenceLink.getGSONValue());
 
 		// description
 		evidence.setDescription(editorDescription.getValue());
 
 		// section
 		evidence.setSection(sectionText.getValue());
+
+		// caption
+		if (imageCaptionText != null) {
+			evidence.setImageCaption(imageCaptionText.getValue());
+		}
 
 		// update the file date for evidence for which file changed notification has
 		// been removed
@@ -445,6 +476,9 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		// Check if evidence with the same path were found
 		if (isValid) {
 			isValid &= checkEvidenceNotification();
+
+			// set last file path selection preference
+			PrefTools.setPreference(PrefTools.PCMM_EVIDENCE_FILE_LAST_PATH_KEY, evidenceLink.getValue());
 		}
 
 		return isValid;
@@ -468,7 +502,7 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 			copy.setSubelement((PCMMSubelement) item);
 		}
 		Map<NotificationType, List<String>> duplicatedEvidenceNotification = getViewManager().getAppManager()
-				.getService(IPCMMApplication.class).getEvidenceNotifications(copy, evidence.getId());
+				.getService(IPCMMEvidenceApp.class).getEvidenceNotifications(copy, evidence.getId());
 
 		// Check if evidence with the same path were found
 		if (duplicatedEvidenceNotification != null && !duplicatedEvidenceNotification.isEmpty()) {

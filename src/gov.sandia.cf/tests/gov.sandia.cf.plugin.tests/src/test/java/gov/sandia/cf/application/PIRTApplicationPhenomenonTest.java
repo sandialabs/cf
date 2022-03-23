@@ -172,40 +172,6 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 	}
 
 	@Test
-	void testAddPhenomenon_ErrorIdLabelNull() {
-
-		// create phenomenon
-		Phenomenon phenomenon = TestEntityFactory.getNewPhenomenon(getDaoManager(), null).copy();
-
-		phenomenon.setIdLabel(null);
-		try {
-			getPIRTApp().addPhenomenon(phenomenon);
-			fail("Adding a phenomenon with an id null must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENON_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
-	void testAddPhenomenon_ErrorIdLabelEmpty() {
-
-		// create phenomenon
-		Phenomenon phenomenon = TestEntityFactory.getNewPhenomenon(getDaoManager(), null).copy();
-
-		phenomenon.setIdLabel(""); //$NON-NLS-1$
-		try {
-			getPIRTApp().addPhenomenon(phenomenon);
-			fail("Adding a phenomenon with an id null must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENON_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
 	void testAddPhenomenon_ErrorPhenomenonGroupNull() {
 
 		// create phenomenon
@@ -239,42 +205,6 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 			fail("Updating a phenomenon with an id null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_UPDATEPHENOMENON_IDNULL), e.getMessage());
-		}
-	}
-
-	@Test
-	void testUpdatePhenomenon_ErrorIdLabelNull() {
-
-		// create phenomenon
-		Phenomenon phenomenon = TestEntityFactory.getNewPhenomenon(getDaoManager(), null);
-		assertNotNull(phenomenon);
-
-		phenomenon.setIdLabel(null);
-		try {
-			getPIRTApp().updatePhenomenon(phenomenon);
-			fail("Updating a phenomenon with an idLabel null must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException | RollbackException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENON_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
-	void testUpdatePhenomenon_ErrorIdLabelEmpty() {
-
-		// create phenomenon
-		Phenomenon phenomenon = TestEntityFactory.getNewPhenomenon(getDaoManager(), null);
-		assertNotNull(phenomenon);
-
-		phenomenon.setIdLabel(""); //$NON-NLS-1$
-		try {
-			getPIRTApp().updatePhenomenon(phenomenon);
-			fail("Updating a phenomenon with an id label empty must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException | RollbackException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENON_IDLABEL_BLANK));
 		}
 	}
 

@@ -12,13 +12,13 @@ import org.eclipse.jface.window.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGlobalApplication;
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pirt.PIRTQuery;
+import gov.sandia.cf.application.global.IGlobalApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.model.dto.configuration.PIRTQuery;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTQueryCriteriaDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoIDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoITagDialog;
@@ -31,7 +31,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTQoIViewController {
+public class PIRTQoIViewController implements IQoIViewController {
 
 	/**
 	 * the logger
@@ -55,7 +55,7 @@ public class PIRTQoIViewController {
 	void addQuantityOfInterest() {
 
 		// open qoi dialog
-		QoIDialog addQoIDialog = new QoIDialog(view.getViewManager(), view.getShell(), DialogMode.CREATE);
+		QoIDialog addQoIDialog = new QoIDialog(view.getViewManager(), view.getShell(), ViewMode.CREATE);
 		QuantityOfInterest newQoi = addQoIDialog.openDialog();
 
 		if (newQoi != null) {
@@ -172,7 +172,7 @@ public class PIRTQoIViewController {
 			if (confirm) {
 				try {
 
-					QoIDialog qoiDialog = new QoIDialog(view.getViewManager(), view.getShell(), DialogMode.COPY,
+					QoIDialog qoiDialog = new QoIDialog(view.getViewManager(), view.getShell(), ViewMode.COPY,
 							qoiSelected);
 					QuantityOfInterest duplicatedQoi = qoiDialog.openDialog();
 
@@ -340,4 +340,28 @@ public class PIRTQoIViewController {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void reorder(QuantityOfInterest qoi, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderQuantityOfInterest(qoi,
+				newIndex, null);
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void refreshIfChanged() {
+
+		// Refresh
+		if (view.getViewManager().isDirty()) {
+			view.refresh();
+		}
+	}
 }

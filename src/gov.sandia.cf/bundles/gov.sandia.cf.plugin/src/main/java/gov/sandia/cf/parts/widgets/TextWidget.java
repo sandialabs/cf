@@ -4,6 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.widgets;
 
 import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -32,7 +33,7 @@ public class TextWidget extends AHelperWidget {
 	 */
 	@SuppressWarnings("javadoc")
 	public enum TextWidgetType {
-		STRING, FLOAT;
+		STRING, FLOAT, PASSWORD;
 	}
 
 	private Object id;
@@ -104,7 +105,11 @@ public class TextWidget extends AHelperWidget {
 	 * Render editable control
 	 */
 	private void renderEditableField() {
-		text = FormFactory.createText(this, id);
+		int style = SWT.LEFT | SWT.SINGLE | SWT.WRAP | SWT.BORDER;
+		if (TextWidgetType.PASSWORD.equals(type)) {
+			style |= SWT.PASSWORD;
+		}
+		text = FormFactory.createText(this, id, style);
 
 		// set float verify listener
 		if (TextWidgetType.FLOAT.equals(type)) {
@@ -116,7 +121,11 @@ public class TextWidget extends AHelperWidget {
 	 * Render non editable control
 	 */
 	private void renderNonEditableField() {
-		textNonEditable = FormFactory.createNonEditableText(this, RscTools.empty());
+		int style = SWT.LEFT | SWT.WRAP | SWT.V_SCROLL;
+		if (TextWidgetType.PASSWORD.equals(type)) {
+			style |= SWT.PASSWORD;
+		}
+		textNonEditable = FormFactory.createNonEditableText(this, RscTools.empty(), style);
 	}
 
 	/**

@@ -22,11 +22,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.Phenomenon;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tests.TestTools;
 import gov.sandia.cf.tools.ColorTools;
@@ -398,14 +399,14 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 		PIRTLevelImportance expectedLevel = new PIRTLevelImportance("0", "level 0", 0, "LVL 0", null, null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		PIRTLevelImportance currentLevel = new PIRTLevelImportance("1", "level 1", 1, "LVL 1", null, null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		RGB rgbDiff = new RGB(150, 150, 150);
+		String rgbDiff = "150, 150, 150"; //$NON-NLS-1$
 
 		PIRTSpecification configuration = mock(PIRTSpecification.class);
 		when(configuration.getColor(1)).thenReturn(rgbDiff);
 
 		// test
 		try {
-			RGB backgroundColor = getPIRTApp().getBackgroundColor(configuration, expectedLevel, currentLevel);
+			String backgroundColor = getPIRTApp().getBackgroundColor(configuration, expectedLevel, currentLevel);
 			assertNotNull(backgroundColor);
 			assertEquals(rgbDiff, backgroundColor);
 		} catch (CredibilityException e) {
@@ -423,8 +424,8 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 		// test
 		try {
-			RGB backgroundColor = getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), expectedLevel,
-					currentLevel);
+			RGB backgroundColor = ColorTools.stringRGBToColor(
+					getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), expectedLevel, currentLevel));
 			assertNotNull(backgroundColor);
 			assertEquals(200, backgroundColor.red);
 			assertEquals(200, backgroundColor.blue);
@@ -458,9 +459,9 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 		// test
 		try {
-			RGB backgroundColor = getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), null, currentLevel);
+			String backgroundColor = getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), null, currentLevel);
 			assertNotNull(backgroundColor);
-			assertEquals(ColorTools.DEFAULT_RGB_COLOR, backgroundColor);
+			assertEquals(ColorTools.DEFAULT_RGB_COLOR, ColorTools.stringRGBToColor(backgroundColor));
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -474,9 +475,10 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 		// test
 		try {
-			RGB backgroundColor = getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), expectedLevel, null);
+			String backgroundColor = getPIRTApp().getBackgroundColor(mock(PIRTSpecification.class), expectedLevel,
+					null);
 			assertNotNull(backgroundColor);
-			assertEquals(ColorTools.DEFAULT_RGB_COLOR, backgroundColor);
+			assertEquals(ColorTools.DEFAULT_RGB_COLOR, ColorTools.stringRGBToColor(backgroundColor));
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}

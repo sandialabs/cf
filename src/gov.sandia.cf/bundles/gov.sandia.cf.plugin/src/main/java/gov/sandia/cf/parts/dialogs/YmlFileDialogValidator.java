@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
-import gov.sandia.cf.tools.FileTools;
+import gov.sandia.cf.tools.FileExtension;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -29,13 +29,14 @@ public class YmlFileDialogValidator implements ISelectionStatusValidator {
 			boolean allMatch = Stream.of(selection).allMatch(element -> {
 				if (element instanceof IFile) {
 					String name = ((IFile) element).getName().toLowerCase();
-					boolean valid = name.endsWith(FileTools.YML) || name.endsWith(FileTools.YAML);
+					boolean valid = name.endsWith(FileExtension.YML.getExtension())
+							|| name.endsWith(FileExtension.YAML.getExtension());
 					valid &= !name.startsWith(RscTools.DOT) //
 							&& !name.startsWith(RscTools.ASTERISK.trim()) //
 							&& !name.startsWith(RscTools.PLUS.trim()) //
 							&& !name.startsWith(RscTools.COLON.trim()) //
 							&& !name.startsWith(RscTools.SEMICOLON.trim()) //
-							&& !name.startsWith(RscTools.UNDERSCORE) //	
+							&& !name.startsWith(RscTools.UNDERSCORE) //
 							&& !name.startsWith(RscTools.COMMA.trim()) //
 							&& !name.startsWith(RscTools.PERCENT) //
 							&& !name.startsWith(RscTools.HYPHEN); //

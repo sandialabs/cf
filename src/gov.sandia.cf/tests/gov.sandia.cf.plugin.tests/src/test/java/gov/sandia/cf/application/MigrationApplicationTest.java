@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.migration.IMigrationApplication;
 import gov.sandia.cf.dao.IPCMMAssessmentRepository;
 import gov.sandia.cf.dao.IPCMMEvidenceRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
@@ -31,6 +31,7 @@ import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**

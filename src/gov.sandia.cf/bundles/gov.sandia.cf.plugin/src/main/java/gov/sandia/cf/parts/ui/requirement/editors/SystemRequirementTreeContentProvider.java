@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import gov.sandia.cf.model.SystemRequirement;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 
 /**
  * Provides the content of the Requirement table
@@ -27,7 +28,8 @@ public class SystemRequirementTreeContentProvider implements ITreeContentProvide
 		List<Object> data = new ArrayList<>();
 		if (inputElement instanceof List) {
 			for (SystemRequirement parent : ((List<SystemRequirement>) inputElement).stream()
-					.filter(SystemRequirement.class::isInstance).sorted(Comparator.comparing(SystemRequirement::getGeneratedId))
+					.filter(SystemRequirement.class::isInstance).sorted(Comparator
+							.comparing(SystemRequirement::getGeneratedId, new StringWithNumberAndNullableComparator()))
 					.collect(Collectors.toList())) {
 				data.add(parent);
 			}
@@ -40,8 +42,9 @@ public class SystemRequirementTreeContentProvider implements ITreeContentProvide
 	public Object[] getChildren(Object parentElement) {
 		Object[] tab = null;
 		if (parentElement instanceof SystemRequirement) {
-			tab = ((SystemRequirement) parentElement).getChildren().stream()
-					.sorted(Comparator.comparing(SystemRequirement::getGeneratedId)).toArray();
+			tab = ((SystemRequirement) parentElement).getChildren().stream().sorted(Comparator
+					.comparing(SystemRequirement::getGeneratedId, new StringWithNumberAndNullableComparator()))
+					.toArray();
 		}
 		return tab;
 	}

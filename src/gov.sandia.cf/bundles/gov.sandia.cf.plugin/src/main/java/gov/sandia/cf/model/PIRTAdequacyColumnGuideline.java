@@ -154,9 +154,25 @@ public class PIRTAdequacyColumnGuideline implements Serializable, IEntity<PIRTAd
 		this.listLevelGuidelines = levelGuidelines;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PIRTAdequacyColumnGuideline newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
 	@Override
 	public boolean sameAs(PIRTAdequacyColumnGuideline newImportable) {
-		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+
+		if (newImportable == null) {
+			return false;
+		}
+
+		boolean sameName = StringTools.equals(getName(), newImportable.getName());
+		boolean sameDescription = StringTools.equals(getDescription(), newImportable.getDescription());
+
+		return sameName && sameDescription;
 	}
 
 	@Override
@@ -166,8 +182,7 @@ public class PIRTAdequacyColumnGuideline implements Serializable, IEntity<PIRTAd
 
 	@Override
 	public String toString() {
-		return "PIRTAdequacyColumnGuideline [id=" + id + ", name=" + name + ", description=" + description //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				+ ", listLevelGuidelines=" + listLevelGuidelines + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "PIRTAdequacyColumnGuideline [id=" + id + ", name=" + name + ", description=" + description + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 	/**

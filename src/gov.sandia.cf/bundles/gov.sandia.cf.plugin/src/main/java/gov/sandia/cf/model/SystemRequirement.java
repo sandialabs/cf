@@ -261,10 +261,15 @@ public class SystemRequirement implements Serializable, IGenericTableItem, IEnti
 	}
 
 	@Override
+	public String getItemTitle() {
+		return getStatement();
+	}
+
+	@Override
 	public String toString() {
-		return "SystemRequirement [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "userCreation=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				+ (userCreation != null ? userCreation.toString() : "") + "]" //$NON-NLS-1$ //$NON-NLS-2$
-				+ (parent != null ? parent.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "SystemRequirement [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "statement=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ (statement != null ? statement : "") + RscTools.COMMA + "userCreation=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (userCreation != null ? userCreation.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override

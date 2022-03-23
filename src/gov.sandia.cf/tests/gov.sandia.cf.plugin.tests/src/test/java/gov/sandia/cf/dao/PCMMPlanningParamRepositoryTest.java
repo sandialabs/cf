@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.YmlGenericSchema;
+import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.dao.impl.PCMMPlanningParamRepository;
 import gov.sandia.cf.model.PCMMPlanningParam;
 import gov.sandia.cf.tests.TestEntityFactory;

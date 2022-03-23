@@ -4,6 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -87,6 +88,14 @@ public class PCMMOption implements IImportable<PCMMOption>, Serializable, IEntit
 	@SuppressWarnings("javadoc")
 	public void setPhase(PCMMPhase phase) {
 		this.phase = phase;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PCMMOption newPhase) {
+		return newPhase != null && Objects.equals(getPhase(), newPhase.getPhase());
 	}
 
 	@Override

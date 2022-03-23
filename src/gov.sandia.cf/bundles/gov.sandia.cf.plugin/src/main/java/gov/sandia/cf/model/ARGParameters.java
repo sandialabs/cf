@@ -41,7 +41,6 @@ public class ARGParameters implements Serializable, IEntity<ARGParameters, Integ
 	 */
 	@SuppressWarnings("javadoc")
 	public enum Filter implements EntityFilter {
-		PYTHON_EXECUTABLE_PATH("pythonExecPath"), //$NON-NLS-1$
 		ARG_EXECUTABLE_PATH("argExecPath"), //$NON-NLS-1$
 		ARG_PREEXECUTION_SCRIPT("argPreScript"), //$NON-NLS-1$
 		USE_ARG_LOCAL_CONF("useArgLocalConf"), //$NON-NLS-1$
@@ -96,12 +95,6 @@ public class ARGParameters implements Serializable, IEntity<ARGParameters, Integ
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Integer id;
-
-	/**
-	 * pythonExecPath: the python path used to execute ARG
-	 */
-	@Column(name = "PYTHON_EXECUTABLE_PATH", columnDefinition = "LONGVARCHAR")
-	private String pythonExecPath;
 
 	/**
 	 * argPath: the arg path used to execute ARG
@@ -287,16 +280,6 @@ public class ARGParameters implements Serializable, IEntity<ARGParameters, Integ
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	@SuppressWarnings("javadoc")
-	public String getPythonExecPath() {
-		return pythonExecPath;
-	}
-
-	@SuppressWarnings("javadoc")
-	public void setPythonExecPath(String pythonExecPath) {
-		this.pythonExecPath = pythonExecPath;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -587,7 +570,6 @@ public class ARGParameters implements Serializable, IEntity<ARGParameters, Integ
 	 */
 	public ARGParameters copy() {
 		ARGParameters entity = new ARGParameters();
-		entity.setPythonExecPath(getPythonExecPath());
 		entity.setArgExecPath(getArgExecPath());
 		entity.setArgPreScript(getArgPreScript());
 		entity.setUseArgLocalConf(getUseArgLocalConf());

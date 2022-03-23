@@ -27,21 +27,19 @@ import org.eclipse.swt.widgets.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMLevel;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.IViewManager;
-import gov.sandia.cf.parts.ui.pcmm.editors.PCMMGuidanceLevelTableLabelProvider;
-import gov.sandia.cf.parts.ui.pcmm.editors.PCMMGuidanceLevelTreeContentProvider;
-import gov.sandia.cf.parts.ui.pcmm.editors.PCMMGuidanceLevelTreeSimplifiedContentProvider;
 import gov.sandia.cf.parts.viewer.TreeViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -160,7 +158,8 @@ public class PCMMGuidanceLevelView extends Composite {
 		} else {
 			// Title
 			Label lblLevels = new Label(this, SWT.NONE);
-			lblLevels.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+			lblLevels.setForeground(ColorTools.toColor(viewMgr.getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			lblLevels.setText(RscTools.getString(RscConst.MSG_GUIDANCEVIEW_PCMM_SUBTITLE));
 			FontTools.setSubtitleFont(viewMgr.getRscMgr(), lblLevels);
 		}

@@ -14,6 +14,7 @@ import gov.sandia.cf.model.QuantityOfInterest;
  * @author Didier Verstraete
  * 
  */
+@Repository
 public interface IQuantityOfInterestRepository extends ICRUDRepository<QuantityOfInterest, Integer> {
 
 	/**

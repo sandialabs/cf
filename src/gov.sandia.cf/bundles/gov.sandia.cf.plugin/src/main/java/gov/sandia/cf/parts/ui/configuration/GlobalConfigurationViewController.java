@@ -8,7 +8,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGlobalApplication;
+import gov.sandia.cf.application.global.IGlobalApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GlobalConfiguration;
 import gov.sandia.cf.model.OpenLinkBrowserOption;

@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -20,6 +22,10 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TreeEditor;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -35,7 +41,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
+import gov.sandia.cf.application.decision.IDecisionApplication;
 import gov.sandia.cf.model.Decision;
 import gov.sandia.cf.model.DecisionParam;
 import gov.sandia.cf.model.Model;
@@ -54,6 +60,7 @@ import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.viewer.editors.GenericTableLabelProvider;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -341,6 +348,9 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		// Columns - Actions
 		renderMainTableActionColumns(columnProperties);
 
+		// add drag and drop support on tree to transfer uncertainties
+		addDragAndDropSupport();
+
 		// Add listeners
 		renderMainTableAddEvents();
 
@@ -371,7 +381,8 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 	 */
 	private void renderMainTableInit() {
 		// Tree - Create
-		treeViewer = new TreeViewerID(compositeTable, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		treeViewer = new TreeViewerID(compositeTable,
+				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		GridData gdViewer = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 
 		Tree tree = treeViewer.getTree();
@@ -391,15 +402,20 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		tree.setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Set width
 		treeViewer.getIdColumn().setLabelProvider(new DecisionColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Decision) {
-					((Decision) element).setGeneratedId(treeViewer.getIdColumnText(element));
+					if (StringUtils.isBlank(((Decision) element).getGeneratedId())) {
+						((Decision) element).setGeneratedId(treeViewer.getIdColumnText(element));
+					}
+					return ((Decision) element).getGeneratedId();
 				}
 				return treeViewer.getIdColumnText(element);
 			}
@@ -658,6 +674,32 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 	}
 
 	/**
+	 * Add drag and drop support to the tree
+	 */
+	private void addDragAndDropSupport() {
+
+		// drag support
+		Transfer[] transferTypesDrag = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		treeViewer.addDragSupport(DND.DROP_MOVE, transferTypesDrag, new DragSourceAdapter() {
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				IStructuredSelection selection = treeViewer.getStructuredSelection();
+				Object firstElement = selection.getFirstElement();
+
+				if (LocalSelectionTransfer.getTransfer().isSupportedType(event.dataType)
+						&& firstElement instanceof Decision) {
+					event.data = firstElement;
+				}
+			}
+		});
+
+		// drop support
+		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new DecisionDropSupport(viewCtrl, treeViewer));
+	}
+
+	/**
 	 * Refresh the main table
 	 */
 	private void refreshMainTable() {
@@ -744,11 +786,14 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 			Decision decision = (Decision) element;
 
 			if (decision.getParent() != null && decision.getChildren() != null && !decision.getChildren().isEmpty()) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			} else if (decision.getParent() == null) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
 		return null;
@@ -766,10 +811,12 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		if (element instanceof Decision) {
 			Decision decision = (Decision) element;
 			if (decision.getParent() == null) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 
 		return null;

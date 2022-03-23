@@ -3,11 +3,16 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.tools;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Gson reading, writing tool class
@@ -39,6 +44,30 @@ public class GsonTools {
 		if (value != null) {
 			try {
 				data = new Gson().fromJson(value, classToReturn);
+			} catch (JsonSyntaxException ex) {
+				logger.warn(ex.getMessage());
+			}
+		}
+
+		return data;
+	}
+
+	/**
+	 * Gets the list from gson.
+	 *
+	 * @param <M>           the generic type
+	 * @param value         the value
+	 * @param classToReturn the class to return
+	 * @return the list from gson
+	 */
+	public static <M> List<M> getListFromGson(String value, Class<M> classToReturn) {
+		List<M> data = new ArrayList<>();
+
+		if (value != null) {
+			try {
+				Type listType = new TypeToken<ArrayList<M>>() {
+				}.getType();
+				data = new Gson().fromJson(value, listType);
 			} catch (JsonSyntaxException ex) {
 				logger.warn(ex.getMessage());
 			}

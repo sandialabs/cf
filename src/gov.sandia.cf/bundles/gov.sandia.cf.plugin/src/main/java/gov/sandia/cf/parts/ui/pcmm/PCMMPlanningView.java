@@ -53,8 +53,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
@@ -90,6 +90,7 @@ import gov.sandia.cf.parts.viewer.editors.GenericTableLabelProvider;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.RichTextWidget;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -222,7 +223,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		compositeWidget.setLayoutData(gridData);
 		compositeWidget.setLayout(gridLayout);
-		compositeWidget.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		compositeWidget.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
 	/**
@@ -260,7 +262,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				GridData gridDataContent = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 				content.setLayoutData(gridDataContent);
 				content.setLayout(new GridLayout());
-				content.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT));
+				content.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
 
 				// create content
 				createPlanningContent(content, elementSelected);
@@ -290,8 +293,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				// Sub Expand bar
 				boolean withBorder = false;
 				boolean grabVerticalSpace = true;
-				ExpandBar subBarHeader = ExpandBarTheme.createExpandBar(compositeWidget, withBorder, grabVerticalSpace,
-						SWT.V_SCROLL | SWT.FILL);
+				ExpandBar subBarHeader = ExpandBarTheme.createExpandBar(compositeWidget, getViewManager().getRscMgr(),
+						withBorder, grabVerticalSpace, SWT.V_SCROLL | SWT.FILL);
 				FontTools.setBoldFont(getViewManager().getRscMgr(), subBarHeader);
 
 				// create an expand bar item for each subelement
@@ -304,7 +307,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 					GridData gridDataSubItemContent = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 					subItemContent.setLayoutData(gridDataSubItemContent);
 					subItemContent.setLayout(new GridLayout());
-					subItemContent.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT));
+					subItemContent.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
 
 					// Expand bar item - Title
 					ExpandItem subItem = new ExpandItem(subBarHeader, SWT.FILL, index);
@@ -465,7 +469,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				// value
 				Label text = FormFactory.createNonEditableText(content,
 						viewCtrl.getPlanningValueAsText(field, assessable));
-				text.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+				text.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 			} else if (FormFieldType.SELECT.getType().equals(field.getType())) {
 
@@ -490,7 +495,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 				// value
 				Label text = FormFactory.createNonEditableText(content, stringValue);
-				text.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+				text.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 			} else if (FormFieldType.RICH_TEXT.getType().equals(field.getType())) {
 
@@ -498,7 +504,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				RichTextWidget richText = FormFactory.createRichTextCollapsible(getViewManager().getRscMgr(), parent,
 						field.getName(), field, false);
 				richText.setValue(viewCtrl.getPlanningValueAsText(field, assessable));
-				richText.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1));
+				richText.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 				richText.setEnabled(false);
 
 			} else if (field instanceof PCMMPlanningParam && field.getChildren() != null
@@ -579,7 +586,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		RichTextWidget richText = FormFactory.createRichTextCollapsible(getViewManager().getRscMgr(), parent,
 				field.getName(), field, false);
 		richText.setValue(viewCtrl.getPlanningValueAsText(field, assessable));
-		richText.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1));
+		richText.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 		richText.getRichtext().addModifyListener(
 				event -> viewCtrl.changeParameterValue(field, assessable, richText.getRichtext().getText()));
 		richText.getRichtext().addKeyListener(new KeyAdapter() {
@@ -623,7 +631,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		// label
 		Label label = FormFactory.createLabel(content, field.getName());
-		label.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1));
+		label.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 
 		// Combo-box
 		ComboViewer combo = FormFactory.createCombo(content, field.getName(), field.getParameterValueList(),
@@ -684,7 +693,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 			GridLayout gridLayout = new GridLayout();
 			gridLayout.marginWidth = 0;
 			mainComposite.setLayout(gridLayout);
-			mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1));
+			mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 
 			// header composite
 			Composite headerComposite = new Composite(mainComposite, SWT.NONE);
@@ -789,8 +799,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		treeViewer.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		treeViewer.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		return treeViewer;
 	}

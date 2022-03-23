@@ -15,11 +15,12 @@ import org.hsqldb.cmdline.SqlToolError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.IQuantityOfInterestRepository;
 import gov.sandia.cf.dao.migration.EclipseLinkMigrationManager;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QuantityOfInterest;
@@ -36,6 +37,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
+@MigrationTask(name = "0.2.0-iwfcf-216.sql", id = 1)
 public class Task_001_QoIITag implements IMigrationTask {
 
 	/**
@@ -43,20 +45,20 @@ public class Task_001_QoIITag implements IMigrationTask {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(Task_001_QoIITag.class);
 
-	private static final String TASK_NAME = "0.2.0-iwfcf-216.sql"; //$NON-NLS-1$
-
 	private static final String SCRIPT_NAME = "0.2.0-iwfcf-216.sql"; //$NON-NLS-1$
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
+
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));

@@ -21,10 +21,10 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMMode;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tools.WorkspaceTools;
 
 /**

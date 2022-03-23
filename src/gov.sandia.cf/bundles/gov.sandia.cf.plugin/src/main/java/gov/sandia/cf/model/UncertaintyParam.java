@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -22,7 +24,7 @@ import gov.sandia.cf.tools.StringTools;
  *
  */
 @Entity
-@Table(name = "COM_UNCERTAINTY_PARAM")
+@Table(name = "UNCERTAINTY_PARAM")
 public class UncertaintyParam extends GenericParameter<UncertaintyParam>
 		implements IEntity<UncertaintyParam, Integer>, IImportable<UncertaintyParam> {
 
@@ -49,6 +51,23 @@ public class UncertaintyParam extends GenericParameter<UncertaintyParam>
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parameter", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
 	private List<UncertaintyConstraint> constraintList;
+
+	/**
+	 * The parameter parent
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private UncertaintyParam parent;
+
+	@Override
+	public UncertaintyParam getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(UncertaintyParam parent) {
+		this.parent = parent;
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -116,6 +135,14 @@ public class UncertaintyParam extends GenericParameter<UncertaintyParam>
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(UncertaintyParam newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(UncertaintyParam importable) {
 
 		if (importable == null) {
@@ -123,10 +150,12 @@ public class UncertaintyParam extends GenericParameter<UncertaintyParam>
 		}
 
 		boolean sameName = StringTools.equals(getName(), importable.getName());
+		boolean sameLevel = StringTools.equals(getLevel(), importable.getLevel());
+		boolean sameDefaultValue = StringTools.equals(getDefaultValue(), importable.getDefaultValue());
 		boolean sameType = StringTools.equals(getType(), importable.getType());
 		boolean sameIsRequired = StringTools.equals(getRequired(), importable.getRequired());
 
-		return sameName && sameType && sameIsRequired;
+		return sameName && sameLevel && sameDefaultValue && sameType && sameIsRequired;
 	}
 
 	/**

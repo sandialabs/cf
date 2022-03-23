@@ -10,22 +10,15 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
-import gov.sandia.cf.application.IGlobalApplication;
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.IQoIPlanningApplication;
-import gov.sandia.cf.application.ISystemRequirementApplication;
-import gov.sandia.cf.application.IUncertaintyApplication;
-import gov.sandia.cf.application.IUserApplication;
-import gov.sandia.cf.application.configuration.decision.DecisionSpecification;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pirt.PIRTQuery;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTQueries;
-import gov.sandia.cf.application.configuration.qoiplanning.QoIPlanningSpecification;
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
-import gov.sandia.cf.application.configuration.uncertainty.UncertaintySpecification;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.global.IGlobalApplication;
+import gov.sandia.cf.application.global.IUserApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTQueries;
+import gov.sandia.cf.application.qoiplanning.IQoIPlanningApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
 import gov.sandia.cf.constants.CFVariable;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GlobalConfiguration;
@@ -33,8 +26,18 @@ import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.OpenLinkBrowserOption;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.DecisionSpecification;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.model.dto.configuration.PIRTQuery;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
+import gov.sandia.cf.model.dto.configuration.QoIPlanningSpecification;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
+import gov.sandia.cf.model.dto.configuration.UncertaintySpecification;
+import gov.sandia.cf.parts.services.setup.ISetupService;
 import gov.sandia.cf.preferences.PrefTools;
 import gov.sandia.cf.tools.CFVariableResolver;
+import gov.sandia.cf.web.services.authentication.IAuthenticationService;
+import gov.sandia.cf.web.services.global.IModelWebClient;
 
 /**
  * The CF data cache class.
@@ -99,7 +102,11 @@ public class CFCache {
 	 */
 	private List<PIRTQuery> pirtQueries;
 
+	/** The global configuration. */
 	private GlobalConfiguration globalConfiguration;
+
+	/** The cf client setup. */
+	private CFClientSetup cfClientSetup;
 
 	/**
 	 * The constructor
@@ -116,6 +123,7 @@ public class CFCache {
 		this.pcmmSpecification = null;
 		this.uncertaintySpecification = null;
 		this.sysRequirementSpecification = null;
+		this.cfClientSetup = null;
 	}
 
 	/**
@@ -128,10 +136,18 @@ public class CFCache {
 	/**
 	 * Refresh the CF model
 	 * 
+	 * Web: for the web call, please initialize the client setup with model id to
+	 * load.
+	 * 
 	 * @throws CredibilityException if an error occured
 	 */
 	public void refreshModel() throws CredibilityException {
-		this.model = credibilityEditor.getAppMgr().getService(IGlobalApplication.class).loadModel();
+		if (credibilityEditor.isWebConnection()) {
+			this.model = credibilityEditor.getWebClient().getService(IModelWebClient.class)
+					.loadModel(getCFClientSetup().getModelId());
+		} else {
+			this.model = credibilityEditor.getAppMgr().getService(IGlobalApplication.class).loadModel();
+		}
 	}
 
 	/**
@@ -147,8 +163,12 @@ public class CFCache {
 	 * @throws CredibilityException if an error occured
 	 */
 	public void refreshGlobalConfiguration() throws CredibilityException {
-		this.globalConfiguration = credibilityEditor.getAppMgr().getService(IGlobalApplication.class)
-				.loadGlobalConfiguration();
+		if (credibilityEditor.isWebConnection()) {
+			// TODO implement
+		} else {
+			this.globalConfiguration = credibilityEditor.getAppMgr().getService(IGlobalApplication.class)
+					.loadGlobalConfiguration();
+		}
 	}
 
 	/**
@@ -163,6 +183,7 @@ public class CFCache {
 			try {
 				option = OpenLinkBrowserOption.valueOf(glbConfiguration.getOpenLinkBrowserOpts());
 			} catch (IllegalArgumentException e) {
+				// do nothing
 			}
 		}
 
@@ -182,8 +203,13 @@ public class CFCache {
 	 * @throws CredibilityException if an error occured
 	 */
 	public void refreshUser() throws CredibilityException {
-		this.user = credibilityEditor.getAppMgr().getService(IUserApplication.class)
-				.getUserByUserID(CFVariableResolver.resolve(CFVariable.USER_NAME));
+		if (credibilityEditor.isWebConnection()) {
+			this.user = credibilityEditor.getWebClient().getService(IAuthenticationService.class)
+					.getUser(CFVariableResolver.resolve(CFVariable.USER_NAME));
+		} else {
+			this.user = credibilityEditor.getAppMgr().getService(IUserApplication.class)
+					.getUserByUserID(CFVariableResolver.resolve(CFVariable.USER_NAME));
+		}
 	}
 
 	/**
@@ -203,7 +229,11 @@ public class CFCache {
 	 * @throws CredibilityException if an error occured
 	 */
 	public void updatePCMMRole(Role newRole) throws CredibilityException {
-		credibilityEditor.getAppMgr().getService(IUserApplication.class).setCurrentPCMMRole(user, newRole);
+		if (credibilityEditor.isWebConnection()) {
+			// TODO implement
+		} else {
+			credibilityEditor.getAppMgr().getService(IUserApplication.class).setCurrentPCMMRole(user, newRole);
+		}
 		refreshUser();
 	}
 
@@ -212,8 +242,12 @@ public class CFCache {
 	 */
 	public PIRTSpecification getPIRTSpecification() {
 		if (pirtSpecification == null) {
-			pirtSpecification = credibilityEditor.getAppMgr().getService(IPIRTApplication.class)
-					.loadPIRTConfiguration(model);
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				pirtSpecification = credibilityEditor.getAppMgr().getService(IPIRTApplication.class)
+						.loadPIRTConfiguration(model);
+			}
 		}
 		return pirtSpecification;
 	}
@@ -231,8 +265,12 @@ public class CFCache {
 	 */
 	public DecisionSpecification getDecisionSpecification() {
 		if (decisionSpecification == null) {
-			decisionSpecification = credibilityEditor.getAppMgr().getService(IDecisionApplication.class)
-					.loadDecisionConfiguration(model);
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				decisionSpecification = credibilityEditor.getAppMgr().getService(IDecisionApplication.class)
+						.loadDecisionConfiguration(model);
+			}
 		}
 		return decisionSpecification;
 	}
@@ -250,8 +288,12 @@ public class CFCache {
 	 */
 	public QoIPlanningSpecification getQoIPlanningSpecification() {
 		if (qoiPlanningSpecification == null) {
-			qoiPlanningSpecification = credibilityEditor.getAppMgr().getService(IQoIPlanningApplication.class)
-					.loadQoIPlanningConfiguration(model);
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				qoiPlanningSpecification = credibilityEditor.getAppMgr().getService(IQoIPlanningApplication.class)
+						.loadQoIPlanningConfiguration(model);
+			}
 		}
 		return qoiPlanningSpecification;
 	}
@@ -269,11 +311,15 @@ public class CFCache {
 	 */
 	public PCMMSpecification getPCMMSpecification() {
 		if (pcmmSpecification == null) {
-			try {
-				pcmmSpecification = credibilityEditor.getAppMgr().getService(IPCMMApplication.class)
-						.loadPCMMConfiguration(model);
-			} catch (CredibilityException e) {
-				logger.error("An error occured while loading PCMM configuration {}", e.getMessage(), e); //$NON-NLS-1$
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				try {
+					pcmmSpecification = credibilityEditor.getAppMgr().getService(IPCMMApplication.class)
+							.loadPCMMConfiguration(model);
+				} catch (CredibilityException e) {
+					logger.error("An error occured while loading PCMM configuration {}", e.getMessage(), e); //$NON-NLS-1$
+				}
 			}
 		}
 		return pcmmSpecification;
@@ -292,8 +338,12 @@ public class CFCache {
 	 */
 	public UncertaintySpecification getUncertaintySpecification() {
 		if (uncertaintySpecification == null) {
-			uncertaintySpecification = credibilityEditor.getAppMgr().getService(IUncertaintyApplication.class)
-					.loadUncertaintyConfiguration(model);
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				uncertaintySpecification = credibilityEditor.getAppMgr().getService(IUncertaintyApplication.class)
+						.loadUncertaintyConfiguration(model);
+			}
 		}
 		return uncertaintySpecification;
 	}
@@ -311,8 +361,12 @@ public class CFCache {
 	 */
 	public SystemRequirementSpecification getSystemRequirementSpecification() {
 		if (sysRequirementSpecification == null) {
-			sysRequirementSpecification = credibilityEditor.getAppMgr().getService(ISystemRequirementApplication.class)
-					.loadSysRequirementConfiguration(model);
+			if (credibilityEditor.isWebConnection()) {
+				// TODO implement
+			} else {
+				sysRequirementSpecification = credibilityEditor.getAppMgr()
+						.getService(ISystemRequirementApplication.class).loadSysRequirementConfiguration(model);
+			}
 		}
 		return sysRequirementSpecification;
 	}
@@ -357,5 +411,45 @@ public class CFCache {
 	public List<PIRTQuery> reloadPIRTQueries() {
 		pirtQueries = null;
 		return getPIRTQueries();
+	}
+
+	/**
+	 * Gets the CF client setup.
+	 *
+	 * @return the CF client setup
+	 */
+	public CFClientSetup getCFClientSetup() {
+		if (cfClientSetup == null) {
+			reloadCFClientSetup(null);
+		}
+		return cfClientSetup;
+	}
+
+	/**
+	 * Reload CF client setup.
+	 *
+	 * @param setupFile the setup file
+	 * @throws CredibilityException the credibility exception
+	 * @throws IOException          Signals that an I/O exception has occurred.
+	 */
+	void reloadCFClientSetup(File setupFile) {
+
+		CFClientSetup cfClientSetupTmp = null;
+
+		// load file if file exists and the option is activated
+		if (setupFile != null) {
+			try {
+				cfClientSetupTmp = credibilityEditor.getClientSrvMgr().getService(ISetupService.class).load(setupFile);
+			} catch (CredibilityException | IOException e) {
+				logger.warn("An error occured while loading the client setup {}", e.getMessage(), e); //$NON-NLS-1$
+			}
+		}
+
+		// default behavior load file
+		if (cfClientSetupTmp == null) {
+			cfClientSetupTmp = CFClientSetupFactory.get();
+		}
+
+		this.cfClientSetup = cfClientSetupTmp;
 	}
 }

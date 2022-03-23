@@ -18,13 +18,12 @@ import org.hsqldb.lib.StringInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
-import gov.sandia.cf.application.configuration.YmlGenericSchema;
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.dao.IARGParametersQoIOptionRepository;
 import gov.sandia.cf.dao.IARGParametersRepository;
 import gov.sandia.cf.dao.ICRUDRepository;
 import gov.sandia.cf.dao.ICriterionRepository;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IDecisionParamRepository;
 import gov.sandia.cf.dao.IDecisionRepository;
 import gov.sandia.cf.dao.IDecisionValueRepository;
@@ -58,7 +57,6 @@ import gov.sandia.cf.dao.ISystemRequirementParamRepository;
 import gov.sandia.cf.dao.ISystemRequirementRepository;
 import gov.sandia.cf.dao.ISystemRequirementValueRepository;
 import gov.sandia.cf.dao.ITagRepository;
-import gov.sandia.cf.dao.IUncertaintyGroupRepository;
 import gov.sandia.cf.dao.IUncertaintyParamRepository;
 import gov.sandia.cf.dao.IUncertaintyRepository;
 import gov.sandia.cf.dao.IUncertaintyValueRepository;
@@ -70,7 +68,6 @@ import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.Decision;
 import gov.sandia.cf.model.DecisionParam;
 import gov.sandia.cf.model.DecisionValue;
-import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.GenericParameterConstraint;
 import gov.sandia.cf.model.GenericParameterSelectValue;
@@ -112,11 +109,9 @@ import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.Uncertainty;
-import gov.sandia.cf.model.UncertaintyGroup;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.UncertaintyValue;
 import gov.sandia.cf.model.User;
-import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.MathTools;
 
 /**
@@ -135,7 +130,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated model
 	 */
-	public static Model getNewModel(DaoManager daoManager) {
+	public static Model getNewModel(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -157,7 +152,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated PIRT level difference color
 	 */
-	public static PIRTLevelDifferenceColor getNewPIRTLevelDifferenceColors(DaoManager daoManager) {
+	public static PIRTLevelDifferenceColor getNewPIRTLevelDifferenceColors(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -176,7 +171,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated PIRT adequacy column
 	 */
-	public static PIRTAdequacyColumn getNewPIRTAdequacyColumn(DaoManager daoManager) {
+	public static PIRTAdequacyColumn getNewPIRTAdequacyColumn(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -193,7 +188,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated PIRT description header
 	 */
-	public static PIRTDescriptionHeader getNewPIRTDescriptionHeader(DaoManager daoManager) {
+	public static PIRTDescriptionHeader getNewPIRTDescriptionHeader(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -209,7 +204,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated PIRT description header
 	 */
-	public static PIRTLevelImportance getNewPIRTLevelImportance(DaoManager daoManager) {
+	public static PIRTLevelImportance getNewPIRTLevelImportance(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -229,7 +224,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated PIRT description header
 	 */
-	public static PIRTAdequacyColumnGuideline getNewPIRTAdequacyColumnGuideline(DaoManager daoManager) {
+	public static PIRTAdequacyColumnGuideline getNewPIRTAdequacyColumnGuideline(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -266,7 +261,7 @@ public class TestEntityFactory {
 	 * @param guideline  the PIRT guideline to associate
 	 * @return a new generated PIRT description header
 	 */
-	public static PIRTAdequacyColumnLevelGuideline getNewPIRTAdequacyColumnLevelGuideline(DaoManager daoManager,
+	public static PIRTAdequacyColumnLevelGuideline getNewPIRTAdequacyColumnLevelGuideline(IDaoManager daoManager,
 			PIRTAdequacyColumnGuideline guideline) {
 
 		assertNotNull(daoManager);
@@ -314,7 +309,7 @@ public class TestEntityFactory {
 	 * @param model      the model to associate
 	 * @return a new generated qoi
 	 */
-	public static QuantityOfInterest getNewQoI(DaoManager daoManager, Model model) {
+	public static QuantityOfInterest getNewQoI(IDaoManager daoManager, Model model) {
 
 		assertNotNull(daoManager);
 
@@ -342,7 +337,7 @@ public class TestEntityFactory {
 	 * @param parent     the qoi parent to associate
 	 * @return a new generated qoi
 	 */
-	public static QuantityOfInterest getNewQoIWithParent(DaoManager daoManager, QuantityOfInterest parent) {
+	public static QuantityOfInterest getNewQoIWithParent(IDaoManager daoManager, QuantityOfInterest parent) {
 
 		assertNotNull(daoManager);
 
@@ -373,7 +368,7 @@ public class TestEntityFactory {
 	 * @param model      the model to associate
 	 * @return a new generated qoi planning parameter
 	 */
-	public static QoIPlanningParam getNewQoIPlanningParam(DaoManager daoManager, Model model) {
+	public static QoIPlanningParam getNewQoIPlanningParam(IDaoManager daoManager, Model model) {
 
 		assertNotNull(daoManager);
 
@@ -405,7 +400,7 @@ public class TestEntityFactory {
 	 * @param user       the creation user to associate
 	 * @return a new generated qoi planning value
 	 */
-	public static QoIPlanningValue getNewQoIPlanningValue(DaoManager daoManager, QoIPlanningParam param,
+	public static QoIPlanningValue getNewQoIPlanningValue(IDaoManager daoManager, QoIPlanningParam param,
 			QuantityOfInterest qoi, User user) {
 
 		assertNotNull(daoManager);
@@ -445,7 +440,7 @@ public class TestEntityFactory {
 	 * @param user       the user creation to set
 	 * @return a new generated qoi
 	 */
-	public static QoIHeader getNewQoIHeader(DaoManager daoManager, QuantityOfInterest qoi, User user) {
+	public static QoIHeader getNewQoIHeader(IDaoManager daoManager, QuantityOfInterest qoi, User user) {
 
 		assertNotNull(daoManager);
 
@@ -483,7 +478,7 @@ public class TestEntityFactory {
 	 * @return a new generated generic select value
 	 */
 	public static <C extends GenericParameterSelectValue<P>, P extends GenericParameter<P>> C getNewGenericSelectValue(
-			DaoManager daoManager, Class<C> classSelectValue, P parameter,
+			IDaoManager daoManager, Class<C> classSelectValue, P parameter,
 			Class<? extends ICRUDRepository<C, ?>> classRepository) {
 
 		assertNotNull(daoManager);
@@ -518,7 +513,7 @@ public class TestEntityFactory {
 	 * @return a new generated generic constraint
 	 */
 	public static <C extends GenericParameterConstraint<P>, P extends GenericParameter<P>> C getNewGenericConstraint(
-			DaoManager daoManager, Class<C> classConstraint, P parameter,
+			IDaoManager daoManager, Class<C> classConstraint, P parameter,
 			Class<? extends ICRUDRepository<C, ?>> classRepository) {
 
 		assertNotNull(daoManager);
@@ -548,7 +543,7 @@ public class TestEntityFactory {
 	 * @param qoi        the qoi to associate
 	 * @return a new generated phenomenon
 	 */
-	public static PhenomenonGroup getNewPhenomenonGroup(DaoManager daoManager, QuantityOfInterest qoi) {
+	public static PhenomenonGroup getNewPhenomenonGroup(IDaoManager daoManager, QuantityOfInterest qoi) {
 
 		assertNotNull(daoManager);
 
@@ -576,7 +571,7 @@ public class TestEntityFactory {
 	 * @param phenomenonGroup the phenomenon group to associate
 	 * @return a new generated phenomenon
 	 */
-	public static Phenomenon getNewPhenomenon(DaoManager daoManager, PhenomenonGroup phenomenonGroup) {
+	public static Phenomenon getNewPhenomenon(IDaoManager daoManager, PhenomenonGroup phenomenonGroup) {
 		return getNewPhenomenon(daoManager, phenomenonGroup, null);
 	}
 
@@ -586,7 +581,7 @@ public class TestEntityFactory {
 	 * @param importance      the phenomenon importance
 	 * @return a new generated phenomenon
 	 */
-	public static Phenomenon getNewPhenomenon(DaoManager daoManager, PhenomenonGroup phenomenonGroup,
+	public static Phenomenon getNewPhenomenon(IDaoManager daoManager, PhenomenonGroup phenomenonGroup,
 			String importance) {
 
 		assertNotNull(daoManager);
@@ -618,7 +613,7 @@ public class TestEntityFactory {
 	 * @param phenomenon the phenomenon to associate
 	 * @return a new generated criterion
 	 */
-	public static Criterion getNewCriterion(DaoManager daoManager, Phenomenon phenomenon) {
+	public static Criterion getNewCriterion(IDaoManager daoManager, Phenomenon phenomenon) {
 		return getNewCriterion(daoManager, phenomenon, null, null, null);
 	}
 
@@ -630,7 +625,7 @@ public class TestEntityFactory {
 	 * @param value      the criterion value
 	 * @return a new generated criterion
 	 */
-	public static Criterion getNewCriterion(DaoManager daoManager, Phenomenon phenomenon, String name, String type,
+	public static Criterion getNewCriterion(IDaoManager daoManager, Phenomenon phenomenon, String name, String type,
 			String value) {
 
 		assertNotNull(daoManager);
@@ -671,7 +666,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated user
 	 */
-	public static User getNewUser(DaoManager daoManager) {
+	public static User getNewUser(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -689,10 +684,34 @@ public class TestEntityFactory {
 	}
 
 	/**
+	 * Gets the new user.
+	 *
+	 * @param daoManager the dao manager
+	 * @param userID     the user ID
+	 * @return a new generated user
+	 */
+	public static User getNewUser(IDaoManager daoManager, String userID) {
+
+		assertNotNull(daoManager);
+
+		// create user
+		User user = new User();
+		user.setUserID(userID);
+		try {
+			user = daoManager.getRepository(IUserRepository.class).create(user);
+		} catch (CredibilityException e) {
+			fail(e.getMessage());
+		}
+		assertNotNull(user);
+
+		return user;
+	}
+
+	/**
 	 * @param daoManager the dao manager
 	 * @return a new generated role
 	 */
-	public static Role getNewRole(DaoManager daoManager) {
+	public static Role getNewRole(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -714,7 +733,7 @@ public class TestEntityFactory {
 	 * @param model      the model to associate
 	 * @return a new generated pcmm element
 	 */
-	public static PCMMElement getNewPCMMElement(DaoManager daoManager, Model model) {
+	public static PCMMElement getNewPCMMElement(IDaoManager daoManager, Model model) {
 
 		assertNotNull(daoManager);
 
@@ -742,7 +761,7 @@ public class TestEntityFactory {
 	 * @param element    the pcmm element to associate
 	 * @return a new generated pcmm subelement
 	 */
-	public static PCMMSubelement getNewPCMMSubelement(DaoManager daoManager, PCMMElement element) {
+	public static PCMMSubelement getNewPCMMSubelement(IDaoManager daoManager, PCMMElement element) {
 
 		assertNotNull(daoManager);
 
@@ -773,7 +792,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated pcmm level color
 	 */
-	public static PCMMLevelColor getNewPCMMLevelColor(DaoManager daoManager) {
+	public static PCMMLevelColor getNewPCMMLevelColor(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -798,7 +817,7 @@ public class TestEntityFactory {
 	 * @param phase      the pcmm phase
 	 * @return a new generated pcmm option
 	 */
-	public static PCMMOption getNewPCMMOption(DaoManager daoManager, PCMMPhase phase) {
+	public static PCMMOption getNewPCMMOption(IDaoManager daoManager, PCMMPhase phase) {
 
 		assertNotNull(daoManager);
 
@@ -825,7 +844,7 @@ public class TestEntityFactory {
 	 * @param code       the level code
 	 * @return a new generated pcmm level
 	 */
-	public static PCMMLevel getNewPCMMLevel(DaoManager daoManager, IAssessable assessable, Integer code) {
+	public static PCMMLevel getNewPCMMLevel(IDaoManager daoManager, IAssessable assessable, Integer code) {
 
 		assertNotNull(daoManager);
 
@@ -856,7 +875,7 @@ public class TestEntityFactory {
 	 * @param level      the pcmm level to associate
 	 * @return a new generated pcmm level descriptor
 	 */
-	public static PCMMLevelDescriptor getNewPCMMLevelDescriptor(DaoManager daoManager, PCMMLevel level) {
+	public static PCMMLevelDescriptor getNewPCMMLevelDescriptor(IDaoManager daoManager, PCMMLevel level) {
 
 		assertNotNull(daoManager);
 
@@ -883,7 +902,7 @@ public class TestEntityFactory {
 	 * @param userCreation the user to associate
 	 * @return a new generated pcmm level
 	 */
-	public static Tag getNewTag(DaoManager daoManager, User userCreation) {
+	public static Tag getNewTag(IDaoManager daoManager, User userCreation) {
 
 		assertNotNull(daoManager);
 
@@ -914,7 +933,7 @@ public class TestEntityFactory {
 	 * @param level      the pcmm level to set
 	 * @return a new generated pcmm assessment
 	 */
-	public static PCMMAssessment getNewPCMMAssessment(DaoManager daoManager, Role role, User user,
+	public static PCMMAssessment getNewPCMMAssessment(IDaoManager daoManager, Role role, User user,
 			IAssessable assessable, PCMMLevel level) {
 
 		assertNotNull(daoManager);
@@ -955,7 +974,8 @@ public class TestEntityFactory {
 	 * @param assessable the pcmm element or subelement
 	 * @return a new generated pcmm evidence
 	 */
-	public static PCMMEvidence getNewPCMMEvidence(DaoManager daoManager, Role role, User user, IAssessable assessable) {
+	public static PCMMEvidence getNewPCMMEvidence(IDaoManager daoManager, Role role, User user,
+			IAssessable assessable) {
 		return getNewPCMMEvidence(daoManager, role, user, assessable, (String) null);
 	}
 
@@ -967,7 +987,7 @@ public class TestEntityFactory {
 	 * @param filePath   the evidence file path
 	 * @return a new generated pcmm evidence
 	 */
-	public static PCMMEvidence getNewPCMMEvidence(DaoManager daoManager, Role role, User user, IAssessable assessable,
+	public static PCMMEvidence getNewPCMMEvidence(IDaoManager daoManager, Role role, User user, IAssessable assessable,
 			IFile filePath) {
 
 		assertNotNull(daoManager);
@@ -1014,7 +1034,7 @@ public class TestEntityFactory {
 	 * @param url        the evidence url to set
 	 * @return a new generated pcmm evidence
 	 */
-	public static PCMMEvidence getNewPCMMEvidence(DaoManager daoManager, Role role, User user, IAssessable assessable,
+	public static PCMMEvidence getNewPCMMEvidence(IDaoManager daoManager, Role role, User user, IAssessable assessable,
 			String url) {
 
 		assertNotNull(daoManager);
@@ -1054,11 +1074,66 @@ public class TestEntityFactory {
 	}
 
 	/**
+	 * Gets the new PCMM evidence.
+	 *
+	 * @param daoManager the dao manager
+	 * @param role       the role
+	 * @param user       the user
+	 * @param assessable the assessable
+	 * @param url        the url
+	 * @param tag        the tag
+	 * @return the new PCMM evidence
+	 */
+	public static PCMMEvidence getNewPCMMEvidence(IDaoManager daoManager, Role role, User user, IAssessable assessable,
+			String url, Tag tag) {
+
+		assertNotNull(daoManager);
+
+		// create pcmm evidence
+		PCMMEvidence elt = new PCMMEvidence();
+		if (role != null) {
+			elt.setRoleCreation(role);
+		} else {
+			elt.setRoleCreation(getNewRole(daoManager));
+		}
+		if (user != null) {
+			elt.setUserCreation(user);
+		} else {
+			elt.setUserCreation(getNewUser(daoManager));
+		}
+		elt.setDateCreation(new Date());
+		if (assessable instanceof PCMMElement) {
+			elt.setElement((PCMMElement) assessable);
+		} else if (assessable instanceof PCMMSubelement) {
+			elt.setSubelement((PCMMSubelement) assessable);
+		}
+		if (url != null) {
+			elt.setURL(url);
+		}
+		if (elt.getValue() == null) {
+			elt.setURL("http://default.com"); //$NON-NLS-1$
+		}
+
+		if (tag != null) {
+			elt.setTag(tag);
+		}
+
+		try {
+			elt = daoManager.getRepository(IPCMMEvidenceRepository.class).create(elt);
+		} catch (CredibilityException e) {
+			fail(e.getMessage());
+		}
+		assertNotNull(elt);
+
+		return elt;
+	}
+
+	/**
 	 * @param daoManager the dao manager
 	 * @param assessable the pcmm element or subelement
 	 * @return a new generated pcmm planning question
 	 */
-	public static PCMMPlanningQuestion getNewPCMMPlanningQuestion(DaoManager daoManager, IAssessable assessable) {
+	public static PCMMPlanningQuestion getNewPCMMPlanningQuestion(IDaoManager daoManager, IAssessable assessable) {
 
 		assertNotNull(daoManager);
 
@@ -1096,7 +1171,7 @@ public class TestEntityFactory {
 	 * @param tag        the tag to associate
 	 * @return a new generated pcmm planning question value
 	 */
-	public static PCMMPlanningQuestionValue getNewPCMMPlanningQuestionValue(DaoManager daoManager,
+	public static PCMMPlanningQuestionValue getNewPCMMPlanningQuestionValue(IDaoManager daoManager,
 			PCMMPlanningQuestion question, User user, Tag tag) {
 
 		assertNotNull(daoManager);
@@ -1131,7 +1206,7 @@ public class TestEntityFactory {
 	 * @param model      the model
 	 * @return a new generated pcmm planning parameter
 	 */
-	public static PCMMPlanningParam getNewPCMMPlanningParam(DaoManager daoManager, Model model) {
+	public static PCMMPlanningParam getNewPCMMPlanningParam(IDaoManager daoManager, Model model) {
 		return getNewPCMMPlanningParam(daoManager, model, null);
 	}
 
@@ -1141,7 +1216,7 @@ public class TestEntityFactory {
 	 * @param parent     the parent to associate
 	 * @return a new generated pcmm planning parameter
 	 */
-	public static PCMMPlanningParam getNewPCMMPlanningParam(DaoManager daoManager, Model model,
+	public static PCMMPlanningParam getNewPCMMPlanningParam(IDaoManager daoManager, Model model,
 			PCMMPlanningParam parent) {
 
 		// create pcmm planning parameter
@@ -1173,7 +1248,7 @@ public class TestEntityFactory {
 	 * @param param      the param to associate
 	 * @return a new generated pcmm planning select value
 	 */
-	public static PCMMPlanningSelectValue getNewPCMMPlanningSelectValue(DaoManager daoManager,
+	public static PCMMPlanningSelectValue getNewPCMMPlanningSelectValue(IDaoManager daoManager,
 			PCMMPlanningParam param) {
 
 		// create pcmm planning select value
@@ -1205,7 +1280,7 @@ public class TestEntityFactory {
 	 * @param tag        the tag to associate
 	 * @return a new generated pcmm planning value
 	 */
-	public static PCMMPlanningValue getNewPCMMPlanningValue(DaoManager daoManager, PCMMPlanningParam param,
+	public static PCMMPlanningValue getNewPCMMPlanningValue(IDaoManager daoManager, PCMMPlanningParam param,
 			IAssessable assessable, User user, Tag tag) {
 
 		assertNotNull(daoManager);
@@ -1248,7 +1323,7 @@ public class TestEntityFactory {
 	 * @param tag        the tag to associate
 	 * @return a new generated pcmm planning table item
 	 */
-	public static PCMMPlanningTableItem getNewPCMMPlanningTableItem(DaoManager daoManager, PCMMPlanningParam param,
+	public static PCMMPlanningTableItem getNewPCMMPlanningTableItem(IDaoManager daoManager, PCMMPlanningParam param,
 			IAssessable assessable, User user, Tag tag) {
 
 		assertNotNull(daoManager);
@@ -1290,7 +1365,7 @@ public class TestEntityFactory {
 	 * @param user       the creation user
 	 * @return a new generated pcmm planning table value
 	 */
-	public static PCMMPlanningTableValue getNewPCMMPlanningTableValue(DaoManager daoManager, PCMMPlanningParam param,
+	public static PCMMPlanningTableValue getNewPCMMPlanningTableValue(IDaoManager daoManager, PCMMPlanningParam param,
 			PCMMPlanningTableItem item, User user) {
 
 		assertNotNull(daoManager);
@@ -1328,7 +1403,7 @@ public class TestEntityFactory {
 	 * @param model      the model to associate
 	 * @return a new generated IntendedPurpose
 	 */
-	public static IntendedPurpose getNewIntendedPurpose(DaoManager daoManager, Model model) {
+	public static IntendedPurpose getNewIntendedPurpose(IDaoManager daoManager, Model model) {
 
 		assertNotNull(daoManager);
 
@@ -1355,7 +1430,7 @@ public class TestEntityFactory {
 	 * @param user        the user to associate
 	 * @return a new generated SystemRequirementValue
 	 */
-	public static UncertaintyValue getNewUncertaintyValue(DaoManager daoManager, Uncertainty uncertainty,
+	public static UncertaintyValue getNewUncertaintyValue(IDaoManager daoManager, Uncertainty uncertainty,
 			UncertaintyParam parameter, User user) {
 
 		assertNotNull(daoManager);
@@ -1368,7 +1443,7 @@ public class TestEntityFactory {
 		}
 		elt.setDateCreation(new Date());
 		if (uncertainty == null) {
-			uncertainty = getNewUncertainty(daoManager, null, user);
+			uncertainty = getNewUncertainty(daoManager, null, null, user);
 		}
 		elt.setUncertainty(uncertainty);
 		if (parameter == null) {
@@ -1391,7 +1466,8 @@ public class TestEntityFactory {
 	 * @param parent     the parent to associate
 	 * @return a new generated uncertainty parameter
 	 */
-	public static UncertaintyParam getNewUncertaintyParam(DaoManager daoManager, Model model, UncertaintyParam parent) {
+	public static UncertaintyParam getNewUncertaintyParam(IDaoManager daoManager, Model model,
+			UncertaintyParam parent) {
 
 		assertNotNull(daoManager);
 
@@ -1417,48 +1493,28 @@ public class TestEntityFactory {
 	}
 
 	/**
+	 * Gets the new uncertainty.
+	 *
 	 * @param daoManager the dao manager
-	 * @param model      the model to associate
-	 * @return a new generated uncertainty group
-	 */
-	public static UncertaintyGroup getNewUncertaintyGroup(DaoManager daoManager, Model model) {
-
-		assertNotNull(daoManager);
-
-		// create uncertainty
-		UncertaintyGroup elt = new UncertaintyGroup();
-		if (model != null) {
-			elt.setModel(model);
-		} else {
-			elt.setModel(getNewModel(daoManager));
-		}
-		elt.setName("UNCERTAINTY GROUP"); //$NON-NLS-1$
-		try {
-			elt = daoManager.getRepository(IUncertaintyGroupRepository.class).create(elt);
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
-		assertNotNull(elt);
-
-		return elt;
-	}
-
-	/**
-	 * @param daoManager the dao manager
+	 * @param model      the model
 	 * @param group      the uncertainty group to associate
 	 * @param user       the user to associate
 	 * @return a new generated uncertainty
 	 */
-	public static Uncertainty getNewUncertainty(DaoManager daoManager, UncertaintyGroup group, User user) {
+	public static Uncertainty getNewUncertainty(IDaoManager daoManager, Model model, Uncertainty group, User user) {
 
 		assertNotNull(daoManager);
 
 		// create uncertainty
 		Uncertainty elt = new Uncertainty();
-		elt.setGroup(group);
-		if (elt.getGroup() == null) {
-			elt.setGroup(TestEntityFactory.getNewUncertaintyGroup(daoManager, null));
+		if (model == null) {
+			elt.setModel(getNewModel(daoManager));
+		} else {
+			elt.setModel(model);
 		}
+		elt.setParent(group);
+		elt.setName("Name"); //$NON-NLS-1$
+		elt.setCreationDate(new Date());
 		elt.setUserCreation(user);
 		if (elt.getUserCreation() == null) {
 			elt.setUserCreation(getNewUser(daoManager));
@@ -1479,7 +1535,7 @@ public class TestEntityFactory {
 	 * @param parent     the parent to associate
 	 * @return a new generated SystemRequirement parameter
 	 */
-	public static SystemRequirementParam getNewSystemRequirementParam(DaoManager daoManager, Model model,
+	public static SystemRequirementParam getNewSystemRequirementParam(IDaoManager daoManager, Model model,
 			SystemRequirementParam parent) {
 
 		assertNotNull(daoManager);
@@ -1512,7 +1568,7 @@ public class TestEntityFactory {
 	 * @param user       the user to associate
 	 * @return a new generated SystemRequirement
 	 */
-	public static SystemRequirement getNewSystemRequirement(DaoManager daoManager, Model model,
+	public static SystemRequirement getNewSystemRequirement(IDaoManager daoManager, Model model,
 			SystemRequirement parent, User user) {
 
 		assertNotNull(daoManager);
@@ -1547,7 +1603,7 @@ public class TestEntityFactory {
 	 * @param user           the user to associate
 	 * @return a new generated SystemRequirementValue
 	 */
-	public static SystemRequirementValue getNewSystemRequirementValue(DaoManager daoManager,
+	public static SystemRequirementValue getNewSystemRequirementValue(IDaoManager daoManager,
 			SystemRequirement sysRequirement, SystemRequirementParam parameter, User user) {
 
 		assertNotNull(daoManager);
@@ -1635,6 +1691,30 @@ public class TestEntityFactory {
 	}
 
 	/**
+	 * Gets the new test generic param select value.
+	 *
+	 * @return the new test generic param select value
+	 */
+	public static TestGenericParamSelectValue getNewTestGenericParamSelectValue() {
+		return new TestGenericParamSelectValue();
+	}
+
+	/**
+	 * Gets the new test generic param select value.
+	 *
+	 * @param name the name
+	 * @param parameter the parameter
+	 * @return the new test generic param select value
+	 */
+	public static TestGenericParamSelectValue getNewTestGenericParamSelectValue(String name,
+			TestGenericParam parameter) {
+		TestGenericParamSelectValue selectValue = new TestGenericParamSelectValue();
+		selectValue.setName(name);
+		selectValue.setParameter(parameter);
+		return selectValue;
+	}
+
+	/**
 	 * @return an anonymous and stub generic value
 	 */
 	public static <P extends GenericParameter<P>> GenericValue<P, ?> getNewAnonymousGenericValue() {
@@ -1687,7 +1767,7 @@ public class TestEntityFactory {
 	 * @param parent     the parent to associate
 	 * @return a new generated Decision parameter
 	 */
-	public static DecisionParam getNewDecisionParam(DaoManager daoManager, Model model, DecisionParam parent) {
+	public static DecisionParam getNewDecisionParam(IDaoManager daoManager, Model model, DecisionParam parent) {
 
 		assertNotNull(daoManager);
 
@@ -1719,7 +1799,7 @@ public class TestEntityFactory {
 	 * @param user       the user to associate
 	 * @return a new generated Decision
 	 */
-	public static Decision getNewDecision(DaoManager daoManager, Model model, Decision parent, User user) {
+	public static Decision getNewDecision(IDaoManager daoManager, Model model, Decision parent, User user) {
 
 		assertNotNull(daoManager);
 
@@ -1753,7 +1833,7 @@ public class TestEntityFactory {
 	 * @param user       the user to associate
 	 * @return a new generated Decision
 	 */
-	public static DecisionValue getNewDecisionValue(DaoManager daoManager, Decision decision, DecisionParam parameter,
+	public static DecisionValue getNewDecisionValue(IDaoManager daoManager, Decision decision, DecisionParam parameter,
 			User user) {
 
 		assertNotNull(daoManager);
@@ -1787,7 +1867,7 @@ public class TestEntityFactory {
 	 * @param daoManager the dao manager
 	 * @return a new generated ARGParameters entity
 	 */
-	public static ARGParameters getNewARGParameters(DaoManager daoManager) {
+	public static ARGParameters getNewARGParameters(IDaoManager daoManager) {
 
 		assertNotNull(daoManager);
 
@@ -1818,8 +1898,8 @@ public class TestEntityFactory {
 	 * @param tag          the tag to set
 	 * @return a new generated ARGParametersQoIOption entity
 	 */
-	public static ARGParametersQoIOption getNewARGParametersQoIOption(DaoManager daoManager, ARGParameters argParameter,
-			QuantityOfInterest qoi, QuantityOfInterest tag) {
+	public static ARGParametersQoIOption getNewARGParametersQoIOption(IDaoManager daoManager,
+			ARGParameters argParameter, QuantityOfInterest qoi, QuantityOfInterest tag) {
 
 		assertNotNull(daoManager);
 
@@ -1843,17 +1923,5 @@ public class TestEntityFactory {
 		assertNotNull(elt);
 
 		return elt;
-	}
-
-	/**
-	 * @param type  the link type
-	 * @param value the link value
-	 * @return a string containing the parameter link in gson
-	 */
-	public static String getParameterLinkGson(FormFieldType type, String value) {
-		ParameterLinkGson linkData = new ParameterLinkGson();
-		linkData.type = type;
-		linkData.value = value;
-		return GsonTools.toGson(linkData);
 	}
 }

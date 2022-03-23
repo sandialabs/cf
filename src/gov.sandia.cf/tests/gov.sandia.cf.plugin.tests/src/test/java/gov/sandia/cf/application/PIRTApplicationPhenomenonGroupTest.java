@@ -27,6 +27,7 @@ import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QuantityOfInterest;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tests.TestTools;
 import gov.sandia.cf.tools.RscConst;
@@ -144,46 +145,6 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 	}
 
 	@Test
-	void testAddPhenomenonGroup_Error_IdLabelNull() {
-
-		// create phenomenon group
-		PhenomenonGroup group = TestEntityFactory.getNewPhenomenonGroup(getDaoManager(), null).copy();
-
-		// **********************************
-		// With PhenomenonGroup id label null
-		// **********************************
-		group.setIdLabel(null);
-		try {
-			getPIRTApp().addPhenomenonGroup(group);
-			fail("Adding a phenomenon group with id label null must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENONGROUP_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
-	void testAddPhenomenonGroup_Error_IdLabelEmpty() {
-
-		// create phenomenon group
-		PhenomenonGroup group = TestEntityFactory.getNewPhenomenonGroup(getDaoManager(), null).copy();
-
-		// ***********************************
-		// With PhenomenonGroup id label empty
-		// ***********************************
-		group.setIdLabel(""); //$NON-NLS-1$
-		try {
-			getPIRTApp().addPhenomenonGroup(group);
-			fail("Adding a phenomenon group with id label empty must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENONGROUP_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
 	void testAddPhenomenonGroup_Error_NameNull() {
 
 		// create phenomenon group
@@ -268,48 +229,6 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 			assertTrue(e.getCause() instanceof ConstraintViolationException);
 			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
 					RscConst.EX_PHENOMENONGROUP_QOI_NULL));
-		}
-	}
-
-	@Test
-	void testUpdatePhenomenonGroup_Error_IdLabelNull() {
-
-		// create phenomenon group
-		PhenomenonGroup group = TestEntityFactory.getNewPhenomenonGroup(getDaoManager(), null);
-		assertNotNull(group);
-
-		// **********************************
-		// With PhenomenonGroup id label null
-		// **********************************
-		group.setIdLabel(null);
-		try {
-			getPIRTApp().updatePhenomenonGroup(group);
-			fail("Updating a phenomenon group with id label null must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException | RollbackException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENONGROUP_IDLABEL_BLANK));
-		}
-	}
-
-	@Test
-	void testUpdatePhenomenonGroup_Error_IdLabelEmpty() {
-
-		// create phenomenon group
-		PhenomenonGroup group = TestEntityFactory.getNewPhenomenonGroup(getDaoManager(), null);
-		assertNotNull(group);
-
-		// ***********************************
-		// With PhenomenonGroup id label empty
-		// ***********************************
-		group.setIdLabel(""); //$NON-NLS-1$
-		try {
-			getPIRTApp().updatePhenomenonGroup(group);
-			fail("Updating a phenomenon group with id label empty must be impossible."); //$NON-NLS-1$
-		} catch (CredibilityException | RollbackException e) {
-			assertTrue(e.getCause() instanceof ConstraintViolationException);
-			assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
-					RscConst.EX_PHENOMENONGROUP_IDLABEL_BLANK));
 		}
 	}
 
@@ -486,7 +405,8 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 		}
 
 		List<PhenomenonGroup> phenomenonGroups = getPIRTApp().getPhenomenonGroups();
-		phenomenonGroups.sort(Comparator.comparing(PhenomenonGroup::getIdLabel));
+		phenomenonGroups
+				.sort(Comparator.comparing(PhenomenonGroup::getIdLabel, new StringWithNumberAndNullableComparator()));
 
 		// test
 		// group order

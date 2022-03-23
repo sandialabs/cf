@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PIRTLevelImportance;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPIRTLevelImportanceRepository extends ICRUDRepository<PIRTLevelImportance, Integer> {
 
 }

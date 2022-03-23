@@ -49,6 +49,7 @@ public class ConfigurationFile implements Serializable, IEntity<ConfigurationFil
 		ID("id"), //$NON-NLS-1$
 		PATH("path"), //$NON-NLS-1$
 		CF_FEATURE("feature"), //$NON-NLS-1$
+		USER_IMPORT("userImport"), //$NON-NLS-1$
 		MODEL("model"); //$NON-NLS-1$
 
 		private String field;
@@ -84,6 +85,13 @@ public class ConfigurationFile implements Serializable, IEntity<ConfigurationFil
 	@NotNull(message = RscConst.EX_CONFFILE_FEATURE_NULL)
 	@Enumerated(EnumType.STRING)
 	private CFFeature feature;
+
+	/**
+	 * The userImport field linked to USER_IMPORT_ID column
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "USER_IMPORT_ID")
+	private User userImport;
 
 	/**
 	 * The dateImport linked to DATE_IMPORT column
@@ -138,6 +146,16 @@ public class ConfigurationFile implements Serializable, IEntity<ConfigurationFil
 	}
 
 	@SuppressWarnings("javadoc")
+	public User getUserImport() {
+		return userImport;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setUserImport(User userImport) {
+		this.userImport = userImport;
+	}
+
+	@SuppressWarnings("javadoc")
 	public Date getDateImport() {
 		return Optional.ofNullable(dateImport).map(Date::getTime).map(Date::new).orElse(null);
 	}
@@ -164,7 +182,8 @@ public class ConfigurationFile implements Serializable, IEntity<ConfigurationFil
 	public String toString() {
 		return "ConfigurationFile [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "path=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				+ (path != null ? path : "") + RscTools.COMMA + "feature=" //$NON-NLS-1$ //$NON-NLS-2$
-				+ (feature != null ? feature : "") + RscTools.COMMA + "dateImport=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (feature != null ? feature : "") + RscTools.COMMA + "userImport=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (userImport != null ? userImport.toString() : "") + RscTools.COMMA + "dateImport=" //$NON-NLS-1$ //$NON-NLS-2$
 				+ (dateImport != null ? dateImport.toString() : "") + RscTools.COMMA + "model=" //$NON-NLS-1$ //$NON-NLS-2$
 				+ (model != null ? model.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -179,6 +198,8 @@ public class ConfigurationFile implements Serializable, IEntity<ConfigurationFil
 		ConfigurationFile entity = new ConfigurationFile();
 		entity.setPath(getPath());
 		entity.setFeature(getFeature());
+		entity.setUserImport(getUserImport());
+		entity.setDateImport(getDateImport());
 		entity.setModel(getModel());
 		return entity;
 	}

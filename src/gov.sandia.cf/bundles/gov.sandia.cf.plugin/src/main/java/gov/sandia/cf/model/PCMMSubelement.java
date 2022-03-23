@@ -158,17 +158,28 @@ public class PCMMSubelement
 		this.levelList = levelList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean sameAs(PCMMSubelement newImportable) {
+	public boolean sameKey(PCMMSubelement newImportable) {
+		return newImportable != null && StringTools.equals(getCode(), newImportable.getCode());
+	}
 
-		if (newImportable == null) {
+	@Override
+	public boolean sameAs(PCMMSubelement importable) {
+
+		if (importable == null) {
 			return false;
 		}
 
-		boolean sameName = StringTools.equals(getName(), newImportable.getName());
-		boolean sameCode = StringTools.equals(getCode(), newImportable.getCode());
+		boolean sameName = StringTools.equals(getName(), importable.getName());
+		boolean sameCode = StringTools.equals(getCode(), importable.getCode());
+		boolean sameElement = (getElement() == null && importable.getElement() == null)
+				|| (getElement() != null && importable.getElement() != null
+						&& StringTools.equals(getElement().getName(), importable.getElement().getName()));
 
-		return sameName && sameCode;
+		return sameName && sameCode && sameElement;
 	}
 
 	@Override

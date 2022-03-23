@@ -12,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
@@ -20,9 +22,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.uncertainty.UncertaintySpecification;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
 import gov.sandia.cf.dao.IUncertaintyConstraintRepository;
-import gov.sandia.cf.dao.IUncertaintyGroupRepository;
 import gov.sandia.cf.dao.IUncertaintyParamRepository;
 import gov.sandia.cf.dao.IUncertaintyRepository;
 import gov.sandia.cf.dao.IUncertaintySelectValueRepository;
@@ -31,19 +32,22 @@ import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Uncertainty;
 import gov.sandia.cf.model.UncertaintyConstraint;
-import gov.sandia.cf.model.UncertaintyGroup;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.UncertaintySelectValue;
 import gov.sandia.cf.model.UncertaintyValue;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.UncertaintySpecification;
+import gov.sandia.cf.model.query.EntityFilter;
+import gov.sandia.cf.model.query.NullParameter;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
 /**
+ * JUnit test class for the System Uncertainty Application
+ * 
  * @author Maxime N.
  *
- *         JUnit test class for the System Uncertainty Application
  */
 @RunWith(JUnitPlatform.class)
 class UncertaintyApplicationTest extends AbstractTestApplication {
@@ -89,10 +93,10 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// Construct data
 		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		UncertaintyGroup uncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), newModel);
+		Uncertainty uncertaintyGroup = TestEntityFactory.getNewUncertainty(getDaoManager(), newModel, null, null);
 
 		// Test
-		UncertaintyGroup found = getAppManager().getService(IUncertaintyApplication.class)
+		Uncertainty found = getAppManager().getService(IUncertaintyApplication.class)
 				.getUncertaintyGroupById(uncertaintyGroup.getId());
 		assertNotNull(found);
 		assertEquals(found.getId(), uncertaintyGroup.getId());
@@ -104,7 +108,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 	void test_getUncertaintyById_Working() {
 
 		// Construct data
-		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		// test
 		Uncertainty found = getAppManager().getService(IUncertaintyApplication.class)
@@ -120,11 +124,12 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// construct data
 		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), newModel);
-		TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), newModel);
+		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), newModel, null, null);
+		TestEntityFactory.getNewUncertainty(getDaoManager(), newModel, null, null);
+		TestEntityFactory.getNewUncertainty(getDaoManager(), newModel, newUncertainty, null);
 
 		// test
-		List<UncertaintyGroup> groupByModel = getAppManager().getService(IUncertaintyApplication.class)
+		List<Uncertainty> groupByModel = getAppManager().getService(IUncertaintyApplication.class)
 				.getUncertaintyGroupByModel(newModel);
 		assertNotNull(groupByModel);
 		assertEquals(2, groupByModel.size());
@@ -155,9 +160,12 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		UncertaintyParam newUncertaintyParam = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), null, null);
 		UncertaintyParam newUncertaintyParam2 = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), null, null);
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
+		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
 
 		Uncertainty uncertainty = new Uncertainty();
 		uncertainty.setUserCreation(newUser);
+		uncertainty.setCreationDate(new Date());
+		uncertainty.setName("Name"); //$NON-NLS-1$
 
 		UncertaintyValue value1 = new UncertaintyValue();
 		value1.setDateCreation(new Date());
@@ -174,32 +182,32 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		value2.setValue(null);
 
 		// Set parameter
-		uncertainty.setUncertaintyParameterList(Arrays.asList(value1, value2));
+		uncertainty.setValues(Arrays.asList(value1, value2));
 
 		// Group
-		UncertaintyGroup group = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
-		uncertainty.setGroup(group);
+		Uncertainty group = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
+		uncertainty.setParent(group);
 
 		// test
 		try {
 			Uncertainty added = getAppManager().getService(IUncertaintyApplication.class).addUncertainty(uncertainty,
-					newUser);
+					newModel, newUser);
 
 			assertNotNull(added);
 			assertNotNull(added.getId());
 
 			Uncertainty found = getDaoManager().getRepository(IUncertaintyRepository.class).findById(added.getId());
 
-			assertNotNull(found.getUncertaintyParameterList());
+			assertNotNull(found.getValues());
 			assertEquals(newUser, found.getUserCreation());
-			assertEquals(2, found.getUncertaintyParameterList().size());
-			assertTrue(found.getUncertaintyParameterList().stream()
+			assertEquals(2, found.getValues().size());
+			assertTrue(found.getValues().stream()
 					.anyMatch(v -> v.getParameter() != null && v.getParameter().equals(newUncertaintyParam)));
-			assertTrue(found.getUncertaintyParameterList().stream()
+			assertTrue(found.getValues().stream()
 					.anyMatch(v -> v.getParameter() != null && v.getParameter().equals(newUncertaintyParam2)));
-			assertTrue(found.getUncertaintyParameterList().stream()
+			assertTrue(found.getValues().stream()
 					.anyMatch(v -> v.getParameter() != null && v.getValue().equals("My VALUE"))); //$NON-NLS-1$
-			assertTrue(found.getUncertaintyParameterList().stream().anyMatch(v -> v.getValue() == null));
+			assertTrue(found.getValues().stream().anyMatch(v -> v.getValue() == null));
 
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
@@ -210,21 +218,23 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 	void test_addUncertainty_Null() {
 		// Construct data
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
 
 		// test
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).addUncertainty(null, newUser);
+			getAppManager().getService(IUncertaintyApplication.class).addUncertainty(null, model, newUser);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTYROW_NULL), e.getMessage());
+			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTY_NULL), e.getMessage());
 		}
 	}
 
 	@Test
 	void test_addUncertainty_UserNull() {
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
 		// test
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).addUncertainty(new Uncertainty(), null);
+			getAppManager().getService(IUncertaintyApplication.class).addUncertainty(new Uncertainty(), model, null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTYROW_USERNULL), e.getMessage());
@@ -232,131 +242,14 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 	}
 
 	@Test
-	void test_addUncertaintyGroup_WorkingNoValues() {
-
-		// construct data
-		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel, null);
-		TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel, null);
+	void test_addUncertainty_ModelNull() {
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-
-		UncertaintyGroup uncertaintyGroup = new UncertaintyGroup();
-		uncertaintyGroup.setName("GROUP"); //$NON-NLS-1$
-		uncertaintyGroup.setUserCreation(newUser);
-
 		// test
 		try {
-			// Create
-			UncertaintyGroup added = getAppManager().getService(IUncertaintyApplication.class)
-					.addUncertaintyGroup(uncertaintyGroup, newModel, newUser);
-			// Tests
-			assertNotNull(added);
-			assertNotNull(added.getId());
-
-			// Find
-			UncertaintyGroup found = getDaoManager().getRepository(IUncertaintyGroupRepository.class)
-					.findById(added.getId());
-
-			// Tests
-			assertNotNull(found.getUncertainties());
-			assertEquals(newUser, found.getUserCreation());
-			assertEquals(0, found.getUncertainties().size());
-
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	/* ************ addUncertaintyGroup ************* */
-	@Test
-	void test_addUncertaintyGroup_Working() {
-
-		// Construct data
-		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-
-		UncertaintyGroup uncertaintyGroup = new UncertaintyGroup();
-		uncertaintyGroup.setName("My Uncertainty Group"); //$NON-NLS-1$
-		uncertaintyGroup.setModel(newModel);
-		uncertaintyGroup.setUserCreation(newUser);
-
-		Uncertainty value1 = new Uncertainty();
-		value1.setGroup(uncertaintyGroup);
-		value1.setUserCreation(newUser);
-
-		Uncertainty value2 = new Uncertainty();
-		value2.setGroup(uncertaintyGroup);
-		value2.setUserCreation(newUser);
-		uncertaintyGroup.setUncertainties(Arrays.asList(value1, value2));
-
-		// Actions
-		try {
-			// Create
-			UncertaintyGroup added = getAppManager().getService(IUncertaintyApplication.class)
-					.addUncertaintyGroup(uncertaintyGroup, newModel, newUser);
-
-			assertNotNull(added);
-			assertNotNull(added.getId());
-
-			// Retrieve
-			UncertaintyGroup found = getDaoManager().getRepository(IUncertaintyGroupRepository.class)
-					.findById(added.getId());
-
-			// Tests
-			assertEquals(added.getName(), found.getName());
-			assertEquals(newUser, found.getUserCreation());
-			assertEquals(newModel, found.getModel());
-			assertNotNull(found.getUncertainties());
-			assertEquals(2, found.getUncertainties().size());
-
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	@Test
-	void test_addUncertaintyGroup_ModelNull() {
-		// Create data
-		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-
-		// test
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).addUncertaintyGroup(new UncertaintyGroup(), null,
-					newUser);
+			getAppManager().getService(IUncertaintyApplication.class).addUncertainty(new Uncertainty(), null, newUser);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_MODELNULL), e.getMessage());
-		}
-	}
-
-	@Test
-	void test_addUncertaintyGroup_Null() {
-
-		// construct data
-		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-
-		// test
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).addUncertaintyGroup(null, newModel, newUser);
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_NULL), e.getMessage());
-		}
-	}
-
-	@Test
-	void test_addUncertaintyGroup_UserNull() {
-
-		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-
-		// test
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).addUncertaintyGroup(new UncertaintyGroup(),
-					newModel, null);
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTYGROUP_USERNULL), e.getMessage());
+			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_ADD_UNCERTAINTY_MODELNULL), e.getMessage());
 		}
 	}
 
@@ -372,7 +265,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		UncertaintyParam newUncertaintyParam2 = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel,
 				null);
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, newUser);
+		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), newModel, null, newUser);
 
 		UncertaintyValue value1 = TestEntityFactory.getNewUncertaintyValue(getDaoManager(), uncertainty,
 				newUncertaintyParam, newUser);
@@ -382,7 +275,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		value2.setValue(null);
 
 		getDaoManager().getRepository(IUncertaintyRepository.class).refresh(uncertainty);
-		assertEquals(2, uncertainty.getUncertaintyParameterList().size());
+		assertEquals(2, uncertainty.getValues().size());
 
 		// update
 		value1.setValue("UPDATED"); //$NON-NLS-1$
@@ -396,15 +289,15 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 			assertNotNull(updated);
 			assertNotNull(updated.getId());
 			assertEquals(uncertainty.getId(), updated.getId());
-			assertNotNull(updated.getUncertaintyParameterList());
+			assertNotNull(updated.getValues());
 			assertEquals(uncertainty.getUserCreation(), updated.getUserCreation());
-			assertEquals(2, updated.getUncertaintyParameterList().size());
-			assertTrue(updated.getUncertaintyParameterList().stream()
+			assertEquals(2, updated.getValues().size());
+			assertTrue(updated.getValues().stream()
 					.anyMatch(v -> v.getParameter() != null && v.getParameter().equals(newUncertaintyParam)));
-			assertTrue(updated.getUncertaintyParameterList().stream()
+			assertTrue(updated.getValues().stream()
 					.anyMatch(v -> v.getParameter() != null && v.getParameter().equals(newUncertaintyParam2)));
-			assertTrue(updated.getUncertaintyParameterList().stream().anyMatch(v -> "UPDATED".equals(v.getValue()))); //$NON-NLS-1$
-			assertTrue(updated.getUncertaintyParameterList().stream().anyMatch(v -> "UPDATED 2".equals(v.getValue()))); //$NON-NLS-1$
+			assertTrue(updated.getValues().stream().anyMatch(v -> "UPDATED".equals(v.getValue()))); //$NON-NLS-1$
+			assertTrue(updated.getValues().stream().anyMatch(v -> "UPDATED 2".equals(v.getValue()))); //$NON-NLS-1$
 
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
@@ -444,7 +337,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 	@Test
 	void test_updateUncertainty_UserNull() {
 
-		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		// test
 		try {
@@ -455,66 +348,6 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		}
 	}
 
-	/* ************ updateUncertainty ************* */
-
-	@Test
-	void test_updateUncertaintyGroup_Working() {
-
-		// construct data
-		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
-		User newUser = TestEntityFactory.getNewUser(getDaoManager());
-
-		// Generate group
-		UncertaintyGroup uncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), newModel);
-		assertNotNull(uncertaintyGroup);
-
-		// Create uncertainty
-		Uncertainty uncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, newUser);
-		assertNotNull(uncertainty);
-		assertNotNull(uncertainty.getGroup());
-
-		// test
-		try {
-			// Update
-			uncertaintyGroup.setName("GROUP UPDATED"); //$NON-NLS-1$
-			uncertaintyGroup.setUserCreation(newUser);
-			uncertaintyGroup.setUncertainties(Arrays.asList(uncertainty));
-			UncertaintyGroup updated = getAppManager().getService(IUncertaintyApplication.class)
-					.updateUncertaintyGroup(uncertaintyGroup);
-
-			assertEquals(uncertaintyGroup.getId(), updated.getId());
-			assertEquals("GROUP UPDATED", updated.getName()); //$NON-NLS-1$
-			assertNotNull(updated.getUncertainties());
-			assertEquals(uncertaintyGroup.getUserCreation(), updated.getUserCreation());
-			assertEquals(1, updated.getUncertainties().size());
-
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
-	}
-
-	@Test
-	void test_updateUncertaintyGroup_Null() {
-		// test
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).updateUncertaintyGroup(null);
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_UPDATE_UNCERTAINTYGROUP_NULL), e.getMessage());
-		}
-	}
-
-	@Test
-	void test_updateUncertaintyGroup_IdNull() {
-		// test
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).updateUncertaintyGroup(new UncertaintyGroup());
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_UPDATE_UNCERTAINTYGROUP_IDNULL), e.getMessage());
-		}
-	}
-
 	/* ************ deleteUncertainty************* */
 
 	@Test
@@ -522,12 +355,12 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// construct data
 		// kept
-		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 		UncertaintyValue newUncertaintyValue = TestEntityFactory.getNewUncertaintyValue(getDaoManager(), newUncertainty,
 				null, null);
 
 		// to delete
-		Uncertainty newUncertainty2 = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		Uncertainty newUncertainty2 = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 		TestEntityFactory.getNewUncertaintyValue(getDaoManager(), newUncertainty2, null, null);
 		TestEntityFactory.getNewUncertaintyValue(getDaoManager(), newUncertainty2, null, null);
 
@@ -575,27 +408,25 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		}
 	}
 
-	/* ************ deleteUncertaintyGroup************* */
-
 	@Test
 	void test_deleteUncertaintyGroup_NoUncertaintyWorking() {
 
 		// construct data
 		// kept
-		UncertaintyGroup newUncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
+		Uncertainty newUncertaintyGroup = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		// to delete
-		UncertaintyGroup newUncertaintyGroup2 = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
+		Uncertainty newUncertaintyGroup2 = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertaintyGroup(newUncertaintyGroup2);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
 
 		// Test
-		List<UncertaintyGroup> findAll = getDaoManager().getRepository(IUncertaintyGroupRepository.class).findAll();
+		List<Uncertainty> findAll = getDaoManager().getRepository(IUncertaintyRepository.class).findAll();
 		assertNotNull(findAll);
 		assertEquals(1, findAll.size());
 		assertEquals(newUncertaintyGroup, findAll.iterator().next());
@@ -606,34 +437,39 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// construct data
 		// kept
-		UncertaintyGroup newUncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
-		Uncertainty newUncertaintyG1_1 = TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup,
+		Uncertainty newUncertaintyGroup = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
+		Uncertainty newUncertaintyG1_1 = TestEntityFactory.getNewUncertainty(getDaoManager(), null, newUncertaintyGroup,
 				null);
 
 		// to delete
-		UncertaintyGroup newUncertaintyGroup2 = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
-		Uncertainty newUncertaintyG2_1 = TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup2,
-				null);
-		Uncertainty newUncertaintyG2_2 = TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup2,
-				null);
+		Uncertainty newUncertaintyGroup2 = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
+		Uncertainty newUncertaintyG2_1 = TestEntityFactory.getNewUncertainty(getDaoManager(), null,
+				newUncertaintyGroup2, null);
+		Uncertainty newUncertaintyG2_2 = TestEntityFactory.getNewUncertainty(getDaoManager(), null,
+				newUncertaintyGroup2, null);
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertaintyGroup(newUncertaintyGroup2);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
 
 		// Test
 		// get uncertainty groups
-		List<UncertaintyGroup> findAllUncertaintyGroup = getDaoManager()
-				.getRepository(IUncertaintyGroupRepository.class).findAll();
+		Map<EntityFilter, Object> filters = new HashMap<>();
+		filters.put(Uncertainty.Filter.PARENT, NullParameter.NULL);
+		List<Uncertainty> findAllUncertaintyGroup = getDaoManager().getRepository(IUncertaintyRepository.class)
+				.findBy(filters);
 		assertNotNull(findAllUncertaintyGroup);
 		assertEquals(1, findAllUncertaintyGroup.size());
 		assertEquals(newUncertaintyGroup, findAllUncertaintyGroup.iterator().next());
 
 		// get uncertainties
-		List<Uncertainty> findAllUncertainties = getDaoManager().getRepository(IUncertaintyRepository.class).findAll();
+		filters = new HashMap<>();
+		filters.put(Uncertainty.Filter.PARENT, NullParameter.NOT_NULL);
+		List<Uncertainty> findAllUncertainties = getDaoManager().getRepository(IUncertaintyRepository.class)
+				.findBy(filters);
 		assertNotNull(findAllUncertainties);
 		assertEquals(1, findAllUncertainties.size());
 		assertEquals(newUncertaintyG1_1, findAllUncertainties.iterator().next());
@@ -641,30 +477,6 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		assertNull(getDaoManager().getRepository(IUncertaintyRepository.class).findById(newUncertaintyG2_1.getId()));
 		assertNull(getDaoManager().getRepository(IUncertaintyRepository.class).findById(newUncertaintyG2_2.getId()));
 
-	}
-
-	@Test
-	void test_deleteUncertaintyGroup_Null() {
-
-		// delete
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertaintyGroup(null);
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYGROUP_NULL), e.getMessage());
-		}
-	}
-
-	@Test
-	void test_deleteUncertaintyGroup_IdNull() {
-
-		// delete
-		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertaintyGroup(new UncertaintyGroup());
-			fail("This shouldn't work"); //$NON-NLS-1$
-		} catch (CredibilityException e) {
-			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYGROUP_IDNULL), e.getMessage());
-		}
 	}
 
 	/* ************ deleteAllUncertaintyParam ************* */
@@ -957,6 +769,94 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 		}
 	}
 
+	/* ************ deleteAllUncertaintyConstraint ************* */
+
+	@Test
+	void test_deleteAllUncertaintyConstraint_Working() {
+
+		// construct data
+		UncertaintyParam parameter = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), null, null);
+		// Kept
+		UncertaintyConstraint newUncertaintyConstraint = TestEntityFactory.getNewGenericConstraint(getDaoManager(),
+				UncertaintyConstraint.class, parameter, IUncertaintyConstraintRepository.class);
+		// to delete
+		UncertaintyConstraint newUncertaintyConstraint2 = TestEntityFactory.getNewGenericConstraint(getDaoManager(),
+				UncertaintyConstraint.class, parameter, IUncertaintyConstraintRepository.class);
+		UncertaintyConstraint newUncertaintyConstraint3 = TestEntityFactory.getNewGenericConstraint(getDaoManager(),
+				UncertaintyConstraint.class, parameter, IUncertaintyConstraintRepository.class);
+
+		// delete
+		try {
+			getAppManager().getService(IUncertaintyApplication.class).deleteAllUncertaintyConstraint(
+					Arrays.asList(newUncertaintyConstraint2, newUncertaintyConstraint3));
+		} catch (CredibilityException e) {
+			fail(e.getMessage());
+		}
+
+		// test
+		List<UncertaintyConstraint> findAll = getDaoManager().getRepository(IUncertaintyConstraintRepository.class)
+				.findAll();
+		assertNotNull(findAll);
+		assertEquals(1, findAll.size());
+		assertEquals(newUncertaintyConstraint, findAll.iterator().next());
+	}
+
+	/* ************ deleteUncertaintyConstraint ************* */
+
+	@Test
+	void test_deleteUncertaintyConstraint_Working() {
+
+		// construct data
+		UncertaintyParam parameter = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), null, null);
+		// Kept
+		UncertaintyConstraint newUncertaintyConstraint = TestEntityFactory.getNewGenericConstraint(getDaoManager(),
+				UncertaintyConstraint.class, parameter, IUncertaintyConstraintRepository.class);
+		// to delete
+		UncertaintyConstraint newUncertaintyConstraint2 = TestEntityFactory.getNewGenericConstraint(getDaoManager(),
+				UncertaintyConstraint.class, parameter, IUncertaintyConstraintRepository.class);
+
+		// delete
+		try {
+			getAppManager().getService(IUncertaintyApplication.class)
+					.deleteUncertaintyConstraint(newUncertaintyConstraint2);
+		} catch (CredibilityException e) {
+			fail(e.getMessage());
+		}
+
+		// test
+		List<UncertaintyConstraint> findAll = getDaoManager().getRepository(IUncertaintyConstraintRepository.class)
+				.findAll();
+		assertNotNull(findAll);
+		assertEquals(1, findAll.size());
+		assertEquals(newUncertaintyConstraint, findAll.iterator().next());
+	}
+
+	@Test
+	void test_deleteUncertaintyConstraint_Null() {
+
+		// delete
+		try {
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertaintyConstraint(null);
+			fail("This shouldn't work"); //$NON-NLS-1$
+		} catch (CredibilityException e) {
+			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_NULL), e.getMessage());
+		}
+	}
+
+	@Test
+	void test_deleteUncertaintyConstraint_IdNull() {
+
+		// delete
+		try {
+			getAppManager().getService(IUncertaintyApplication.class)
+					.deleteUncertaintyConstraint(new UncertaintyConstraint());
+			fail("This shouldn't work"); //$NON-NLS-1$
+		} catch (CredibilityException e) {
+			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_IDNULL),
+					e.getMessage());
+		}
+	}
+
 	/* ************ isUncertaintyEnabled ************* */
 
 	@Test
@@ -996,21 +896,21 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 	@Test
 	void test_refreshUncertaintyGroup() {
 
-		UncertaintyGroup newUncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
+		Uncertainty newUncertaintyGroup = TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		// uncertainty in the group
-		TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup, null);
-		TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup, null);
+		TestEntityFactory.getNewUncertainty(getDaoManager(), null, newUncertaintyGroup, null);
+		TestEntityFactory.getNewUncertainty(getDaoManager(), null, newUncertaintyGroup, null);
 
 		// uncertainty not in the group
-		TestEntityFactory.getNewUncertainty(getDaoManager(), null, null);
+		TestEntityFactory.getNewUncertainty(getDaoManager(), null, null, null);
 
 		getAppManager().getService(IUncertaintyApplication.class).refresh(newUncertaintyGroup);
 
 		// test
-		assertNotNull(newUncertaintyGroup.getUncertainties());
-		assertFalse(newUncertaintyGroup.getUncertainties().isEmpty());
-		assertEquals(2, newUncertaintyGroup.getUncertainties().size());
+		assertNotNull(newUncertaintyGroup.getChildren());
+		assertFalse(newUncertaintyGroup.getChildren().isEmpty());
+		assertEquals(2, newUncertaintyGroup.getChildren().size());
 	}
 
 }

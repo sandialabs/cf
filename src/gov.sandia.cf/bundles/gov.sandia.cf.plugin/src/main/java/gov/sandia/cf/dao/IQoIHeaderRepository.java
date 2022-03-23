@@ -11,6 +11,7 @@ import gov.sandia.cf.model.QoIHeader;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IQoIHeaderRepository extends ICRUDRepository<QoIHeader, Integer> {
 
 }

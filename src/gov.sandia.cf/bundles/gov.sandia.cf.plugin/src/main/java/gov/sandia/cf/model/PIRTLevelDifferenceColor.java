@@ -186,6 +186,14 @@ public class PIRTLevelDifferenceColor
 		this.explanation = explanation;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PIRTLevelDifferenceColor newImportable) {
+		return newImportable != null && StringTools.equals(getDescription(), newImportable.getDescription());
+	}
+
 	@Override
 	public boolean sameAs(PIRTLevelDifferenceColor newImportable) {
 

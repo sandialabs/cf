@@ -12,6 +12,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 import gov.sandia.cf.parts.ui.pcmm.PCMMViewManager;
 
 /**
@@ -76,8 +77,9 @@ public class PCMMEvidenceTreeSimplifiedContentProvider implements ITreeContentPr
 						.collect(Collectors.toList()));
 			}
 
-			// sort by name
-			evidenceToDisplay.sort(Comparator.comparing(PCMMEvidence::getName));
+			// sort by generated id (user choice)
+			evidenceToDisplay.sort(
+					Comparator.comparing(PCMMEvidence::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
 			tab = evidenceToDisplay.toArray();
 		}

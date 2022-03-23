@@ -11,6 +11,7 @@ import gov.sandia.cf.model.SystemRequirementSelectValue;
  * @author Maxime N.
  *
  */
+@Repository
 public interface ISystemRequirementSelectValueRepository extends ICRUDRepository<SystemRequirementSelectValue, Integer> {
 
 }

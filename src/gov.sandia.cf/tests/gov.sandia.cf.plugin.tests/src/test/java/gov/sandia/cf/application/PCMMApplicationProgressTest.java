@@ -21,8 +21,10 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.impl.PCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pcmm.PCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.Model;
@@ -37,6 +39,7 @@ import gov.sandia.cf.model.PCMMPlanningTableItem;
 import gov.sandia.cf.model.PCMMPlanningValue;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Tag;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
@@ -378,13 +381,20 @@ class PCMMApplicationProgressTest extends AbstractTestApplication {
 		PCMMElement element = mock(PCMMElement.class);
 		when(element.getSubElementList()).thenReturn(listSub);
 
-		// PCMMApplication
-		IPCMMApplication pcmmPlanApp = Mockito.spy(getAppManager().getService(IPCMMApplication.class));
-
 		int progress;
 		try {
-			when(pcmmPlanApp.getAssessmentByElementInSubelement(element, null)).thenReturn(listAssesst);
-			progress = pcmmPlanApp.computeAssessProgress(element, null, PCMMMode.DEFAULT);
+
+			ApplicationManager appMgr = Mockito.spy(getAppManager());
+			IPCMMAssessmentApp assesstApp = Mockito.spy(getAppManager().getService(IPCMMAssessmentApp.class));
+			IPCMMApplication pcmmApp = Mockito.spy(getAppManager().getService(IPCMMApplication.class));
+
+			when(pcmmApp.getAppMgr()).thenReturn(appMgr);
+			when(appMgr.getService(IPCMMAssessmentApp.class)).thenReturn(assesstApp);
+			when(assesstApp.getAssessmentByElement(Mockito.any(PCMMElement.class), Mockito.any(Map.class)))
+					.thenReturn(listAssesst);
+
+			when(assesstApp.getAssessmentByElementInSubelement(element, null)).thenReturn(listAssesst);
+			progress = pcmmApp.computeAssessProgress(element, null, PCMMMode.DEFAULT);
 			int expectedProgress = 1;
 			assertEquals(expectedProgress, progress);
 		} catch (CredibilityException e) {
@@ -405,12 +415,16 @@ class PCMMApplicationProgressTest extends AbstractTestApplication {
 		when(assesst.getElement()).thenReturn(element);
 		listAssesst.add(assesst);
 
-		// PCMMApplication
-		IPCMMApplication pcmmPlanApp = Mockito.spy(getAppManager().getService(IPCMMApplication.class));
+		ApplicationManager appMgr = Mockito.spy(getAppManager());
+		IPCMMAssessmentApp assesstApp = Mockito.spy(getAppManager().getService(IPCMMAssessmentApp.class));
+		IPCMMApplication pcmmApp = Mockito.spy(getAppManager().getService(IPCMMApplication.class));
 
-		when(pcmmPlanApp.getAssessmentByElement(Mockito.any(PCMMElement.class), Mockito.any(Map.class)))
+		when(pcmmApp.getAppMgr()).thenReturn(appMgr);
+		when(appMgr.getService(IPCMMAssessmentApp.class)).thenReturn(assesstApp);
+		when(assesstApp.getAssessmentByElement(Mockito.any(PCMMElement.class), Mockito.any(Map.class)))
 				.thenReturn(listAssesst);
-		int progress = pcmmPlanApp.computeAssessProgress(element, null, PCMMMode.SIMPLIFIED);
+
+		int progress = pcmmApp.computeAssessProgress(element, null, PCMMMode.SIMPLIFIED);
 		int expectedProgress = 1;
 		assertEquals(expectedProgress, progress);
 	}

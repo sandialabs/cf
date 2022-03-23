@@ -55,6 +55,14 @@ public class SystemRequirementConstraint extends GenericParameterConstraint<Syst
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(SystemRequirementConstraint newImportable) {
+		return newImportable != null && StringTools.equals(getRule(), newImportable.getRule());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(SystemRequirementConstraint importable) {
 
 		if (importable == null) {

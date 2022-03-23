@@ -26,6 +26,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.global.IUserApplication;
 import gov.sandia.cf.dao.IPCMMAssessmentRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
@@ -122,13 +123,13 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assessment.setRoleCreation(role);
 
 		// Create
-		assessment = getPCMMApp().addAssessment(assessment);
+		assessment = getPCMMAssessmentApp().addAssessment(assessment);
 
 		// Apply changes
 		assessment.setElement(element);
 		assessment.setSubelement(subelement);
 		assessment.setTag(tag);
-		assessment = getPCMMApp().updateAssessment(assessment, user, role);
+		assessment = getPCMMAssessmentApp().updateAssessment(assessment, user, role);
 
 		// Test creation
 		assertNotNull(assessment);
@@ -137,7 +138,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		// ************************
 		// Get Assessment by Id
 		// ************************
-		PCMMAssessment assessmentById = getPCMMApp().getAssessmentById(assessment.getId());
+		PCMMAssessment assessmentById = getPCMMAssessmentApp().getAssessmentById(assessment.getId());
 
 		// Check
 		assertNotNull(assessmentById);
@@ -148,7 +149,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		// ******************************
 		PCMMAssessment updatedAssessment = null;
 		assessment.setLevel(level1);
-		updatedAssessment = getPCMMApp().updateAssessment(assessment, user, role);
+		updatedAssessment = getPCMMAssessmentApp().updateAssessment(assessment, user, role);
 		assertEquals(updatedAssessment.getUserCreation().getId(), user.getId());
 		assertEquals(updatedAssessment.getRoleCreation().getId(), role.getId());
 		assertEquals(updatedAssessment.getLevel().getId(), level1.getId());
@@ -163,40 +164,40 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		filters.put(PCMMAssessment.Filter.TAG, tag);
 
 		// Get by element
-		assessmentBy = getPCMMApp().getAssessmentByElement(element, filters);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentByElement(element, filters);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// Get by sub-element
-		assessmentBy = getPCMMApp().getAssessmentBySubelement(subelement, filters);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentBySubelement(subelement, filters);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// Get by sub-element in element
-		assessmentBy = getPCMMApp().getAssessmentByElementInSubelement(element, tag);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentByElementInSubelement(element, tag);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// Get by role user element tag
-		assessmentBy = getPCMMApp().getAssessmentByRoleAndUserAndEltAndTag(role, user, element, tag);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentByRoleAndUserAndEltAndTag(role, user, element, tag);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// Get by role user sub-element tag
-		assessmentBy = getPCMMApp().getAssessmentByRoleAndUserAndSubeltAndTag(role, user, subelement, tag);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentByRoleAndUserAndSubeltAndTag(role, user, subelement, tag);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// Get by tag
-		assessmentBy = getPCMMApp().getAssessmentByTag(tag);
+		assessmentBy = getPCMMAssessmentApp().getAssessmentByTag(tag);
 		assertFalse(assessmentBy.isEmpty());
 		assertEquals(1, assessmentBy.size());
 
 		// ******************************
 		// Delete assessment
 		// ******************************
-		getPCMMApp().deleteAssessment(updatedAssessment);
-		assertNull(getPCMMApp().getAssessmentById(updatedAssessment.getId()));
+		getPCMMAssessmentApp().deleteAssessment(updatedAssessment);
+		assertNull(getPCMMAssessmentApp().getAssessmentById(updatedAssessment.getId()));
 
 		// ************************
 		// Create assessment list
@@ -206,10 +207,10 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assessment.setComment("My_comment"); //$NON-NLS-1$
 		assessment.setUserCreation(user);
 		assessment.setRoleCreation(role);
-		assessment = getPCMMApp().addAssessment(assessment);
+		assessment = getPCMMAssessmentApp().addAssessment(assessment);
 
 		// Get list
-		List<PCMMAssessment> assessments = getPCMMApp().getActiveAssessmentList();
+		List<PCMMAssessment> assessments = getPCMMAssessmentApp().getActiveAssessmentList();
 		assertNotNull(assessments);
 		assertFalse(assessments.isEmpty());
 		assertEquals(1, assessments.size());
@@ -217,8 +218,8 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		// ******************************
 		// Delete assessment List
 		// ******************************
-		getPCMMApp().deleteAssessment(assessments);
-		assertNull(getPCMMApp().getAssessmentById(assessments.get(0).getId()));
+		getPCMMAssessmentApp().deleteAssessment(assessments);
+		assertNull(getPCMMAssessmentApp().getAssessmentById(assessments.get(0).getId()));
 	}
 
 	/* ************** getAssessmentById ************* */
@@ -226,7 +227,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	@Test
 	void test_getAssessmentById_Errors() {
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().getAssessmentById(null);
+			getPCMMAssessmentApp().getAssessmentById(null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_GETASSESSTBYID_IDNULL), e.getMessage());
 	}
@@ -240,7 +241,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(defaultUser);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addAssessment(null);
+			getPCMMAssessmentApp().addAssessment(null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_ADDASSESSTBYID_ASSESSTNULL), e.getMessage());
 	}
@@ -256,7 +257,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assessment.setDateCreation(new Date());
 		assessment.setRoleCreation(defaultRole);
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addAssessment(assessment);
+			getPCMMAssessmentApp().addAssessment(assessment);
 		});
 		assertTrue(e.getCause() instanceof ConstraintViolationException);
 		assertTrue(TestTools.containsConstraintViolationException(((ConstraintViolationException) e.getCause()),
@@ -274,7 +275,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assessment.setDateCreation(new Date());
 		assessment.setUserCreation(defaultUser);
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().addAssessment(assessment);
+			getPCMMAssessmentApp().addAssessment(assessment);
 		});
 		assertTrue(e.getCause() instanceof ConstraintViolationException);
 		assertFalse(((ConstraintViolationException) e.getCause()).getConstraintViolations().isEmpty());
@@ -287,7 +288,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	@Test
 	void test_updateAssessment_Error_Null() {
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(null, null, null);
+			getPCMMAssessmentApp().updateAssessment(null, null, null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_ASSESSTNULL), e.getMessage());
 	}
@@ -296,7 +297,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	void test_updateAssessment_Error_IdNull() {
 		PCMMAssessment assessment = new PCMMAssessment();
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(assessment, null, null);
+			getPCMMAssessmentApp().updateAssessment(assessment, null, null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_IDNULL), e.getMessage());
 	}
@@ -309,7 +310,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(assessment);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(assessment, null, assessment.getRoleCreation());
+			getPCMMAssessmentApp().updateAssessment(assessment, null, assessment.getRoleCreation());
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_DIFFUSERNULL), e.getMessage());
 	}
@@ -326,7 +327,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(otherUser);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(assessment, otherUser, assessment.getRoleCreation());
+			getPCMMAssessmentApp().updateAssessment(assessment, otherUser, assessment.getRoleCreation());
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_DIFFUSERNULL), e.getMessage());
 	}
@@ -339,7 +340,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(assessment);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(assessment, assessment.getUserCreation(), null);
+			getPCMMAssessmentApp().updateAssessment(assessment, assessment.getUserCreation(), null);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_DIFFROLENULL), e.getMessage());
 	}
@@ -356,7 +357,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(defaultRole);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().updateAssessment(assessment, assessment.getUserCreation(), defaultRole);
+			getPCMMAssessmentApp().updateAssessment(assessment, assessment.getUserCreation(), defaultRole);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_DIFFROLENULL), e.getMessage());
 	}
@@ -367,7 +368,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	void test_deleteAssessment_Error_Null() {
 		PCMMAssessment assessment = null;
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().deleteAssessment(assessment);
+			getPCMMAssessmentApp().deleteAssessment(assessment);
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_DELETEASSESSTBYID_ASSESSTNULL), e.getMessage());
 	}
@@ -375,7 +376,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	@Test
 	void test_deleteAssessment_Error_IdNull() {
 		CredibilityException e = assertThrows(CredibilityException.class, () -> {
-			getPCMMApp().deleteAssessment(new PCMMAssessment());
+			getPCMMAssessmentApp().deleteAssessment(new PCMMAssessment());
 		});
 		assertEquals(RscTools.getString(RscConst.EX_PCMM_DELETEASSESSTBYID_IDNULL), e.getMessage());
 	}
@@ -384,7 +385,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 	void test_deleteAssessment_Error_ListNull() {
 		List<PCMMAssessment> addedAssessmentList = null;
 		try {
-			getPCMMApp().deleteAssessment(addedAssessmentList);
+			getPCMMAssessmentApp().deleteAssessment(addedAssessmentList);
 		} catch (CredibilityException e) {
 			fail("Must not throw an exception"); //$NON-NLS-1$
 		}
@@ -441,7 +442,7 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		assertNotNull(addedAssessmentTagged.getId());
 
 		// find by element
-		List<PCMMAssessment> findByElement = getPCMMApp().getAssessmentByElement(createdElement, null);
+		List<PCMMAssessment> findByElement = getPCMMAssessmentApp().getAssessmentByElement(createdElement, null);
 		assertNotNull(findByElement);
 		assertEquals(2, findByElement.size());
 	}
@@ -457,10 +458,10 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		PCMMAssessment assess = TestEntityFactory.getNewPCMMAssessment(getDaoManager(), role, user, null, null);
 		PCMMAssessment assessTag = TestEntityFactory.getNewPCMMAssessment(getDaoManager(), role, user, null, null);
 		assessTag.setTag(tag);
-		getPCMMApp().updateAssessment(assessTag, user, role);
+		getPCMMAssessmentApp().updateAssessment(assessTag, user, role);
 
 		// test
-		List<PCMMAssessment> evidenceByTag = getPCMMApp().getAssessmentByTag(tag);
+		List<PCMMAssessment> evidenceByTag = getPCMMAssessmentApp().getAssessmentByTag(tag);
 		assertTrue(evidenceByTag.contains(assessTag));
 		assertFalse(evidenceByTag.contains(assess));
 	}
@@ -475,13 +476,13 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 		PCMMAssessment evidence = TestEntityFactory.getNewPCMMAssessment(getDaoManager(), role, user, null, null);
 		PCMMAssessment evidenceTag1 = TestEntityFactory.getNewPCMMAssessment(getDaoManager(), role, user, null, null);
 		evidenceTag1.setTag(tag1);
-		getPCMMApp().updateAssessment(evidenceTag1, user, role);
+		getPCMMAssessmentApp().updateAssessment(evidenceTag1, user, role);
 		PCMMAssessment evidenceTag2 = TestEntityFactory.getNewPCMMAssessment(getDaoManager(), role, user, null, null);
 		evidenceTag2.setTag(tag2);
-		getPCMMApp().updateAssessment(evidenceTag2, user, role);
+		getPCMMAssessmentApp().updateAssessment(evidenceTag2, user, role);
 
 		// test
-		List<PCMMAssessment> evidenceByTag = getPCMMApp().getAssessmentByTag(Arrays.asList(tag1, tag2));
+		List<PCMMAssessment> evidenceByTag = getPCMMAssessmentApp().getAssessmentByTag(Arrays.asList(tag1, tag2));
 		assertTrue(evidenceByTag.contains(evidenceTag1));
 		assertTrue(evidenceByTag.contains(evidenceTag2));
 		assertFalse(evidenceByTag.contains(evidence));

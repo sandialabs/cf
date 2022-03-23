@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IImportApplication;
+import gov.sandia.cf.application.imports.IImportApplication;
 import gov.sandia.cf.model.IImportable;
 import gov.sandia.cf.model.ImportActionType;
 import gov.sandia.cf.model.ImportSchema;
@@ -46,6 +46,7 @@ import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.widgets.CollapsibleWidget;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
 import gov.sandia.cf.parts.widgets.FormFactory;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -128,7 +129,8 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 		formContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gridLayout = new GridLayout();
 		formContainer.setLayout(gridLayout);
-		formContainer.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		formContainer.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// render analysis content
 		renderAnalysisContent(formContainer);
@@ -167,7 +169,8 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				GridLayout gdClassContainer = new GridLayout();
 				gdClassContainer.marginWidth = 0;
 				classContainer.setLayout(gdClassContainer);
-				classContainer.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+				classContainer.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 				// collapsible widget
 				String importableName = getViewManager().getAppManager().getService(IImportApplication.class)
@@ -175,10 +178,13 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.BORDER, classContainer, importableName,
 						false, true);
 
-				// no changes tree
+				// to add tree
 				renderImportElement(classContainer, ImportActionType.TO_ADD, key, value);
 
-				// no changes tree
+				// to update tree
+				renderImportElement(classContainer, ImportActionType.TO_UPDATE, key, value);
+
+				// to delete tree
 				renderImportElement(classContainer, ImportActionType.TO_DELETE, key, value);
 
 				// no changes tree
@@ -210,6 +216,8 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				.getImportableName(importClass);
 		if (ImportActionType.TO_ADD.equals(importAction)) {
 			label = RscTools.getString(RscConst.MSG_IMPORTDLG_IMPORTCLASS_TOADD, className);
+		} else if (ImportActionType.TO_UPDATE.equals(importAction)) {
+			label = RscTools.getString(RscConst.MSG_IMPORTDLG_IMPORTCLASS_TOUPDATE, className);
 		} else if (ImportActionType.TO_DELETE.equals(importAction)) {
 			label = RscTools.getString(RscConst.MSG_IMPORTDLG_IMPORTCLASS_TODELETE, className);
 		} else if (ImportActionType.NO_CHANGES.equals(importAction)) {
@@ -241,7 +249,7 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 			addTreeListener(treeImport, importClass, importAction);
 
 			// checked default configuration
-			if (ImportActionType.TO_ADD.equals(importAction)) {
+			if (ImportActionType.TO_ADD.equals(importAction) || ImportActionType.TO_UPDATE.equals(importAction)) {
 				boolean checked = true;
 				Arrays.stream(treeImport.getTree().getItems()).forEach(itemTmp -> {
 					checkItems(itemTmp, checked);
@@ -253,7 +261,7 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 			}
 
 		} else {
-			FormFactory.createLabel(importActionComposite, RscTools.getString(RscConst.MSG_IMPORTDLG_NOCHANGES, label));
+			FormFactory.createFormLabel(importActionComposite, RscTools.getString(RscConst.MSG_IMPORTDLG_NOCHANGES, label));
 		}
 	}
 
@@ -292,8 +300,10 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		treeViewer.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		treeViewer.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		return treeViewer;
 	}
@@ -327,7 +337,7 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 		changedItems.add(treeItem);
 
 		// add/remove from changes list
-		if (ImportActionType.TO_ADD.equals(importAction) || ImportActionType.TO_DELETE.equals(importAction)) {
+		if (!ImportActionType.NO_CHANGES.equals(importAction)) {
 			if (!changesApproved.containsKey(importClass)) {
 				changesApproved.put(importClass, new EnumMap<>(ImportActionType.class));
 			}

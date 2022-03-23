@@ -13,7 +13,7 @@ import org.eclipse.swt.widgets.Item;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.parts.ui.pcmm.PCMMManageTagDialog;

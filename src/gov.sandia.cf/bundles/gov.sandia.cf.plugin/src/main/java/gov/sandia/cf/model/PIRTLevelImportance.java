@@ -205,6 +205,14 @@ public class PIRTLevelImportance
 		this.fixedColorDescription = fixedColorDescription;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PIRTLevelImportance newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
 	@Override
 	public boolean sameAs(PIRTLevelImportance newImportable) {
 

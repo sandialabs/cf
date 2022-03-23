@@ -31,13 +31,13 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -47,6 +47,7 @@ import gov.sandia.cf.parts.viewer.TreeViewerID;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.GenericTableLabelProvider;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -91,7 +92,7 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 		super(viewManager, parentShell);
 
 		// Set mode
-		mode = DialogMode.VIEW;
+		mode = ViewMode.VIEW;
 
 		requirementSelected = null;
 	}
@@ -304,8 +305,10 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 		gdViewer.widthHint = formContainer.getSize().x - 2 * ((GridLayout) formContainer.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		tree.setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Set width
 		treeViewer.getIdColumn().setLabelProvider(new ColumnLabelProvider() {
@@ -403,11 +406,14 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 			SystemRequirement req = (SystemRequirement) element;
 
 			if (req.getParent() != null && req.getChildren() != null && !req.getChildren().isEmpty()) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			} else if (req.getParent() == null) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
 		return null;
@@ -425,10 +431,12 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 		if (element instanceof SystemRequirement) {
 			SystemRequirement req = (SystemRequirement) element;
 			if (req.getParent() == null) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+				return ColorTools.toColor(getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+			return ColorTools.toColor(getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 
 		return null;

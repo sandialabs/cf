@@ -34,8 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IDecisionApplication;
-import gov.sandia.cf.application.IGenericParameterApplication;
+import gov.sandia.cf.application.decision.IDecisionApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Decision;
 import gov.sandia.cf.model.DecisionParam;
@@ -45,9 +44,10 @@ import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Notification;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.FormFieldWidget;
 import gov.sandia.cf.parts.widgets.GenericValueFieldWidget;
@@ -119,7 +119,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 	 * @param mode           dialog mode
 	 */
 	public DecisionDialog(DecisionViewManager viewManager, Shell parentShell, Decision decision,
-			Decision parentSelected, DialogMode mode) {
+			Decision parentSelected, ViewMode mode) {
 		super(viewManager, parentShell);
 
 		// Get model
@@ -134,7 +134,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 
 		// Set mode
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		// Parameter columns
@@ -145,7 +145,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 		case CREATE:
 			this.decision = new Decision();
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -177,7 +177,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 		} else {
 			setTitle(RscTools.getString(RscConst.MSG_DIALOG_DECISION_TITLE));
 		}
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			if (this.parentSelected == null) {
 				setMessage(RscTools.getString(RscConst.MSG_DIALOG_DECISION_GROUP_DESCRIPTION),
 						IMessageProvider.INFORMATION);
@@ -272,7 +272,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 		formContainer.setLayout(gridLayout);
 
 		// Select content type
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			renderNonEditableContent(formContainer);
 		} else {
 			renderEditableContent(formContainer);
@@ -357,7 +357,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 			for (DecisionParam param : parameters) {
 
 				// check if the parameter is for the current level
-				if (getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+				if (getViewManager().getClientService(IGenericParameterService.class)
 						.isParameterAvailableForLevel(param, getCurrentLevel())) {
 
 					// search the value for the parameter
@@ -394,7 +394,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 	private void renderEditableContent(Composite parent) {
 
 		// create parent combobox
-		if (mode != DialogMode.CREATE) {
+		if (mode != ViewMode.CREATE) {
 			renderParentComboBox(parent);
 		}
 
@@ -416,7 +416,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 		parameterViewers = new HashMap<>();
 
 		for (DecisionParam param : parameters) {
-			if (getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			if (getViewManager().getClientService(IGenericParameterService.class)
 					.isParameterAvailableForLevel(param, getCurrentLevel())) {
 
 				// render field
@@ -546,7 +546,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 	@Override
 	protected void okPressed() {
 		// View - Just exit
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 		}
 
@@ -584,7 +584,7 @@ public class DecisionDialog extends GenericCFSmallDialog<DecisionViewManager> {
 		for (DecisionValue value : tempValues) {
 
 			// validate constraints
-			Notification notification = getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			Notification notification = getViewManager().getClientService(IGenericParameterService.class)
 					.checkValid(value, tempValues);
 
 			if (notification != null) {

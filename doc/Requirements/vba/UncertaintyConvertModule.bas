@@ -1,7 +1,11 @@
 'Generation Configuration
 Const ymlExtension As String = ".yml"
+Const DataModelSheet = "Data Model"
+Const DataSheet = "Inventory"
+
 Const GLB_INDENT As String = "  "
-Const ElementName = "Uncertainty Parameters"
+Const DataModelElementName = "Uncertainty Parameters"
+Const DataElementName = "uncertaintyGroups"
 
 Sub ExportDataModelToYaml()
 
@@ -12,10 +16,12 @@ Sub ExportDataModelToYaml()
     'Create Yaml File
     Call CreateYamlFile(FilePath)
 
-    'Export Excel Sheets to Yaml
-    Call ExportParametersToYaml(FilePath, ActiveSheet, ElementName)
+    'Export Data Model to Yaml
+    Call ExportParametersToYaml(FilePath, Worksheets(DataModelSheet), DataModelElementName)
 
-    'Call ExportContentToYaml
+    'Export Data to Yaml
+    Call ExportDataToYaml(FilePath, Worksheets(DataSheet), DataElementName)
+    
 End Sub
 
 'Create the Yaml File to Generate
@@ -28,10 +34,14 @@ Private Sub CreateYamlFile(FilePath)
 End Sub
 
 'Export parameters to yml
-Private Sub ExportParametersToYaml(FilePath, DataModelSheet, ElementName)
+Private Sub ExportParametersToYaml(FilePath, WorkingSheet, ElementName)
 Dim Sheet As Worksheet
-    Set Sheet = DataModelSheet
+    Set PreviousActiveSheet = ActiveSheet
+    Set Sheet = WorkingSheet
     
+    'Activate sheet to work on it
+    Sheet.Activate
+        
     levelString = "level"
     requiredString = "required"
     defaultString = "default"
@@ -119,6 +129,10 @@ Dim Sheet As Worksheet
     Next c
 
     Close #Filenum
+    
+    'Reactivate previous sheet
+    PreviousActiveSheet.Activate
+    
 End Sub
 
 'Find the field type row in column A
@@ -135,3 +149,85 @@ Private Function FindFieldTypeRow(FieldType) As Integer
         
 End Function
 
+'Export Data to yml
+Private Sub ExportDataToYaml(FilePath, WorkingSheet, ElementName)
+Dim Sheet As Worksheet
+    Set PreviousActiveSheet = ActiveSheet
+    Set Sheet = WorkingSheet
+    
+    'Activate sheet to work on it
+    Sheet.Activate
+    
+    nameTag = "name"
+    childrenTag = "children"
+    valuesTag = "values"
+    parameterTag = "parameter"
+    valueTag = "value"
+
+    'Open the file
+    Filenum = FreeFile
+    Open FilePath For Append As #Filenum
+
+    'Print the Levels label
+    Print #Filenum, ElementName & ":"
+
+    Dim columnCount As Long
+    columnCount = Sheet.Cells(2, Sheet.Columns.Count).End(xlToLeft).Column
+    
+    Dim firstValueColumn As Long
+    firstValueColumn = 2
+    
+    Dim rowCount As Long
+    rowCount = Cells(Rows.Count, firstValueColumn).End(xlUp).Row
+        
+    Dim rowHeader As Long
+    rowHeader = 2
+
+    'Fields parsing
+    PreviousLevel = 0
+    For Row = rowHeader + 1 To rowCount
+    
+        Level = Sheet.Cells(Row, firstValueColumn).Value
+        
+        OffsetSpaces = ""
+        For x = 0 To Level
+            OffsetSpaces = OffsetSpaces & GLB_INDENT
+        Next x
+        
+        If Level > PreviousLevel Then
+            Prefix = OffsetSpaces & childrenTag & ":" & vbNewLine & OffsetSpaces & "- "
+        Else
+            Prefix = OffsetSpaces & "- "
+        End If
+        
+        First = True
+        
+        For c = 1 + firstValueColumn To columnCount + columnOffset
+            
+            Field = Sheet.Cells(rowHeader, c).Value
+            Value = Sheet.Cells(Row, c).Value
+            
+            If Field = nameTag Then
+                Print #Filenum, Prefix & Field & ": """ & Value & """"
+            Else
+                If Value <> "" Then
+                    If First Then
+                        Print #Filenum, OffsetSpaces & GLB_INDENT & valuesTag & ":"
+                        First = False
+                    End If
+                    Print #Filenum, OffsetSpaces & GLB_INDENT & "- " & parameterTag & ":"
+                    Print #Filenum, OffsetSpaces & GLB_INDENT & GLB_INDENT & GLB_INDENT & nameTag & ": """ & Field & """"
+                    Print #Filenum, OffsetSpaces & GLB_INDENT & GLB_INDENT & valueTag & ": """ & Value & """"
+                End If
+            End If
+        Next c
+        
+        PreviousLevel = Level
+    Next Row
+    
+    Close #Filenum
+    
+    'Reactivate previous sheet
+    PreviousActiveSheet.Activate
+    
+End Sub

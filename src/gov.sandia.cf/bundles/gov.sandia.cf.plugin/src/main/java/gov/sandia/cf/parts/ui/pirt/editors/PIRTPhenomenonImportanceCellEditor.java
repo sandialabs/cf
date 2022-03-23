@@ -6,6 +6,7 @@ package gov.sandia.cf.parts.ui.pirt.editors;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -14,11 +15,16 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaViewController;
+import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
 /**
@@ -28,6 +34,11 @@ import gov.sandia.cf.tools.RscTools;
  *
  */
 public class PIRTPhenomenonImportanceCellEditor extends EditingSupport {
+	/**
+	 * the logger
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(PIRTPhenomenonImportanceCellEditor.class);
+
 	private ComboBoxViewerCellEditor cellEditor = null;
 	private PIRTPhenomenaViewController viewCtrl = null;
 
@@ -98,7 +109,18 @@ public class PIRTPhenomenonImportanceCellEditor extends EditingSupport {
 			// Set and save phenomenon
 			Phenomenon phenomenon = (Phenomenon) element;
 			phenomenon.setImportance(((PIRTLevelImportance) value).getIdLabel());
-			viewCtrl.updatePhenomenon(phenomenon);
+			try {
+				viewCtrl.updatePhenomenon(phenomenon);
+
+				viewCtrl.refreshIfChanged();
+
+			} catch (CredibilityException e) {
+				logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$
+						+ e.getMessage(), e);
+				MessageDialog.openError(Display.getCurrent().getActiveShell(),
+						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENOMENON) + e.getMessage());
+			}
 		}
 	}
 

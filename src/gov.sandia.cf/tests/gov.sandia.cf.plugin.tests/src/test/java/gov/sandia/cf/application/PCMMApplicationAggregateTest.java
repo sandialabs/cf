@@ -23,7 +23,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.IPCMMAssessmentRepository;
 import gov.sandia.cf.dao.IPCMMElementRepository;
@@ -41,6 +40,7 @@ import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
@@ -141,7 +141,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			assertNotNull(assessment);
 			assessment.setComment("My_comment"); //$NON-NLS-1$
 			assessment.setTag(tag);
-			assessment = getPCMMApp().updateAssessment(assessment, defaultUser, defaultRole);
+			assessment = getPCMMAssessmentApp().updateAssessment(assessment, defaultUser, defaultRole);
 
 			// Refresh all
 			getDaoManager().getRepository(IModelRepository.class).refresh(createdModel);
@@ -150,11 +150,11 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			getDaoManager().getRepository(IPCMMAssessmentRepository.class).refresh(assessment);
 
 			// Check is complete simplified
-			Boolean isCompleteSimplified = getPCMMApp().isCompleteAggregationSimplified(createdModel, null);
+			Boolean isCompleteSimplified = getPCMMAggregateApp().isCompleteAggregationSimplified(createdModel, null);
 			assertFalse(isCompleteSimplified);
 
 			// Check is complete
-			Boolean isComplete = getPCMMApp().isCompleteAggregation(createdModel, null);
+			Boolean isComplete = getPCMMAggregateApp().isCompleteAggregation(createdModel, null);
 			assertFalse(isComplete);
 
 			// Assessment list
@@ -162,21 +162,21 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			assessments.add(assessment);
 
 			// Aggregate
-			Map<PCMMElement, PCMMAggregation<PCMMElement>> aggegationElementMap = getPCMMApp()
+			Map<PCMMElement, PCMMAggregation<PCMMElement>> aggegationElementMap = getPCMMAggregateApp()
 					.aggregateAssessmentSimplified(pcmmConfiguration, getPCMMApp().getElementList(createdModel), null);
 			assertNotNull(aggegationElementMap);
 
-			Map<PCMMSubelement, PCMMAggregation<PCMMSubelement>> aggegationSubelementMap = getPCMMApp()
+			Map<PCMMSubelement, PCMMAggregation<PCMMSubelement>> aggegationSubelementMap = getPCMMAggregateApp()
 					.aggregateAssessments(pcmmConfiguration, getPCMMApp().getElementList(createdModel), null);
 			assertNotNull(aggegationSubelementMap);
 
-			PCMMAggregation<PCMMElement> aggegationElement = getPCMMApp().aggregateAssessments(pcmmConfiguration,
-					element, assessments);
+			PCMMAggregation<PCMMElement> aggegationElement = getPCMMAggregateApp()
+					.aggregateAssessments(pcmmConfiguration, element, assessments);
 			assertNotNull(aggegationElement);
 
 			// Element
 			// *******
-			aggegationElementMap = getPCMMApp().aggregateSubelements(pcmmConfiguration,
+			aggegationElementMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
 					getPCMMApp().getElementList(createdModel), null);
 			assertNotNull(aggegationElementMap);
 
@@ -188,7 +188,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			aggregation.setItem(subelement);
 			aggegationSubelementMap = new HashMap<>();
 			aggegationSubelementMap.put(subelement, aggregation);
-			aggegationElementMap = getPCMMApp().aggregateSubelements(pcmmConfiguration, aggegationSubelementMap);
+			aggegationElementMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
+					aggegationSubelementMap);
 			assertNotNull(aggegationElementMap);
 
 			// Item null
@@ -197,7 +198,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			aggregation.setItem(null);
 			aggegationSubelementMap = new HashMap<>();
 			aggegationSubelementMap.put(subelement, aggregation);
-			aggegationElementMap = getPCMMApp().aggregateSubelements(pcmmConfiguration, aggegationSubelementMap);
+			aggegationElementMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
+					aggegationSubelementMap);
 			assertNotNull(aggegationElementMap);
 
 			// With level
@@ -207,7 +209,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			aggregation.setLevel(aggLevel0);
 			aggegationSubelementMap = new HashMap<>();
 			aggegationSubelementMap.put(subelement, aggregation);
-			aggegationElementMap = getPCMMApp().aggregateSubelements(pcmmConfiguration, aggegationSubelementMap);
+			aggegationElementMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
+					aggegationSubelementMap);
 			assertNotNull(aggegationElementMap);
 
 			// With level
@@ -218,7 +221,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			aggregation.setLevel(aggLevel1);
 			aggegationSubelementMap = new HashMap<>();
 			aggegationSubelementMap.put(subelement, aggregation);
-			aggegationElementMap = getPCMMApp().aggregateSubelements(pcmmConfiguration, aggegationSubelementMap);
+			aggegationElementMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
+					aggegationSubelementMap);
 			assertNotNull(aggegationElementMap);
 
 			// *********************
@@ -228,13 +232,13 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 			assessments.clear();
 			assessment.setLevel(null);
 			assessments.add(assessment);
-			getPCMMApp().aggregateAssessments(pcmmConfiguration, element, assessments);
+			getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, element, assessments);
 
 			// Level code null
 			assessments.clear();
 			assessment.setLevel(level1);
 			assessments.add(assessment);
-			getPCMMApp().aggregateAssessments(pcmmConfiguration, element, assessments);
+			getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, element, assessments);
 
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
@@ -249,7 +253,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// No model
 		// *********
 		try {
-			getPCMMApp().isCompleteAggregation(null, null);
+			getPCMMAggregateApp().isCompleteAggregation(null, null);
 			fail("Can launch IsCompleteAggregation with a null model."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_GETELTLIST_MODELNULL), e.getMessage());
@@ -260,7 +264,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// *********
 		Boolean isComplete;
 		try {
-			isComplete = getPCMMApp().isCompleteAggregation(new Model(), null);
+			isComplete = getPCMMAggregateApp().isCompleteAggregation(new Model(), null);
 			assertTrue(isComplete);
 		} catch (CredibilityException e) {
 			fail("Can't launch IsCompleteAggregation with a null tag."); //$NON-NLS-1$
@@ -273,7 +277,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// No model
 		// *********
 		try {
-			getPCMMApp().isCompleteAggregationSimplified(null, null);
+			getPCMMAggregateApp().isCompleteAggregationSimplified(null, null);
 			fail("Can launch IsCompleteAggregation with a null model."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_GETELTLIST_MODELNULL), e.getMessage());
@@ -284,7 +288,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// *********
 		Boolean isComplete;
 		try {
-			isComplete = getPCMMApp().isCompleteAggregationSimplified(new Model(), null);
+			isComplete = getPCMMAggregateApp().isCompleteAggregationSimplified(new Model(), null);
 			assertTrue(isComplete);
 		} catch (CredibilityException e) {
 			fail("Can't launch IsCompleteAggregation with a null tag."); //$NON-NLS-1$
@@ -307,7 +311,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// ********
 		// elements null
 		try {
-			getPCMMApp().aggregateSubelements(configuration, elements, filters);
+			getPCMMAggregateApp().aggregateSubelements(configuration, elements, filters);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_ELTLISTNULL), e.getMessage());
@@ -316,7 +320,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// configuration null
 		elements = new ArrayList<>();
 		try {
-			getPCMMApp().aggregateSubelements(configuration, elements, filters);
+			getPCMMAggregateApp().aggregateSubelements(configuration, elements, filters);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_CONFLEVELCOLORLISTNULL), e.getMessage());
@@ -325,7 +329,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// configuration PCMMSpecification
 		configuration = new PCMMSpecification();
 		try {
-			getPCMMApp().aggregateSubelements(configuration, elements, filters);
+			getPCMMAggregateApp().aggregateSubelements(configuration, elements, filters);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_CONFLEVELCOLORLISTNULL), e.getMessage());
@@ -339,7 +343,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 
 		// mapAggregationBySubelement null
 		try {
-			getPCMMApp().aggregateSubelements(configuration, mapAggregationBySubelement);
+			getPCMMAggregateApp().aggregateSubelements(configuration, mapAggregationBySubelement);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_AGGREGMAPNULL), e.getMessage());
@@ -348,7 +352,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// configuration null
 		mapAggregationBySubelement = new HashMap<>();
 		try {
-			getPCMMApp().aggregateSubelements(configuration, mapAggregationBySubelement);
+			getPCMMAggregateApp().aggregateSubelements(configuration, mapAggregationBySubelement);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_CONFLEVELCOLORLISTNULL), e.getMessage());
@@ -357,7 +361,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// configuration PCMMSpecification
 		configuration = new PCMMSpecification();
 		try {
-			getPCMMApp().aggregateSubelements(configuration, mapAggregationBySubelement);
+			getPCMMAggregateApp().aggregateSubelements(configuration, mapAggregationBySubelement);
 			fail("Can call AggregateSubelements with a null configuration."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_CONFLEVELCOLORLISTNULL), e.getMessage());
@@ -381,13 +385,13 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// *************
 		// Standard - elements null
 		try {
-			getPCMMApp().aggregateAssessments(pcmmConfiguration, elements, filters);
+			getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, elements, filters);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_ELTLISTNULL), e.getMessage());
 		}
 		// Simplified - elements null
 		try {
-			getPCMMApp().aggregateAssessmentSimplified(pcmmConfiguration, elements, filters);
+			getPCMMAggregateApp().aggregateAssessmentSimplified(pcmmConfiguration, elements, filters);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_ELTLISTNULL), e.getMessage());
 		}
@@ -396,7 +400,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// *************
 		// element null
 		try {
-			getPCMMApp().aggregateAssessments(pcmmConfiguration, element, filters);
+			getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, element, filters);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_ELTNULL), e.getMessage());
 		}
@@ -407,7 +411,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// element null
 		try {
 			IAssessable type = null;
-			getPCMMApp().aggregateAssessments(pcmmConfiguration, type, null);
+			getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, type, null);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PCMM_AGGREGATESUBELT_ITEMNULL), e.getMessage());
 		}
@@ -470,7 +474,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		assertNotNull(assessment2);
 		assessment2.setComment("My_comment"); //$NON-NLS-1$
 		try {
-			getPCMMApp().updateAssessment(assessment2, defaultUser, role2);
+			getPCMMAssessmentApp().updateAssessment(assessment2, defaultUser, role2);
 		} catch (CredibilityException e) {
 			fail("Test Aggregate Level Value: " + e.getMessage());//$NON-NLS-1$
 		}
@@ -487,7 +491,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// Aggregate Simplified
 		Map<PCMMElement, PCMMAggregation<PCMMElement>> aggregatedElementsMap = null;
 		try {
-			aggregatedElementsMap = getPCMMApp().aggregateAssessmentSimplified(pcmmConfiguration, elements, null);
+			aggregatedElementsMap = getPCMMAggregateApp().aggregateAssessmentSimplified(pcmmConfiguration, elements,
+					null);
 			assertNotNull(aggregatedElementsMap);
 		} catch (CredibilityException e) {
 			fail("Test Aggregate Level Value: " + e.getMessage());//$NON-NLS-1$
@@ -562,7 +567,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		assertNotNull(assessment2);
 		assessment2.setComment("My_comment"); //$NON-NLS-1$
 		try {
-			getPCMMApp().updateAssessment(assessment2, defaultUser, role2);
+			getPCMMAssessmentApp().updateAssessment(assessment2, defaultUser, role2);
 		} catch (CredibilityException e) {
 			fail("Test Aggregate Level Value: " + e.getMessage());//$NON-NLS-1$
 		}
@@ -582,8 +587,7 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 		// Aggregate
 		Map<PCMMSubelement, PCMMAggregation<PCMMSubelement>> aggregatedSubelementsMap = null;
 		try {
-			aggregatedSubelementsMap = getAppManager().getService(IPCMMApplication.class).aggregateAssessments(pcmmConfiguration,
-					elements, null);
+			aggregatedSubelementsMap = getPCMMAggregateApp().aggregateAssessments(pcmmConfiguration, elements, null);
 		} catch (CredibilityException e) {
 			fail("Test Aggregate Level Value: " + e.getMessage());//$NON-NLS-1$
 		}
@@ -598,7 +602,8 @@ class PCMMApplicationAggregateTest extends AbstractTestApplication {
 
 		Map<PCMMElement, PCMMAggregation<PCMMElement>> aggregatedElementsMap = null;
 		try {
-			aggregatedElementsMap = getPCMMApp().aggregateSubelements(pcmmConfiguration, aggregatedSubelementsMap);
+			aggregatedElementsMap = getPCMMAggregateApp().aggregateSubelements(pcmmConfiguration,
+					aggregatedSubelementsMap);
 		} catch (CredibilityException e) {
 			fail("Test Aggregate Level Value: " + e.getMessage());//$NON-NLS-1$
 		}

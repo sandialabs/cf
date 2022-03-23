@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.ui.pirt.PIRTViewManager;
 import gov.sandia.cf.parts.widgets.FormFactory;
@@ -65,10 +65,10 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 	 * @param mode            the dialog mode
 	 */
 	public PIRTPhenomenonGroupDialog(PIRTViewManager viewManager, Shell parentShell, QuantityOfInterest qoiSelected,
-			PhenomenonGroup phenomenonGroup, DialogMode mode) {
+			PhenomenonGroup phenomenonGroup, ViewMode mode) {
 		super(viewManager, parentShell);
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		switch (mode) {
@@ -76,7 +76,7 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 			this.phenomenonGroup = new PhenomenonGroup();
 			this.phenomenonGroup.setQoi(qoiSelected);
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -102,7 +102,7 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 	public void create() {
 		super.create();
 		setTitle(RscTools.getString(RscConst.MSG_DIALOG_PHENGROUP_TITLE));
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			setMessage(RscTools.getString(RscConst.MSG_DIALOG_PHENGROUP_DESCRIPTION), IMessageProvider.INFORMATION);
 		}
 	}
@@ -127,7 +127,7 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 		FormFactory.createLabel(formContainer, RscTools.getString(RscConst.MSG_DIALOG_PHENGROUP_LABEL));
 
 		// text Text
-		boolean editable = mode != DialogMode.VIEW;
+		boolean editable = mode != ViewMode.VIEW;
 		txtLabel = FormFactory.createTextWidget(getViewManager().getRscMgr(), formContainer, editable, null);
 		txtLabel.setValue((phenomenonGroup != null && phenomenonGroup.getName() != null) ? phenomenonGroup.getName()
 				: RscTools.empty());
@@ -172,7 +172,7 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 	 */
 	private boolean isValid() {
 
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			return true;
 		}
 

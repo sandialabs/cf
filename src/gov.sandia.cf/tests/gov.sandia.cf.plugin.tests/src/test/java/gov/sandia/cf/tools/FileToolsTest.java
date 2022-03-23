@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -139,7 +138,7 @@ class FileToolsTest {
 		// Test null file path
 		try {
 			// Create File
-			File createdFile = FileTools.createFile(null);
+			File createdFile = FileTools.createFile((String) null);
 			assertTrue(createdFile.exists());
 		} catch (CredibilityException | IOException e) {
 			assertEquals(e.getMessage(), RscTools.getString(RscConst.EX_FILETOOLS_EMPTYNULL));
@@ -344,18 +343,6 @@ class FileToolsTest {
 //			fail(e.getMessage());
 //		}
 //	}
-
-	@Test
-	void testGetTempFolderErrors() {
-		// Test null
-		assertNull(WorkspaceTools.getTempFolder(null));
-
-		// Test parent null
-		IFile inputFile = mock(IFile.class);
-		assertNull(WorkspaceTools.getTempFolder(inputFile));
-		when(inputFile.getParent()).thenReturn(null);
-		assertNull(WorkspaceTools.getTempFolder(inputFile));
-	}
 
 	@Test
 	void testGetChildren() {

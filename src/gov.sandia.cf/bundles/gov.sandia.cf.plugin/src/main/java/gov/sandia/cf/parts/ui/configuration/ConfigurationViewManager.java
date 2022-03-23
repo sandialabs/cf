@@ -20,6 +20,7 @@ import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 import gov.sandia.cf.tools.RscConst;
@@ -52,6 +53,9 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 */
 	private GlobalConfigurationView globalConfigurationView;
 
+	/** The folder. */
+	private CTabFolder folder;
+
 	/**
 	 * The constructor
 	 * 
@@ -77,7 +81,7 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 		this.setLayout(new FillLayout());
 
 		// the layout manager to hide/show the different views
-		CTabFolder folder = new CTabFolder(this, SWT.BOTTOM);
+		folder = new CTabFolder(this, SWT.BOTTOM);
 
 		this.globalConfigurationView = new GlobalConfigurationView(this, folder, SWT.NONE);
 		this.importConfigurationView = new ImportConfigurationView(this, folder, SWT.NONE);
@@ -111,9 +115,9 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 * Refresh save state
 	 */
 	public void refreshSaveState() {
-		importConfigurationView.refreshSaveState();
-		exportConfigurationView.refreshSaveState();
-		globalConfigurationView.refreshSaveState();
+		importConfigurationView.refreshStatusComposite();
+		exportConfigurationView.refreshStatusComposite();
+		globalConfigurationView.refreshStatusComposite();
 	}
 
 	/**
@@ -190,6 +194,14 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 		}
 		if (globalConfigurationView != null) {
 			globalConfigurationView.reload();
+		}
+	}
+
+	@Override
+	public void reloadActiveView() {
+		if (folder != null && folder.getSelection() != null
+				&& folder.getSelection().getControl() instanceof ICredibilityView) {
+			((ICredibilityView) folder.getSelection().getControl()).reload();
 		}
 	}
 

@@ -4,25 +4,27 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.application;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
-import org.reflections.Reflections;
+import org.hsqldb.cmdline.SqlToolError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
-import gov.sandia.cf.application.CredibilityServiceRuntimeException.CredibilityServiceRuntimeMessage;
+import gov.sandia.cf.common.ServiceLoader;
 import gov.sandia.cf.dao.DaoManager;
-import gov.sandia.cf.tools.RscConst;
-import gov.sandia.cf.tools.RscTools;
+import gov.sandia.cf.dao.IDaoManager;
+import gov.sandia.cf.exceptions.CredibilityDatabaseInvalidException;
+import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.exceptions.CredibilityMigrationException;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException.CredibilityServiceRuntimeMessage;
 
 /**
  * Load the application layer classes and give access to the dao layer
@@ -40,7 +42,7 @@ public class ApplicationManager implements IApplicationManager {
 	/**
 	 * The dao layer manager
 	 */
-	private DaoManager daoMgr;
+	private IDaoManager daoMgr;
 
 	/**
 	 * The bean validator
@@ -48,14 +50,14 @@ public class ApplicationManager implements IApplicationManager {
 	private Validator validator;
 
 	/**
-	 * Map of interface and entities repository
+	 * Map of interface and services
 	 */
-	private Map<Class<? extends IApplication>, Class<? extends AApplication>> mapInterface;
+	private Map<Class<?>, Class<?>> mapInterface;
 
 	/**
-	 * Map of Model entities repository
+	 * Map of Model services
 	 */
-	private Map<Class<? extends IApplication>, IApplication> mapEnabledService;
+	private Map<Class<?>, Object> mapEnabledService;
 
 	/**
 	 * Defines the state of the loader
@@ -64,14 +66,9 @@ public class ApplicationManager implements IApplicationManager {
 
 	/**
 	 * The constructor with a specific dao manager
-	 * 
-	 * @param daoMgr the dao manager
 	 */
-	public ApplicationManager(DaoManager daoMgr) {
-		if (daoMgr == null) {
-			throw new IllegalArgumentException(RscTools.getString(RscConst.EX_APPMGR_DAOMGR_NULL));
-		}
-		this.daoMgr = daoMgr;
+	public ApplicationManager() {
+		this.daoMgr = new DaoManager();
 	}
 
 	/**
@@ -81,7 +78,11 @@ public class ApplicationManager implements IApplicationManager {
 	public void start() {
 		logger.debug("application loader started"); //$NON-NLS-1$
 
-		instantiateInterfaceMap();
+		mapInterface = new HashMap<>();
+
+		// load services
+		mapInterface.putAll(ServiceLoader.load(Service.class, this.getClass().getPackage().getName(),
+				this.getClass().getPackage().getName()));
 
 		mapEnabledService = new HashMap<>();
 
@@ -95,70 +96,6 @@ public class ApplicationManager implements IApplicationManager {
 		}
 
 		isStarted = true;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void instantiateInterfaceMap() {
-
-		// load service configuration file
-		Map<String, Object> serviceConfiguration = null;
-		try (InputStream stream = ApplicationManager.class.getClassLoader()
-				.getResourceAsStream(AppManagerConstants.SERVICES_FILENAME)) {
-			serviceConfiguration = new Yaml().load(stream);
-		} catch (IOException e) {
-			throw new CredibilityServiceRuntimeException(e);
-		}
-
-		if (serviceConfiguration == null) {
-			logger.warn("The services configuration can not be loaded."); //$NON-NLS-1$
-			return;
-		}
-
-		List<String> repositories = (List<String>) serviceConfiguration.get(AppManagerConstants.SERVICES_KEY);
-
-		mapInterface = new HashMap<>();
-
-		Reflections reflections = new Reflections(ApplicationManager.class.getPackage().getName());
-
-		// start implementation
-		for (String serviceInterfaceToImplement : repositories) {
-
-			Class<?> interfaceClass;
-
-			// get the service interface
-			try {
-				interfaceClass = Class.forName(serviceInterfaceToImplement);
-			} catch (ClassNotFoundException e) {
-				throw new CredibilityServiceRuntimeException(e);
-			}
-
-			// check service interface extends IApplication
-			if (!IApplication.class.isAssignableFrom(interfaceClass)) {
-				throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE,
-						serviceInterfaceToImplement);
-			}
-
-			// search for the first implementation
-			Set<?> serviceImplementationClassSet = reflections.getSubTypesOf(interfaceClass);
-
-			// check if service implementation is found
-			if (serviceImplementationClassSet == null || serviceImplementationClassSet.isEmpty()) {
-				throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_FOUND,
-						interfaceClass.getName());
-			}
-
-			// check if service implementation extends AApplication
-			Class<?> serviceImplementation = (Class<?>) serviceImplementationClassSet.iterator().next();
-			if (!AApplication.class.isAssignableFrom(serviceImplementation)) {
-				throw new CredibilityServiceRuntimeException(
-						CredibilityServiceRuntimeMessage.NOT_APPSERVICE_IMPLEMENTATION, serviceImplementation.getName(),
-						interfaceClass.getName());
-			}
-
-			// put into the services map
-			mapInterface.put((Class<? extends IApplication>) interfaceClass,
-					(Class<? extends AApplication>) serviceImplementation);
-		}
 	}
 
 	/**
@@ -176,7 +113,7 @@ public class ApplicationManager implements IApplicationManager {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <S extends IApplication> S getService(Class<S> interfaceClass) {
+	public <S> S getService(Class<S> interfaceClass) {
 
 		S service = null;
 		Class<S> serviceClass = null;
@@ -184,6 +121,18 @@ public class ApplicationManager implements IApplicationManager {
 		// check if is interface
 		if (!interfaceClass.isInterface()) {
 			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_INTERFACE);
+		}
+
+		// check if it is using Service annotation
+		if (interfaceClass.getAnnotation(Service.class) == null) {
+			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE,
+					interfaceClass, Service.class.getName());
+		}
+
+		// check if it is a IApplication service
+		if (!IApplication.class.isAssignableFrom(interfaceClass)) {
+			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE,
+					interfaceClass, IApplication.class.getName());
 		}
 
 		// check initialized
@@ -199,7 +148,7 @@ public class ApplicationManager implements IApplicationManager {
 		}
 
 		if (mapEnabledService.containsKey(serviceClass)) {
-			IApplication iService = mapEnabledService.get(serviceClass);
+			Object iService = mapEnabledService.get(serviceClass);
 			if (serviceClass.isInstance(iService)) {
 				service = serviceClass.cast(iService);
 			}
@@ -214,7 +163,7 @@ public class ApplicationManager implements IApplicationManager {
 		}
 
 		// populate
-		populate(service);
+		populate((IApplication) service);
 
 		return service;
 	}
@@ -244,7 +193,7 @@ public class ApplicationManager implements IApplicationManager {
 	 * @return the dao manager
 	 */
 	@Override
-	public DaoManager getDaoManager() {
+	public IDaoManager getDaoManager() {
 		return daoMgr;
 	}
 
@@ -256,4 +205,12 @@ public class ApplicationManager implements IApplicationManager {
 		return isStarted;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void initializeLocalDB(String projectPath) throws SqlToolError, CredibilityException, SQLException,
+			IOException, URISyntaxException, CredibilityMigrationException, CredibilityDatabaseInvalidException {
+		daoMgr.initialize(projectPath);
+	}
 }

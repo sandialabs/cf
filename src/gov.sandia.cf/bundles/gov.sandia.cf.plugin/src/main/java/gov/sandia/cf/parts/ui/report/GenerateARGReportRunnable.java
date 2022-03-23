@@ -6,6 +6,7 @@ package gov.sandia.cf.parts.ui.report;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -23,13 +24,14 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IReportARGApplication;
-import gov.sandia.cf.application.IReportARGExecutionApp;
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.ARGBackendDefault;
+import gov.sandia.cf.application.report.IReportARGApplication;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.constants.arg.ARGBackendDefault;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.parts.ui.IViewManager;
+import gov.sandia.cf.tools.FileExtension;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -84,7 +86,7 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 	 * @throws InterruptedException
 	 * 
 	 */
-	private void generateReport(IProgressMonitor progressMonitor) throws InterruptedException {
+	private void generateReport(IProgressMonitor progressMonitor) {
 
 		progressMonitor.beginTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_PROCESSING), 100);
 		progressMonitor.worked(10);
@@ -223,7 +225,6 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 	 */
 	private void generateReportARG(ARGParameters parameters, IProgressMonitor progressMonitor) {
 		try {
-
 			// delete previous report before generation
 			progressMonitor.subTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_TASK_DELETEPREVIOUS));
 			deletePreviousReport(parameters);
@@ -250,11 +251,12 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 	}
 
 	/**
-	 * Delete the ARG report before generation
-	 * 
-	 * @param parameters
+	 * Delete the ARG report before generation.
+	 *
+	 * @param parameters the parameters
+	 * @throws CredibilityException the credibility exception
 	 */
-	private void deletePreviousReport(ARGParameters parameters) {
+	private void deletePreviousReport(ARGParameters parameters) throws CredibilityException {
 
 		// find report
 		if (parameters != null && parameters.getBackendType() != null && parameters.getOutput() != null
@@ -263,26 +265,27 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 			if (ARGBackendDefault.WORD.getBackend().equals(parameters.getBackendType())) {
 
 				// try to find word file
-				deleteGeneratedFile(parameters, FileTools.WORD_2007);
+				deleteGeneratedFile(parameters, FileExtension.WORD_2007.getExtension());
 
 			} else if (ARGBackendDefault.LATEX.getBackend().equals(parameters.getBackendType())) {
 
 				// try to find PDF file if it has been generated
-				deleteGeneratedFile(parameters, FileTools.PDF);
+				deleteGeneratedFile(parameters, FileExtension.PDF.getExtension());
 
 				// try to find latex file
-				deleteGeneratedFile(parameters, FileTools.LATEX);
+				deleteGeneratedFile(parameters, FileExtension.LATEX.getExtension());
 			}
 		}
 	}
 
 	/**
-	 * Delete the generated files before new generation
-	 * 
+	 * Delete the generated files before new generation.
+	 *
 	 * @param parameters the ARG parameters
 	 * @param extension  the file extension
+	 * @throws CredibilityException the credibility exception
 	 */
-	private void deleteGeneratedFile(ARGParameters parameters, String extension) {
+	private void deleteGeneratedFile(ARGParameters parameters, String extension) throws CredibilityException {
 
 		// find file in workspace
 		IPath reportIPath = new org.eclipse.core.runtime.Path(parameters.getOutput())
@@ -307,8 +310,12 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 				Files.delete(reportPath);
 			}
 
+		} catch (FileSystemException e) {
+			throw new CredibilityException(
+					RscTools.getString(RscConst.EX_REPORTVIEW_REPORT_ALREADYOPENED, parameters.getFilename()), e);
 		} catch (InvalidPathException | IOException e) {
-			logger.error(RscTools.getString(RscConst.EX_REPORTVIEW_DELETE_REPORT, parameters.getFilename()), e);
+			throw new CredibilityException(
+					RscTools.getString(RscConst.EX_REPORTVIEW_DELETE_REPORT, parameters.getFilename()), e);
 		}
 	}
 
@@ -369,7 +376,7 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 	 * @return the word document generated
 	 */
 	private File findWordReport(String folder, String filename) {
-		return FileTools.findFileInWorkspaceOrSystem(folder, filename + FileTools.WORD_2007);
+		return FileTools.findFileInWorkspaceOrSystem(folder, filename + FileExtension.WORD_2007.getExtension());
 	}
 
 	/**
@@ -382,11 +389,11 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 		File reportFile = null;
 
 		/* try to find PDF file if it has been generated */
-		reportFile = FileTools.findFileInWorkspaceOrSystem(folder, filename + FileTools.PDF);
+		reportFile = FileTools.findFileInWorkspaceOrSystem(folder, filename + FileExtension.PDF.getExtension());
 
 		/* otherwise return latex file */
 		if (reportFile == null || !reportFile.exists()) {
-			reportFile = FileTools.findFileInWorkspaceOrSystem(folder, filename + FileTools.LATEX);
+			reportFile = FileTools.findFileInWorkspaceOrSystem(folder, filename + FileExtension.LATEX.getExtension());
 		}
 
 		return reportFile;

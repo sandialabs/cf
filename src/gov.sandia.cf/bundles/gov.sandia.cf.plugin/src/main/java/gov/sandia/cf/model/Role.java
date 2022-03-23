@@ -93,6 +93,14 @@ public class Role implements Serializable, IEntity<Role, Integer>, IImportable<R
 		this.name = name;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(Role newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
+
 	@Override
 	public boolean sameAs(Role newImportable) {
 		return newImportable != null && StringTools.equals(getName(), newImportable.getName());

@@ -186,6 +186,12 @@ public class QuantityOfInterest implements Serializable, IEntity<QuantityOfInter
 	@JoinColumn(name = "PARENT_ID")
 	private QuantityOfInterest parent;
 
+	/**
+	 * The generated id
+	 */
+	@Column(name = "ID_GENERATED")
+	private String generatedId;
+
 	public Integer getId() {
 		return id;
 	}
@@ -305,6 +311,16 @@ public class QuantityOfInterest implements Serializable, IEntity<QuantityOfInter
 	}
 
 	@SuppressWarnings("javadoc")
+	public String getGeneratedId() {
+		return generatedId;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setGeneratedId(String generatedId) {
+		this.generatedId = generatedId;
+	}
+
+	@SuppressWarnings("javadoc")
 	public List<QoIHeader> getQoiHeaderList() {
 		return qoiHeaderList;
 	}
@@ -359,6 +375,25 @@ public class QuantityOfInterest implements Serializable, IEntity<QuantityOfInter
 	@SuppressWarnings("javadoc")
 	public void setParent(QuantityOfInterest parent) {
 		this.parent = parent;
+	}
+
+	@Override
+	public String getItemTitle() {
+		return getSymbol();
+	}
+
+	@SuppressWarnings("javadoc")
+	public Integer getLevel() {
+
+		int level = 0;
+		QuantityOfInterest parentTmp = getParent();
+
+		while (parentTmp != null) {
+			parentTmp = parentTmp.getParent();
+			level++;
+		}
+
+		return level;
 	}
 
 	/**

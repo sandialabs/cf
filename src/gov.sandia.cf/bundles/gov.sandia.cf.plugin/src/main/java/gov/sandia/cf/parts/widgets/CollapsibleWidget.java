@@ -17,6 +17,7 @@ import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.FontTools;
+import gov.sandia.cf.tools.ColorTools;
 
 /**
  * A CollapsibleControl composite
@@ -154,7 +155,8 @@ public class CollapsibleWidget extends Composite {
 			checkbox.setText(headerText);
 			checkbox.setSelection(true);
 			checkbox.setBackground(checkbox.getParent().getBackground());
-			checkbox.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+			checkbox.setForeground(
+					ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			GridData dataCheckbox = new GridData();
 			dataCheckbox.horizontalAlignment = GridData.FILL;
 			dataCheckbox.verticalAlignment = GridData.FILL;
@@ -165,7 +167,8 @@ public class CollapsibleWidget extends Composite {
 		} else {
 			label = FormFactory.createLabel(headerComposite, headerText);
 			label.setBackground(label.getParent().getBackground());
-			label.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+			label.setForeground(
+					ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			GridData dataLabel = (GridData) label.getLayoutData();
 			dataLabel.horizontalAlignment = GridData.FILL;
 			dataLabel.verticalAlignment = GridData.FILL;
@@ -250,8 +253,9 @@ public class CollapsibleWidget extends Composite {
 			}
 		}
 		if (label != null) {
-			label.setForeground(enabled ? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)
-					: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY));
+			label.setForeground(
+					ColorTools.toColor(rscMgr, (enabled ? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)
+							: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY))));
 		}
 	}
 }

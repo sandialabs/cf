@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PIRTLevelDifferenceColor;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPIRTLevelDifferenceColorRepository extends ICRUDRepository<PIRTLevelDifferenceColor, Integer> {
 
 }

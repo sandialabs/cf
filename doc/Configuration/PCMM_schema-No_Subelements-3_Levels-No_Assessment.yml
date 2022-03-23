@@ -1,0 +1,238 @@
+PCMM:
+  Phases:
+    - "Evidence"
+  Roles:
+    - "Customer"
+    - "System Engineer"
+    - "Analyst"
+    - "Code Developer"
+    - "Experimentalist"
+    - "V&V Partner"
+  Levels:
+    Low:
+      Code: 0
+      Color: 255,0,0
+    Medium:
+      Code: 1
+      Color: 255,192,0
+    High:
+      Code: 2
+      Color: 0,176,80
+  Elements:
+    RGF:
+      Name: Representation and Geometric Fidelity
+      Abbreviation: RGF
+      Color: 0,142,116
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Discuss major feature simplification/omission (using engineering judgement)"
+            Outcome: "Document rationale for model choices"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Discuss major feature simplification/omission (using engineering judgement)"
+            Outcome: "Document rationale for model choices"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "Quantify sensitivity of defeaturing, difference in mesh vs. CAD"
+            Outcome: "Quantitative results comparison"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+    PMMF:
+      Name: Physics and Material Model Fidelity
+      Abbreviation: PMMF
+      Color: 108,179,18
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Complete a PIRT identifying gaps"
+            Outcome: "Completed PIRT "
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Define interpolation vs. extrapolation domain (where is this activity)"
+            Outcome: "Documentation of key physics assumptions and their range of applicability"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "Perform full quantitative separate effects validation"
+            Outcome: "Comparison to data for each physics category"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+    CVER:
+      Name: Code Verification
+      Abbreviation: CVER
+      Color: 255,160,51
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Have an SQE process in place, discuss bugs/errors"
+            Outcome: "Memo documenting/referencing the SQE process"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Test feature Coverage"
+            Outcome: "FCT report"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "Coordinate with code team on known deficiencies and status"
+            Outcome: "Document/release notes with deficiency information"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+    SVER:
+      Name: Solution Verification
+      Abbreviation: SVER
+      Color: 169,44,0
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Have an SQE process in place, discuss bugs/errors"
+            Outcome: "Memo documenting/referencing the SQE process"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Test feature Coverage"
+            Outcome: "FCT report"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "Coordinate with code team on known deficiencies and status"
+            Outcome: "Document/release notes with deficiency information"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+    VAL:
+      Name: Validation
+      Abbreviation: VAL
+      Color: 125,13,124
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Define validation hierarchy and identify data needs; perform visual comparison to data"
+            Outcome: "Validation hierarchy; conclusions on comparison"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Perform baseline comparisons with legacy/new validation activities"
+            Outcome: "Conclusions on comparison; note limitations/differences and rationale"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "Perform quantitative validation under uncertainty"
+            Outcome: "Probabilistic validation metrics; statement about relevance for prediction"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+    UQ:
+      Name: Uncertainty Quantification
+      Abbreviation: UQ
+      Color: 0,173,208
+      Levels:
+        Low:
+          Code: 0
+          Name: Low
+          Descriptors:
+            Descriptor: "Define and characterize sources of uncertainty"
+            Outcome: "Table (i.e. uncertainty inventory)"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        Medium :
+          Code: 1
+          Name: Medium
+          Descriptors:
+            Descriptor: "Medium: perform scoping studies and sensitivity analysis on QOIs, formalize characterization of uncertainties (source and relevance of information)"
+            Outcome: "Sensitivity analysis results/plots; a reduced set of parameters"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+        High:
+          Code: 2
+          Name: High
+          Descriptors:
+            Descriptor: "High: quantify propagation of uncertainties on QOIs/QMU analysis"
+            Outcome: "Full UQ/QMU analysis results (tables/plots/etc)"
+            Additional Info: ""
+            Change(s) from previous level: ""
+            Brief description of evidence relevant to this level: ""
+            Key Words/Phrases: ""
+      Subelements:
+  

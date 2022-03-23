@@ -1,8 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./CredibilityPreferencePage.html" title="gov.sandia.cf.preferences.CredibilityPreferencePage" alt="" coords="202,232,402,343"/>
-<area shape="rect" id="node1" href="./CredibilityPreferencePage.html" title="&lt;TABLE&gt;" alt="" coords="191,227,413,348"/>
-<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html" title="org.eclipse.jface.preference.FieldEditorPreferencePage" alt="" coords="16,11,308,173"/>
-<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html" title="&lt;TABLE&gt;" alt="" coords="5,5,319,179"/>
-<area shape="rect" id="node3_2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/ui/IWorkbenchPreferencePage.html" title="org.eclipse.ui.IWorkbenchPreferencePage" alt="" coords="353,45,533,139"/>
-<area shape="rect" id="node3" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/ui/IWorkbenchPreferencePage.html" title="&lt;TABLE&gt;" alt="" coords="343,40,544,144"/>
-</map>

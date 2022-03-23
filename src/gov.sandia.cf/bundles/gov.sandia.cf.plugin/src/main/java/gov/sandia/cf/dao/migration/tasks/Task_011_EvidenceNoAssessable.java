@@ -10,10 +10,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.IPCMMEvidenceRepository;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMEvidence;
@@ -31,23 +32,22 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  */
+@MigrationTask(name = "1.0.0-iwfcf-479-evidenceNoAssessable-task11", id = 11)
 public class Task_011_EvidenceNoAssessable implements IMigrationTask {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(Task_011_EvidenceNoAssessable.class);
 
-	private static final String TASK_NAME = "1.0.0-iwfcf-479-evidenceNoAssessable-task11"; //$NON-NLS-1$
-
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 
-		logger.info("Starting migration Task: " + TASK_NAME); //$NON-NLS-1$
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));

@@ -1,0 +1,60 @@
+/*************************************************************************************************************
+See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/master/LICENSE">CF LICENSE</a>}
+*************************************************************************************************************/
+package gov.sandia.cf.constants.configuration;
+
+/**
+ * The ARG report options.
+ * 
+ * @author Maxime N.
+ *
+ */
+@SuppressWarnings("javadoc")
+public enum ExportOptions {
+
+	// ARG Parameters
+	ARG_PARAMETERS,
+
+	// Model
+	MODEL,
+
+	// User
+	USER_LIST,
+
+	// Role
+	PCMM_ROLE_LIST,
+
+	// Planning
+	PLANNING_INCLUDE,
+
+	// Intended Purpose
+	INTENDEDPURPOSE_INCLUDE, INTENDED_PURPOSE,
+
+	// System requirements
+	SYSTEM_REQUIREMENT_INCLUDE, SYSTEM_REQUIREMENT_SPECIFICATION, SYSTEM_REQUIREMENT_PARAMETERS,
+	SYSTEM_REQUIREMENT_LIST,
+
+	// QoI Planner
+	QOI_PLANNER_INCLUDE,
+
+	// Uncertainty Inventory
+	UNCERTAINTY_INCLUDE, PLANNING_UNCERTAINTY_INCLUDE, UNCERTAINTY_SPECIFICATION, PLANNING_UNCERTAINTIES,
+	UNCERTAINTY_PARAMETERS, UNCERTAINTY_GROUP_LIST,
+
+	// Analyst Decisions
+	DECISION_INCLUDE, DECISION_SPECIFICATION, DECISION_PARAMETERS, DECISION_LIST,
+
+	// PIRT
+	PIRT_INCLUDE, PIRT_SPECIFICATION, PIRT_QOI_LIST, PIRT_QOI_INCLUDE, PIRT_QOI_TAG,
+
+	// PCMM
+	PCMM_INCLUDE, PCMM_PLANNING_INCLUDE, PCMM_ASSESSMENT_INCLUDE, PCMM_EVIDENCE_INCLUDE,
+
+	PCMM_SPECIFICATION, PCMM_TAG, PCMM_TAG_LIST, PCMM_MODE, PCMM_ELEMENTS, PCMM_PLANNING_PARAMETERS,
+	PCMM_PLANNING_PARAMETERS_VALUES, PCMM_PLANNING_PARAMETERS_TABLEITEMS, PCMM_PLANNING_QUESTIONS,
+
+	PCMM_PLANNING_QUESTION_VALUES, PCMM_EVIDENCE_LIST, PCMM_ASSESSMENT_LIST,
+
+	// Custom Ending
+	CUSTOM_ENDING_INCLUDE;
+}

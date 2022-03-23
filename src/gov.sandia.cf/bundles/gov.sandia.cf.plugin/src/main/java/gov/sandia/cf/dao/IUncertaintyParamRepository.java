@@ -11,6 +11,15 @@ import gov.sandia.cf.model.UncertaintyParam;
  * @author Maxime N.
  *
  */
+@Repository
 public interface IUncertaintyParamRepository extends ICRUDRepository<UncertaintyParam, Integer> {
+
+	/**
+	 * Find first by name.
+	 *
+	 * @param name the name
+	 * @return the uncertainty param
+	 */
+	UncertaintyParam findFirstByName(String name);
 
 }

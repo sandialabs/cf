@@ -168,8 +168,8 @@ public abstract class AHelperWidget extends Composite {
 		if (notification != null) {
 			textHelper.setText(String.join(RscTools.CARRIAGE_RETURN, notification.getMessages()));
 			textHelper.setVisible(true);
-			textHelper.setForeground(FormFactory.getNotificationColor(notification));
-			textHelper.setImage(FormFactory.getNotificationIcon(rscMgr, notification));
+			textHelper.setForeground(FormFactory.getNotificationColor(rscMgr, notification));
+			textHelper.setImage(NotificationFactory.getNotificationIcon(rscMgr, notification));
 			((GridData) textHelper.getLayoutData()).heightHint = textHelper.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 
 			textHelper.requestLayout();

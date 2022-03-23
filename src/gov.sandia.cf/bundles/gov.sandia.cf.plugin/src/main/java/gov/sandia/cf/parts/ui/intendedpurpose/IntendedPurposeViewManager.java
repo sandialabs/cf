@@ -18,16 +18,20 @@ import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
+import gov.sandia.cf.web.IWebEventListener;
+import gov.sandia.cf.web.WebEvent;
 
 /**
- * The Intended Purpose view.
+ * The Intended Purpose view manager to control view within the whole
+ * application and redirections.
  * 
  * @author Didier Verstraete
  *
  */
-public class IntendedPurposeViewManager extends AViewManager implements Listener, IViewManager {
+public class IntendedPurposeViewManager extends AViewManager implements Listener, IViewManager, IWebEventListener {
 
 	/** Buttons events Properties */
 	public static final String BTN_EVENT_PROPERTY = "BTN_EVENT"; //$NON-NLS-1$
@@ -41,10 +45,8 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 	/** Buttons events ADD */
 	public static final String BTN_EVENT_ADD = "BTN_EVENT_ADD"; //$NON-NLS-1$
 
-	/**
-	 * the Intended Purpose home view
-	 */
-	private IntendedPurposeView intendedPurposeView;
+	/** The intended purpose view ctrl. */
+	private IIntendedPurposeViewController intendedPurposeViewCtrl;
 
 	/**
 	 * the last control opened
@@ -68,6 +70,13 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 
 		this.lastControl = null;
 
+		if (isWebConnection()) {
+			this.intendedPurposeViewCtrl = new IntendedPurposeWebViewController(this);
+			getCredibilityEditor().getWebMsgMgr().addListener(this);
+		} else {
+			this.intendedPurposeViewCtrl = new IntendedPurposeViewController(this);
+		}
+
 		// create the view
 		createPartControl(parent);
 	}
@@ -84,12 +93,9 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 		this.stackLayout = new StackLayout();
 		this.setLayout(stackLayout);
 
-		// load home view
-		this.intendedPurposeView = new IntendedPurposeView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = intendedPurposeView;
-		this.lastControl = intendedPurposeView;
+		this.stackLayout.topControl = intendedPurposeViewCtrl.getViewControl();
+		this.lastControl = intendedPurposeViewCtrl.getViewControl();
 
 		this.layout();
 	}
@@ -132,16 +138,32 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 		// save the last opened view
 		saveLastView();
 
-		if (this.intendedPurposeView == null) {
-			this.intendedPurposeView = new IntendedPurposeView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = intendedPurposeView;
-		intendedPurposeView.refresh();
+		this.stackLayout.topControl = intendedPurposeViewCtrl.getViewControl();
+		intendedPurposeViewCtrl.refresh();
 
 		// Layout
 		this.layout();
+	}
+
+	/**
+	 * Handle web event.
+	 *
+	 * @param e the e
+	 */
+	@Override
+	public void handle(WebEvent e) {
+		intendedPurposeViewCtrl.handleWebEvent(e);
+	}
+
+	/**
+	 * Handle web event error.
+	 *
+	 * @param error the error
+	 */
+	@Override
+	public void handleError(Throwable error) {
+		// TODO implement
 	}
 
 	/**
@@ -149,7 +171,7 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 	 */
 	public void refreshSaveState() {
 		if (null != this.stackLayout.topControl) {
-			((ACredibilityView<?>) this.stackLayout.topControl).refreshSaveState();
+			((ACredibilityView<?>) this.stackLayout.topControl).refreshStatusComposite();
 		}
 	}
 
@@ -195,10 +217,10 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 	public Queue<BreadcrumbItemParts> getBreadcrumbItems(ACredibilityView<?> view) {
 		Queue<BreadcrumbItemParts> breadcrumbItems = this.viewManager.getBreadcrumbItems(view);
 
-		// add the pcmm home view
+		// add the home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (intendedPurposeView != null) {
-			bcHomeItemPart.setName(intendedPurposeView.getItemTitle());
+		if (intendedPurposeViewCtrl != null) {
+			bcHomeItemPart.setName(intendedPurposeViewCtrl.getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -208,26 +230,39 @@ public class IntendedPurposeViewManager extends AViewManager implements Listener
 		return breadcrumbItems;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
 		if (item != null && item.getListener().equals(this)
-				&& item.getName().equals((intendedPurposeView).getItemTitle())) {
+				&& item.getName().equals(intendedPurposeViewCtrl.getItemTitle())) {
 			openHome();
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void reload() {
 
 		// reload views
-		if (intendedPurposeView != null) {
-			intendedPurposeView.reload();
+		if (intendedPurposeViewCtrl != null) {
+			intendedPurposeViewCtrl.reload();
 		}
 	}
 
+	@Override
+	public void reloadActiveView() {
+		if (stackLayout.topControl instanceof ICredibilityView) {
+			((ICredibilityView) stackLayout.topControl).reload();
+		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void quit() {
+		intendedPurposeViewCtrl.quit();
+	}
+
+	/** {@inheritDoc} */
 	@Override
 	public CredibilityEditor getCredibilityEditor() {
 		if (viewManager == null) {

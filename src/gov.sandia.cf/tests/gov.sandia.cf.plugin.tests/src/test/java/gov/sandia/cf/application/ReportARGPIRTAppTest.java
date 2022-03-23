@@ -20,9 +20,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.YmlARGStructure;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.pirt.IImportPIRTApp;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
+import gov.sandia.cf.application.report.IReportARGPIRTApp;
+import gov.sandia.cf.constants.arg.ARGOrientation;
+import gov.sandia.cf.constants.arg.YmlARGStructure;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
@@ -30,6 +33,8 @@ import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.QuantityOfInterest;
+import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -68,6 +73,7 @@ class ReportARGPIRTAppTest extends AbstractTestApplication {
 				map.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY));
 		assertEquals(RscTools.getString(RscConst.MSG_ARG_REPORT_PIRT_STRING),
 				map.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY));
+		assertEquals(ARGOrientation.LANDSCAPE.getOrientation(), map.get(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY));
 		assertTrue(((List<?>) map.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).isEmpty());
 	}
 
@@ -77,8 +83,9 @@ class ReportARGPIRTAppTest extends AbstractTestApplication {
 
 		// construct database
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
-		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, confFile);
+		getAppManager().getService(IImportPIRTApp.class).importPIRTSpecification(model, user, confFile);
 		PIRTSpecification pirtSpecs = getAppManager().getService(IPIRTApplication.class).loadPIRTConfiguration(model);
 		QuantityOfInterest newQoI = TestEntityFactory.getNewQoI(getDaoManager(), model);
 		QoIPlanningParam newQoIPlanningParam = TestEntityFactory.getNewQoIPlanningParam(getDaoManager(), null);
@@ -136,6 +143,7 @@ class ReportARGPIRTAppTest extends AbstractTestApplication {
 				map.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY));
 		assertEquals(RscTools.getString(RscConst.MSG_ARG_REPORT_PIRT_STRING),
 				map.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY));
+		assertEquals(ARGOrientation.LANDSCAPE.getOrientation(), map.get(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY));
 		assertEquals(3, ((List<?>) map.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).size());
 	}
 

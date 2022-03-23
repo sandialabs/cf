@@ -104,7 +104,7 @@ public class QoITagDialog extends GenericCFSmallDialog<IViewManager> {
 
 		// text description - editor
 		editorDescription = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), formContainer,
-				RscTools.getString(RscConst.MSG_TAGQOI_DESCRIPTION, qoiName), null, true, true);
+				RscTools.getString(RscConst.MSG_TAGQOI_DESCRIPTION, qoiName), null, true, true, true);
 
 		// dialog behavior
 		editorDescription.setFocus();

@@ -3,7 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 
 /**
  * The main interface to define for each application service.
@@ -28,5 +28,5 @@ public interface IApplication {
 	/**
 	 * @return the dao manager
 	 */
-	DaoManager getDaoManager();
+	IDaoManager getDaoManager();
 }

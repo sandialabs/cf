@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1_0" href="./PIRTPhenTableHeaderCellModifier.html" title="gov.sandia.cf.parts.ui.pirt.editors.PIRTPhenTableHeaderCellModifier" alt="" coords="16,197,488,325"/>
-<area shape="rect" id="node1" href="./PIRTPhenTableHeaderCellModifier.html" title="&lt;TABLE&gt;" alt="" coords="5,192,499,331"/>
-<area shape="rect" id="node2_1" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ICellModifier.html" title="org.eclipse.jface.viewers.ICellModifier" alt="" coords="94,11,410,139"/>
-<area shape="rect" id="node2" href="http://java.sun.com/j2se/1.4.2/docs/api/org/eclipse/jface/viewers/ICellModifier.html" title="&lt;TABLE&gt;" alt="" coords="83,5,421,144"/>
-</map>

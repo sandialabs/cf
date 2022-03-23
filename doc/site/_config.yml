@@ -1,0 +1,3 @@
+baseurl: /cf
+plugins:
+  - jekyll-remote-include

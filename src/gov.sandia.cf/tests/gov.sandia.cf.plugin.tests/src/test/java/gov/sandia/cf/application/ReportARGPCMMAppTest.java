@@ -23,10 +23,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.YmlARGStructure;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pcmm.IImportPCMMApp;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.application.report.IReportARGPCMMApp;
+import gov.sandia.cf.constants.arg.YmlARGStructure;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.Model;
@@ -40,6 +42,8 @@ import gov.sandia.cf.model.PCMMPlanningQuestion;
 import gov.sandia.cf.model.PCMMPlanningQuestionValue;
 import gov.sandia.cf.model.PCMMPlanningValue;
 import gov.sandia.cf.model.PCMMSubelement;
+import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -270,10 +274,11 @@ class ReportARGPCMMAppTest extends AbstractTestApplication {
 
 		// construct database
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 		File confFile = new File(WorkspaceTools
 				.getStaticFilePath("configuration/PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.yml")); //$NON-NLS-1$
 		PCMMSpecification pcmmSpecs = new YmlReaderPCMMSchema().load(confFile);
-		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, confFile);
+		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, user, confFile);
 
 		TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null);
 

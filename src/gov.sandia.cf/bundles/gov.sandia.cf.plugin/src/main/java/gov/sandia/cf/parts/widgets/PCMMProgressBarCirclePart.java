@@ -3,6 +3,8 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.widgets;
 
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.nebula.widgets.progresscircle.ProgressCircle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -10,8 +12,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
 import gov.sandia.cf.model.PCMMElement;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RandomTools;
 
@@ -24,16 +26,23 @@ import gov.sandia.cf.tools.RandomTools;
 public class PCMMProgressBarCirclePart extends Composite {
 
 	private PCMMSpecification configuration;
+	private ResourceManager rscMgr;
 
 	/**
 	 * The constructor
 	 * 
 	 * @param parent        the parent view
+	 * @param rscMgr        the resource manager
 	 * @param configuration the configuration class
 	 * @param style         the inherited style
 	 */
-	public PCMMProgressBarCirclePart(Composite parent, PCMMSpecification configuration, int style) {
+	public PCMMProgressBarCirclePart(Composite parent, ResourceManager rscMgr, PCMMSpecification configuration,
+			int style) {
 		super(parent, style);
+
+		Assert.isNotNull(rscMgr);
+		this.rscMgr = rscMgr;
+
 		this.configuration = configuration;
 
 		// create part
@@ -71,7 +80,7 @@ public class PCMMProgressBarCirclePart extends Composite {
 				barCircle.setThickness(progressCircleThickness);
 				barCircle.setShowText(showText);
 				barCircle.setTextPattern(maximumPattern + barCircle.getMaximum());
-				barCircle.setHighlightColor(ColorTools.stringToColor(this.getDisplay(), element.getColor()));
+				barCircle.setHighlightColor(ColorTools.toColor(rscMgr, element.getColor()));
 			}
 		}
 	}

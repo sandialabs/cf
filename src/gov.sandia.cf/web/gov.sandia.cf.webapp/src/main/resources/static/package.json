@@ -1,0 +1,28 @@
+{
+  "name": "gov.sandia.cf.webapp",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gulp": "node ./node_modules/gulp/bin/gulp build"
+  },
+  "keywords": [],
+  "author": "Sandia National Laboratories",
+  "license": "EPL-2.0",
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@fortawesome/fontawesome-free": "^5.15.4",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-jshint": "^2.1.0",
+    "gulp-rename": "^2.0.0",
+    "gulp-uglify": "^3.0.2",
+    "highlight.js": "^11.3.1",
+    "jshint": "^2.13.1",
+    "katex": "^0.13.18",
+    "mdbootstrap": "^4.20.0",
+    "quill": "^1.3.7"
+  }
+}

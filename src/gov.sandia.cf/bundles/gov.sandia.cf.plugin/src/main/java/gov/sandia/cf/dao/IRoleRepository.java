@@ -11,6 +11,7 @@ import gov.sandia.cf.model.Role;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IRoleRepository extends ICRUDRepository<Role, Integer> {
 
 }

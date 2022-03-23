@@ -22,7 +22,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.requirement.IImportSysRequirementApp;
 import gov.sandia.cf.dao.ISystemRequirementParamRepository;
 import gov.sandia.cf.dao.ISystemRequirementSelectValueRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
@@ -32,6 +33,7 @@ import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementSelectValue;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -56,14 +58,15 @@ class ImportSysRequirementAppTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/Requirement_Parameter-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import
-		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, confFile);
+		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, user,
+				confFile);
 
 		// test Uncertainty Parameter
 		List<SystemRequirementParam> param = getDaoManager().getRepository(ISystemRequirementParamRepository.class)

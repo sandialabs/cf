@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.GenericValueTaggable;
@@ -127,7 +128,7 @@ class PCMMApplicationTagTest extends AbstractTestApplication {
 		assessment.setLevel(level);
 		assessment.setUserCreation(defaultUser);
 		assessment.setRoleCreation(defaultRole);
-		assessment = getPCMMApp().addAssessment(assessment);
+		assessment = getPCMMAssessmentApp().addAssessment(assessment);
 		assertNotNull(assessment);
 
 		// Tag with assessment
@@ -224,11 +225,11 @@ class PCMMApplicationTagTest extends AbstractTestApplication {
 		assertNotNull(createdTag.getId());
 
 		// try to find after tag creation
-		List<PCMMEvidence> evidenceByTag = getPCMMApp().getEvidenceByTag(createdTag);
+		List<PCMMEvidence> evidenceByTag = getPCMMEvidenceApp().getEvidenceByTag(createdTag);
 		assertNotNull(evidenceByTag);
 		assertFalse(evidenceByTag.isEmpty());
 
-		List<PCMMAssessment> assessmentByTag = getPCMMApp().getAssessmentByTag(createdTag);
+		List<PCMMAssessment> assessmentByTag = getPCMMAssessmentApp().getAssessmentByTag(createdTag);
 		assertNotNull(assessmentByTag);
 		assertFalse(assessmentByTag.isEmpty());
 
@@ -258,11 +259,11 @@ class PCMMApplicationTagTest extends AbstractTestApplication {
 		getPCMMApp().deleteTag(tag);
 
 		// try to find after tag deletion
-		List<PCMMEvidence> evidenceByTag1 = getPCMMApp().getEvidenceByTag(tag);
+		List<PCMMEvidence> evidenceByTag1 = getPCMMEvidenceApp().getEvidenceByTag(tag);
 		assertNotNull(evidenceByTag1);
 		assertTrue(evidenceByTag1.isEmpty());
 
-		List<PCMMAssessment> assessmentByTag1 = getPCMMApp().getAssessmentByTag(tag);
+		List<PCMMAssessment> assessmentByTag1 = getPCMMAssessmentApp().getAssessmentByTag(tag);
 		assertNotNull(assessmentByTag1);
 		assertTrue(assessmentByTag1.isEmpty());
 

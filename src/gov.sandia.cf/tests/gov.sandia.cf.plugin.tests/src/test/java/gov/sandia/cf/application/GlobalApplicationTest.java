@@ -19,12 +19,13 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ConfigurationFileType;
-import gov.sandia.cf.application.configuration.ConfigurationSchema;
+import gov.sandia.cf.application.global.IGlobalApplication;
+import gov.sandia.cf.constants.configuration.ConfigurationFileType;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GlobalConfiguration;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.OpenLinkBrowserOption;
+import gov.sandia.cf.model.dto.configuration.ConfigurationSchema;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 

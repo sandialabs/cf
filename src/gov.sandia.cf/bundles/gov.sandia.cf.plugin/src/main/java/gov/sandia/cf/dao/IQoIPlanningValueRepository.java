@@ -11,6 +11,7 @@ import gov.sandia.cf.model.QoIPlanningValue;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IQoIPlanningValueRepository extends ICRUDRepository<QoIPlanningValue, Integer> {
 
 }

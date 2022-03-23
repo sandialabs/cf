@@ -21,8 +21,16 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.YmlARGStructure;
+import gov.sandia.cf.application.decision.IDecisionApplication;
+import gov.sandia.cf.application.decision.IImportDecisionApp;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.application.report.IReportARGPlanningApp;
+import gov.sandia.cf.application.requirement.IImportSysRequirementApp;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.uncertainty.IImportUncertaintyApp;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.constants.arg.YmlARGStructure;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.Decision;
@@ -33,9 +41,9 @@ import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.model.Uncertainty;
-import gov.sandia.cf.model.UncertaintyGroup;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.UncertaintyValue;
+import gov.sandia.cf.model.User;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -61,9 +69,9 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		// construct
 		Map<ExportOptions, Object> options = new HashMap<>();
 		options.put(ExportOptions.PLANNING_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_REQUIREMENT_INCLUDE, true);
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, true);
 		options.put(ExportOptions.PLANNING_UNCERTAINTY_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_DECISION_INCLUDE, true);
+		options.put(ExportOptions.DECISION_INCLUDE, true);
 		List<Map<String, Object>> chapters = new ArrayList<>();
 
 		// test
@@ -79,7 +87,7 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		// construct
 		Map<ExportOptions, Object> options = new HashMap<>();
 		options.put(ExportOptions.PLANNING_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_REQUIREMENT_INCLUDE, true);
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, true);
 		List<Map<String, Object>> chapters = new ArrayList<>();
 
 		// test
@@ -102,8 +110,10 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 
 		// construct database
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/Requirement_Parameter-v0.1.yml")); //$NON-NLS-1$
-		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, confFile);
+		getAppManager().getService(IImportSysRequirementApp.class).importSysRequirementSpecification(model, user,
+				confFile);
 		SystemRequirementParam newSystemRequirementParam = TestEntityFactory
 				.getNewSystemRequirementParam(getDaoManager(), model, null);
 		SystemRequirementParam newSystemRequirementParam2 = TestEntityFactory
@@ -120,11 +130,11 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		// construct options
 		Map<ExportOptions, Object> options = new HashMap<>();
 		options.put(ExportOptions.PLANNING_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_REQUIREMENT_INCLUDE, true);
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, true);
 		ARGParameters addDefaultARGParameters = getAppManager().getService(IReportARGExecutionApp.class)
 				.addDefaultARGParameters(null);
 		options.put(ExportOptions.ARG_PARAMETERS, addDefaultARGParameters);
-		options.put(ExportOptions.PLANNING_REQUIREMENTS, Arrays.asList(newSystemRequirement));
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, Arrays.asList(newSystemRequirement));
 		List<Map<String, Object>> chapters = new ArrayList<>();
 
 		// test
@@ -174,12 +184,15 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 
 		// construct database
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
+
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/Uncertainty_Parameter_v0.0.yml")); //$NON-NLS-1$
-		getAppManager().getService(IImportUncertaintyApp.class).importUncertaintySpecification(model, confFile);
+		getAppManager().getService(IImportUncertaintyApp.class).importUncertaintySpecification(model, user, confFile);
 		UncertaintyParam newUncertaintyParam = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), model, null);
 		UncertaintyParam newUncertaintyParam2 = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), model, null);
-		UncertaintyGroup newUncertaintyGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), model);
-		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), newUncertaintyGroup, null);
+		Uncertainty newUncertaintyGroup = TestEntityFactory.getNewUncertainty(getDaoManager(), model, null, null);
+		Uncertainty newUncertainty = TestEntityFactory.getNewUncertainty(getDaoManager(), model, newUncertaintyGroup,
+				null);
 		UncertaintyValue newUncertaintyValue = TestEntityFactory.getNewUncertaintyValue(getDaoManager(), newUncertainty,
 				newUncertaintyParam, null);
 		newUncertaintyValue.setValue("MyValue"); //$NON-NLS-1$
@@ -221,7 +234,7 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		// construct
 		Map<ExportOptions, Object> options = new HashMap<>();
 		options.put(ExportOptions.PLANNING_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_DECISION_INCLUDE, true);
+		options.put(ExportOptions.DECISION_INCLUDE, true);
 		List<Map<String, Object>> chapters = new ArrayList<>();
 
 		// test
@@ -244,8 +257,9 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 
 		// construct database
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
-		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, confFile);
+		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, user, confFile);
 		DecisionParam newDecisionParam = TestEntityFactory.getNewDecisionParam(getDaoManager(), model, null);
 		DecisionParam newDecisionParam2 = TestEntityFactory.getNewDecisionParam(getDaoManager(), model, null);
 		Decision newDecision = TestEntityFactory.getNewDecision(getDaoManager(), model, null, null);
@@ -258,11 +272,11 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		// construct options
 		Map<ExportOptions, Object> options = new HashMap<>();
 		options.put(ExportOptions.PLANNING_INCLUDE, true);
-		options.put(ExportOptions.PLANNING_DECISION_INCLUDE, true);
+		options.put(ExportOptions.DECISION_INCLUDE, true);
 		ARGParameters addDefaultARGParameters = getAppManager().getService(IReportARGExecutionApp.class)
 				.addDefaultARGParameters(null);
 		options.put(ExportOptions.ARG_PARAMETERS, addDefaultARGParameters);
-		options.put(ExportOptions.PLANNING_DECISIONS, Arrays.asList(newDecision));
+		options.put(ExportOptions.DECISION_LIST, Arrays.asList(newDecision));
 		List<Map<String, Object>> chapters = new ArrayList<>();
 
 		// test

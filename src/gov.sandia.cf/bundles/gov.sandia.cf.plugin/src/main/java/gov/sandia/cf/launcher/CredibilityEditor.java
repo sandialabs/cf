@@ -7,12 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -28,7 +23,6 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -44,27 +38,26 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ApplicationManager;
-import gov.sandia.cf.application.IGlobalApplication;
-import gov.sandia.cf.application.IImportApplication;
-import gov.sandia.cf.application.IMigrationApplication;
-import gov.sandia.cf.application.configuration.ConfigurationFileType;
-import gov.sandia.cf.application.configuration.ConfigurationSchema;
+import gov.sandia.cf.application.IApplicationManager;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
-import gov.sandia.cf.dao.DaoManager;
-import gov.sandia.cf.dao.IModelRepository;
+import gov.sandia.cf.exceptions.CredibilityDatabaseInvalidException;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationCancelledException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
-import gov.sandia.cf.model.Model;
-import gov.sandia.cf.model.comparator.VersionComparator;
+import gov.sandia.cf.parts.services.ClientServiceManager;
+import gov.sandia.cf.parts.services.IClientServiceManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;
-import gov.sandia.cf.tools.ZipTools;
+import gov.sandia.cf.web.WebClientException;
+import gov.sandia.cf.web.WebClientRuntimeException;
+import gov.sandia.cf.web.message.IMessageManager;
+import gov.sandia.cf.web.services.IWebClientManager;
+import gov.sandia.cf.web.services.status.IConnectionStatusListener;
+import gov.sandia.cf.web.services.status.IPingManager;
 
 /**
  * 
@@ -73,35 +66,35 @@ import gov.sandia.cf.tools.ZipTools;
  * @author Didier Verstraete
  *
  */
-public class CredibilityEditor extends EditorPart implements Listener {
+public class CredibilityEditor extends EditorPart implements Listener, IConnectionStatusListener {
 
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(CredibilityEditor.class);
 
-	/**
-	 * The credibility database folder name
-	 */
-	private static final String CREDIBILITY_CONF_FILE_NAME = "cf-schema.yml"; //$NON-NLS-1$
+	/** The Constant CREDIBILITY_CONF_FILE_NAME. */
+	public static final String CREDIBILITY_SETUP_FILE_NAME = "setup.yml"; //$NON-NLS-1$
 
 	/**
 	 * The GUI resource manager
 	 */
 	private ResourceManager resourceManager;
 
-	/**
-	 * The view manager
-	 */
+	/** The view mgr. */
 	private MainViewManager viewMgr;
-	/**
-	 * The application layer manager
-	 */
-	private ApplicationManager appMgr;
-	/**
-	 * The dao layer manager
-	 */
-	private DaoManager daoMgr;
+
+	/** The client srv mgr. */
+	private IClientServiceManager clientSrvMgr;
+
+	/** The app mgr. */
+	private IApplicationManager appMgr;
+
+	/** The web msg mgr. */
+	private IMessageManager webMsgMgr;
+
+	/** The ping mgr. */
+	private IPingManager pingMgr;
 
 	/**
 	 * The cf input file
@@ -121,34 +114,47 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	/**
 	 * Editor in error
 	 */
-	private boolean inError;
+	private boolean toClose;
 
 	/**
 	 * the cf cache
 	 */
 	private CFCache cache;
 
+	/** The cf tmp folder mgr. */
+	private CFTmpFolderManager cfTmpFolderMgr;
+
 	/**
 	 * The constructor
 	 */
 	public CredibilityEditor() {
-		this.viewMgr = new MainViewManager(this);
-		this.daoMgr = new DaoManager();
-		this.appMgr = new ApplicationManager(daoMgr);
-		this.cache = new CFCache(this);
 		this.dirty = false;
-		this.inError = false;
+		this.toClose = false;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void createPartControl(Composite parent) {
+
+		if (this.toClose) {
+			// close editor
+			WorkspaceTools.closeEditor(this, false);
+		} else {
+			// create part
+			viewMgr.createPartControl(parent);
+		}
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
-		this.cache = new CFCache(this);
-
 		// set not dirty at first
 		this.dirty = false;
 
+		/**
+		 * 1- Check input
+		 */
 		if (!(input instanceof FileEditorInput)) {
 			String message = RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_BADINPUT);
 			logger.error(message);
@@ -163,338 +169,108 @@ public class CredibilityEditor extends EditorPart implements Listener {
 				CredibilityFrameworkConstants.CF_PLUGIN_NAME, getVersion(), ((FileEditorInput) input).getFile());
 
 		/**
-		 * Initialize variables
+		 * 2- Initialize client
 		 */
 		setSite(site);
 		setInput(input);
 		setPartName(input.getName());
 
+		// init managers
+		this.viewMgr = new MainViewManager(this);
+		this.clientSrvMgr = new ClientServiceManager();
+		this.cache = new CFCache(this);
+
+		// set resource manager
+		this.resourceManager = new LocalResourceManager(JFaceResources.getResources());
+
+		// start client service
+		this.viewMgr.start();
+		this.clientSrvMgr.start();
+
 		// get cf file
 		this.inputFile = ((FileEditorInput) input).getFile();
 
-		// the cf project path
+		// get cf project path
+		this.cfTmpFolderMgr = new CFTmpFolderManager(this);
 		this.cfProjectPath = this.inputFile.getParent().getFullPath();
 
-		// the cf project path
-		IFolder cfTmpIFolder = WorkspaceTools.getTempFolder(inputFile);
-		IPath cfFolderPath = cfTmpIFolder.getFullPath();
-
-		// the cf working dir
-		File cfTmpFolder = WorkspaceTools.toFile(cfFolderPath);
-
-		// test if the user wants to recover previous data or not
-		boolean okRecoverPreviousStage = false;
-
-		/**
-		 * Start loading process
-		 */
 		try {
-			/*
-			 * Check database version and ask for migration if needed
+
+			/**
+			 * 3- Load setup file for backend detection (Local FILE or WEB)
 			 */
-			checkDatabaseAndMigrate(cfTmpFolder);
+			loadClientSetup();
 
-			/*
-			 * Check CF working directory existence
+			/**
+			 * 4- Load process depending of backend type
 			 */
-			// unzip property to load data in .cf file
-			boolean unzipCfFile = true;
-
-			// test if a cf temporary folder is already present or not
-			boolean existsCfTmpFolder = (cfTmpFolder != null && cfTmpFolder.exists());
-			if (existsCfTmpFolder) {
-
-				// test if the data are recoverable : make a database connection test, execute a
-				// query and close the connection
-				boolean databaseRecoverable = isDatabaseRecoverable(cfFolderPath);
-				boolean deleteExisting = false;
-
-				if (!databaseRecoverable) {
-					MessageDialog.openWarning(getSite().getShell(),
-							RscTools.getString(RscConst.WRN_CREDIBILITYEDITOR_CFTMPFOLDER_TITLE), RscTools.getString(
-									RscConst.WRN_CREDIBILITYEDITOR_CFTMPFOLDER_NOTRECOVERABLE, inputFile.getName()));
-					deleteExisting = true;
-				} else {
-					// ask the user if he wants to recover
-					okRecoverPreviousStage = MessageDialog.openQuestion(getSite().getShell(),
-							RscTools.getString(RscConst.WRN_CREDIBILITYEDITOR_CFTMPFOLDER_TITLE), RscTools.getString(
-									RscConst.WRN_CREDIBILITYEDITOR_CFTMPFOLDER_CONFIRMRECOVER, inputFile.getName()));
-
-					// if the user wants to recover the previous data
-					if (okRecoverPreviousStage) {
-						unzipCfFile = false;
-
-						// put the editor in a dirty state because .cf file and temporary folder do not
-						// have same data
-						setDirty(true);
-					} else {
-						deleteExisting = true;
-					}
-				}
-
-				if (deleteExisting) {
-					FileTools.deleteDirectoryRecursively(cfTmpFolder);
-				}
+			if (isWebConnection()) {
+				new CFWebBackendLoader().load(this);
+			} else {
+				new CFLocalFileLoader().load(this);
 			}
 
-			/*
-			 * Unzip the CF file and create the working directory
-			 */
-			if (unzipCfFile) {
-				createWorkingDir(cfTmpFolder);
-			}
-
-			/*
-			 * Start the database connection, the application managers and the cache
-			 */
-			// load application layer classes
-			appMgr.start();
-
-			// create or load the credibility database
-			String projectPath = WorkspaceTools.toOsPath(cfFolderPath);
-			logger.debug("Creating database files at: {}", projectPath); //$NON-NLS-1$
-			daoMgr.initialize(projectPath);
-
-			/*
-			 * Load cache
-			 */
-			cache.refreshModel();
-			cache.refreshGlobalConfiguration();
-			cache.refreshUser();
-
-			/*
-			 * Database cleaning and migration
-			 */
-			doDataMigration(cfFolderPath);
-
-			/*
-			 * Load the configuration from the CF working directory
-			 */
-			reloadConfiguration();
-
-			/*
-			 * Update the database version with the current plugin version
-			 */
-			updateDatabaseVersion();
-
-			// the editor needs to be saved?
-			if (isDirty() && !okRecoverPreviousStage) {
-				// save just after
-				// create asynchronous save job (otherwise it may not be saved)
-				Display.getCurrent().asyncExec(() -> doSave(new NullProgressMonitor()));
-			}
-
-		} catch (CredibilityMigrationException | CredibilityException | SqlToolError | SQLException | IOException
-				| URISyntaxException e) {
+		} catch (CredibilityMigrationException | CredibilityException | CredibilityDatabaseInvalidException
+				| SqlToolError | SQLException | IOException | URISyntaxException | WebClientException
+				| WebClientRuntimeException | CoreException e) {
 
 			// display the error
 			Status status = new Status(IStatus.ERROR, CredibilityFrameworkConstants.CF_PLUGIN_NAME,
-					RscTools.getString(RscConst.EX_CREDEDITOR_OPENING, getTitle(), e.getMessage()));
+					RscTools.getString(RscConst.EX_CREDEDITOR_OPENING, getTitle(), e.getMessage()), e);
 			StatusManager.getManager().handle(status, StatusManager.LOG);
 
 			logger.error(e.getMessage(), e);
 
 			MessageDialog.openError(getSite().getShell(), RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_TITLE),
-					RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_LOADING) + this.inputFile
-							+ RscTools.carriageReturn() + e.getMessage());
+					RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_LOADING) + RscTools.carriageReturn()
+							+ this.inputFile + RscTools.carriageReturn() + RscTools.carriageReturn() + e.getMessage());
 
-			this.inError = true;
+			this.toClose = true;
+
 		} catch (CredibilityMigrationCancelledException e) {
 
 			// display the error
 			Status status = new Status(IStatus.WARNING, CredibilityFrameworkConstants.CF_PLUGIN_NAME,
-					RscTools.getString(RscConst.EX_CREDEDITOR_OPENING, getTitle(), e.getMessage()));
+					RscTools.getString(RscConst.EX_CREDEDITOR_OPENING, getTitle(), e.getMessage()), e);
 			StatusManager.getManager().handle(status, StatusManager.LOG);
 
 			logger.warn(e.getMessage(), e);
 
-			MessageDialog.openWarning(getSite().getShell(), RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_TITLE),
-					e.getMessage());
-
-			this.inError = true;
+			this.toClose = true;
 		}
 	}
 
 	/**
-	 * Check the database consistency and ask for migration if needed.
-	 * 
-	 * @param cfTmpFolder the database folder
-	 * @throws IOException                            if a file IO error occured
-	 * @throws SQLException                           if a SQL error occured
-	 * @throws CredibilityException                   if a functional error occured
-	 * @throws CredibilityMigrationCancelledException if a migration error occured
+	 * Load client setup.
+	 *
+	 * @return the CF backend connection type
+	 * @throws CredibilityException the credibility exception
+	 * @throws IOException          Signals that an I/O exception has occurred.
 	 */
-	private void checkDatabaseAndMigrate(File cfTmpFolder)
-			throws IOException, CredibilityException, SQLException, CredibilityMigrationCancelledException {
+	private CFClientSetup loadClientSetup() throws CredibilityException, IOException {
 
-		boolean existsCfTmpFolder = (cfTmpFolder != null && cfTmpFolder.exists());
-		Path dbCheckCfTmpFolder = null;
-		DaoManager daoManagerTmp = new DaoManager();
+		// get cf working dir
+		IFolder cfTmpIFolder = cfTmpFolderMgr.getTempIFolder();
+		IPath cfFolderPath = cfTmpIFolder.getFullPath();
+		File cfTmpFolder = WorkspaceTools.toFile(cfFolderPath);
+		boolean existAtStartCfTmpFolder = (cfTmpFolder != null && cfTmpFolder.exists());
 
-		try {
-			// create temporary folder
-			dbCheckCfTmpFolder = Files.createTempDirectory(FileTools.CREDIBILITY_TMP_FOLDER_DEFAULT_PREFIX);
-
-			// copy the database into the temporary folder
-			if (existsCfTmpFolder) {
-				Files.copy(cfTmpFolder.toPath(), dbCheckCfTmpFolder, StandardCopyOption.COPY_ATTRIBUTES,
-						StandardCopyOption.REPLACE_EXISTING);
-				// Traverse the file tree and copy each file/directory.
-				final Path targetFolder = dbCheckCfTmpFolder;
-				try (Stream<Path> walk = Files.walk(cfTmpFolder.toPath())) {
-					walk.forEach(sourcePath -> {
-						try {
-							Path targetPath = targetFolder.resolve(cfTmpFolder.toPath().relativize(sourcePath));
-							Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-						} catch (IOException ex) {
-							logger.error("I/O error: %s%n", ex); //$NON-NLS-1$
-						}
-					});
-				}
-			} else {
-				Files.copy(WorkspaceTools.toFile(this.inputFile.getFullPath()).toPath(),
-						Paths.get(dbCheckCfTmpFolder.toFile().getAbsolutePath(), this.inputFile.getName()),
-						StandardCopyOption.REPLACE_EXISTING);
-				ZipTools.unzip(new File(dbCheckCfTmpFolder.toFile(), this.inputFile.getName()),
-						dbCheckCfTmpFolder.toFile());
-			}
-
-			// open database connection on temporary database
-			daoManagerTmp.start();
-			daoManagerTmp.getDbManager().initialize(dbCheckCfTmpFolder.toFile().getAbsolutePath());
-			daoManagerTmp.getRepository(IModelRepository.class).setEntityManager(daoManagerTmp.getEntityManager());
-
-			final String pluginVersion = getVersion();
-			String databaseVersion = daoManagerTmp.getRepository(IModelRepository.class).getDatabaseVersion();
-			// if the database version is not set, it is an old version of CF. We need to
-			// set it
-			if (databaseVersion == null) {
-				databaseVersion = RscTools.empty();
-			}
-			if (pluginVersion == null || pluginVersion.isEmpty()) {
-				throw new CredibilityException(RscTools.getString(RscConst.EX_CREDEDITOR_PLUGIN_VERSION_EMPTY));
-			}
-			int versionComparison = new VersionComparator().compare(pluginVersion, databaseVersion);
-
-			// Check the plugin version vs the database version (last plugin version):
-			// (database version < plugin version) -> Needs migration
-			if (versionComparison > 0) {
-
-				// Display confirm dialog before doing migration
-				Display display = Display.getDefault();
-				Shell activeShell = display.getActiveShell();
-				MessageDialog dialog = new MessageDialog(activeShell,
-						RscTools.getString(RscConst.WRN_CREDIBILITYEDITOR_DBMIGRATION_CONFIRM_TITLE), null,
-						RscTools.getString(RscConst.WRN_CREDIBILITYEDITOR_DBMIGRATION_CONFIRM_TXT,
-								this.inputFile.getName(), databaseVersion, pluginVersion),
-						MessageDialog.WARNING, new String[] { RscTools.getString(RscConst.MSG_BTN_CANCEL),
-								RscTools.getString(RscConst.MSG_BTN_CONFIRM) },
-						0);
-				// Get user selection ([0 => Cancel, 1 => Confirm])
-				int result = dialog.open();
-
-				// If the user cancel the migration (stop opening)
-				if (1 != Integer.valueOf(result)) {
-					throw new CredibilityMigrationCancelledException(
-							RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_DBMIGRATION_TXT, this.inputFile.getName(),
-									databaseVersion, pluginVersion));
-				}
-			}
-			// (database version > plugin version) -> Impossible to open, update the plugin
-			else if (versionComparison < 0) {
-				throw new CredibilityException(RscTools.getString(RscConst.EX_CREDEDITOR_VERSION_MISMATCH,
-						pluginVersion, databaseVersion, inputFile.getFullPath()));
-			}
-		} finally {
-
-			// stop the temporary database connection
-			if (daoManagerTmp.isStarted()) {
-				daoManagerTmp.stop();
-			}
-
-			// delete the temporary folder
-			if (dbCheckCfTmpFolder != null && dbCheckCfTmpFolder.toFile() != null
-					&& dbCheckCfTmpFolder.toFile().exists()) {
-				try {
-					FileTools.deleteDirectoryRecursively(dbCheckCfTmpFolder.toFile());
-				} catch (IOException e) {
-					logger.error("Impossible to delete the temporary folder {}", dbCheckCfTmpFolder, e); //$NON-NLS-1$
-				}
-			}
-		}
-	}
-
-	/**
-	 * @param cfFolderPath the cf temporary folder to check
-	 * @return true if the database is recoverable : 1.database connection succeed,
-	 *         2.There is a model in database, otherwise return false
-	 */
-	private boolean isDatabaseRecoverable(IPath cfFolderPath) {
-
-		// return false if the cf folder is null
-		if (cfFolderPath == null) {
-			return false;
+		if (!existAtStartCfTmpFolder) {
+			cfTmpFolderMgr.createWorkingDir();
 		}
 
-		// load application layer classes
-		appMgr.start();
+		// get setup file
+		File setupFile = new File(cfTmpFolder, CREDIBILITY_SETUP_FILE_NAME);
 
-		try {
-			// create or load the credibility database
-			String projectPath = WorkspaceTools.toOsPath(cfFolderPath);
-			logger.info("create database files at: {}", projectPath); //$NON-NLS-1$
+		// load setup file
+		getCache().reloadCFClientSetup(setupFile);
 
-			// initialize the database connection without the database migration
-			daoMgr.getDbManager().initialize(projectPath);
-			daoMgr.getRepository(IModelRepository.class).setEntityManager(daoMgr.getEntityManager());
-
-			// load or create model
-			Model model = appMgr.getService(IGlobalApplication.class).loadModel();
-
-			// if the model does not exist, the database is corrupted
-			if (model == null) {
-				return false;
-			}
-
-		} catch (Exception e) {
-			logger.error("Previous database to recover is in a bad state:\n{}", e.getMessage(), e);//$NON-NLS-1$
-			return false;
+		// if the tmp folder has just been created for the loading -> delete it
+		if (!existAtStartCfTmpFolder) {
+			FileTools.deleteDirectoryRecursively(cfTmpFolder);
 		}
 
-		// stop database connection
-		appMgr.stop();
-
-		return true;
-	}
-
-	/**
-	 * Create the working directory for this cf editor
-	 * 
-	 * @param cfTmpFolder the temporary folder file
-	 * @throws CredibilityException if a functional error occured
-	 * @throws IOException          if a file exception occured
-	 */
-	private void createWorkingDir(File cfTmpFolder) throws CredibilityException, IOException {
-
-		// create the temporary folder
-		boolean cfTmpCreated = cfTmpFolder.mkdir();
-		if (!cfTmpCreated) {
-			throw new CredibilityException(RscTools.getString(RscConst.EX_CREDEDITOR_OPEN_TMPFOLDERCREATIONUNSUCCESSFUL,
-					inputFile.getFullPath(), cfTmpFolder));
-		}
-
-		// unzip the content of the cf file into the temporary folder
-		ZipTools.unzip(WorkspaceTools.toFile(this.inputFile), cfTmpFolder);
-
-		// #FIX: issue #116: the content of the *.cf file can have a folder called
-		// .cftmp or not. If the folder is present, delete it
-		File cfTmpZippedFolder = new File(cfTmpFolder.getPath(), FileTools.CREDIBILITY_TMP_FOLDER_ZIPPED_NAME);
-		if (cfTmpZippedFolder.exists()) {
-			FileTools.move(cfTmpFolder, cfTmpZippedFolder);
-		}
-
-		logger.info("Unzipping cf file ({}) and creating new temporary folder for cf project at: {}", //$NON-NLS-1$
-				this.inputFile.getFullPath(), cfTmpFolder.getPath());
+		return getCache().getCFClientSetup();
 	}
 
 	/**
@@ -522,140 +298,6 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	}
 
 	/**
-	 * Update the database with some adjustments.
-	 * 
-	 * @param cfFolderPath the database folder path
-	 * @throws CredibilityException if an error occurred during migration
-	 * @throws IOException          if an error occurred during a file parsing
-	 */
-	private void doDataMigration(IPath cfFolderPath) throws CredibilityException, IOException {
-
-		// Clear multiple assessments for the same user, role and tag
-		// (see gitlab issue #199).
-		boolean assessmentsCleared = getAppMgr().getService(IMigrationApplication.class)
-				.clearMultipleAssessment(getCache().getPCMMSpecification());
-
-		// Clear the evidence path and replace "\\" by "/" to be correctly interpreted
-		// (see gitlab issue #262).
-		boolean evidencePathCleared = getAppMgr().getService(IMigrationApplication.class).clearEvidencePath();
-
-		// Import the configuration into the database
-		// (see gitlab issue #337).
-		boolean configurationImported = importYmlSchemaConfiguration(cfFolderPath);
-
-		// save the changes
-		if (assessmentsCleared || evidencePathCleared || configurationImported) {
-			setDirty(true);
-		}
-	}
-
-	/**
-	 * Import the confiuration into the database (see gitlab issue #337).
-	 * 
-	 * @return true if the migration was needed
-	 * @throws IOException
-	 * @throws CredibilityException
-	 */
-	private boolean importYmlSchemaConfiguration(IPath cfFolderPath) throws CredibilityException, IOException {
-		// Initialize
-		boolean configurationImported = false;
-
-		// The CF schema file to import and delete
-		File cfSchemaFile = WorkspaceTools.toFile(cfFolderPath.append(CREDIBILITY_CONF_FILE_NAME));
-		if (cfSchemaFile != null && cfSchemaFile.exists()) {
-
-			// Prepare data files
-			ConfigurationSchema confSchema = new ConfigurationSchema();
-			confSchema.put(ConfigurationFileType.PIRT, cfSchemaFile);
-			confSchema.put(ConfigurationFileType.QOIPLANNING, cfSchemaFile);
-			confSchema.put(ConfigurationFileType.PCMM, cfSchemaFile);
-			confSchema.put(ConfigurationFileType.UNCERTAINTY, cfSchemaFile);
-			confSchema.put(ConfigurationFileType.SYSTEM_REQUIREMENT, cfSchemaFile);
-
-			// Import configuration from the CF schema file
-			getAppMgr().getService(IImportApplication.class).importConfiguration(cache.getModel(), confSchema);
-			configurationImported = true;
-
-			// Move the CF schema file to backup folder
-			try {
-
-				File cfSchemaFileTargetFolder = WorkspaceTools
-						.toFile(cfFolderPath.append(FileTools.CREDIBILITY_BACKUP_FOLDER_NAME));
-
-				// If needed create the backup folder
-				if (cfSchemaFileTargetFolder != null && !cfSchemaFileTargetFolder.exists()) {
-					Files.createDirectory(cfSchemaFileTargetFolder.toPath());
-				}
-
-				// CF schema file destination path
-				File cfSchemaFileTarget = WorkspaceTools.toFile(cfFolderPath
-						.append(FileTools.CREDIBILITY_BACKUP_FOLDER_NAME).append(CREDIBILITY_CONF_FILE_NAME));
-
-				// Move CF schema file
-				if (cfSchemaFileTargetFolder != null && cfSchemaFileTargetFolder.exists()) {
-					logger.info("Moving cf schema file to {}", cfSchemaFileTarget.getPath()); //$NON-NLS-1$
-					Files.move(cfSchemaFile.toPath(), cfSchemaFileTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				}
-			} catch (IOException e) {
-				logger.error("An error occured during cf schema file move: {}", e.getMessage(), e); //$NON-NLS-1$
-			}
-		}
-
-		return configurationImported;
-	}
-
-	/**
-	 * Update the database version with the plugin version if the user gives
-	 * approval.
-	 * 
-	 * @throws CredibilityException if an error occured during version update
-	 */
-	private void updateDatabaseVersion() throws CredibilityException {
-
-		Model model = cache.getModel();
-		String databaseVersion = model.getVersion();
-		final String pluginVersion = getVersion();
-
-		// if the database version is not set, it is an old version of CF. We need to
-		// set it
-		if (databaseVersion == null) {
-			databaseVersion = RscTools.empty();
-		}
-		int versionComparison = new VersionComparator().compare(pluginVersion, databaseVersion);
-		if (versionComparison > 0) {
-			model.setVersion(getVersion());
-			daoMgr.getRepository(IModelRepository.class).update(model);
-			cache.refreshModel();
-
-			// save the version and the migration
-			setDirty(true);
-
-			logger.info("The cf file ({}) has been migrated to version {}.", //$NON-NLS-1$
-					inputFile.getFullPath(), getVersion());
-
-		} else if (versionComparison < 0) {
-			throw new CredibilityException(RscTools.getString(RscConst.EX_CREDEDITOR_VERSION_MISMATCH, pluginVersion,
-					databaseVersion, inputFile.getName()));
-		}
-	}
-
-	/** {@inheritDoc} */
-	@Override
-	public void createPartControl(Composite parent) {
-
-		// set resource manager
-		this.resourceManager = new LocalResourceManager(JFaceResources.getResources(), parent);
-
-		if (this.inError) {
-			// close editor
-			WorkspaceTools.closeEditor(this, false);
-		} else {
-			// create part
-			viewMgr.createPartControl(parent);
-		}
-	}
-
-	/**
 	 * Set the new file name and path for the current file, if it modified while the
 	 * file is opened
 	 * 
@@ -680,30 +322,22 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	@Override
 	public void dispose() {
 
+		// CONCURRENCY SUPPORT: unsubscribe to the message broker
+		if (isWebConnection()) {
+			if (webMsgMgr != null)
+				webMsgMgr.stop();
+			if (pingMgr != null)
+				pingMgr.stop();
+		}
+
 		// stop the managers
-		if (viewMgr != null)
-			viewMgr.stop();
+		if (clientSrvMgr != null)
+			clientSrvMgr.stop();
 		if (appMgr != null)
 			appMgr.stop();
 
-		if (!inError) {
-			// remove cf temporary folder
-			IFolder cfTmpIFolder = WorkspaceTools.getTempFolder(inputFile);
-
-			// search file folder
-			File tmpFolder = null;
-			if (cfTmpIFolder != null) {
-				tmpFolder = WorkspaceTools.toFile(cfTmpIFolder.getFullPath());
-			}
-
-			// delete recursively
-			if (tmpFolder != null && tmpFolder.exists()) {
-				try {
-					FileTools.deleteDirectoryRecursively(tmpFolder);
-				} catch (IOException e) {
-					logger.error("Impossible to delete the temporary folder {}", cfTmpIFolder.getFullPath(), e); //$NON-NLS-1$
-				}
-			}
+		if (!toClose) {
+			getCfTmpFolderMgr().deleteTempFolder();
 		}
 
 		// dispose main view manager
@@ -733,23 +367,19 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	}
 
 	/**
+	 * Gets the cf tmp folder mgr.
+	 *
+	 * @return the cf tmp folder mgr
+	 */
+	public CFTmpFolderManager getCfTmpFolderMgr() {
+		return cfTmpFolderMgr;
+	}
+
+	/**
 	 * @return the cf cache
 	 */
 	public CFCache getCache() {
 		return cache;
-	}
-
-	/**
-	 * @return the version of the plugin
-	 */
-	public static String getVersion() {
-		String version = RscTools.empty();
-
-		Bundle cfBundle = CredibilityFrameworkConstants.getBundle();
-		if (cfBundle != null && cfBundle.getVersion() != null) {
-			version = cfBundle.getVersion().toString();
-		}
-		return version;
 	}
 
 	/**
@@ -760,10 +390,97 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	}
 
 	/**
+	 * @return the client service manager
+	 */
+	public IClientServiceManager getClientSrvMgr() {
+		return clientSrvMgr;
+	}
+
+	/**
 	 * @return the application manager
 	 */
-	public ApplicationManager getAppMgr() {
+	public IApplicationManager getAppMgr() {
 		return appMgr;
+	}
+
+	/**
+	 * Sets the app mgr.
+	 *
+	 * @param appMgr the new app mgr
+	 */
+	void setAppMgr(IApplicationManager appMgr) {
+		this.appMgr = appMgr;
+	}
+
+	/**
+	 * Gets the editor shell.
+	 *
+	 * @return the editor shell
+	 */
+	public Shell getEditorShell() {
+		return getSite().getShell();
+	}
+
+	/**
+	 * @return the web client manager
+	 */
+	public IWebClientManager getWebClient() {
+		if (appMgr == null || !isWebConnection() && !IWebClientManager.class.isAssignableFrom(appMgr.getClass())) {
+			return null;
+		}
+		return (IWebClientManager) appMgr;
+	}
+
+	/**
+	 * Gets the web msg mgr.
+	 *
+	 * @return the web msg mgr
+	 */
+	public IMessageManager getWebMsgMgr() {
+		return webMsgMgr;
+	}
+
+	/**
+	 * Sets the web msg mgr.
+	 *
+	 * @param webMsgMgr the new web msg mgr
+	 */
+	void setWebMsgMgr(IMessageManager webMsgMgr) {
+		this.webMsgMgr = webMsgMgr;
+	}
+
+	/**
+	 * Gets the ping mgr.
+	 *
+	 * @return the ping mgr
+	 */
+	public IPingManager getPingMgr() {
+		return pingMgr;
+	}
+
+	/**
+	 * Sets the ping mgr.
+	 *
+	 * @param pingMgr the new ping mgr
+	 */
+	void setPingMgr(IPingManager pingMgr) {
+		this.pingMgr = pingMgr;
+	}
+
+	/**
+	 * Sets CF editor in error.
+	 *
+	 * @param toClose the new to close
+	 */
+	void setInError() {
+		this.toClose = true;
+	}
+
+	/**
+	 * @return is CF editor in error
+	 */
+	public boolean isInError() {
+		return toClose;
 	}
 
 	/**
@@ -780,48 +497,45 @@ public class CredibilityEditor extends EditorPart implements Listener {
 
 		if (inputFile != null && inputFile.exists()) { // the input file can change if the file has been renamed
 
-			logger.info("{} saved at: {}", inputFile.getFullPath(), DateTools.getDateFormattedDateTime()); //$NON-NLS-1$
-			monitor.beginTask(RscTools.getString(RscConst.MSG_EDITOR_SAVE_BEGINTASK, inputFile), 3);
+			logger.debug("Begin save {} into {}", cfTmpFolderMgr.getTempFolderPath(), inputFile.getFullPath()); //$NON-NLS-1$
+			monitor.beginTask(RscTools.getString(RscConst.MSG_EDITOR_SAVE_BEGINTASK, inputFile), 4);
+			int cptTask = 1;
 
 			// save current cf data as a zip file
-			String oldCfFileName = inputFile.getName() + FileTools.OLD_FILENAME_SUFFIX
+			String oldCfFileName = inputFile.getName() + CFTmpFolderManager.OLD_FILENAME_SUFFIX
 					+ DateTools.getDateFormattedDateTimeHash();
 			IPath oldCfFilePath = cfProjectPath.append(oldCfFileName);
-			IFolder cfTmpIFolder = WorkspaceTools.getTempFolder(inputFile);
 
 			try {
 
 				// copy current cf file
+				logger.debug("Save current {} file as {}", inputFile.getName(), oldCfFileName); //$NON-NLS-1$
 				monitor.subTask(RscTools.getString(RscConst.MSG_EDITOR_SAVE_COPYTASK));
 				inputFile.copy(oldCfFilePath, IResource.FORCE, new NullProgressMonitor());
 
 				// delete the current cf file without workspace method to not trigger delete
 				// events that will delete database and close connection
+				logger.debug("Delete {} file", inputFile.getName()); //$NON-NLS-1$
 				Files.delete(WorkspaceTools.toFile(inputFile).toPath());
-				monitor.worked(1);
+				monitor.worked(cptTask);
 
 				// zip cf content to cf file
+				logger.debug("Save temporary folder {} as a zip into {}", cfTmpFolderMgr.getTempFolderPath(), //$NON-NLS-1$
+						inputFile.getName());
 				monitor.subTask(RscTools.getString(RscConst.MSG_EDITOR_SAVE_ZIPTASK));
-				File tmpFolder = WorkspaceTools.toFile(cfTmpIFolder.getFullPath());
-				if (tmpFolder != null && tmpFolder.exists()) {
-					File[] listFiles = tmpFolder.listFiles();
-					if (listFiles != null && listFiles.length > 0) {
-						ZipTools.zipFile(Arrays.asList(listFiles), inputFile.getFullPath());
-					} else {
-						logger.warn("The cf working directory is empty. There is nothing to zip."); //$NON-NLS-1$
-					}
-				} else {
-					throw new CredibilityException(RscTools.getString(RscConst.EX_CREDEDITOR_SAVE_TMPFOLDERNULL,
-							inputFile.getFullPath(), tmpFolder));
-				}
-				monitor.worked(2);
+				cfTmpFolderMgr.saveToZip();
+				cptTask++;
+				monitor.worked(cptTask);
 
 				// remove old cf file
+				logger.debug("Delete saved file {}", oldCfFileName); //$NON-NLS-1$
 				monitor.subTask(RscTools.getString(RscConst.MSG_EDITOR_SAVE_REMOVEOLDTASK));
 				WorkspaceTools.getFileInWorkspaceForPath(oldCfFilePath).delete(IResource.FORCE,
 						new NullProgressMonitor());
-				monitor.worked(3);
+				cptTask++;
+				monitor.worked(cptTask);
 
+				logger.info("{} saved at: {}", inputFile.getFullPath(), DateTools.getDateFormattedDateTime()); //$NON-NLS-1$
 				monitor.done();
 
 			} catch (CoreException | IOException | CredibilityException e) {
@@ -878,10 +592,100 @@ public class CredibilityEditor extends EditorPart implements Listener {
 	}
 
 	/**
-	 * @return is CF editor in error
+	 * Checks if is web connection.
+	 *
+	 * @return true, if is web
 	 */
-	public boolean isInError() {
-		return inError;
+	public boolean isWebConnection() {
+		return CFBackendConnectionType.WEB.equals(getCache().getCFClientSetup().getBackendConnectionType());
 	}
 
+	/**
+	 * Checks if is local file connection.
+	 *
+	 * @return true, if is local file
+	 */
+	public boolean isLocalFileConnection() {
+		return !isWebConnection();
+	}
+
+	/**
+	 * Delete the current CF file, close connection and the editor.
+	 */
+	public void deleteAndCloseFile() {
+
+		if (inputFile != null && inputFile.exists()) { // the input file can change if the file has been renamed
+
+			logger.info("{} deleted at: {}", inputFile.getFullPath(), DateTools.getDateFormattedDateTime()); //$NON-NLS-1$
+
+			try {
+
+				// delete the current cf file without workspace method to not trigger delete
+				// events that will delete database and close connection
+				Files.delete(WorkspaceTools.toFile(inputFile).toPath());
+
+			} catch (IOException e) {
+				logger.error(e.getMessage(), e);
+				MessageDialog.openError(getSite().getShell(), RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_TITLE),
+						RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_SAVING) + inputFile
+								+ RscTools.carriageReturn() + e.getMessage());
+			}
+
+			// close editor
+			WorkspaceTools.closeEditor(this, false);
+		}
+	}
+
+	@Override
+	public void connectionLost() {
+		// refresh connection status
+		getViewMgr().refreshSaveState();
+
+		// reload active view
+		getViewMgr().reloadActiveView();
+
+		// stop message manager
+		webMsgMgr.stop();
+	}
+
+	@Override
+	public void connectionGained() {
+		// refresh connection status
+		getViewMgr().refreshSaveState();
+
+		// reload active view
+		getViewMgr().reloadActiveView();
+
+		// restart message manager
+		webMsgMgr.start();
+
+		// resubscribe
+		try {
+			webMsgMgr.subscribeToModel(getCache().getModel());
+		} catch (WebClientException e) {
+			logger.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * Checks if is connected.
+	 *
+	 * @return true, if is connected
+	 */
+	public boolean isConnected() {
+		return pingMgr != null && pingMgr.isConnected();
+	}
+
+	/**
+	 * @return the version of the plugin
+	 */
+	public static String getVersion() {
+		String version = RscTools.empty();
+
+		Bundle cfBundle = CredibilityFrameworkConstants.getBundle();
+		if (cfBundle != null && cfBundle.getVersion() != null) {
+			version = cfBundle.getVersion().toString();
+		}
+		return version;
+	}
 }

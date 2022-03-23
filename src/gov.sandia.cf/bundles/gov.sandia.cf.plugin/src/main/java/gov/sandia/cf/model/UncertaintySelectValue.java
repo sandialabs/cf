@@ -20,7 +20,7 @@ import gov.sandia.cf.tools.StringTools;
  *
  */
 @Entity
-@Table(name = "COM_UNCERTAINTY_SELECT_VALUE")
+@Table(name = "UNCERTAINTY_SELECT_VALUE")
 public class UncertaintySelectValue extends GenericParameterSelectValue<UncertaintyParam>
 		implements IEntity<UncertaintySelectValue, Integer>, IImportable<UncertaintySelectValue> {
 
@@ -49,6 +49,14 @@ public class UncertaintySelectValue extends GenericParameterSelectValue<Uncertai
 	 */
 	public void setParameter(UncertaintyParam parameter) {
 		this.parameter = parameter;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(UncertaintySelectValue newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
 	}
 
 	/**

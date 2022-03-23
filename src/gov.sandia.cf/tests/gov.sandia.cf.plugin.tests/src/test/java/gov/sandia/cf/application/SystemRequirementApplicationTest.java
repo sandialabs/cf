@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.dao.ISystemRequirementConstraintRepository;
 import gov.sandia.cf.dao.ISystemRequirementParamRepository;
 import gov.sandia.cf.dao.ISystemRequirementRepository;
@@ -34,6 +34,7 @@ import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementSelectValue;
 import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;

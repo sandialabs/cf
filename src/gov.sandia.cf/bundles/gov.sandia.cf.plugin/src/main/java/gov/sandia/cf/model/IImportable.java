@@ -13,6 +13,16 @@ package gov.sandia.cf.model;
 public interface IImportable<M> {
 
 	/**
+	 * Same key.
+	 *
+	 * @param newImportable the new importable
+	 * @return true, if successful
+	 */
+	boolean sameKey(M newImportable);
+	
+	/**
+	 * Same as.
+	 *
 	 * @param newImportable the importable to compare with
 	 * @return true if the importable in parameter has the same field values as this
 	 *         class.
@@ -20,6 +30,8 @@ public interface IImportable<M> {
 	boolean sameAs(M newImportable);
 
 	/**
+	 * Gets the abstract.
+	 *
 	 * @return the importable abstract
 	 */
 	String getAbstract();

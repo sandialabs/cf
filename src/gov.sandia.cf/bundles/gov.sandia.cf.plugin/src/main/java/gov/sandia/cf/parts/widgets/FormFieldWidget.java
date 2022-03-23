@@ -164,7 +164,7 @@ public class FormFieldWidget<S extends GenericParameterSelectValue<?>> extends C
 			// text
 			boolean expanded = false;
 			richText = FormFactory.createRichTextWidget(viewManager.getRscMgr(), this,
-					RscTools.getString(RscConst.MSG_RICHTEXT_CLICK_BAR, name), id, expanded, true);
+					RscTools.getString(RscConst.MSG_RICHTEXT_CLICK_BAR, name), id, expanded, true, true);
 
 			// add expand listener to layout the parent form
 			richText.addExpandListener(new ExpandListener() {
@@ -213,7 +213,7 @@ public class FormFieldWidget<S extends GenericParameterSelectValue<?>> extends C
 			// text
 			boolean expanded = false;
 			richText = FormFactory.createRichTextWidget(viewManager.getRscMgr(), this,
-					RscTools.getString(RscConst.MSG_RICHTEXT_CLICK_BAR, name), id, expanded, false);
+					RscTools.getString(RscConst.MSG_RICHTEXT_CLICK_BAR, name), id, expanded, false, true);
 
 			// add expand listener to layout the parent form
 			richText.addExpandListener(new ExpandListener() {
@@ -250,8 +250,14 @@ public class FormFieldWidget<S extends GenericParameterSelectValue<?>> extends C
 	@Override
 	public void addKeyListener(KeyListener listener) {
 		Control control = getControl();
-		if (control != null)
+		if (control != null) {
 			control.addKeyListener(listener);
+
+			// for richtext editors add modify listener
+			if (FormFieldType.RICH_TEXT.equals(type) && control instanceof RichTextWidget) {
+				((RichTextWidget) control).addModifyListener(e -> listener.notify());
+			}
+		}
 	}
 
 	/**

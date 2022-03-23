@@ -3,6 +3,8 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pirt.editors;
 
+import org.eclipse.jface.resource.ResourceManager;
+
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.RscConst;
@@ -15,6 +17,13 @@ import gov.sandia.cf.tools.RscTools;
  *
  */
 public class QoICreationDateLabelProvider extends QoILabelProvider {
+
+	/**
+	 * @param rscMgr the resource manager
+	 */
+	public QoICreationDateLabelProvider(ResourceManager rscMgr) {
+		super(rscMgr);
+	}
 
 	@Override
 	public String getText(Object element) {

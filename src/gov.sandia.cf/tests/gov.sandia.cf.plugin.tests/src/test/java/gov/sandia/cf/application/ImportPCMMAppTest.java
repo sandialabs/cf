@@ -22,8 +22,9 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.pcmm.IImportPCMMApp;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.IPCMMElementRepository;
 import gov.sandia.cf.dao.IPCMMLevelDescRepository;
@@ -47,6 +48,7 @@ import gov.sandia.cf.model.PCMMPlanningSelectValue;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -71,7 +73,7 @@ class ImportPCMMAppTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools
@@ -79,7 +81,7 @@ class ImportPCMMAppTest extends AbstractTestApplication {
 		assertNotNull(confFile);
 
 		// import
-		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, confFile);
+		getAppManager().getService(IImportPCMMApp.class).importPCMMSpecification(model, user, confFile);
 
 		// test PCMM Phases
 		List<PCMMOption> pcmmOptions = getPCMMApp().getPCMMOptions();
@@ -94,7 +96,7 @@ class ImportPCMMAppTest extends AbstractTestApplication {
 		// test PCMM Levels
 		List<PCMMLevel> levels = getDaoManager().getRepository(IPCMMLevelRepository.class).findAll();
 		assertNotNull(levels);
-		assertEquals(4, levels.size());
+		assertEquals(108, levels.size()); // 4 levels * 27
 
 		// test PCMM Elements
 		List<PCMMElement> elementList = getDaoManager().getRepository(IPCMMElementRepository.class).findAll();

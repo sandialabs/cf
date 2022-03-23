@@ -13,9 +13,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ApplicationManager;
-import gov.sandia.cf.application.IPIRTApplication;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
@@ -23,7 +21,10 @@ import gov.sandia.cf.model.PIRTLevelImportance;
 import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.theme.ConstantTheme;
+import gov.sandia.cf.parts.ui.IViewManager;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscTools;
 
 /**
@@ -41,23 +42,23 @@ public class PIRTAdequacyColumnLabelProvider extends ColumnLabelProvider {
 
 	private PIRTSpecification pirtConfiguration;
 	private PIRTAdequacyColumn column;
-	private ApplicationManager appMgr;
+	private IViewManager viewMgr;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param pirtConfiguration the PIRT configuration
 	 * @param column            the PIRT adequacy column
-	 * @param appMgr            the application manager
+	 * @param viewMgr           the view manager
 	 */
 	public PIRTAdequacyColumnLabelProvider(PIRTSpecification pirtConfiguration, PIRTAdequacyColumn column,
-			ApplicationManager appMgr) {
-		Assert.isNotNull(appMgr);
+			IViewManager viewMgr) {
+		Assert.isNotNull(viewMgr);
 		Assert.isNotNull(pirtConfiguration);
 		Assert.isNotNull(column);
 		this.pirtConfiguration = pirtConfiguration;
 		this.column = column;
-		this.appMgr = appMgr;
+		this.viewMgr = viewMgr;
 	}
 
 	@Override
@@ -82,7 +83,8 @@ public class PIRTAdequacyColumnLabelProvider extends ColumnLabelProvider {
 
 		// Phenomenon Group background
 		if (element instanceof PhenomenonGroup) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT);
+			return ColorTools.toColor(viewMgr.getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 		}
 
 		// Phenomenon background
@@ -106,8 +108,9 @@ public class PIRTAdequacyColumnLabelProvider extends ColumnLabelProvider {
 
 				try {
 					// return color compared to importance column
-					RGB rgbColor = appMgr.getService(IPIRTApplication.class).getBackgroundColor(pirtConfiguration,
-							importanceTemp, pirtLevel);
+					RGB rgbColor = ColorTools
+							.stringRGBToColor(viewMgr.getAppManager().getService(IPIRTApplication.class)
+									.getBackgroundColor(pirtConfiguration, importanceTemp, pirtLevel));
 					return rgbColor != null ? new Color(Display.getCurrent(), rgbColor) : null;
 				} catch (CredibilityException e) {
 					logger.error("An error occured while getting the level color: {}", e.getMessage(), //$NON-NLS-1$
@@ -121,7 +124,9 @@ public class PIRTAdequacyColumnLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public Color getForeground(Object element) {
-		return (element instanceof PhenomenonGroup) ? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE) : null;
+		return (element instanceof PhenomenonGroup)
+				? ColorTools.toColor(viewMgr.getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE))
+				: null;
 	}
 
 }

@@ -74,7 +74,6 @@ public class Phenomenon implements Serializable, IEntity<Phenomenon, Integer> {
 	 * The idLabel field linked to ID_LABEL column
 	 */
 	@Column(name = "ID_LABEL")
-	@NotBlank(message = RscConst.EX_PHENOMENON_IDLABEL_BLANK)
 	private String idLabel;
 
 	/**

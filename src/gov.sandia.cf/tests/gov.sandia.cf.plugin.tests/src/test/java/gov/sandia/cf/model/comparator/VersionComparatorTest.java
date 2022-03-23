@@ -36,12 +36,12 @@ class VersionComparatorTest {
 
 	@Test
 	void test_compare_CompareWithNullVersions() {
-		assertTrue(comparator.compare(null, null) == 0);
+		assertEquals(0, comparator.compare(null, null));
 	}
 
 	@Test
 	void test_compare_CompareWithEmptyVersions() {
-		assertTrue(comparator.compare(RscTools.empty(), RscTools.empty()) == 0);
+		assertEquals(0, comparator.compare(RscTools.empty(), RscTools.empty()));
 	}
 
 	@Test
@@ -149,6 +149,16 @@ class VersionComparatorTest {
 		assertTrue(comparator.compare("0.2.0.RC1", "0.2.0.M1") > 0); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Test
+	void test_compare_ValidScriptSuffixStringVersion_RC1_RC1dev() {
+		assertTrue(comparator.compare("0.5.0.RC1", "0.5.0.RC1-dev") < 0); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	void test_compare_ValidScriptSuffixStringVersion_RC1_RC1_point_dev() {
+		assertTrue(comparator.compare("0.5.0.RC1", "0.5.0.RC1.dev") > 0); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
 	@Test
 	void test_compare_ValidScript_Hyphen() {
 		assertTrue(comparator.compare("0.2.0", "0.2.0-20200601") > 0); //$NON-NLS-1$ //$NON-NLS-2$

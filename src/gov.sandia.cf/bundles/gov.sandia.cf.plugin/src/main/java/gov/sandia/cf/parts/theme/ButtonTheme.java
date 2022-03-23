@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -15,6 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
 
 import gov.sandia.cf.parts.tools.FontTools;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.SystemTools;
 
 /**
@@ -28,7 +30,7 @@ public class ButtonTheme extends Button {
 	/**
 	 * // * Button default color
 	 */
-	public static final String BUTTON_COLOR_DEFAULT = "PRIMARY"; //$NON-NLS-1$
+	public static final String BUTTON_COLOR_DEFAULT = ConstantTheme.COLOR_NAME_PRIMARY;
 
 	/** TEXT option */
 	public static final String OPTION_TEXT = "text"; // String //$NON-NLS-1$
@@ -69,10 +71,13 @@ public class ButtonTheme extends Button {
 	public ButtonTheme(ResourceManager rscMgr, Composite parent, int style, Map<String, Object> options) {
 		super(parent, style);
 
+		Assert.isNotNull(rscMgr);
 		this.rscMgr = rscMgr;
 
 		// Register option
-		this.options = options;
+		if (options != null) {
+			this.options = options;
+		}
 
 		// Apply theme personalization
 		applyTheme();
@@ -81,13 +86,13 @@ public class ButtonTheme extends Button {
 	/**
 	 * Constructor
 	 * 
+	 * @param rscMgr the resource manager used to manage the resources (fonts,
+	 *               colors, images, cursors...)
 	 * @param parent the parent composite
 	 * @param style  the SWT style
 	 */
-	public ButtonTheme(Composite parent, int style) {
-		super(parent, style);
-
-		applyTheme();
+	public ButtonTheme(ResourceManager rscMgr, Composite parent, int style) {
+		this(rscMgr, parent, style, null);
 	}
 
 	/**
@@ -123,7 +128,7 @@ public class ButtonTheme extends Button {
 		}
 
 		// Get main color
-		Color mainColor = ConstantTheme.getColor(BUTTON_COLOR_DEFAULT);
+		String mainColor = ConstantTheme.getColor(BUTTON_COLOR_DEFAULT);
 		if (options.containsKey(OPTION_COLOR) && ConstantTheme.existColor((String) options.get(OPTION_COLOR))) {
 			// Get color
 			mainColor = ConstantTheme.getColor((String) options.get(OPTION_COLOR));
@@ -166,7 +171,7 @@ public class ButtonTheme extends Button {
 	 * @param mainColor the main color
 	 * @param isOutline is it outline?
 	 */
-	public void setIcon(String iconName, Color mainColor, boolean isOutline) {
+	public void setIcon(String iconName, String mainColor, boolean isOutline) {
 
 		// define size
 		int size = SystemTools.isWindows() ? IconTheme.ICON_SIZE_DEFAULT_WINDOWS : IconTheme.ICON_SIZE_DEFAULT_UNIX;
@@ -187,16 +192,17 @@ public class ButtonTheme extends Button {
 	/**
 	 * Set button colors
 	 * 
-	 * @param mainColor the main color
-	 * @param isOutline is it outline?
+	 * @param mainColorString the main color
+	 * @param isOutline       is it outline?
 	 */
-	public void setButtonColors(Color mainColor, boolean isOutline) {
+	public void setButtonColors(String mainColorString, boolean isOutline) {
 
 		// mainColor can be null if the color setted is COLOR_NAME_NO_COLOR
-		if (this.getEnabled() && mainColor != null) {
+		if (this.getEnabled() && mainColorString != null) {
 
+			Color mainColor = ColorTools.toColor(rscMgr, mainColorString);
 			// Get associated color
-			Color associatedColor = ConstantTheme.getAssociatedColor(mainColor);
+			Color associatedColor = ColorTools.toColor(rscMgr, ConstantTheme.getAssociatedColor(mainColorString));
 
 			// Outline button
 			if (isOutline) {
@@ -253,7 +259,7 @@ public class ButtonTheme extends Button {
 			super.setEnabled(enabled);
 
 			// Get main color
-			Color mainColor = ConstantTheme.getColor(BUTTON_COLOR_DEFAULT);
+			String mainColor = ConstantTheme.getColor(BUTTON_COLOR_DEFAULT);
 			if (options.containsKey(OPTION_COLOR) && ConstantTheme.existColor((String) options.get(OPTION_COLOR))) {
 				// Get color
 				mainColor = ConstantTheme.getColor((String) options.get(OPTION_COLOR));
