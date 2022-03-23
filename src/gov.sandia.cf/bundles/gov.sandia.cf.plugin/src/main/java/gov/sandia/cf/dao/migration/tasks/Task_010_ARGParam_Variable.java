@@ -9,10 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.constants.CFVariable;
-import gov.sandia.cf.dao.DaoManager;
 import gov.sandia.cf.dao.IARGParametersRepository;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.ARGParameters;
@@ -28,13 +29,12 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  */
+@MigrationTask(name = "0.6.0-iwfcf-443-argparamvariable-task10", id = 10)
 public class Task_010_ARGParam_Variable implements IMigrationTask {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(Task_010_ARGParam_Variable.class);
-
-	private static final String TASK_NAME = "0.6.0-iwfcf-443-argparamvariable-task10"; //$NON-NLS-1$
 
 	/**
 	 * Types
@@ -43,13 +43,13 @@ public class Task_010_ARGParam_Variable implements IMigrationTask {
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 
-		logger.info("Starting migration Task: " + TASK_NAME); //$NON-NLS-1$
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));
@@ -81,7 +81,7 @@ public class Task_010_ARGParam_Variable implements IMigrationTask {
 	 * 
 	 * @throws CredibilityMigrationException if an error occurs during migration
 	 */
-	private boolean migrateARGParam(ARGParameters param, DaoManager daoManager) throws CredibilityMigrationException {
+	private boolean migrateARGParam(ARGParameters param, IDaoManager daoManager) throws CredibilityMigrationException {
 
 		if (param == null) {
 			return false;

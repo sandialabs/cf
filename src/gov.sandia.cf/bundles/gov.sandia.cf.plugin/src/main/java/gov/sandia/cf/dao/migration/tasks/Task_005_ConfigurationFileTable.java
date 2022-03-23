@@ -11,12 +11,15 @@ import java.util.Map;
 
 import org.eclipse.persistence.internal.sessions.ArrayRecord;
 import org.eclipse.persistence.sessions.UnitOfWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.DaoManager;
 import gov.sandia.cf.dao.IConfigurationFileRepository;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IModelRepository;
 import gov.sandia.cf.dao.migration.EclipseLinkMigrationManager;
 import gov.sandia.cf.dao.migration.IMigrationTask;
+import gov.sandia.cf.dao.migration.MigrationTask;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.CFFeature;
@@ -36,7 +39,12 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
+@MigrationTask(name = "0.6.0-iwfcf-384-confile-task", id = 5)
 public class Task_005_ConfigurationFileTable implements IMigrationTask {
+	/**
+	 * the logger
+	 */
+	private static final Logger logger = LoggerFactory.getLogger(Task_005_ConfigurationFileTable.class);
 
 	private static final Map<CFFeature, String> CONFFILE_FIELD;
 	static {
@@ -47,21 +55,21 @@ public class Task_005_ConfigurationFileTable implements IMigrationTask {
 		CONFFILE_FIELD.put(CFFeature.SYSTEM_REQUIREMENTS, "COM_REQUIREMENT_SCHEMA_PATH"); //$NON-NLS-1$
 	}
 
-	private static final String TASK_NAME = "0.6.0-iwfcf-384-confile-task"; //$NON-NLS-1$
-
 	private static final String QUERY_SELECT_FIELD = "SELECT {0} FROM MODEL"; //$NON-NLS-1$
 	private static final String QUERY_DROP_FIELD = "ALTER TABLE MODEL DROP COLUMN {0};"; //$NON-NLS-1$
 
 	@Override
 	public String getName() {
-		return TASK_NAME;
+		return this.getClass().getAnnotation(MigrationTask.class).name();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+	public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
+
+		logger.info("Starting migration Task: {}", getName()); //$NON-NLS-1$
 
 		if (daoManager == null || daoManager.getEntityManager() == null) {
 			throw new CredibilityMigrationException(RscTools.getString(RscConst.EX_MIGRATIONDAO_DAOMGR_NULL));
@@ -98,7 +106,7 @@ public class Task_005_ConfigurationFileTable implements IMigrationTask {
 	 * @return true if the database needed changes, otherwise false.
 	 * @throws CredibilityMigrationException
 	 */
-	private boolean changeConfFile(Model model, CFFeature feature, DaoManager daoManager, UnitOfWork unitOfWork)
+	private boolean changeConfFile(Model model, CFFeature feature, IDaoManager daoManager, UnitOfWork unitOfWork)
 			throws CredibilityMigrationException {
 
 		boolean changed = false;

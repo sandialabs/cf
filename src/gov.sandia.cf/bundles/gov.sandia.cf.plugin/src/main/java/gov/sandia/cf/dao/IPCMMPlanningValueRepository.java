@@ -15,6 +15,7 @@ import gov.sandia.cf.model.Tag;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMPlanningValueRepository extends ICRUDRepository<PCMMPlanningValue, Integer> {
 
 	/**

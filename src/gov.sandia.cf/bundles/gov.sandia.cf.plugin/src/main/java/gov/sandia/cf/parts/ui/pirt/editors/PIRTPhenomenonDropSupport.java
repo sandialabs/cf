@@ -3,22 +3,26 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pirt.editors;
 
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
-import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaView;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
+import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaViewController;
 import gov.sandia.cf.tools.IDTools;
+import gov.sandia.cf.tools.RscTools;
 
 /**
  * The PIRT Phenomena View drop support class
@@ -33,67 +37,77 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PIRTPhenomenonDropSupport.class);
 
-	private PIRTPhenomenaView view;
+	/** The view ctrl. */
+	private PIRTPhenomenaViewController viewCtrl;
 
 	/**
-	 * Constructor
-	 * 
-	 * @param view   the pirt view
-	 * @param viewer the viewer
+	 * Constructor.
+	 *
+	 * @param viewCtrl the view ctrl
+	 * @param viewer   the viewer
 	 */
-	public PIRTPhenomenonDropSupport(PIRTPhenomenaView view, Viewer viewer) {
+	public PIRTPhenomenonDropSupport(PIRTPhenomenaViewController viewCtrl, Viewer viewer) {
 		super(viewer);
-		Assert.isNotNull(view);
-		Assert.isNotNull(view.getViewManager());
+		Assert.isNotNull(viewCtrl);
 
-		this.view = view;
+		this.viewCtrl = viewCtrl;
 	}
 
 	@Override
 	public boolean performDrop(Object data) {
 
-		Object source = getSelectedObject();
+		Object source = (data != null) ? data : getViewer().getSelection();
 		Object target = getCurrentTarget();
 
-		if (target == null) {
+		if (target == null || !(source instanceof IStructuredSelection)) {
 			return false;
 		}
 
-		if (source instanceof PhenomenonGroup) {
-			return movePhenomenonGroups((PhenomenonGroup) source, target);
-		} else if (source instanceof Phenomenon) {
-			return movePhenomenon((Phenomenon) source, target);
+		boolean dropSuccessful = true;
+		int location = determineLocation(getCurrentEvent());
+		List<?> toDropList = ((IStructuredSelection) source).toList();
+
+		if (location == LOCATION_AFTER || (location == LOCATION_ON && target instanceof Phenomenon)) {
+			Collections.reverse(toDropList);
 		}
 
-		return false;
+		// process drop for each item
+		for (Object element : toDropList) {
+			if (element instanceof PhenomenonGroup) {
+				dropSuccessful &= movePhenomenonGroups((PhenomenonGroup) element, target, location == LOCATION_BEFORE);
+			} else if (element instanceof Phenomenon) {
+				dropSuccessful &= movePhenomenon((Phenomenon) element, target, location == LOCATION_BEFORE);
+			}
+		}
+
+		if (dropSuccessful) {
+			logger.debug("The drop of: {}\nhas been done on the element: {}", source, target);//$NON-NLS-1$
+
+			// refresh the view
+			Display.getCurrent().asyncExec(() -> viewCtrl.refreshIfChanged());
+		}
+
+		return dropSuccessful;
 	}
 
 	/**
-	 * 
+	 * Move phenomenon groups.
+	 *
 	 * @param dragged the group to move
 	 * @param target  the target group
+	 * @param before  the before
 	 * @return true if the phenomenon groups has been changed, otherwise false
 	 */
-	protected boolean movePhenomenonGroups(PhenomenonGroup dragged, Object target) {
+	protected boolean movePhenomenonGroups(PhenomenonGroup dragged, Object target, boolean before) {
 
 		if (dragged == null) {
 			return false;
 		}
 
-		// default drag location is after
-		boolean before = false;
-
 		// get phenomenon group
 		PhenomenonGroup groupTarget = null;
 		if (target instanceof PhenomenonGroup) {
-
 			groupTarget = (PhenomenonGroup) target;
-
-			// get the drag location
-			if (determineLocation(getCurrentEvent()) == LOCATION_BEFORE) {
-				before = true;
-			}
-
 		} else if (target instanceof Phenomenon) {
 			groupTarget = ((Phenomenon) target).getPhenomenonGroup();
 		}
@@ -109,30 +123,30 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 
 				// offset used to drag the item depending of its location compared to the target
 				int offset = 0;
-				if (dragged.getIdLabel() != null && dragged.getIdLabel().compareTo(groupTarget.getIdLabel()) <= 0) {
+				if (dragged.getIdLabel() != null &&
+
+						new StringWithNumberAndNullableComparator().compare(dragged.getIdLabel(),
+								groupTarget.getIdLabel()) <= 0) {
 					offset = 1;
 				}
 
 				// reorder
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenonGroups(
-						dragged, IDTools.reverseGenerateAlphabeticIdRecursive(groupTarget.getIdLabel()) - offset);
+				viewCtrl.reorderPhenomenonGroups(dragged,
+						IDTools.reverseGenerateAlphabeticIdRecursive(groupTarget.getIdLabel()) - offset);
 			} else {
 
 				// offset used to drag the item depending of its location compared to the target
 				int offset = 0;
-				if (dragged.getIdLabel() != null && dragged.getIdLabel().compareTo(groupTarget.getIdLabel()) > 0) {
+				if (dragged.getIdLabel() != null && new StringWithNumberAndNullableComparator()
+						.compare(dragged.getIdLabel(), groupTarget.getIdLabel()) > 0) {
 					offset = 1;
 				}
 
 				// reorder
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenonGroups(
-						dragged, IDTools.reverseGenerateAlphabeticIdRecursive(groupTarget.getIdLabel()) + offset);
+				viewCtrl.reorderPhenomenonGroups(dragged,
+						IDTools.reverseGenerateAlphabeticIdRecursive(groupTarget.getIdLabel()) + offset);
 			}
 
-			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
-
-			logger.debug("The drop of: {} was done on the element: {}", dragged, target); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			logger.error("Impossible to reorder phenomenon group: {}", e.getMessage(), e); //$NON-NLS-1$
 			return false;
@@ -142,11 +156,14 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 	}
 
 	/**
+	 * Move phenomenon.
+	 *
 	 * @param dragged the dragged object
 	 * @param target  the drop target
+	 * @param before  the before
 	 * @return true if the phenomenon groups has been changed, otherwise false
 	 */
-	protected boolean movePhenomenon(Phenomenon dragged, Object target) {
+	protected boolean movePhenomenon(Phenomenon dragged, Object target, boolean before) {
 
 		if (dragged == null) {
 			return false;
@@ -154,8 +171,9 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 
 		PhenomenonGroup groupTarget = null;
 		Phenomenon phenomenonTarget = null;
+		PhenomenonGroup previousGroup = dragged.getPhenomenonGroup();
 		boolean needRepositioning = false;
-		boolean before = false;
+		boolean moved = false;
 
 		// if phenomenon is dropped on a group
 		if (target instanceof PhenomenonGroup) {
@@ -166,57 +184,54 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 			groupTarget = ((Phenomenon) target).getPhenomenonGroup();
 			phenomenonTarget = (Phenomenon) target;
 			needRepositioning = true;
-
-			// get the drag location
-			if (determineLocation(getCurrentEvent()) == LOCATION_BEFORE) {
-				before = true;
-			}
 		}
-
-		// if the phenomenon is not dropped on his current group
-		PhenomenonGroup previousGroup = dragged.getPhenomenonGroup();
 
 		if (groupTarget == null) {
 			return false;
 		}
 
-		if (!groupTarget.equals(previousGroup)) {
+		if (!Objects.equals(groupTarget, previousGroup)) {
+
+			// reset generated id
+			dragged.setIdLabel(null);
+
+			// set new group
+			dragged.setPhenomenonGroup(groupTarget);
 
 			try {
 				// update dragged phenomenon
-				dragged.setPhenomenonGroup(groupTarget);
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).updatePhenomenon(dragged);
+				viewCtrl.updatePhenomenon(dragged);
 
-				// update phenomenon group lists
-				previousGroup.getPhenomenonList().remove(dragged);
-				groupTarget.getPhenomenonList().add(dragged);
+			} catch (CredibilityException e) {
+				logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$
+						+ e.getMessage(), e);
+				return false;
+			}
 
-				// update previous group phenomenon id label
-				List<Phenomenon> phenomenonListToUpdate = previousGroup.getPhenomenonList();
-				phenomenonListToUpdate.sort(Comparator.comparing(Phenomenon::getIdLabel));
-				int count = 1;
-				for (Phenomenon phenTemp : phenomenonListToUpdate) {
-					phenTemp.setIdLabel(previousGroup.getIdLabel() + count);
-					view.getViewManager().getAppManager().getService(IPIRTApplication.class).updatePhenomenon(phenTemp);
-					count++;
-				}
+			// refresh
+			viewCtrl.refreshPhenomenonGroup(groupTarget);
+			viewCtrl.refreshPhenomenonGroup(previousGroup);
 
-				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+			logger.debug("The drop of: {} was done on the element: {}", dragged, target); //$NON-NLS-1$
+		}
 
-				logger.debug("The drop of: {} was done on the element: {}", dragged, target); //$NON-NLS-1$
+		if (needRepositioning) {
+			moved = reorderPhenomenon(dragged, phenomenonTarget, before);
+		}
 
+		// if the parent changed, reorder all the items with the highest level impacted
+		// to have good IDs
+		if (!Objects.equals(groupTarget, previousGroup)) {
+			try {
+				viewCtrl.reorderPhenomenaForGroup(previousGroup);
+				viewCtrl.reorderPhenomenaForGroup(groupTarget);
 			} catch (CredibilityException e) {
 				logger.error("Impossible to update phenomenon: {}", e.getMessage(), e); //$NON-NLS-1$
 				return false;
 			}
 		}
 
-		if (needRepositioning) {
-			return reorderPhenomenon(dragged, phenomenonTarget, before);
-		}
-
-		return true;
+		return moved;
 	}
 
 	/**
@@ -233,30 +248,25 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 
 				// offset used to drag the item depending of its location compared to the target
 				int offset = 0;
-				if (dragged.getIdLabel() != null && dragged.getIdLabel().compareTo(target.getIdLabel()) <= 0) {
+				if (dragged.getIdLabel() != null && new StringWithNumberAndNullableComparator()
+						.compare(dragged.getIdLabel(), target.getIdLabel()) <= 0) {
 					offset = 1;
 				}
 
 				// reorder
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomena(dragged,
-						IDTools.getPositionInSet(target.getIdLabel()) - offset);
+				viewCtrl.reorderPhenomenon(dragged, IDTools.getPositionInSet(target.getIdLabel()) - offset);
 			} else {
 
 				// offset used to drag the item depending of its location compared to the target
 				int offset = 0;
-				if (dragged.getIdLabel() != null && dragged.getIdLabel().compareTo(target.getIdLabel()) > 0) {
+				if (dragged.getIdLabel() != null && new StringWithNumberAndNullableComparator()
+						.compare(dragged.getIdLabel(), target.getIdLabel()) > 0) {
 					offset = 1;
 				}
 
 				// reorder
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomena(dragged,
-						IDTools.getPositionInSet(target.getIdLabel()) + offset);
+				viewCtrl.reorderPhenomenon(dragged, IDTools.getPositionInSet(target.getIdLabel()) + offset);
 			}
-
-			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
-
-			logger.debug("The drop of: {} was done on the element: {}", dragged, target); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			logger.error("Impossible to reorder phenomenon group: {}", e.getMessage(), e); //$NON-NLS-1$
 			return false;
@@ -269,7 +279,9 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		// it is just permitted to drag and drop Phenomenon not PhenomenonGroup
 		Object source = getSelectedObject();
-		return source instanceof PhenomenonGroup || source instanceof Phenomenon;
+		boolean valid = source instanceof PhenomenonGroup || source instanceof Phenomenon;
+		valid &= target instanceof PhenomenonGroup || target instanceof Phenomenon;
+		return valid;
 	}
 
 }

@@ -13,11 +13,13 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.IntendedPurpose;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.tests.TestDtoFactory;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -66,26 +68,26 @@ class IntendedPurposeAppTest extends AbstractTestApplication {
 		IntendedPurpose intendedPurpose = getAppManager().getService(IIntendedPurposeApp.class).get(newModel);
 
 		intendedPurpose.setDescription("New Description"); //$NON-NLS-1$
-		intendedPurpose
-				.setReference(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
+		intendedPurpose.setReference(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
 		IntendedPurpose updatedIntendedPurpose = getAppManager().getService(IIntendedPurposeApp.class)
-				.updateIntendedPurpose(intendedPurpose, newUser);
+				.updateIntendedPurpose(newModel, null, intendedPurpose, newUser);
 
 		assertNotNull(updatedIntendedPurpose);
 		assertNotNull(updatedIntendedPurpose.getId());
 		assertNotNull(updatedIntendedPurpose.getDateUpdate());
 		assertEquals(newUser, updatedIntendedPurpose.getUserUpdate());
 		assertEquals("New Description", updatedIntendedPurpose.getDescription()); //$NON-NLS-1$
-		assertEquals(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com"), //$NON-NLS-1$
+		assertEquals(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com"), //$NON-NLS-1$
 				updatedIntendedPurpose.getReference());
 	}
 
 	@Test
 	void test_updateIntendedPurpose_Null() {
+		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
 
-		CredibilityException e = assertThrows(CredibilityException.class,
-				() -> getAppManager().getService(IIntendedPurposeApp.class).updateIntendedPurpose(null, newUser));
+		CredibilityException e = assertThrows(CredibilityException.class, () -> getAppManager()
+				.getService(IIntendedPurposeApp.class).updateIntendedPurpose(newModel, null, null, newUser));
 		assertEquals(RscTools.getString(RscConst.EX_INTENDEDPURPOSE_UPDATE_INTENDEDPURPOSE_NULL), e.getMessage());
 	}
 
@@ -95,7 +97,18 @@ class IntendedPurposeAppTest extends AbstractTestApplication {
 		IntendedPurpose intendedPurpose = getAppManager().getService(IIntendedPurposeApp.class).get(newModel);
 
 		CredibilityException e = assertThrows(CredibilityException.class, () -> getAppManager()
-				.getService(IIntendedPurposeApp.class).updateIntendedPurpose(intendedPurpose, null));
+				.getService(IIntendedPurposeApp.class).updateIntendedPurpose(newModel, null, intendedPurpose, null));
 		assertEquals(RscTools.getString(RscConst.EX_INTENDEDPURPOSE_UPDATE_USER_NULL), e.getMessage());
+	}
+
+	@Test
+	void test_updateIntendedPurpose_ModelNull() throws CredibilityException {
+		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
+		IntendedPurpose intendedPurpose = getAppManager().getService(IIntendedPurposeApp.class).get(newModel);
+		User newUser = TestEntityFactory.getNewUser(getDaoManager());
+
+		CredibilityException e = assertThrows(CredibilityException.class, () -> getAppManager()
+				.getService(IIntendedPurposeApp.class).updateIntendedPurpose(null, null, intendedPurpose, newUser));
+		assertEquals(RscTools.getString(RscConst.EX_INTENDEDPURPOSE_UPDATE_MODEL_NULL), e.getMessage());
 	}
 }

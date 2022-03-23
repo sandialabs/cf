@@ -11,6 +11,7 @@ import gov.sandia.cf.model.SystemRequirementParam;
  * @author Maxime N.
  *
  */
+@Repository
 public interface ISystemRequirementParamRepository extends ICRUDRepository<SystemRequirementParam, Integer> {
 
 }

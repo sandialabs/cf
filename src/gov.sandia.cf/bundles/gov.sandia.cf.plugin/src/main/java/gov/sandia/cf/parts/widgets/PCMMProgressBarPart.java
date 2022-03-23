@@ -23,10 +23,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMElement;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.ui.pcmm.PCMMViewManager;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;

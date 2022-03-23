@@ -20,12 +20,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
 import gov.sandia.cf.model.IAssessable;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.dialogs.GenericCFDialog;
 import gov.sandia.cf.parts.listeners.ExpandBarListener;
@@ -112,7 +112,7 @@ public class PCMMAggregationDetailsDialog extends GenericCFDialog<PCMMViewManage
 			/**
 			 * Expand bar container
 			 */
-			ExpandBar barHeader = ExpandBarTheme.createExpandBar(container);
+			ExpandBar barHeader = ExpandBarTheme.createExpandBar(container, getViewManager().getRscMgr());
 			GridData gridDataExpandBar = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 			gridDataExpandBar.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
 			gridDataExpandBar.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
@@ -152,7 +152,8 @@ public class PCMMAggregationDetailsDialog extends GenericCFDialog<PCMMViewManage
 					// Change bg
 					Color bg = defaultBg;
 					if ((i % 2) == 0) {
-						bg = ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT);
+						bg = ColorTools.toColor(getViewManager().getRscMgr(),
+								ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 					}
 					i++;
 

@@ -17,7 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.RscConst;

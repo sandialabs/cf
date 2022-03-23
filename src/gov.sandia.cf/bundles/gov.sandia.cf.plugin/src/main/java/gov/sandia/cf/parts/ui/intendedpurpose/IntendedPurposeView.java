@@ -6,6 +6,7 @@ package gov.sandia.cf.parts.ui.intendedpurpose;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.nebula.widgets.richtext.RichTextEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -28,6 +29,7 @@ import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.LinkWidget;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -60,15 +62,19 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 	private LinkWidget linkReference;
 
 	/**
-	 * The constructor
-	 * 
+	 * The constructor.
+	 *
 	 * @param viewManager The view manager
+	 * @param viewCtrl the view ctrl
 	 * @param style       The view style
 	 */
-	public IntendedPurposeView(IntendedPurposeViewManager viewManager, int style) {
+	public IntendedPurposeView(IntendedPurposeViewManager viewManager, IntendedPurposeViewController viewCtrl,
+			int style) {
 		super(viewManager, viewManager, style);
 
-		this.viewCtrl = new IntendedPurposeViewController(this);
+		Assert.isNotNull(viewCtrl);
+
+		this.viewCtrl = viewCtrl;
 
 		// create the view
 		renderPage();
@@ -134,7 +140,8 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		mainComposite = new Composite(this, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Render sub-composites
 		renderForm();
@@ -164,7 +171,8 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		Label label = FormFactory.createLabel(headerComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_HEADER_LBL));
 		label.setBackground(label.getParent().getBackground());
-		label.setForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		label.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData dataLabel = (GridData) label.getLayoutData();
 		dataLabel.horizontalAlignment = GridData.FILL;
 		dataLabel.verticalAlignment = GridData.FILL;
@@ -185,6 +193,7 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 				viewCtrl.changedDescription(richTextDescription.getText());
 			}
 		});
+		richTextDescription.addModifyListener(e -> viewCtrl.changedDescription(richTextDescription.getText()));
 
 		// References
 		Label lblReferences = FormFactory.createLabel(formComposite,

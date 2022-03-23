@@ -26,13 +26,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Notification;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.NotificationType;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.widgets.filebrowser.FileChooser;
+import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.LinkTools;
 import gov.sandia.cf.tools.NetTools;
@@ -48,13 +49,17 @@ import gov.sandia.cf.tools.WorkspaceTools;
  */
 public class LinkWidget extends AHelperWidget {
 
+	// editable fields
 	private Button fileBtn;
 	private Button urlBtn;
 	private Composite urlComposite;
 	private Text urlInput;
+	private Composite captionContainer;
+	private Text captionText;
 
 	// non editable fields
 	private Label textNonEditable;
+	private Label captionTextNonEditable;
 
 	// data
 	private FormFieldType type;
@@ -207,6 +212,23 @@ public class LinkWidget extends AHelperWidget {
 		fileChooser.setBackground(getParent().getBackground());
 		containerLayout.topControl = fileChooser;
 
+		/**
+		 * Caption (if image)
+		 */
+		captionContainer = new Composite(this, SWT.NONE);
+		GridData captionGdContainer = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
+		captionContainer.setLayoutData(captionGdContainer);
+		captionContainer.setLayout(gridLayout);
+
+		FormFactory.createFormLabel(captionContainer,
+				RscTools.getString(RscConst.MSG_LINKWIDGET_CAPTION_LBL) + RscTools.COLON);
+		captionText = FormFactory.createText(captionContainer, null);
+		captionText.addListener(SWT.Modify, this::fireChanged);
+
+		boolean visibleCaption = FormFieldType.LINK_FILE.equals(this.type) && FileTools.isImage(getValue());
+		captionContainer.setVisible(visibleCaption);
+		((GridData) captionContainer.getLayoutData()).heightHint = visibleCaption ? SWT.DEFAULT : 0;
+
 		// File - Button Listener
 		fileBtn.addSelectionListener(new SelectionAdapter() {
 
@@ -244,6 +266,27 @@ public class LinkWidget extends AHelperWidget {
 	 */
 	private void renderNonEditableField() {
 		textNonEditable = FormFactory.createLink(viewManager.getRscMgr(), this, RscTools.empty());
+
+		/**
+		 * Caption (if image)
+		 */
+		GridLayout gridLayout = new GridLayout(2, false);
+		gridLayout.marginWidth = 0;
+		gridLayout.marginLeft = 0;
+		gridLayout.marginRight = 0;
+
+		captionContainer = new Composite(this, SWT.NONE);
+		GridData captionGdContainer = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
+		captionContainer.setLayoutData(captionGdContainer);
+		captionContainer.setLayout(gridLayout);
+
+		FormFactory.createLabel(captionContainer, RscTools.getString(RscConst.MSG_LINKWIDGET_CAPTION_LBL));
+
+		captionTextNonEditable = FormFactory.createLabel(captionContainer, RscTools.empty());
+
+		boolean visibleCaption = FormFieldType.LINK_FILE.equals(this.type) && FileTools.isImage(getValue());
+		captionContainer.setVisible(visibleCaption);
+		((GridData) captionContainer.getLayoutData()).heightHint = visibleCaption ? SWT.DEFAULT : 0;
 	}
 
 	/**
@@ -281,7 +324,7 @@ public class LinkWidget extends AHelperWidget {
 		if (linkData != null) {
 			this.type = linkData.type;
 			if (FormFieldType.LINK_FILE.equals(linkData.type)) {
-				setFile(linkData.value);
+				setFile(linkData);
 			} else if (FormFieldType.LINK_URL.equals(linkData.type)) {
 				setURL(linkData.value);
 			}
@@ -308,21 +351,36 @@ public class LinkWidget extends AHelperWidget {
 	}
 
 	/**
-	 * Set the file
-	 * 
-	 * @param file the file to set
+	 * Sets the file default browser value.
+	 *
+	 * @param filePath the new file default browser value
 	 */
-	public void setFile(String file) {
+	public void setFileDefaultBrowserValue(String filePath) {
+		fileChooser.setBrowserDefaultPathSelection(filePath);
+	}
+
+	/**
+	 * Set the file.
+	 *
+	 * @param linkData the new file
+	 */
+	public void setFile(ParameterLinkGson linkData) {
 
 		// Manage button
 		fileBtn.setSelection(true);
 		urlBtn.setSelection(false);
 
-		String value = file != null ? file : RscTools.empty();
-		fileChooser.setDefaultValue(value);
+		if (linkData != null) {
+			String value = linkData.value != null ? linkData.value : RscTools.empty();
+			fileChooser.setDefaultValue(value);
 
-		this.type = FormFieldType.LINK_FILE;
+			this.type = FormFieldType.LINK_FILE;
 
+			// set caption
+			captionText.setText(linkData.caption != null ? linkData.caption : RscTools.empty());
+		}
+
+		// notify listeners
 		fileBtn.notifyListeners(SWT.Selection, null);
 	}
 
@@ -341,8 +399,18 @@ public class LinkWidget extends AHelperWidget {
 		textNonEditable.addListener(SWT.Selection,
 				event -> LinkTools.openLinkValue(textValue, viewManager.getCache().getOpenLinkBrowserOpts()));
 
-		if (linkData != null)
+		if (linkData != null) {
+
+			// set type
 			this.type = linkData.type;
+
+			// set caption
+			captionTextNonEditable.setText(linkData.caption != null ? linkData.caption : RscTools.empty());
+			boolean visibleCaption = FormFieldType.LINK_FILE.equals(this.type) && FileTools.isImage(getValue());
+			captionContainer.setVisible(visibleCaption);
+			((GridData) captionContainer.getLayoutData()).heightHint = visibleCaption ? SWT.DEFAULT : 0;
+			captionContainer.requestLayout();
+		}
 	}
 
 	/**
@@ -364,7 +432,7 @@ public class LinkWidget extends AHelperWidget {
 	 * @return the file selected path
 	 */
 	public String getFileSelectedPath() {
-		return super.isEditable() ? fileChooser.getTextControl().getText() : textNonEditable.getText();
+		return super.isEditable() ? fileChooser.getText() : textNonEditable.getText();
 	}
 
 	/**
@@ -372,6 +440,15 @@ public class LinkWidget extends AHelperWidget {
 	 */
 	public String getURLSelected() {
 		return super.isEditable() ? urlInput.getText() : textNonEditable.getText();
+	}
+
+	/**
+	 * Gets the caption.
+	 *
+	 * @return the caption
+	 */
+	public String getCaption() {
+		return super.isEditable() ? captionText.getText() : captionTextNonEditable.getText();
 	}
 
 	/**
@@ -414,9 +491,11 @@ public class LinkWidget extends AHelperWidget {
 		if (FormFieldType.LINK_FILE.equals(getLinkTypeSelected())) {
 			jsonObject.type = FormFieldType.LINK_FILE;
 			jsonObject.value = getFileSelectedPath();
+			jsonObject.caption = getCaption();
 		} else if (FormFieldType.LINK_URL.equals(getLinkTypeSelected())) {
 			jsonObject.type = FormFieldType.LINK_URL;
 			jsonObject.value = getURLSelected();
+			jsonObject.caption = getCaption();
 		}
 
 		// Encode JSON
@@ -447,6 +526,12 @@ public class LinkWidget extends AHelperWidget {
 		if (withValidation) {
 			validateLink(NotificationType.ERROR);
 		}
+
+		// update caption
+		boolean visibleCaption = FormFieldType.LINK_FILE.equals(this.type) && FileTools.isImage(getValue());
+		captionContainer.setVisible(visibleCaption);
+		((GridData) captionContainer.getLayoutData()).heightHint = visibleCaption ? SWT.DEFAULT : 0;
+		captionContainer.requestLayout();
 
 		for (LinkChangedListener l : listeners) {
 			SafeRunnable.run(new SafeRunnable() {
@@ -557,6 +642,20 @@ public class LinkWidget extends AHelperWidget {
 		}
 
 		return notification;
+	}
+
+	/**
+	 * Lock path.
+	 *
+	 * @param lock the lock
+	 */
+	public void lockPath(boolean lock) {
+		if (super.isEditable()) {
+			fileBtn.setEnabled(!lock);
+			urlBtn.setEnabled(!lock);
+			fileChooser.setEnabled(!lock);
+			urlInput.setEnabled(!lock);
+		}
 	}
 
 	/**

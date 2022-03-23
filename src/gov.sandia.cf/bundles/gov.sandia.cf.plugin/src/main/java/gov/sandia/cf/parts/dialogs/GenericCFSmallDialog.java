@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Shell;
 
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.ui.IViewManager;
 
 /**
@@ -23,7 +24,7 @@ public class GenericCFSmallDialog<V extends IViewManager> extends GenericCFDialo
 	/**
 	 * The dialog mode create, update
 	 */
-	protected DialogMode mode;
+	protected ViewMode mode;
 
 	/**
 	 * The constructor

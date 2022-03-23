@@ -5,8 +5,12 @@ package gov.sandia.cf.tools;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -41,32 +45,6 @@ public class FileTools {
 	private static final Logger logger = LoggerFactory.getLogger(FileTools.class);
 
 	/**
-	 * The credibility temporary folder name in the zip
-	 */
-	public static final String CREDIBILITY_TMP_FOLDER_ZIPPED_NAME = ".cftmp"; //$NON-NLS-1$
-
-	/**
-	 * the old file suffix to keep a backup during save phase
-	 */
-	public static final String OLD_FILENAME_SUFFIX = "-old"; //$NON-NLS-1$
-
-	/**
-	 * The credibility temporary folder prefix unzipped
-	 */
-	public static final String CREDIBILITY_TMP_FOLDER_DEFAULT_PREFIX = CREDIBILITY_TMP_FOLDER_ZIPPED_NAME
-			+ RscTools.HYPHEN;
-
-	/**
-	 * The credibility database folder name
-	 */
-	public static final String CREDIBILITY_DATABASE_FOLDER_DEFAULT_NAME = "data"; //$NON-NLS-1$
-
-	/**
-	 * The credibility backup folder name
-	 */
-	public static final String CREDIBILITY_BACKUP_FOLDER_NAME = "backup"; //$NON-NLS-1$
-
-	/**
 	 * The file to link with the database and to open the credibility project
 	 */
 	/** CF file extension */
@@ -81,22 +59,6 @@ public class FileTools {
 	public static final String YML_FILTER = "*.yml"; //$NON-NLS-1$
 	/** yaml file extension for filters */
 	public static final String YAML_FILTER = "*.yaml"; //$NON-NLS-1$
-
-	/**
-	 * Files extensions
-	 */
-	/** WORD 1995-2003 extension */
-	public static final String WORD_1995 = ".doc"; //$NON-NLS-1$
-	/** WORD 2007+ extension */
-	public static final String WORD_2007 = ".docx"; //$NON-NLS-1$
-	/** LATEX extension */
-	public static final String LATEX = ".tex"; //$NON-NLS-1$
-	/** PDF extension */
-	public static final String PDF = ".pdf"; //$NON-NLS-1$
-	/** YML extension */
-	public static final String YML = ".yml"; //$NON-NLS-1$
-	/** YAML extension */
-	public static final String YAML = ".yaml"; //$NON-NLS-1$
 
 	/**
 	 * the dot
@@ -215,14 +177,28 @@ public class FileTools {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_FILETOOLS_EMPTYNULL));
 		}
 
-		File file = new File(filepath);
+		return createFile(new File(filepath));
+	}
+
+	/**
+	 * @param file the file to create
+	 * @return a new file on disk from filepath param. If the file already exists,
+	 *         the method do not override it, but returns the file
+	 * @throws CredibilityException if a parameter is not valid
+	 * @throws IOException          if an error occured during file creation
+	 */
+	public static File createFile(File file) throws CredibilityException, IOException {
+
+		if (file == null) {
+			throw new CredibilityException(RscTools.getString(RscConst.EX_FILETOOLS_EMPTYNULL));
+		}
 
 		if (!file.exists()) {
 			boolean newFileCreated = file.createNewFile();
 			if (!newFileCreated) {
 				throw new CredibilityException(RscTools.getString(RscConst.EX_FILETOOLS_CREATEFILE_UNSUCCESSFUL, file));
 			}
-			logger.debug("A new file has been created: {}", filepath); //$NON-NLS-1$
+			logger.debug("A new file has been created: {}", file.getPath()); //$NON-NLS-1$
 		}
 
 		return file;
@@ -272,7 +248,7 @@ public class FileTools {
 	 * @param source the source to move
 	 * @throws CredibilityException if a parameter is not valid.
 	 */
-	public static void move(File target, File source) throws CredibilityException {
+	public static void move(File source, File target) throws CredibilityException {
 
 		if (source == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_FILETOOLS_MOVE_SOURCENULL, target));
@@ -330,7 +306,7 @@ public class FileTools {
 		}
 
 		if (created) {
-			move(newDirectory, directory);
+			move(directory, newDirectory);
 		}
 	}
 
@@ -344,6 +320,69 @@ public class FileTools {
 		boolean renamed = file.renameTo(new File(target, file.getName()));
 		if (!renamed) {
 			logger.warn("Impossible to move to {}: file {} can not be renamed.", target, file); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Copy directory.
+	 *
+	 * @param sourceDirectory      the source directory
+	 * @param destinationDirectory the destination directory
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void copyDirectory(File sourceDirectory, File destinationDirectory) throws IOException {
+
+		if (sourceDirectory != null && sourceDirectory.list() != null && destinationDirectory != null) {
+
+			if (!destinationDirectory.exists()) {
+				Files.createDirectory(destinationDirectory.toPath());
+			}
+
+			String[] listFiles = sourceDirectory.list();
+			if (listFiles != null) {
+				for (String f : listFiles) {
+					if (f != null) {
+						copyDirectoryCompatibityMode(new File(sourceDirectory, f), new File(destinationDirectory, f));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Copy directory compatibity mode.
+	 *
+	 * @param source      the source
+	 * @param destination the destination
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	private static void copyDirectoryCompatibityMode(File source, File destination) throws IOException {
+		if (source != null && destination != null) {
+			if (source.isDirectory()) {
+				copyDirectory(source, destination);
+			} else {
+				copyFile(source, destination);
+			}
+		}
+	}
+
+	/**
+	 * Copy file.
+	 *
+	 * @param sourceFile      the source file
+	 * @param destinationFile the destination file
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
+	public static void copyFile(File sourceFile, File destinationFile) throws IOException {
+		if (sourceFile != null && destinationFile != null) {
+			try (InputStream in = new FileInputStream(sourceFile);
+					OutputStream out = new FileOutputStream(destinationFile)) {
+				byte[] buf = new byte[1024];
+				int length;
+				while ((length = in.read(buf)) > 0) {
+					out.write(buf, 0, length);
+				}
+			}
 		}
 	}
 
@@ -575,7 +614,7 @@ public class FileTools {
 		}
 
 		File file = new File(path);
-		return file.isFile() ? file.getName() : RscTools.empty();
+		return !file.isDirectory() ? file.getName() : RscTools.empty();
 	}
 
 	/**
@@ -587,7 +626,36 @@ public class FileTools {
 		if (extension != null) {
 			extension = RscTools.DOT + extension;
 		}
-		return extension != null && (extension.equals(WORD_1995) || extension.equals(WORD_2007));
+		return extension != null && (extension.equals(FileExtension.WORD_1995.getExtension())
+				|| extension.equals(FileExtension.WORD_2007.getExtension()));
+	}
+
+	/**
+	 * Checks if is yml file.
+	 *
+	 * @param path the path
+	 * @return true, if is yml file
+	 */
+	public static boolean isYmlFile(String path) {
+		String extension = getExtensionByFileName(path);
+		if (extension != null) {
+			extension = RscTools.DOT + extension;
+		}
+		return extension != null && (extension.equals(FileExtension.YML.getExtension())
+				|| extension.equals(FileExtension.YAML.getExtension()));
+	}
+
+	/**
+	 * @param path the path to check
+	 * @return true if the file referenced by path is an image
+	 */
+	public static boolean isImage(String path) {
+		String extension = getExtensionByFileName(path);
+		if (extension != null) {
+			extension = RscTools.DOT + extension;
+		}
+		return extension != null
+				&& (FileExtension.getByType(FileType.IMAGE).contains(FileExtension.getByName(extension)));
 	}
 
 	/**

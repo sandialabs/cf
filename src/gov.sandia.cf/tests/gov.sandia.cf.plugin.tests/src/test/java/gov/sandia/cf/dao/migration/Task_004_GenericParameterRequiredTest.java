@@ -9,7 +9,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.text.MessageFormat;
-
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
@@ -17,13 +16,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.YmlGenericSchema;
+import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.dao.AbstractTestDao;
 import gov.sandia.cf.dao.IPCMMPlanningParamRepository;
 import gov.sandia.cf.dao.IPCMMPlanningQuestionRepository;
 import gov.sandia.cf.dao.IQoIPlanningParamRepository;
 import gov.sandia.cf.dao.ISystemRequirementParamRepository;
-import gov.sandia.cf.dao.IUncertaintyParamRepository;
 import gov.sandia.cf.dao.migration.tasks.Task_004_GenericParameterRequired;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.model.Model;
@@ -31,7 +29,6 @@ import gov.sandia.cf.model.PCMMPlanningParam;
 import gov.sandia.cf.model.PCMMPlanningQuestion;
 import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.SystemRequirementParam;
-import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
@@ -68,10 +65,8 @@ class Task_004_GenericParameterRequiredTest extends AbstractTestDao {
 		SystemRequirementParam sysReqParamFalse = TestEntityFactory.getNewSystemRequirementParam(getDaoManager(),
 				newModel, null);
 
-		UncertaintyParam uncertaintyParamTrue = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel,
-				null);
-		UncertaintyParam uncertaintyParamFalse = TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel,
-				null);
+		TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel, null);
+		TestEntityFactory.getNewUncertaintyParam(getDaoManager(), newModel, null);
 
 		// alter table - inject column to be deleted and migrated
 		String sqlAlterTable = "ALTER TABLE {0} ADD COLUMN IS_REQUIRED BOOLEAN;"; //$NON-NLS-1$
@@ -86,10 +81,10 @@ class Task_004_GenericParameterRequiredTest extends AbstractTestDao {
 				MessageFormat.format(sqlUpdate, "PCMM_PLANNING_PARAM", "false", pcmmPlanningParamFalse.getId())); //$NON-NLS-1$ //$NON-NLS-2$
 
 		unitOfWork.executeNonSelectingSQL(MessageFormat.format(sqlAlterTable, "PCMM_PLANNING_QUESTION")); //$NON-NLS-1$
-		unitOfWork.executeNonSelectingSQL(
-				MessageFormat.format(sqlUpdate, "PCMM_PLANNING_QUESTION", "true", pcmmPlanningQuestionTrue.getId())); //$NON-NLS-1$ //$NON-NLS-2$
-		unitOfWork.executeNonSelectingSQL(
-				MessageFormat.format(sqlUpdate, "PCMM_PLANNING_QUESTION", "false", pcmmPlanningQuestionFalse.getId())); //$NON-NLS-1$ //$NON-NLS-2$
+		unitOfWork.executeNonSelectingSQL(MessageFormat.format(sqlUpdate, "PCMM_PLANNING_QUESTION", "true", //$NON-NLS-1$ //$NON-NLS-2$
+				pcmmPlanningQuestionTrue.getId()));
+		unitOfWork.executeNonSelectingSQL(MessageFormat.format(sqlUpdate, "PCMM_PLANNING_QUESTION", "false", //$NON-NLS-1$ //$NON-NLS-2$
+				pcmmPlanningQuestionFalse.getId()));
 
 		unitOfWork.executeNonSelectingSQL(MessageFormat.format(sqlAlterTable, "QOI_PLANNING_PARAM")); //$NON-NLS-1$
 		unitOfWork.executeNonSelectingSQL(
@@ -102,12 +97,6 @@ class Task_004_GenericParameterRequiredTest extends AbstractTestDao {
 				MessageFormat.format(sqlUpdate, "COM_REQUIREMENT_PARAM", "true", sysReqParamTrue.getId())); //$NON-NLS-1$ //$NON-NLS-2$
 		unitOfWork.executeNonSelectingSQL(
 				MessageFormat.format(sqlUpdate, "COM_REQUIREMENT_PARAM", "false", sysReqParamFalse.getId())); //$NON-NLS-1$ //$NON-NLS-2$
-
-		unitOfWork.executeNonSelectingSQL(MessageFormat.format(sqlAlterTable, "COM_UNCERTAINTY_PARAM")); //$NON-NLS-1$
-		unitOfWork.executeNonSelectingSQL(
-				MessageFormat.format(sqlUpdate, "COM_UNCERTAINTY_PARAM", "true", uncertaintyParamTrue.getId())); //$NON-NLS-1$ //$NON-NLS-2$
-		unitOfWork.executeNonSelectingSQL(
-				MessageFormat.format(sqlUpdate, "COM_UNCERTAINTY_PARAM", "false", uncertaintyParamFalse.getId())); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// test
 		try {
@@ -149,11 +138,6 @@ class Task_004_GenericParameterRequiredTest extends AbstractTestDao {
 		assertEquals(YmlGenericSchema.CONF_GENERIC_TRUE_VALUE, sysReqParamTrue.getRequired());
 		getDaoManager().getRepository(ISystemRequirementParamRepository.class).refresh(sysReqParamFalse);
 		assertEquals(YmlGenericSchema.CONF_GENERIC_FALSE_VALUE, sysReqParamFalse.getRequired());
-
-		getDaoManager().getRepository(IUncertaintyParamRepository.class).refresh(uncertaintyParamTrue);
-		assertEquals(YmlGenericSchema.CONF_GENERIC_TRUE_VALUE, uncertaintyParamTrue.getRequired());
-		getDaoManager().getRepository(IUncertaintyParamRepository.class).refresh(uncertaintyParamFalse);
-		assertEquals(YmlGenericSchema.CONF_GENERIC_FALSE_VALUE, uncertaintyParamFalse.getRequired());
 	}
 
 	@Test

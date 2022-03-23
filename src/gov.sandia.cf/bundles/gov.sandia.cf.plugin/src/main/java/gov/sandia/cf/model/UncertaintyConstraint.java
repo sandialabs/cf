@@ -55,6 +55,14 @@ public class UncertaintyConstraint extends GenericParameterConstraint<Uncertaint
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(UncertaintyConstraint newImportable) {
+		return newImportable != null && StringTools.equals(getRule(), newImportable.getRule());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(UncertaintyConstraint importable) {
 
 		if (importable == null) {

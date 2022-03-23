@@ -9,9 +9,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -21,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.constants.CFVariable;
 import gov.sandia.cf.exceptions.CredibilityException;
-import gov.sandia.cf.preferences.PrefTools;
 
 /**
  * Runtime Tools to execute processes on a local machine.
@@ -49,6 +45,12 @@ public class RuntimeTools {
 	public static final int OK_CODE = 0;
 	/** SHELL error return code */
 	public static final int ERROR_CODE = 1;
+
+	/** The Constant SCRIPT_EXTENSION_LINUX. */
+	public static final String SCRIPT_EXTENSION_LINUX = ".sh"; //$NON-NLS-1$
+
+	/** The Constant SCRIPT_EXTENSION_WINDOWS. */
+	public static final String SCRIPT_EXTENSION_WINDOWS = ".bat"; //$NON-NLS-1$
 
 	/**
 	 * Private constructor to not allow instantiation.
@@ -85,36 +87,6 @@ public class RuntimeTools {
 				builder.command(CMD_SCRIPT_SHELL, CMD_SCRIPT_SHELL_ARG, cmdExec);
 			}
 
-			returnCode = executeSync(errorLog, infoLog, builder);
-		}
-
-		return returnCode;
-	}
-
-	/**
-	 * Execute the python script in parameters and log.
-	 * 
-	 * @param errorLog     the error log string builder
-	 * @param infoLog      the info log string builder
-	 * @param pythonScript the python script to execute
-	 * @param args         the python script arguments
-	 * @return the return code of the process
-	 * @throws CredibilityException if an error occurs during CF variable parsing
-	 */
-	public static int executeSyncPythonScript(StringBuilder errorLog, StringBuilder infoLog, String pythonScript,
-			String... args) throws CredibilityException {
-
-		int returnCode = OK_CODE;
-
-		if (pythonScript != null) {
-			List<String> cmd = new ArrayList<>();
-			cmd.add(PrefTools.getPythonExecutablePath());
-			cmd.add(MessageFormat.format(CMD_SCRIPTFILE, pythonScript));
-			if (args != null && args.length > 0) {
-				cmd.addAll(Arrays.asList(args));
-			}
-
-			ProcessBuilder builder = new ProcessBuilder(cmd);
 			returnCode = executeSync(errorLog, infoLog, builder);
 		}
 
@@ -218,6 +190,15 @@ public class RuntimeTools {
 			}
 		}
 		return cmd;
+	}
+
+	/**
+	 * Gets the script file extension.
+	 *
+	 * @return the script file extension
+	 */
+	public static String getScriptFileExtension() {
+		return SystemTools.isWindows() ? SCRIPT_EXTENSION_WINDOWS : SCRIPT_EXTENSION_LINUX;
 	}
 
 	/**

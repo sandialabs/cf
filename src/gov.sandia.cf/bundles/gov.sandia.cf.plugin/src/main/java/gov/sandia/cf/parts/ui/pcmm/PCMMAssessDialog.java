@@ -186,6 +186,7 @@ public class PCMMAssessDialog extends GenericCFDialog<PCMMViewManager> {
 				checkComments();
 			}
 		});
+		editorComments.addModifyListener(e -> checkComments());
 
 		// dialog behavior
 		cbxLevel.setFocus();

@@ -109,14 +109,14 @@ public class LauncherTile extends Composite {
 		FontTools.setButtonFont(viewMgr.getRscMgr(), label);
 
 		Color textColor = null;
-		Color selectionGrayedBackgroundTmp = ColorTools.grayedColor(backgroundColor, 30);
-		Color inactiveGrayedBackgroundTmp = ColorTools.grayedColor(backgroundColor);
-		Color clickGrayedBackgroundTmp = ColorTools.grayedColor(backgroundColor, 60);
+		Color selectionGrayedBackgroundTmp = ColorTools.grayedColor(viewMgr.getRscMgr(), backgroundColor, 30);
+		Color inactiveGrayedBackgroundTmp = ColorTools.grayedColor(viewMgr.getRscMgr(), backgroundColor);
+		Color clickGrayedBackgroundTmp = ColorTools.grayedColor(viewMgr.getRscMgr(), backgroundColor, 60);
 
 		if (selectionGrayedBackgroundTmp.equals(inactiveGrayedBackgroundTmp)) {
-			selectionGrayedBackgroundTmp = ColorTools.minusColor(backgroundColor, 10);
-			inactiveGrayedBackgroundTmp = ColorTools.minusColor(backgroundColor, 20);
-			clickGrayedBackgroundTmp = ColorTools.minusColor(backgroundColor, 30);
+			selectionGrayedBackgroundTmp = ColorTools.minusColor(viewMgr.getRscMgr(), backgroundColor, 10);
+			inactiveGrayedBackgroundTmp = ColorTools.minusColor(viewMgr.getRscMgr(), backgroundColor, 20);
+			clickGrayedBackgroundTmp = ColorTools.minusColor(viewMgr.getRscMgr(), backgroundColor, 30);
 		}
 
 		final Color selectionGrayedBackground = selectionGrayedBackgroundTmp;
@@ -149,7 +149,8 @@ public class LauncherTile extends Composite {
 			// colors
 			super.setBackground(backgroundColor);
 			label.setBackground(backgroundColor);
-			textColor = ConstantTheme.getAssociatedColor(backgroundColor);
+			textColor = ColorTools.toColor(viewMgr.getRscMgr(),
+					ConstantTheme.getAssociatedColor(ColorTools.toStringRGB(backgroundColor)));
 
 			// listeners
 			this.addPaintListener(paintListener);
@@ -172,15 +173,17 @@ public class LauncherTile extends Composite {
 			if (grayedInactive) {
 				super.setBackground(inactiveGrayedBackground);
 				label.setBackground(inactiveGrayedBackground);
-				textColor = ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY);
+				textColor = ColorTools.toColor(viewMgr.getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY));
 			} else {
 				super.setBackground(backgroundColor);
 				label.setBackground(backgroundColor);
-				textColor = ConstantTheme.getAssociatedColor(backgroundColor);
+				textColor = ColorTools.toColor(viewMgr.getRscMgr(),
+						ConstantTheme.getAssociatedColor(ColorTools.toStringRGB(backgroundColor)));
 			}
 		}
 
-		iconImage = IconTheme.getIconImage(viewMgr.getRscMgr(), iconName, textColor, 50);
+		iconImage = IconTheme.getIconImage(viewMgr.getRscMgr(), iconName, ColorTools.toStringRGB(textColor), 50);
 
 		// set image and text color
 		imageLabel.setImage(iconImage);

@@ -18,7 +18,7 @@
       </category>
       <wizard
             category="gov.sandia.cf.category.credibility"
-            class="gov.sandia.cf.parts.wizards.NewCredibilityProcessWizard"
+            class="gov.sandia.cf.parts.wizards.newcfprocess.NewCFProcessWizard"
             hasPages="true"
             icon="./src/main/resources/icons/app/16x16.gif"
             id="gov.sandia.cf.wizards.credibility.process"
@@ -26,7 +26,7 @@
       </wizard>
       <wizard
             category="gov.sandia.cf.category.credibility"
-            class="gov.sandia.cf.parts.wizards.NewCredibilityEvidenceStructureWizard"
+            class="gov.sandia.cf.parts.wizards.evidencestruct.CFEvidenceStructureWizard"
             hasPages="true"
             icon="./src/main/resources/icons/app/16x16.gif"
             id="gov.sandia.cf.wizards.credibility.evidence-folder-structure"

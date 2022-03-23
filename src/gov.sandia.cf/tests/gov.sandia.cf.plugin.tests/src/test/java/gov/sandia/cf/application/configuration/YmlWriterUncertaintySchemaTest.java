@@ -19,11 +19,11 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IUncertaintyApplication;
-import gov.sandia.cf.application.configuration.uncertainty.UncertaintySpecification;
-import gov.sandia.cf.application.configuration.uncertainty.YmlReaderUncertaintySchema;
-import gov.sandia.cf.application.configuration.uncertainty.YmlWriterUncertaintySchema;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
+import gov.sandia.cf.application.uncertainty.YmlReaderUncertaintySchema;
+import gov.sandia.cf.application.uncertainty.YmlWriterUncertaintySchema;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.dto.configuration.UncertaintySpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;

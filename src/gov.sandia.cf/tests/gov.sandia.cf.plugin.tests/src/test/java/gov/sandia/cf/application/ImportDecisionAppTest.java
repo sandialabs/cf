@@ -22,7 +22,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.decision.DecisionSpecification;
+import gov.sandia.cf.application.decision.IImportDecisionApp;
+import gov.sandia.cf.application.imports.IImportApplication;
 import gov.sandia.cf.dao.IDecisionConstraintRepository;
 import gov.sandia.cf.dao.IDecisionParamRepository;
 import gov.sandia.cf.dao.IDecisionSelectValueRepository;
@@ -34,6 +35,7 @@ import gov.sandia.cf.model.IImportable;
 import gov.sandia.cf.model.ImportActionType;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.DecisionSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -58,14 +60,14 @@ class ImportDecisionAppTest extends AbstractTestApplication {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
+		User user = TestEntityFactory.getNewUser(getDaoManager());
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// import
-		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, confFile);
+		getAppManager().getService(IImportDecisionApp.class).importDecisionSpecification(model, user, confFile);
 
 		// test Parameters
 		List<DecisionParam> paramList = getDaoManager().getRepository(IDecisionParamRepository.class).findAll();

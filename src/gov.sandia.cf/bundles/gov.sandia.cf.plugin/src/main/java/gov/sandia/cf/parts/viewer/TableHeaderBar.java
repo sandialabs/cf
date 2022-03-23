@@ -80,7 +80,7 @@ public class TableHeaderBar {
 		this.viewEditors = new HashMap<>();
 
 		// Expand bar
-		barHeader = ExpandBarTheme.createExpandBar(this.parentControl);
+		barHeader = ExpandBarTheme.createExpandBar(this.parentControl, viewMgr.getRscMgr());
 		FontTools.setBoldFont(viewMgr.getRscMgr(), barHeader);
 
 		// Expand bar - Title

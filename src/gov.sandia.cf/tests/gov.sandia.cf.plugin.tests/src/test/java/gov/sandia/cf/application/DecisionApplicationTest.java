@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.decision.DecisionSpecification;
+import gov.sandia.cf.application.decision.IDecisionApplication;
 import gov.sandia.cf.dao.IDecisionConstraintRepository;
 import gov.sandia.cf.dao.IDecisionParamRepository;
 import gov.sandia.cf.dao.IDecisionRepository;
@@ -34,6 +34,7 @@ import gov.sandia.cf.model.DecisionSelectValue;
 import gov.sandia.cf.model.DecisionValue;
 import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.DecisionSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;

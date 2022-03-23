@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.GenericValue;

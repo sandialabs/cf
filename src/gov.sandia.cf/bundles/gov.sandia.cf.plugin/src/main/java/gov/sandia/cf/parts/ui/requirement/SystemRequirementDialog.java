@@ -34,8 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGenericParameterApplication;
-import gov.sandia.cf.application.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.Model;
@@ -45,9 +44,10 @@ import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
+import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.FormFieldWidget;
 import gov.sandia.cf.parts.widgets.GenericValueFieldWidget;
@@ -115,7 +115,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 	 * @param mode           the dialog mode
 	 */
 	public SystemRequirementDialog(SystemRequirementViewManager viewManager, Shell parentShell,
-			SystemRequirement requirement, SystemRequirement parentSelected, DialogMode mode) {
+			SystemRequirement requirement, SystemRequirement parentSelected, ViewMode mode) {
 		super(viewManager, parentShell);
 
 		// Get model
@@ -130,7 +130,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 
 		// Set mode
 		if (mode == null) {
-			mode = DialogMode.VIEW;
+			mode = ViewMode.VIEW;
 		}
 
 		// Parameter columns
@@ -141,7 +141,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 		case CREATE:
 			this.requirement = new SystemRequirement();
 			this.buttonName = RscTools.getString(RscConst.MSG_BTN_CREATE);
-			this.mode = DialogMode.CREATE;
+			this.mode = ViewMode.CREATE;
 			break;
 
 		case UPDATE:
@@ -171,7 +171,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 		} else {
 			setTitle(RscTools.getString(RscConst.MSG_DIALOG_SYSREQUIREMENT_TITLE));
 		}
-		if (mode != DialogMode.VIEW) {
+		if (mode != ViewMode.VIEW) {
 			if (this.parentSelected == null) {
 				setMessage(RscTools.getString(RscConst.MSG_DIALOG_SYSREQUIREMENT_GROUP_DESCRIPTION),
 						IMessageProvider.INFORMATION);
@@ -267,7 +267,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 		formContainer.setLayout(gridLayout);
 
 		// Select content type
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			renderNonEditableContent(formContainer);
 		} else {
 			renderEditableContent(formContainer);
@@ -348,7 +348,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 			for (SystemRequirementParam param : parameters) {
 
 				// check if the parameter is for the current level
-				if (getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+				if (getViewManager().getClientService(IGenericParameterService.class)
 						.isParameterAvailableForLevel(param, getCurrentLevel())) {
 
 					// search the value for the parameter
@@ -385,7 +385,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 	private void renderEditableContent(Composite parent) {
 
 		// create parent combobox
-		if (mode != DialogMode.CREATE) {
+		if (mode != ViewMode.CREATE) {
 			renderParentComboBox(parent);
 		}
 
@@ -405,7 +405,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 
 		// Generic values
 		for (SystemRequirementParam param : parameters) {
-			if (getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			if (getViewManager().getClientService(IGenericParameterService.class)
 					.isParameterAvailableForLevel(param, getCurrentLevel())) {
 
 				// render field
@@ -491,7 +491,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 	@Override
 	protected void okPressed() {
 		// View - Just exit
-		if (mode == DialogMode.VIEW) {
+		if (mode == ViewMode.VIEW) {
 			super.okPressed();
 		}
 
@@ -526,7 +526,7 @@ public class SystemRequirementDialog extends GenericCFSmallDialog<SystemRequirem
 		for (SystemRequirementValue value : tempValues) {
 
 			// validate constraints
-			Notification notification = getViewManager().getAppManager().getService(IGenericParameterApplication.class)
+			Notification notification = getViewManager().getClientService(IGenericParameterService.class)
 					.checkValid(value, tempValues);
 
 			if (notification != null) {

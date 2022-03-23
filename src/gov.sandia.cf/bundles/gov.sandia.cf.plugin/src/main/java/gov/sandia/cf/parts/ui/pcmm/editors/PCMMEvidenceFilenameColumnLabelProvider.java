@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.model.NotificationType;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
@@ -67,12 +67,9 @@ public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnL
 		if (element instanceof PCMMEvidence) {
 			PCMMEvidence evidence = (PCMMEvidence) element;
 
-			// get app
-			IPCMMApplication app = getView().getViewManager().getAppManager().getService(IPCMMApplication.class);
-
 			// Get notifications
-			Map<NotificationType, List<String>> notificiations = app.getEvidenceNotifications(evidence,
-					evidence.getId());
+			Map<NotificationType, List<String>> notificiations = getView().getViewManager().getAppManager()
+					.getService(IPCMMEvidenceApp.class).getEvidenceNotifications(evidence, evidence.getId());
 
 			// Get Error notifications
 			if (notificiations.containsKey(NotificationType.ERROR)
@@ -108,12 +105,9 @@ public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnL
 			PCMMEvidence evidence = (PCMMEvidence) element;
 			StringBuilder notificationsToString = new StringBuilder();
 
-			// get app
-			IPCMMApplication app = getView().getViewManager().getAppManager().getService(IPCMMApplication.class);
-
 			// Get notifications
-			Map<NotificationType, List<String>> notificiations = app.getEvidenceNotifications(evidence,
-					evidence.getId());
+			Map<NotificationType, List<String>> notificiations = getView().getViewManager().getAppManager()
+					.getService(IPCMMEvidenceApp.class).getEvidenceNotifications(evidence, evidence.getId());
 
 			// Get Error notifications
 			if (notificiations.containsKey(NotificationType.ERROR)

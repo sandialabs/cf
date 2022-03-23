@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.util.Objects;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -21,7 +20,7 @@ public class IconImageDescriptor extends ImageDescriptor {
 
 	private String iconName;
 
-	private Color color;
+	private String color;
 
 	private int size;
 
@@ -30,7 +29,7 @@ public class IconImageDescriptor extends ImageDescriptor {
 	 * @param color    the color associated
 	 * @param size     the icon size
 	 */
-	public IconImageDescriptor(final String iconName, final Color color, final int size) {
+	public IconImageDescriptor(final String iconName, final String color, final int size) {
 		this.iconName = iconName;
 		this.color = color != null ? color : ConstantTheme.getColor(IconTheme.ICON_COLOR_DEFAULT);
 		this.size = size;
@@ -44,12 +43,12 @@ public class IconImageDescriptor extends ImageDescriptor {
 
 		// load image
 		InputStream resourceAsStream = IconTheme.class.getClassLoader().getResourceAsStream(imagePath);
-		
+
 		if (resourceAsStream != null) {
 			ImageData imageData = new ImageData(resourceAsStream);
 			return new Image(device, imageData.scaledTo(size, size));
 		} else {
-			return super.getMissingImageDescriptor().createImage();
+			return ImageDescriptor.getMissingImageDescriptor().createImage();
 		}
 	}
 
@@ -81,7 +80,7 @@ public class IconImageDescriptor extends ImageDescriptor {
 	 * @param size     the image size
 	 * @return a CursorResourceDescriptor that describes the given cursor
 	 */
-	public static IconImageDescriptor createFrom(final String iconName, final Color color, final int size) {
+	public static IconImageDescriptor createFrom(final String iconName, final String color, final int size) {
 		return new IconImageDescriptor(iconName, color, size);
 	}
 

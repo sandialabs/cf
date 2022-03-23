@@ -17,7 +17,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -51,6 +50,9 @@ public class FileChooser extends Composite {
 	 */
 	private String title = null;
 
+	/** The browser default path selection. */
+	private String browserDefaultPathSelection = null;
+
 	/**
 	 * Restrict the file selection to the browse button (no copy-paste, text
 	 * edition)
@@ -61,6 +63,8 @@ public class FileChooser extends Composite {
 	 * The resource manager
 	 */
 	private ResourceManager rscMgr;
+
+	private ButtonTheme browseButton;
 
 	/**
 	 * Constructor:
@@ -116,7 +120,7 @@ public class FileChooser extends Composite {
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		Button browseButton = FormFactory.createButton(rscMgr, this, null, optionsBtnBrowse);
+		browseButton = FormFactory.createButton(rscMgr, this, null, optionsBtnBrowse);
 		((GridData) browseButton.getLayoutData()).verticalAlignment = SWT.CENTER;
 		browseButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -128,7 +132,11 @@ public class FileChooser extends Composite {
 				dialog.setTitle("Open"); //$NON-NLS-1$
 				dialog.setInput(WorkspaceTools.getActiveProject());
 				dialog.setAllowMultiple(false);
-				dialog.setInitialSelection(getFile());
+				IFile defaultSelection = getFile();
+				if (defaultSelection == null && browserDefaultPathSelection != null) {
+					defaultSelection = WorkspaceTools.getFileInWorkspaceForPath(new Path(browserDefaultPathSelection));
+				}
+				dialog.setInitialSelection(defaultSelection);
 
 				// Open
 				if (dialog.open() == IDialogConstants.OK_ID) {
@@ -160,13 +168,6 @@ public class FileChooser extends Composite {
 	}
 
 	/**
-	 * @return the file chooser text control
-	 */
-	public Text getTextControl() {
-		return pathText;
-	}
-
-	/**
 	 * Get file
 	 * 
 	 * @return The file
@@ -189,6 +190,16 @@ public class FileChooser extends Composite {
 	}
 
 	@SuppressWarnings("javadoc")
+	public String getBrowserDefaultPathSelection() {
+		return browserDefaultPathSelection;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setBrowserDefaultPathSelection(String browserDefaultPathSelection) {
+		this.browserDefaultPathSelection = browserDefaultPathSelection;
+	}
+
+	@SuppressWarnings("javadoc")
 	public boolean isOnlyBrowse() {
 		return onlyBrowse;
 	}
@@ -206,5 +217,12 @@ public class FileChooser extends Composite {
 	 */
 	public void addListener(Listener listener) {
 		pathText.addListener(SWT.CHANGED, listener);
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		pathText.setEnabled(enabled);
+		browseButton.setEnabled(enabled);
+		super.setEnabled(enabled);
 	}
 }

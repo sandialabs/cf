@@ -21,7 +21,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
 import gov.sandia.cf.dao.impl.PCMMEvidenceRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
@@ -32,13 +31,15 @@ import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PCMMEvidenceRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PCMMEvidenceRepositoryTest
  */
 @RunWith(JUnitPlatform.class)
 class PCMMEvidenceRepositoryTest extends AbstractTestRepository<PCMMEvidence, Integer, PCMMEvidenceRepository> {
@@ -260,109 +261,182 @@ class PCMMEvidenceRepositoryTest extends AbstractTestRepository<PCMMEvidence, In
 	}
 
 	@Test
-	void testFindBy() {
+	void test_findBy_no_tag() {
 
-		String pathEvidence = "/My/path/text.txt"; //$NON-NLS-1$
-
-		// create user
-		User defaultUser = TestEntityFactory.getNewUser(getDaoManager());
-		assertNotNull(defaultUser);
-
-		// create tag
-		Tag evidenceTag = TestEntityFactory.getNewTag(getDaoManager(), defaultUser);
-		assertNotNull(evidenceTag);
-
-		// create role
-		Role defaultRole = TestEntityFactory.getNewRole(getDaoManager());
-		assertNotNull(defaultRole);
-
-		// No tag and no role
-		PCMMEvidence evidence = new PCMMEvidence();
-		evidence.setName("A"); //$NON-NLS-1$
-		evidence.setFilePath(pathEvidence);
-		evidence.setDateCreation(new Date());
-		evidence.setRoleCreation(defaultRole);
-		evidence.setUserCreation(defaultUser);
-		try {
-			evidence = getRepository().create(evidence);
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
-
-		// With tag and no role
-		PCMMEvidence evidenceTagAndRole = new PCMMEvidence();
-		evidenceTagAndRole.setName("B"); //$NON-NLS-1$
-		evidenceTagAndRole.setTag(evidenceTag);
-		evidenceTagAndRole.setRoleCreation(defaultRole);
-		evidenceTagAndRole.setDateCreation(new Date());
-		evidenceTagAndRole.setFilePath("/Paht/fff"); //$NON-NLS-1$
-		evidenceTagAndRole.setUserCreation(defaultUser);
-		try {
-			evidenceTagAndRole = getRepository().create(evidenceTagAndRole);
-		} catch (CredibilityException e) {
-			fail(e.getMessage());
-		}
+		// No tag
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
 
 		// Init filters
 		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(PCMMEvidence.Filter.TAG, null);
 
-		// Evidence with not flag
+		// Evidence with no tag
 		List<PCMMEvidence> result = getRepository().findBy(filters);
 		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
-		assertEquals("A", result.get(0).getName()); //$NON-NLS-1$
+		assertEquals("http://test.com", result.get(0).getPath()); //$NON-NLS-1$
+		assertNull(result.get(0).getTag());
 
-		// Evidence with flag
-		filters = new HashMap<>();
-		filters.put(PCMMEvidence.Filter.TAG, evidenceTag);
-		result = getRepository().findBy(filters);
+		// clean
+		getRepository().delete(evidence);
+	}
+
+	@Test
+	void test_findBy_tag() {
+
+		// Tag and no role
+		Tag newTag = TestEntityFactory.getNewTag(getDaoManager(), null);
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com", newTag); //$NON-NLS-1$
+
+		// Init filters
+		Map<EntityFilter, Object> filters = new HashMap<>();
+		filters.put(PCMMEvidence.Filter.TAG, newTag);
+
+		// Evidence with tag
+		List<PCMMEvidence> result = getRepository().findBy(filters);
 		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
-		assertEquals("B", result.get(0).getName()); //$NON-NLS-1$
+		assertEquals(newTag, result.get(0).getTag());
 
-		// Evidence no tag
-		filters = new HashMap<>();
+		// clean
+		getRepository().delete(evidence);
+		getDaoManager().getRepository(ITagRepository.class).delete(newTag);
+	}
+
+	@Test
+	void test_findBy_role_no_tag() {
+
+		// Tag and no role
+		Role newRole = TestEntityFactory.getNewRole(getDaoManager());
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), newRole, null, null,
+				"http://test.com"); //$NON-NLS-1$
+
+		// Init filters
+		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(PCMMEvidence.Filter.TAG, null);
-		result = getRepository().findBy(filters);
-		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
-		assertEquals("A", result.get(0).getName()); //$NON-NLS-1$
+		filters.put(PCMMEvidence.Filter.ROLECREATION, newRole);
 
-		// Evidence role and no tag
-		filters = new HashMap<>();
+		// Evidence with tag
+		List<PCMMEvidence> result = getRepository().findBy(filters);
+		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
+		assertEquals(newRole, result.get(0).getRoleCreation());
+		assertNull(result.get(0).getTag());
+
+		// clean
+		getRepository().delete(evidence);
+		getDaoManager().getRepository(IRoleRepository.class).delete(newRole);
+	}
+
+	@Test
+	void test_findBy_path_no_tag() {
+
+		// Tag and no role
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
+
+		// Init filters
+		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(PCMMEvidence.Filter.TAG, null);
-		filters.put(PCMMEvidence.Filter.ROLECREATION, defaultRole);
-		result = getRepository().findBy(filters);
-		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
+		filters.put(PCMMEvidence.Filter.VALUE, ParameterLinkGson.toGson(FormFieldType.LINK_URL, "http://test.com")); //$NON-NLS-1$
 
-		// Evidence no tag and path
-		filters = new HashMap<>();
-		filters.put(PCMMEvidence.Filter.TAG, null);
-		filters.put(PCMMEvidence.Filter.VALUE, ParameterLinkGson.toGson(FormFieldType.LINK_FILE, pathEvidence));
-		result = getRepository().findBy(filters);
+		// Evidence with tag
+		List<PCMMEvidence> result = getRepository().findBy(filters);
 		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
+		assertEquals("http://test.com", result.get(0).getPath()); //$NON-NLS-1$
+		assertNull(result.get(0).getTag());
 
-		// Evidence role and tag
-		filters = new HashMap<>();
-		filters.put(PCMMEvidence.Filter.TAG, evidenceTag);
-		filters.put(PCMMEvidence.Filter.ROLECREATION, defaultRole);
-		result = getRepository().findBy(filters);
+		// clean
+		getRepository().delete(evidence);
+	}
+
+	@Test
+	void test_findBy_path_and_tag() {
+
+		// Tag and path
+		Tag newTag = TestEntityFactory.getNewTag(getDaoManager(), null);
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com", newTag); //$NON-NLS-1$
+
+		// Init filters
+		Map<EntityFilter, Object> filters = new HashMap<>();
+		filters.put(PCMMEvidence.Filter.TAG, newTag);
+		filters.put(PCMMEvidence.Filter.VALUE, ParameterLinkGson.toGson(FormFieldType.LINK_URL, "http://test.com")); //$NON-NLS-1$
+
+		// Evidence with tag
+		List<PCMMEvidence> result = getRepository().findBy(filters);
 		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
-		assertEquals("B", result.get(0).getName()); //$NON-NLS-1$
+		assertEquals("http://test.com", result.get(0).getPath()); //$NON-NLS-1$
+		assertEquals(newTag, result.get(0).getTag());
+
+		// clean
+		getRepository().delete(evidence);
+		getDaoManager().getRepository(ITagRepository.class).delete(newTag);
+	}
+
+	@Test
+	void test_findBy_role_and_tag() {
+
+		// Tag and no role
+		Tag newTag = TestEntityFactory.getNewTag(getDaoManager(), null);
+		Role newRole = TestEntityFactory.getNewRole(getDaoManager());
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), newRole, null, null,
+				"http://test.com", newTag); //$NON-NLS-1$
+
+		// Init filters
+		Map<EntityFilter, Object> filters = new HashMap<>();
+		filters.put(PCMMEvidence.Filter.TAG, newTag);
+		filters.put(PCMMEvidence.Filter.ROLECREATION, newRole);
+
+		// Evidence with tag
+		List<PCMMEvidence> result = getRepository().findBy(filters);
+		assertEquals(Integer.valueOf(1), Integer.valueOf(result.size()));
+		assertEquals(newRole, result.get(0).getRoleCreation());
+		assertEquals(newTag, result.get(0).getTag());
+
+		// clean
+		getRepository().delete(evidence);
+		getDaoManager().getRepository(ITagRepository.class).delete(newTag);
+		getDaoManager().getRepository(IRoleRepository.class).delete(newRole);
+	}
+
+	@Test
+	void test_findBy_null() {
+
+		// list
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
+		PCMMEvidence evidence2 = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
 
 		// No filter (null)
-		result = getRepository().findBy(null);
+		List<PCMMEvidence> result = getRepository().findBy(null);
 		assertEquals(Integer.valueOf(2), Integer.valueOf(result.size()));
 
-		// No filter (empty
+		// No filter (empty)
 		result = getRepository().findBy(new HashMap<>());
 		assertEquals(Integer.valueOf(2), Integer.valueOf(result.size()));
 
 		// Clear
-		if (evidence != null) {
-			getRepository().delete(evidence);
-		}
-		if (evidenceTagAndRole != null) {
-			getRepository().delete(evidenceTagAndRole);
-		}
+		getRepository().delete(evidence);
+		getRepository().delete(evidence2);
+	}
+
+	@Test
+	void test_findBy_empty() {
+
+		// list
+		PCMMEvidence evidence = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
+		PCMMEvidence evidence2 = TestEntityFactory.getNewPCMMEvidence(getDaoManager(), null, null, null,
+				"http://test.com"); //$NON-NLS-1$
+
+		// No filter (null)
+		List<PCMMEvidence> result = getRepository().findBy(new HashMap<>());
+		assertEquals(Integer.valueOf(2), Integer.valueOf(result.size()));
+
+		// Clear
+		getRepository().delete(evidence);
+		getRepository().delete(evidence2);
 	}
 
 	@Test

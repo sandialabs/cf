@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.parts.theme.ConstantTheme;
+import gov.sandia.cf.tools.ColorTools;
 
 /**
  * The PCMM Evidence column label provider
@@ -59,23 +60,28 @@ public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 		// PCMM Element in light primary
 		if (element instanceof PCMMElement) {
 			if (!element.equals(view.getPcmmElement())) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
 		}
 		// PCMM Sub-element in light gray
 		else if (element instanceof PCMMSubelement) {
 			if (((PCMMSubelement) element).getElement() == null
 					|| !((PCMMSubelement) element).getElement().equals(view.getPcmmElement())) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			} else {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			}
 		}
 		// PCMM Evidence in secondary light gray
 		if (element instanceof PCMMEvidence && !view.isFromCurrentPCMMElement((PCMMEvidence) element)) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT);
+			return ColorTools.toColor(view.getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 		}
 
 		return null;
@@ -89,19 +95,24 @@ public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 	 */
 	private Color getTreeCellForeground(Object element) {
 		if (element == null || element instanceof PCMMElement) {
-			return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE);
+			return ColorTools.toColor(view.getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		} else if (element instanceof PCMMSubelement) {
 			if (((PCMMSubelement) element).getElement() == null
 					|| !((PCMMSubelement) element).getElement().equals(view.getPcmmElement())) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 			}
 		} else if (element instanceof PCMMEvidence) {
 			if (!view.isFromCurrentPCMMElement((PCMMEvidence) element)) {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK);
+				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 			}
 		}
 

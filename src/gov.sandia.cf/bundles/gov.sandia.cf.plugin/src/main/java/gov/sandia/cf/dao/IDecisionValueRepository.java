@@ -11,6 +11,7 @@ import gov.sandia.cf.model.DecisionValue;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IDecisionValueRepository extends ICRUDRepository<DecisionValue, Integer> {
 
 }

@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
@@ -64,6 +64,7 @@ import gov.sandia.cf.parts.viewer.TreeViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.widgets.FancyToolTipSupport;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
@@ -92,10 +93,6 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 	 */
 	private PCMMElement elementSelected;
 	/**
-	 * the pcmm elements
-	 */
-	private List<PCMMElement> elements;
-	/**
 	 * the viewer
 	 */
 	private TreeViewerHideSelection treeViewerEvidence;
@@ -119,6 +116,11 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 	private Composite compositeTable;
 
 	/**
+	 * User selection
+	 */
+	private Map<PCMMElement, Object[]> userExpandedSelection;
+
+	/**
 	 * The constructor
 	 * 
 	 * @param parentView      the parent view
@@ -137,8 +139,7 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 		viewEditors = new HashMap<>();
 		deleteEditors = new HashMap<>();
 
-		// lists and maps instantiation
-		elements = new ArrayList<>();
+		userExpandedSelection = new HashMap<>();
 
 		// create the view
 		renderPage();
@@ -270,7 +271,7 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 	private void renderMainTableInit() {
 		// Tree - Create
 		treeViewerEvidence = new TreeViewerHideSelection(compositeTable,
-				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		GridData gdViewer = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 		treeViewerEvidence.getTree().setLayoutData(gdViewer);
 		treeViewerEvidence.getTree().setHeaderVisible(true);
@@ -289,8 +290,10 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		treeViewerEvidence.getTree().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
-		treeViewerEvidence.getTree().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
+		treeViewerEvidence.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewerEvidence.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 	}
 
@@ -604,7 +607,7 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 						ButtonTheme btnDeleteItem = TableFactory
 								.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
 						btnDeleteItem.addListener(SWT.Selection,
-								event -> viewCtrl.deleteEvidence((PCMMEvidence) element));
+								event -> viewCtrl.deleteEvidenceWithConfirm((PCMMEvidence) element));
 
 						// Draw cell
 						editor = new TreeEditor(item.getParent());
@@ -668,6 +671,9 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 
 		// Add drag and drop support to the viewer
 		addDragAndDropSupport();
+
+		// Add delete key listener
+		addDeleteKeyListener();
 
 		// modifications on double click
 		if (!getViewManager().isTagMode()) {
@@ -760,13 +766,6 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 
 		// drag support
 		treeViewerEvidence.addDragSupport(transferTypes, transferObjectTypes, new DragSourceAdapter() {
-			@Override
-			public void dragFinished(DragSourceEvent event) {
-				// refresh the view
-				if (getViewManager().isDirty()) {
-					refresh();
-				}
-			}
 
 			@Override
 			public void dragSetData(DragSourceEvent event) {
@@ -783,6 +782,21 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 		// drop support
 		treeViewerEvidence.addDropSupport(transferTypes, transferObjectTypes,
 				new PCMMEvidenceDropSupport(viewCtrl, treeViewerEvidence));
+	}
+
+	/**
+	 * Adds the delete key listener.
+	 */
+	private void addDeleteKeyListener() {
+		treeViewerEvidence.getTree().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.character == SWT.DEL && e.stateMask == 0) {
+					viewCtrl.deleteEvidence(treeViewerEvidence.getStructuredSelection());
+				}
+				super.keyReleased(e);
+			}
+		});
 	}
 
 	/**
@@ -834,50 +848,53 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 		// Trigger GuidanceLevel View
 		getViewManager().getCredibilityEditor().setPartProperty(
 				CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
-				elementSelected.getAbbreviation());
+				elementSelected != null ? elementSelected.getAbbreviation() : RscTools.empty());
 
 		// Show role selection
 		showRoleSelection();
+
+		List<PCMMElement> pcmmElementList = new ArrayList<>();
 
 		// Get Model
 		Model model = getViewManager().getCache().getModel();
 		if (model != null) {
 			try {
 				// Load pcmm elements from database
-				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
+				pcmmElementList = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						.getElementList(model);
 
-				if (elements != null) {
-
-					// Refresh the table
-					refreshMainTable();
-
-					// set pcmm elements
-					treeViewerEvidence.setInput(elements);
-
-					// expand and select the selected element in the viewer input
-					if (elementSelected != null) {
-
-						// refresh element
-						getViewManager().getAppManager().getService(IPCMMApplication.class)
-								.refreshElement(elementSelected);
-
-						treeViewerEvidence.setExpandedState(elementSelected, true);
-
-						for (PCMMSubelement sub : elementSelected.getSubElementList()) {
-
-							// refresh subelement
-							getViewManager().getAppManager().getService(IPCMMApplication.class).refreshSubelement(sub);
-
-							treeViewerEvidence.setExpandedState(sub, true);
-						}
-						treeViewerEvidence.reveal(elementSelected);
-					}
-				}
 			} catch (CredibilityException e) {
 				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_LOADING_MSG));
 				logger.warn("An error has occurred while loading the evidence data:\n{}", e.getMessage(), e); //$NON-NLS-1$
 			}
+		}
+
+		// Get expanded elements
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		boolean initialization = true;
+		if (treeViewerEvidence != null) {
+			initialization = false;
+			elements = treeViewerEvidence.getExpandedElements();
+		}
+
+		// Refresh the table
+		refreshMainTable();
+
+		// set pcmm elements
+		treeViewerEvidence.setInput(pcmmElementList);
+
+		// Set expanded elements
+		if (initialization) {
+			if (elementSelected != null) {
+
+				// refresh element
+				getViewManager().getAppManager().getService(IPCMMApplication.class).refreshElement(elementSelected);
+
+				expandElement(elementSelected);
+			}
+		} else {
+			treeViewerEvidence.setExpandedElements(elements);
 		}
 
 		// refresh the viewer
@@ -891,30 +908,71 @@ public class PCMMEvidenceView extends ACredibilityPCMMView {
 	}
 
 	/**
+	 * Expand PCMM element.
+	 *
+	 * @param element the element
+	 */
+	void expandElement(PCMMElement element) {
+
+		if (treeViewerEvidence == null || treeViewerEvidence.getTree().isDisposed() || element == null) {
+			return;
+		}
+
+		if (userExpandedSelection.containsKey(element)) {
+			treeViewerEvidence.setExpandedElements(userExpandedSelection.get(element));
+		} else {
+			treeViewerEvidence.setExpandedState(element, true);
+
+			if (element.getSubElementList() != null) {
+				for (PCMMSubelement sub : element.getSubElementList()) {
+
+					// refresh subelement
+					getViewManager().getAppManager().getService(IPCMMApplication.class).refreshSubelement(sub);
+
+					treeViewerEvidence.setExpandedState(sub, true);
+				}
+			}
+			treeViewerEvidence.reveal(element);
+		}
+	}
+
+	/**
+	 * Expand PCMM subelement.
+	 *
+	 * @param subelement the element
+	 */
+	void expandSubelement(PCMMSubelement subelement) {
+
+		if (treeViewerEvidence == null || treeViewerEvidence.getTree().isDisposed() || subelement == null) {
+			return;
+		}
+
+		// refresh subelement
+		getViewManager().getAppManager().getService(IPCMMApplication.class).refreshSubelement(subelement);
+
+		treeViewerEvidence.setExpandedState(subelement, true);
+	}
+
+	/**
 	 * Resets the pcmm element selected
 	 * 
 	 * @param pcmmElement the element to set
 	 */
 	public void setPcmmElement(PCMMElement pcmmElement) {
+		PCMMElement oldElement = this.elementSelected;
 		this.elementSelected = pcmmElement;
 
+		if (treeViewerEvidence != null && !treeViewerEvidence.getTree().isDisposed() && pcmmElement != null) {
+
+			// save user selection
+			userExpandedSelection.put(oldElement, treeViewerEvidence.getExpandedElements());
+
+			treeViewerEvidence.collapseAll();
+
+			expandElement(elementSelected);
+		}
 		// Refresh
 		refresh();
-	}
-
-	/**
-	 * 
-	 * Resets the pcmm subelement selected
-	 * 
-	 * @param subelt the subelement to set
-	 */
-	public void setSubelementSelected(PCMMSubelement subelt) {
-		if (subelt != null) {
-			setPcmmElement(subelt.getElement());
-
-			// select the selected element in the viewer input
-			treeViewerEvidence.reveal(subelt);
-		}
 	}
 
 	/**

@@ -55,6 +55,14 @@ public class PCMMPlanningQuestionConstraint extends GenericParameterConstraint<P
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(PCMMPlanningQuestionConstraint newImportable) {
+		return newImportable != null && StringTools.equals(getRule(), newImportable.getRule());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(PCMMPlanningQuestionConstraint importable) {
 
 		if (importable == null) {

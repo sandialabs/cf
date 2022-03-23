@@ -11,6 +11,7 @@ import gov.sandia.cf.model.ARGParameters;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IARGParametersRepository extends ICRUDRepository<ARGParameters, Integer> {
 
 	/**

@@ -81,7 +81,6 @@ public class Model implements Serializable, IEntity<Model, Integer> {
 	 * The name field linked to VERSION_ORIGIN
 	 */
 	@Column(name = "VERSION_ORIGIN")
-	@NotBlank(message = RscConst.EX_MODEL_VERSIONORIGIN_BLANK)
 	private String versionOrigin;
 
 	/**

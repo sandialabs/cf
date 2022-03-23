@@ -14,6 +14,7 @@ import gov.sandia.cf.model.Tag;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMEvidenceRepository extends ICRUDRepository<PCMMEvidence, Integer> {
 
 	/**

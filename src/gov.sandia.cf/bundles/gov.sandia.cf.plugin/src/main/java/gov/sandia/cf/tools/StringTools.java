@@ -3,6 +3,12 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.tools;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import org.apache.commons.text.StringEscapeUtils;
 
 /**
@@ -183,4 +189,157 @@ public class StringTools {
 
 		return str.toString();
 	}
+
+	/**
+	 * Removes the non printable chars.
+	 *
+	 * @param <K>     the key type
+	 * @param <V>     the value type
+	 * @param toParse the to parse
+	 * @return the map
+	 */
+	@SuppressWarnings("unchecked")
+	public static <K, V> Map<K, V> removeNonPrintableChars(Map<K, V> toParse) {
+		if (toParse == null) {
+			return null;
+		}
+
+		Map<K, V> newMap = new HashMap<>();
+
+		for (Entry<K, V> entry : toParse.entrySet()) {
+
+			K key = entry.getKey();
+			V value = entry.getValue();
+
+			if (key instanceof String && StringTools.hasNonPrintableChars((String) key)) {
+				key = (K) StringTools.removeNonPrintableChars((String) key);
+			}
+
+			if (value instanceof String && StringTools.hasNonPrintableChars((String) value)) {
+				value = (V) StringTools.removeNonPrintableChars((String) value);
+			} else if (value instanceof Map) {
+				value = (V) StringTools.removeNonPrintableChars((Map<?, ?>) value);
+			} else if (value instanceof List) {
+				value = (V) StringTools.removeNonPrintableChars((List<?>) value);
+			}
+
+			newMap.put(key, value);
+		}
+
+		return newMap;
+	}
+
+	/**
+	 * Removes the non printable chars.
+	 *
+	 * @param <V>     the value type
+	 * @param toParse the to parse
+	 * @return the list
+	 */
+	@SuppressWarnings("unchecked")
+	public static <V> List<V> removeNonPrintableChars(List<V> toParse) {
+		if (toParse == null) {
+			return new ArrayList<>();
+		}
+
+		List<V> newList = new ArrayList<>();
+
+		for (V value : toParse) {
+
+			if (value instanceof String && StringTools.hasNonPrintableChars((String) value)) {
+				value = (V) StringTools.removeNonPrintableChars((String) value);
+			} else if (value instanceof Map) {
+				value = (V) StringTools.removeNonPrintableChars((Map<?, ?>) value);
+			} else if (value instanceof List) {
+				value = (V) StringTools.removeNonPrintableChars((List<?>) value);
+			}
+
+			newList.add(value);
+		}
+
+		return newList;
+	}
+
+	/**
+	 * Checks for non printable chars.
+	 *
+	 * @param string the string
+	 * @return true, if successful
+	 */
+	public static boolean hasNonPrintableChars(final String string) {
+		if (string == null) {
+			return false;
+		}
+
+		return !StringTools.isPrintable(string);
+	}
+
+	/**
+	 * Checks if is printable.
+	 *
+	 * @param data the data
+	 * @return true, if is printable
+	 */
+	public static boolean isPrintable(final String data) {
+		if (data == null) {
+			return false;
+		}
+
+		final int length = data.length();
+		for (int offset = 0; offset < length;) {
+			final int codePoint = data.codePointAt(offset);
+
+			if (!isPrintable(codePoint)) {
+				return false;
+			}
+
+			offset += Character.charCount(codePoint);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if is printable.
+	 *
+	 * @param c the c
+	 * @return true, if is printable
+	 */
+	public static boolean isPrintable(final int c) {
+		return (c >= 0x20 && c <= 0x7E) || c == 0x9 || c == 0xA || c == 0xD || c == 0x85 || (c >= 0xA0 && c <= 0xD7FF)
+				|| (c >= 0xE000 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0x10FFFF);
+	}
+
+	/**
+	 * Removes the non printable chars.
+	 *
+	 * @param data the data
+	 * @return the string
+	 */
+	public static String removeNonPrintableChars(final String data) {
+		if (data == null) {
+			return null;
+		}
+
+		String toReturn = data;
+		List<String> toDelete = new ArrayList<>();
+
+		final int length = data.length();
+		for (int offset = 0; offset < length;) {
+			final int codePoint = data.codePointAt(offset);
+
+			if (!isPrintable(codePoint)) {
+				toDelete.add(Character.toString(data.charAt(offset)));
+			}
+
+			offset += Character.charCount(codePoint);
+		}
+
+		for (String charToDelete : toDelete) {
+			toReturn = toReturn.replace(charToDelete, ""); //$NON-NLS-1$
+		}
+
+		return toReturn;
+	}
+
 }

@@ -14,6 +14,11 @@ import java.util.List;
  *
  */
 public interface IGenericTableItem extends Serializable {
+	
+	/**
+	 * @return the item title
+	 */
+	String getItemTitle();
 
 	/**
 	 * @return the item values list

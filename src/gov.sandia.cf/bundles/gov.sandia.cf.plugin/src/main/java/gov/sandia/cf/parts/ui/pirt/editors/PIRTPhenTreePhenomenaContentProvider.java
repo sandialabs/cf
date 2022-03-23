@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 
 /**
  * Provides the content of the PIRT table
@@ -33,7 +34,7 @@ public class PIRTPhenTreePhenomenaContentProvider implements ITreeContentProvide
 		}
 
 		// sort by id label
-		data.sort(Comparator.comparing(PhenomenonGroup::getIdLabel));
+		data.sort(Comparator.comparing(PhenomenonGroup::getIdLabel, new StringWithNumberAndNullableComparator()));
 
 		return data.toArray();
 	}
@@ -50,7 +51,7 @@ public class PIRTPhenTreePhenomenaContentProvider implements ITreeContentProvide
 
 			// sort by id label
 			if (data != null) {
-				data.sort(Comparator.comparing(Phenomenon::getIdLabel));
+				data.sort(Comparator.comparing(Phenomenon::getIdLabel, new StringWithNumberAndNullableComparator()));
 				return data.toArray();
 			}
 		}

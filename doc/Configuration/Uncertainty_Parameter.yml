@@ -1,0 +1,51 @@
+Uncertainty Parameters:
+  Description:
+    level: ">=2"
+    required: "Required"
+    type: "Text"
+  Type:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Select"
+    values:
+      - "epistemic"
+      - "epistemic - model form"
+      - "aleatory"
+  Characterization:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Select"
+    values:
+      - "interval"
+      - "distributional"
+      - "discrete"
+      - "not characterized"
+  Parameters:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Text"
+  Model Feature:
+    level: ">=2"
+    required: "Required"
+    type: "Select"
+    values:
+      - "yes"
+      - "no"
+      - "N/A"
+  Comment:
+    level: ">=2"
+    required: "Optional"
+    type: "RichText"
+  Feasible Physical Range:
+    level: ">=2"
+    required: "Desired"
+    type: "Text"
+  References:
+    level: ">=2"
+    required: "Model Feature == 'yes'"
+    type: "Link"
+uncertaintyGroups:
+  - name: "Numerical"
+  - name: "Parametric"
+  - name: "Model Form"
+  - name: "Environment"

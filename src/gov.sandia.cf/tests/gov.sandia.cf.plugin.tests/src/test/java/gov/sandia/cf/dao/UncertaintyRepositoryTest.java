@@ -3,14 +3,16 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao;
 
+import java.util.Date;
+
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.dao.impl.UncertaintyRepository;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Uncertainty;
-import gov.sandia.cf.model.UncertaintyGroup;
 import gov.sandia.cf.model.User;
 import gov.sandia.cf.tests.TestEntityFactory;
 
@@ -46,12 +48,13 @@ class UncertaintyRepositoryTest extends AbstractTestRepository<Uncertainty, Inte
 	@Override
 	Uncertainty getModelFulfilled(Uncertainty model) {
 		// populate
-		UncertaintyGroup newGroup = TestEntityFactory.getNewUncertaintyGroup(getDaoManager(), null);
+		Model newModel = TestEntityFactory.getNewModel(getDaoManager());
 		User newUser = TestEntityFactory.getNewUser(getDaoManager());
 
 		fulfillModelStrings(model);
-		model.setGroup(newGroup);
+		model.setModel(newModel);
 		model.setUserCreation(newUser);
+		model.setCreationDate(new Date());
 		return model;
 	}
 }

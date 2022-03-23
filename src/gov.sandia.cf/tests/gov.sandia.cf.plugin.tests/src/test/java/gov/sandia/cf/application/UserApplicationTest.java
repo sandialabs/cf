@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.global.IUserApplication;
 import gov.sandia.cf.dao.IRoleRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Role;

@@ -4,30 +4,29 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.dao;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 
 import org.hsqldb.cmdline.SqlToolError;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
-import gov.sandia.cf.application.CredibilityServiceRuntimeException;
+import gov.sandia.cf.common.ServiceLoader;
 import gov.sandia.cf.dao.CredibilityDaoRuntimeException.CredibilityDaoRuntimeMessage;
 import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
 import gov.sandia.cf.dao.impl.NativeQueryRepository;
 import gov.sandia.cf.dao.migration.EclipseLinkMigrationManager;
+import gov.sandia.cf.exceptions.CredibilityDatabaseInvalidException;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
-import gov.sandia.cf.launcher.IManager;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException;
+import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException.CredibilityServiceRuntimeMessage;
+import gov.sandia.cf.tools.RscConst;
+import gov.sandia.cf.tools.RscTools;
 
 /**
  * Manage the database access implementing hsqldb This class is a singleton
@@ -35,7 +34,7 @@ import gov.sandia.cf.launcher.IManager;
  * @author Didier Verstraete
  *
  */
-public class DaoManager implements IManager {
+public class DaoManager implements IDaoManager {
 
 	/**
 	 * the logger
@@ -60,17 +59,20 @@ public class DaoManager implements IManager {
 	/**
 	 * Map of interface and entities repository
 	 */
-	private Map<Class<? extends ICRUDRepository<?, ?>>, Class<? extends AbstractCRUDRepository<?, ?>>> mapInterface;
+	private Map<Class<?>, Class<?>> mapInterface;
 
 	/**
 	 * Map of Model entities repository
 	 */
-	private Map<Class<?>, ICRUDRepository<?, ?>> mapRepositories;
+	private Map<Class<?>, Object> mapRepositories;
 
 	/**
 	 * Defines the state of the loader
 	 */
 	private boolean isStarted = false;
+
+	/** The is initialized. */
+	private boolean isInitialized = false;
 
 	/**
 	 * The persistence unit name
@@ -102,7 +104,11 @@ public class DaoManager implements IManager {
 		dbManager = new HSQLDBDaoManager(persistUnitName);
 		logger.debug("dao manager loaded: HSQLDBDaoManager is the implementation"); //$NON-NLS-1$
 
-		instantiateInterfaceMap();
+		mapInterface = new HashMap<>();
+
+		// load repositories
+		mapInterface.putAll(ServiceLoader.load(Repository.class, this.getClass().getPackage().getName(),
+				this.getClass().getPackage().getName()));
 
 		// initialize repository map
 		// repositories will be instantiated along the water with get method
@@ -117,90 +123,30 @@ public class DaoManager implements IManager {
 		isStarted = true;
 	}
 
-	@SuppressWarnings("unchecked")
-	private void instantiateInterfaceMap() {
+	/** {@inheritDoc} */
+	@Override
+	public void initialize(String databasePath) throws CredibilityException, SqlToolError, SQLException, IOException,
+			URISyntaxException, CredibilityMigrationException, CredibilityDatabaseInvalidException {
 
-		// load dao repositories file
-		Map<String, Object> daoConfiguration = null;
-		try (InputStream stream = DaoManager.class.getClassLoader()
-				.getResourceAsStream(DaoManagerConstants.REPOSITORIES_FILENAME)) {
-			daoConfiguration = new Yaml().load(stream);
-		} catch (IOException e) {
-			throw new CredibilityServiceRuntimeException(e);
-		}
+		if (!isInitialized) {
+			logger.debug("initializing dao loader with local database at:{}", databasePath); //$NON-NLS-1$
 
-		if (daoConfiguration == null) {
-			logger.warn("The DAO configuration can not be loaded."); //$NON-NLS-1$
-			return;
-		}
+			// initialize database manager
+			dbManager.initialize(databasePath);
 
-		List<String> repositories = (List<String>) daoConfiguration.get(DaoManagerConstants.REPOSITORIES_KEY);
+			// execute sql database migration
+			dbMigrationManager.executeMigration();
 
-		mapInterface = new HashMap<>();
-
-		Reflections reflections = new Reflections(DaoManager.class.getPackage().getName());
-
-		// start implementation
-		for (String crudInterfaceToImplement : repositories) {
-
-			Class<?> interfaceClass;
-
-			// get the dao repository interface
-			try {
-				interfaceClass = Class.forName(crudInterfaceToImplement);
-			} catch (ClassNotFoundException e) {
-				throw new CredibilityDaoRuntimeException(e);
-			}
-
-			// check dao repository interface extends ICRUDRepository
-			if (!ICRUDRepository.class.isAssignableFrom(interfaceClass)) {
-				throw new CredibilityDaoRuntimeException(CredibilityDaoRuntimeMessage.NOT_DAOCRUD_INTERFACE,
-						crudInterfaceToImplement);
-			}
-
-			// search for the first implementation
-			Set<?> crudImplementationClassSet = reflections.getSubTypesOf(interfaceClass);
-
-			// check if dao repository implementation is found
-			if (crudImplementationClassSet == null || crudImplementationClassSet.isEmpty()) {
-				throw new CredibilityDaoRuntimeException(CredibilityDaoRuntimeMessage.NOT_FOUND,
-						interfaceClass.getName());
-			}
-
-			// check if dao repository implementation extends AbstractCRUDRepository
-			Class<?> crudImplementation = (Class<?>) crudImplementationClassSet.iterator().next();
-			if (!AbstractCRUDRepository.class.isAssignableFrom(crudImplementation)) {
-				throw new CredibilityDaoRuntimeException(CredibilityDaoRuntimeMessage.NOT_DAOCRUD_IMPLEMENTATION,
-						crudImplementation.getName(), interfaceClass.getName());
-			}
-
-			// put into the repositories map
-			mapInterface.put((Class<? extends ICRUDRepository<?, ?>>) interfaceClass,
-					(Class<? extends AbstractCRUDRepository<?, ?>>) crudImplementation);
+			isInitialized = true;
+		} else {
+			throw new CredibilityException(RscTools.getString(RscConst.EX_DAOMANAGER_ALREADY_INIT));
 		}
 	}
 
-	/**
-	 * Initialize local database with databasePath
-	 * 
-	 * @param databasePath the database path
-	 * @throws CredibilityException          if a parameter is not valid.
-	 * @throws SQLException                  if a sql exception occurs.
-	 * @throws IOException                   if a file read exception occurs.
-	 * @throws SqlToolError                  if a sql tool error occurs.
-	 * @throws URISyntaxException            if a file path is not valid.
-	 * @throws CredibilityMigrationException if a migration exception occurs.
-	 */
-	public void initialize(String databasePath) throws CredibilityException, SqlToolError, SQLException, IOException,
-			URISyntaxException, CredibilityMigrationException {
-
-		logger.debug("initializing dao loader with local database at:{}", databasePath); //$NON-NLS-1$
-
-		// initialize database manager
-		dbManager.initialize(databasePath);
-
-		// execute sql database migration
-		dbMigrationManager.executeMigration();
+	/** {@inheritDoc} */
+	@Override
+	public void setPersistUnitName(String persistUnitName) {
+		this.persistUnitName = persistUnitName;
 	}
 
 	/** {@inheritDoc} */
@@ -214,6 +160,7 @@ public class DaoManager implements IManager {
 			logger.error(e.getMessage(), e);
 		}
 
+		isInitialized = false;
 		isStarted = false;
 		logger.debug("dao loader stopped"); //$NON-NLS-1$
 	}
@@ -225,34 +172,36 @@ public class DaoManager implements IManager {
 	}
 
 	/**
-	 * @return the entity manager
+	 * Checks if is initialized.
+	 *
+	 * @return true, if is initialized
 	 */
+	public boolean isInitialized() {
+		return isInitialized;
+	}
+
+	/** {@inheritDoc} */
+	@Override
 	public EntityManager getEntityManager() {
 		return dbManager.getEntityManager();
 	}
 
-	/**
-	 * @return the database migration manager
-	 */
+	/** {@inheritDoc} */
+	@Override
 	public IDBMigrationManager getDbMigrationManager() {
 		return dbMigrationManager;
 	}
 
-	/**
-	 * @return nativeQuery Repository
-	 */
+	/** {@inheritDoc} */
+	@Override
 	public INativeQueryRepository getNativeQueryRepository() {
-		populateRepository(nativeQueryRepository);
+		populate(nativeQueryRepository);
 		return nativeQueryRepository;
 	}
 
-	/**
-	 * @param <R>            the repository object
-	 * @param interfaceClass the repository class
-	 * @return the repository requested after instantiation and after being
-	 *         populated.
-	 */
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
+	@Override
 	public <R extends ICRUDRepository<?, ?>> R getRepository(Class<R> interfaceClass) {
 
 		R repository = null;
@@ -263,6 +212,23 @@ public class DaoManager implements IManager {
 			throw new CredibilityDaoRuntimeException(CredibilityDaoRuntimeMessage.NOT_INTERFACE);
 		}
 
+		// check if it is using Repository annotation
+		if (interfaceClass.getAnnotation(Repository.class) == null) {
+			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE,
+					interfaceClass.getName(), Repository.class.getName());
+		}
+
+		// check if it is a ICRUDRepository service
+		if (!ICRUDRepository.class.isAssignableFrom(interfaceClass)) {
+			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_APPSERVICE_INTERFACE,
+					interfaceClass.getName(), ICRUDRepository.class.getName());
+		}
+
+		// check initialized
+		if (mapInterface == null) {
+			throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.NOT_INITIALIZED);
+		}
+
 		// get repository class
 		repositoryClass = (Class<R>) mapInterface.get(interfaceClass);
 		if (repositoryClass == null) {
@@ -270,7 +236,7 @@ public class DaoManager implements IManager {
 		}
 
 		if (mapRepositories.containsKey(repositoryClass)) {
-			ICRUDRepository<?, ?> icrudRepository = mapRepositories.get(repositoryClass);
+			Object icrudRepository = mapRepositories.get(repositoryClass);
 			if (repositoryClass.isInstance(icrudRepository)) {
 				repository = repositoryClass.cast(icrudRepository);
 			}
@@ -282,35 +248,36 @@ public class DaoManager implements IManager {
 				logger.error("An error occurs while instantiating new DAO Repository: {}", e.getMessage(), e); //$NON-NLS-1$
 			}
 		}
-		populateRepository(repository);
+
+		// populate
+		populate(repository);
+
 		return repository;
-	}
-
-	/**
-	 * @return the database directory path
-	 */
-	public String getDatabaseDirectoryPath() {
-		return dbManager.getDatabaseDirectoryPath();
-	}
-
-	/**
-	 * @return the database manager
-	 */
-	public IDBManager getDbManager() {
-		return dbManager;
 	}
 
 	/**
 	 * @param repository the dao repository to populate
 	 * @return the repository populated with the entity manager
 	 */
-	private IRepository populateRepository(IRepository repository) {
+	private IRepository populate(IRepository repository) {
 
 		// set the entity manager
 		if (repository != null && repository.getEntityManager() == null) {
 			repository.setEntityManager(getEntityManager());
 		}
 		return repository;
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String getDatabaseDirectoryPath() {
+		return dbManager.getDatabaseDirectoryPath();
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public IDBManager getDbManager() {
+		return dbManager;
 	}
 
 }

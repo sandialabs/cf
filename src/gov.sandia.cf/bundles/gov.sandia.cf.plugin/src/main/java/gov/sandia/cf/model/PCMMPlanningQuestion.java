@@ -71,6 +71,22 @@ public class PCMMPlanningQuestion extends GenericParameter<PCMMPlanningQuestion>
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PCMMSUBELEMENT_ID")
 	private PCMMSubelement subelement;
+	/**
+	 * The parameter parent
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private PCMMPlanningQuestion parent;
+
+	@Override
+	public PCMMPlanningQuestion getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(PCMMPlanningQuestion parent) {
+		this.parent = parent;
+	}
 
 	@SuppressWarnings("javadoc")
 	public PCMMElement getElement() {
@@ -128,6 +144,19 @@ public class PCMMPlanningQuestion extends GenericParameter<PCMMPlanningQuestion>
 	 */
 	public void setConstraintList(List<GenericParameterConstraint<PCMMPlanningQuestion>> constraintList) {
 		// not used
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PCMMPlanningQuestion newImportable) {
+
+		if (newImportable == null) {
+			return false;
+		}
+
+		return StringTools.equals(getName(), newImportable.getName());
 	}
 
 	/** {@inheritDoc} */

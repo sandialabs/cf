@@ -3,7 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application;
 
-import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 
 /**
  * The abstract class to extend for every application service
@@ -21,7 +21,7 @@ public abstract class AApplication implements IApplication {
 	/**
 	 * AApplication constructor
 	 */
-	public AApplication() {
+	protected AApplication() {
 		this.appMgr = null;
 	}
 
@@ -30,7 +30,7 @@ public abstract class AApplication implements IApplication {
 	 * 
 	 * @param appMgr the application manager
 	 */
-	public AApplication(IApplicationManager appMgr) {
+	protected AApplication(IApplicationManager appMgr) {
 		this.appMgr = appMgr;
 	}
 
@@ -48,7 +48,7 @@ public abstract class AApplication implements IApplication {
 	/**
 	 * @return the dao manager, null if appMgr is null
 	 */
-	public DaoManager getDaoManager() {
+	public IDaoManager getDaoManager() {
 		if (appMgr == null) {
 			return null;
 		}

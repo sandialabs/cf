@@ -35,19 +35,40 @@ do
 	if wget --spider $PACKAGEURL 2>/dev/null; then
 		echo "Getting package build artifacts from $PACKAGEURL"
 		wget -q $PACKAGEURL
-		mkdir -p packages/$version/
-		echo "Unzipping build package artifacts to packages/$version/"
-		unzip -q $P2_REPO_FILE_PREFIX.$version.zip -d packages/$version/
+		mkdir -p packages/$version/eclipse/
+		echo "Unzipping build package artifacts to packages/$version/eclipse/"
+		unzip -q $P2_REPO_FILE_PREFIX.$version.zip -d packages/$version/eclipse/
 		# execute the first time to add the latest package into the 'latest' folder
 		if [[ $FIRST == "true" ]]; then
 			echo "Creating latest package for $P2_REPO_FILE_PREFIX.$version.zip"
 			cp -R packages/$version packages/latest
-			cp $P2_REPO_FILE_PREFIX.$version.zip packages/latest/$P2_REPO_FILE_PREFIX.latest.zip
+			cp $P2_REPO_FILE_PREFIX.$version.zip packages/latest/eclipse/$P2_REPO_FILE_PREFIX.latest.zip
 		fi
 		echo "Removing build package $P2_REPO_FILE_PREFIX.$version.zip"
 		rm $P2_REPO_FILE_PREFIX.$version.zip
 	else
 		echo "Impossible to get build package artifact at $PACKAGEURL"
+	fi
+
+	# Create webapp for each package version sorted reversely
+	PACKAGEURL="$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$version/$WEBAPP_FILE_PREFIX.$version.zip"
+	echo "Checking webapp artifacts from $PACKAGEURL"
+	if wget --spider $PACKAGEURL 2>/dev/null; then
+		echo "Getting package build artifacts from $PACKAGEURL"
+		wget -q $PACKAGEURL
+		mkdir -p packages/$version/webapp/
+		echo "Unzipping build package artifacts to packages/$version/webapp/"
+		unzip -q $WEBAPP_FILE_PREFIX.$version.zip -d packages/$version/webapp/
+		# execute the first time to add the latest package into the 'latest' folder
+		if [[ $FIRST == "true" ]]; then
+			echo "Creating latest package for $WEBAPP_FILE_PREFIX.$version.zip"
+			cp -R packages/$version/webapp packages/latest/webapp
+			cp $WEBAPP_FILE_PREFIX.$version.zip packages/latest/webapp/$WEBAPP_FILE_PREFIX.latest.zip
+		fi
+		echo "Removing build package $WEBAPP_FILE_PREFIX.$version.zip"
+		rm $WEBAPP_FILE_PREFIX.$version.zip
+	else
+		echo "Impossible to get webapp artifacts at $PACKAGEURL"
 	fi
 
 	# Create javadoc for each package version sorted reversely

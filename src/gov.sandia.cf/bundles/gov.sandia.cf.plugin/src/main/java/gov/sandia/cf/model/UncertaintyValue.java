@@ -14,13 +14,13 @@ import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tools.RscConst;
 
 /**
- * The UncertaintyValue entity class linked to table COM_UNCERTAINTY_VALUE
+ * The UncertaintyValue entity class linked to table UNCERTAINTY_VALUE
  * 
  * @author Maxime N.
  *
  */
 @Entity
-@Table(name = "COM_UNCERTAINTY_VALUE")
+@Table(name = "UNCERTAINTY_VALUE")
 public class UncertaintyValue extends GenericValue<UncertaintyParam, UncertaintyValue> implements IGenericTableValue {
 
 	/**
@@ -48,7 +48,7 @@ public class UncertaintyValue extends GenericValue<UncertaintyParam, Uncertainty
 	}
 
 	/**
-	 * The parameter field linked to COM_PARAMETER_ID column
+	 * The parameter field linked to PARAMETER_ID column
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PARAMETER_ID")

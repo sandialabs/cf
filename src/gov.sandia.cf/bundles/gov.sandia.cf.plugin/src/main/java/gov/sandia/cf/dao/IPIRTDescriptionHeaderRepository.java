@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PIRTDescriptionHeader;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPIRTDescriptionHeaderRepository extends ICRUDRepository<PIRTDescriptionHeader, Integer> {
 
 }

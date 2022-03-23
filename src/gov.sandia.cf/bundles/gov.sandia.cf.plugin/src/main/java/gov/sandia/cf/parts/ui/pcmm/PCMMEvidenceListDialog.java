@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 
-import gov.sandia.cf.application.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.model.IAssessable;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
@@ -45,6 +45,7 @@ import gov.sandia.cf.parts.viewer.TableViewerHideSelection;
 import gov.sandia.cf.parts.viewer.editors.AutoResizeViewerLayout;
 import gov.sandia.cf.parts.viewer.editors.ColumnViewerSupport;
 import gov.sandia.cf.parts.viewer.editors.GenericTableListContentProvider;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.StringTools;
@@ -144,7 +145,7 @@ public class PCMMEvidenceListDialog extends GenericCFDialog<PCMMViewManager> {
 		filters.put(PCMMEvidence.Filter.TAG, tag);
 
 		// Get evidence
-		evidence = getViewManager().getAppManager().getService(IPCMMApplication.class).getEvidenceBy(filters);
+		evidence = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).getEvidenceBy(filters);
 	}
 
 	/**
@@ -206,8 +207,10 @@ public class PCMMEvidenceListDialog extends GenericCFDialog<PCMMViewManager> {
 
 		// sort column listener
 		SortTableColumnListener sortListener = new SortTableColumnListener(evidenceTable);
-		evidenceTable.getTable().setHeaderForeground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
-		evidenceTable.getTable().setHeaderBackground(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY));
+		evidenceTable.getTable().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+		evidenceTable.getTable().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 
 		/**
 		 * construct fixed viewer columns

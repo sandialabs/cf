@@ -3,21 +3,21 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao.migration;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 
 import org.eclipse.persistence.sessions.UnitOfWork;
@@ -34,11 +34,12 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.common.ServiceLoader;
 import gov.sandia.cf.dao.AbstractTestDao;
 import gov.sandia.cf.dao.DaoManager;
+import gov.sandia.cf.dao.IDaoManager;
 import gov.sandia.cf.dao.IMigrationLogRepository;
 import gov.sandia.cf.dao.IModelRepository;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
 import gov.sandia.cf.tests.TestEntityFactory;
@@ -72,7 +73,7 @@ class EclipseLinkMigrationManagerTest {
 	/**
 	 * the dao manager
 	 */
-	private static DaoManager daoManager;
+	private static IDaoManager daoManager;
 
 	private File createdFolder;
 
@@ -97,7 +98,7 @@ class EclipseLinkMigrationManagerTest {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
+	public IDaoManager getDaoManager() {
 		return daoManager;
 	}
 
@@ -132,8 +133,7 @@ class EclipseLinkMigrationManagerTest {
 		getDaoManager().stop();
 		if (createdFolder != null && createdFolder.exists()) {
 			try {
-				HSQLDBDaoManager.dropDatabaseFiles(createdFolder.getPath());
-				Files.deleteIfExists(createdFolder.toPath());
+				FileTools.deleteDirectoryRecursively(createdFolder);
 			} catch (IOException e) {
 				fail(e.getMessage());
 			}
@@ -147,7 +147,7 @@ class EclipseLinkMigrationManagerTest {
 	public static void clean() {
 		daoManager.stop();
 		try {
-			HSQLDBDaoManager.dropDatabaseFiles(TEMP_FOLDER.getRoot().toString());
+			FileTools.deleteDirectoryRecursively(TEMP_FOLDER.getRoot());
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -183,7 +183,24 @@ class EclipseLinkMigrationManagerTest {
 	}
 
 	@Test
-	void test_getTasksToExecute_All() {
+	void test_getTasks_All() throws CredibilityMigrationException {
+		SortedMap<Integer, IMigrationTask> migrationTasks = new EclipseLinkMigrationManager(getDaoManager())
+				.getMigrationTasks();
+		List<Class<?>> taskClasses = ServiceLoader.load(MigrationTask.class,
+				EclipseLinkMigrationManager.class.getPackage().getName());
+
+		assertEquals(taskClasses.size(), migrationTasks.size());
+
+		for (Entry<Integer, IMigrationTask> entry : migrationTasks.entrySet()) {
+			Integer key = entry.getKey();
+			IMigrationTask value = entry.getValue();
+			int taskId = value.getClass().getAnnotation(MigrationTask.class).id();
+			assertEquals(Integer.valueOf(taskId), key);
+		}
+	}
+
+	@Test
+	void test_getTasksToExecute_All() throws CredibilityMigrationException {
 
 		// get unit of work
 		UnitOfWork unitOfWork = getDaoManager().getEntityManager().unwrap(UnitOfWork.class);
@@ -197,7 +214,8 @@ class EclipseLinkMigrationManagerTest {
 			fail(e.getMessage());
 		}
 		assertNotNull(tasksToExecute);
-		assertEquals(EclipseLinkMigrationManager.getMigrationTasks().size(), tasksToExecute.size());
+		assertEquals(new EclipseLinkMigrationManager(getDaoManager()).getMigrationTasks().size(),
+				tasksToExecute.size());
 	}
 
 	@Test
@@ -246,7 +264,7 @@ class EclipseLinkMigrationManagerTest {
 				}
 
 				@Override
-				public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+				public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 					return false;
 				}
 			};
@@ -268,7 +286,7 @@ class EclipseLinkMigrationManagerTest {
 				}
 
 				@Override
-				public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+				public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 					return false;
 				}
 			};
@@ -295,7 +313,7 @@ class EclipseLinkMigrationManagerTest {
 				}
 
 				@Override
-				public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+				public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 					return false;
 				}
 			};
@@ -326,7 +344,7 @@ class EclipseLinkMigrationManagerTest {
 			}
 
 			@Override
-			public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+			public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 				return false;
 			}
 		};
@@ -361,7 +379,7 @@ class EclipseLinkMigrationManagerTest {
 			}
 
 			@Override
-			public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+			public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 				return false;
 			}
 		};
@@ -395,7 +413,7 @@ class EclipseLinkMigrationManagerTest {
 			}
 
 			@Override
-			public boolean execute(DaoManager daoManager) throws CredibilityMigrationException {
+			public boolean execute(IDaoManager daoManager) throws CredibilityMigrationException {
 				return false;
 			}
 		};

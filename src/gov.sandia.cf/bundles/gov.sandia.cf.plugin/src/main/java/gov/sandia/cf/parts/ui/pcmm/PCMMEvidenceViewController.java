@@ -3,21 +3,19 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pcmm;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.IAssessable;
@@ -25,7 +23,8 @@ import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;
@@ -64,6 +63,9 @@ public class PCMMEvidenceViewController {
 	 * @param element the evidence to add
 	 */
 	void addEvidence(Object element) {
+
+		PCMMEvidence evidenceCreated = null;
+
 		/**
 		 * Check the PCMM mode
 		 */
@@ -76,8 +78,8 @@ public class PCMMEvidenceViewController {
 				MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTSUBELEMENT_MSG));
 			} else {
-				// add the evidences
-				addEvidence(subelementSelected);
+				// add the evidence
+				evidenceCreated = addEvidence(subelementSelected, null);
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(view.getViewManager().getPCMMConfiguration().getMode())) {
 			// get the selected element to associate the evidence with
@@ -88,97 +90,95 @@ public class PCMMEvidenceViewController {
 				MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTELEMENT_MSG));
 			} else {
-				// add the evidences
-				addEvidence(elementSelectedTemp);
+				// add the evidence
+				evidenceCreated = addEvidence(elementSelectedTemp, null);
 			}
 		}
 
+		// Refresh
+		if (evidenceCreated != null) {
+
+			// refresh
+			viewChangedAndRefresh();
+		}
 	}
 
 	/**
-	 * Add a new PCMM evidence
-	 * 
-	 * @param assessable the assessable (PCMM Element or Subelement) to associate
-	 *                   the evidence with
-	 */
-	void addEvidence(IAssessable assessable) {
-		addEvidence(assessable, null);
-	}
-
-	/**
-	 * Add a new PCMM evidence with default file setted
-	 * 
+	 * Add a new PCMM evidence with default file setted.
+	 *
 	 * @param assessable  the assessable (PCMM Element or Subelement) to associate
 	 *                    the evidence with
 	 * @param defaultFile the default file to associate
+	 * @return the PCMM evidence
 	 */
-	public void addEvidence(IAssessable assessable, IFile defaultFile) {
+	public PCMMEvidence addEvidence(IAssessable assessable, IFile defaultFile) {
 
 		if (getPcmmElement() == null) {
 			String message = "Impossible to add the evidence. There is no PCMM element selected."; //$NON-NLS-1$
 			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
 			logger.warn(message);
-			return;
+			return null;
 		} else if (assessable == null) {
 			String message = RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTSUBELEMENT_MSG);
 			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
 			logger.warn(message);
-			return;
+			return null;
 		} else if (assessable instanceof PCMMElement && !getPcmmElement().equals(assessable)) {
 			String message = "Impossible to add the evidence. The selected element is not an authorized PCMM element"; //$NON-NLS-1$
 			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
 			logger.warn(message);
-			return;
+			return null;
 		} else if (assessable instanceof PCMMSubelement && (((PCMMSubelement) assessable).getElement() == null
 				|| !getPcmmElement().equals(((PCMMSubelement) assessable).getElement()))) {
 			String message = "Impossible to add the evidence. The selected subelement is not into the authorized PCMM element"; //$NON-NLS-1$
 			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
 			logger.warn(message);
-			return;
+			return null;
 		}
 
 		// select the resource with the resource dialog
-		List<PCMMEvidence> evidenceList = showEvidenceDialog(null, assessable, defaultFile);
+		PCMMEvidence evidence = showEvidenceDialog(null, assessable, defaultFile);
 
-		if (evidenceList == null || evidenceList.isEmpty()) {
-			return;
+		PCMMEvidence evidenceCreated = null;
+
+		if (evidence == null) {
+			return evidenceCreated;
 		}
 
-		boolean changed = false;
+		try {
+			// add the evidence in database and viewer
+			evidenceCreated = addEvidenceResource(evidence, assessable);
 
-		// add the evidence in database and viewer
-		for (PCMMEvidence evidence : evidenceList.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
-			try {
-				addEvidenceResource(evidence, assessable);
-			} catch (CredibilityException e) {
-				logger.error("An error occurred while adding new PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
+			// expand element
+			if (evidenceCreated != null) {
+				view.expandElement(evidenceCreated.getElement());
+				view.expandSubelement(evidenceCreated.getSubelement());
 			}
-			changed = true;
-		}
-
-		if (changed) {
-			// Set view changed
+			// view changed
 			view.getViewManager().viewChanged();
 
-			// Refresh
-			view.refresh();
+		} catch (CredibilityException e) {
+			logger.error("An error occurred while adding new PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
+			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
 		}
+
+		return evidenceCreated;
 	}
 
 	/**
 	 * Add the evidence in database and associate it with the assessable (PCMM
-	 * element or subelement)
-	 * 
+	 * element or subelement).
+	 *
 	 * @param evidence   the evidence to add
 	 * @param assessable the assessable (PCMM element or subelement)
-	 * @throws CredibilityException
+	 * @return the PCMM evidence
+	 * @throws CredibilityException the credibility exception
 	 */
-	void addEvidenceResource(PCMMEvidence evidence, IAssessable assessable) throws CredibilityException {
+	PCMMEvidence addEvidenceResource(PCMMEvidence evidence, IAssessable assessable) throws CredibilityException {
 
 		if (evidence == null) {
-			return;
+			return null;
 		}
 
 		// Keep file location
@@ -205,7 +205,7 @@ public class PCMMEvidenceViewController {
 		evidence.setRoleCreation(view.getViewManager().getCurrentUserRole());
 
 		// Add Evidence in database
-		PCMMEvidence evidenceCreated = view.getViewManager().getAppManager().getService(IPCMMApplication.class)
+		PCMMEvidence evidenceCreated = view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 				.addEvidence(evidence);
 
 		// Associate the evidence with the assessable item
@@ -214,6 +214,8 @@ public class PCMMEvidenceViewController {
 		} else if (assessable instanceof PCMMSubelement) {
 			((PCMMSubelement) assessable).getEvidenceList().add(evidenceCreated);
 		}
+
+		return evidenceCreated;
 	}
 
 	/**
@@ -239,22 +241,20 @@ public class PCMMEvidenceViewController {
 		}
 
 		// select the resource with the resource dialog
-		List<PCMMEvidence> evidenceList = showEvidenceDialog(editedEvidence, item, null);
+		PCMMEvidence evidence = showEvidenceDialog(editedEvidence, item, null);
 
-		if (evidenceList != null && !evidenceList.isEmpty()) {
+		if (evidence != null) {
 
 			boolean changed = false;
 
 			// Save
-			for (PCMMEvidence evidence : evidenceList.stream().filter(Objects::nonNull).collect(Collectors.toList())) {
-				try {
-					view.getViewManager().getAppManager().getService(IPCMMApplication.class).updateEvidence(evidence);
-					changed |= true;
-				} catch (CredibilityException e) {
-					logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
-							RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
-				}
+			try {
+				view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).updateEvidence(evidence);
+				changed |= true;
+			} catch (CredibilityException e) {
+				logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
+				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+						RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
 			}
 
 			if (changed) {
@@ -273,14 +273,14 @@ public class PCMMEvidenceViewController {
 	 * @param evidence The edited evidence
 	 * @return the list of the selected resources
 	 */
-	List<PCMMEvidence> showEvidenceDialog(PCMMEvidence evidence, IAssessable item, IFile defaultFile) {
+	PCMMEvidence showEvidenceDialog(PCMMEvidence evidence, IAssessable item, IFile defaultFile) {
 		// Get last selected file
 		if (null == getLastSelectedFile()) {
 			view.setLastSelectedFile(WorkspaceTools.getActiveCfFile());
 		}
 
 		// Evidence dialog to add/edit the evidence
-		DialogMode mode = evidence == null ? DialogMode.CREATE : DialogMode.UPDATE;
+		ViewMode mode = evidence == null ? ViewMode.CREATE : ViewMode.UPDATE;
 		if (evidence == null) {
 			evidence = new PCMMEvidence();
 		}
@@ -291,15 +291,57 @@ public class PCMMEvidenceViewController {
 				mode);
 
 		// open the dialog
-		return Arrays.asList(dialog.openDialog());
+		return dialog.openDialog();
 	}
 
 	/**
-	 * Delete the selected evidence
-	 * 
-	 * @param evidences the evidence to delete
+	 * Delete evidence.
+	 *
+	 * @param selection the selection
 	 */
-	void deleteEvidence(PCMMEvidence evidence) {
+	void deleteEvidence(IStructuredSelection selection) {
+
+		if (selection != null && !selection.isEmpty()) {
+
+			/** confirm delete **/
+
+			// constructs confirm message
+			String deleteDetailMessage = RscTools.getString(RscConst.MSG_PCMMEVID_MULTI_DELETE_CONFIRM_QUESTION);
+
+			// confirm dialog
+			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+					RscTools.getString(RscConst.MSG_PCMMEVID_DELETE_CONFIRM_TITLE), deleteDetailMessage);
+
+			if (!confirm) {
+				return;
+			}
+
+			Iterator<?> iterator = selection.iterator();
+			while (iterator.hasNext()) {
+				Object next = iterator.next();
+				if (next instanceof PCMMEvidence) {
+					try {
+						deleteEvidence((PCMMEvidence) next);
+					} catch (CredibilityException e) {
+						logger.error("An error has occurred while deleting PCMMevidence:\n{}", e.getMessage(), e); //$NON-NLS-1$
+						MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+								RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_DELETING_MSG) + e.getMessage());
+						break;
+					}
+				}
+			}
+
+			// Refresh
+			view.refresh();
+		}
+	}
+
+	/**
+	 * Delete the selected evidence.
+	 *
+	 * @param evidence the evidence
+	 */
+	void deleteEvidenceWithConfirm(PCMMEvidence evidence) {
 
 		// delete the evidence
 		try {
@@ -316,32 +358,15 @@ public class PCMMEvidenceViewController {
 			boolean confirm = MessageDialog.openConfirm(view.getShell(),
 					RscTools.getString(RscConst.MSG_PCMMEVID_DELETE_CONFIRM_TITLE), deleteDetailMessage);
 
-			if (confirm && evidence != null) {
-
-				/**
-				 * Delete from phenomena viewer
-				 */
-				if (evidence.getElement() != null) {
-					getPcmmElement().getEvidenceList().remove(evidence);
-				} else if (evidence.getSubelement() != null) {
-					int index = getPcmmElement().getSubElementList().indexOf(evidence.getSubelement());
-					if (index >= 0) {
-						PCMMSubelement sub = getPcmmElement().getSubElementList().get(index);
-						sub.getEvidenceList().remove(evidence);
-					}
-				}
-
-				/**
-				 * Delete from database
-				 */
-				view.getViewManager().getAppManager().getService(IPCMMApplication.class).deleteEvidence(evidence);
-
-				// Set view changed
-				view.getViewManager().viewChanged();
-
-				// Refresh
-				view.refresh();
+			if (!confirm) {
+				return;
 			}
+
+			// delete evidence
+			deleteEvidence(evidence);
+
+			// Refresh
+			view.refresh();
 		} catch (CredibilityException e) {
 			logger.error("An error has occurred while deleting PCMMevidence:\n{}", e.getMessage(), e); //$NON-NLS-1$
 			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
@@ -350,51 +375,124 @@ public class PCMMEvidenceViewController {
 	}
 
 	/**
-	 * Edit the evidence in database and associate it with the assessable (PCMM
-	 * element or subelement)
-	 * 
+	 * Delete evidence.
+	 *
+	 * @param evidence the evidence
+	 * @throws CredibilityException the credibility exception
+	 */
+	void deleteEvidence(PCMMEvidence evidence) throws CredibilityException {
+
+		if (evidence == null) {
+			return;
+		}
+
+		/**
+		 * Delete from phenomena viewer
+		 */
+		if (evidence.getElement() != null) {
+			getPcmmElement().getEvidenceList().remove(evidence);
+		} else if (evidence.getSubelement() != null) {
+			int index = getPcmmElement().getSubElementList().indexOf(evidence.getSubelement());
+			if (index >= 0) {
+				PCMMSubelement sub = getPcmmElement().getSubElementList().get(index);
+				sub.getEvidenceList().remove(evidence);
+			}
+		}
+
+		/**
+		 * Delete from database
+		 */
+		view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).deleteEvidence(evidence);
+
+		// Set view changed
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * Move the evidence in database and associate it with the assessable (PCMM
+	 * element or subelement).
+	 *
 	 * @param evidence      the evidence to add
 	 * @param newAssessable the new assessable to set (PCMM element or subelement)
+	 * @return the PCMM evidence updated
 	 */
-	public void editEvidenceResource(PCMMEvidence evidence, IAssessable newAssessable) {
+	public PCMMEvidence moveEvidence(PCMMEvidence evidence, IAssessable newAssessable) {
 
 		if (evidence == null || newAssessable == null) {
-			return;
+			return null;
 		}
 
+		PCMMEvidence evidenceUpdated = null;
 		boolean changed = false;
 
-		// check
-		try {
-			view.getViewManager().getAppManager().getService(IPCMMApplication.class)
-					.checkEvidenceWithSamePathInAssessable(evidence.getValue(), evidence.getSection(), newAssessable);
-		} catch (CredibilityException e) {
-			logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
-					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
-			return;
-		}
-
-		// set changes
+		// set changes and get old one to refresh
+		IAssessable oldAssessable = null;
 		if (newAssessable instanceof PCMMElement) {
-			evidence.setElement((PCMMElement) newAssessable);
+			oldAssessable = evidence.getElement();
 		} else if (newAssessable instanceof PCMMSubelement) {
-			evidence.setSubelement((PCMMSubelement) newAssessable);
+			oldAssessable = evidence.getSubelement();
 		}
 
 		// update
 		try {
-			view.getViewManager().getAppManager().getService(IPCMMApplication.class).updateEvidence(evidence);
-			changed |= true;
+			evidenceUpdated = view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+					.moveEvidence(evidence, null, newAssessable);
+			changed = true;
 		} catch (CredibilityException e) {
 			logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
 			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
-					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
+					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_UPDATING_MSG) + e.getMessage());
 		}
 
 		if (changed) {
+
+			// refresh
+			view.getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(oldAssessable);
+			view.getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(newAssessable);
+
 			// Set view changed
 			view.getViewManager().viewChanged();
+		}
+
+		return evidenceUpdated;
+	}
+
+	/**
+	 * Reorder evidence.
+	 *
+	 * @param evidence the evidence
+	 * @param newIndex the new index
+	 * @throws CredibilityException the credibility exception
+	 */
+	public void reorderEvidence(PCMMEvidence evidence, int newIndex) throws CredibilityException {
+
+		view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).reorderEvidence(evidence, newIndex,
+				view.getViewManager().getCache().getUser());
+
+		// fire view change to save credibility file
+		view.getViewManager().viewChanged();
+	}
+
+	/**
+	 * View changed.
+	 */
+	public void viewChangedAndRefresh() {
+
+		// Set view changed
+		view.getViewManager().viewChanged();
+
+		// Refresh
+		view.refresh();
+	}
+
+	/**
+	 * Refresh if changed.
+	 */
+	public void refreshIfChanged() {
+
+		// Refresh
+		if (view.getViewManager().isDirty()) {
+			view.refresh();
 		}
 	}
 

@@ -149,8 +149,11 @@ public class PIRTAdequacyColumnLevelGuideline implements Serializable,
 		this.adequacyColumnGuideline = adequacyColumnGuideline;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean sameAs(PIRTAdequacyColumnLevelGuideline importable) {
+	public boolean sameKey(PIRTAdequacyColumnLevelGuideline importable) {
 
 		if (importable == null) {
 			return false;
@@ -160,9 +163,26 @@ public class PIRTAdequacyColumnLevelGuideline implements Serializable,
 		boolean sameGuideline = (getAdequacyColumnGuideline() == null
 				&& importable.getAdequacyColumnGuideline() == null)
 				|| (getAdequacyColumnGuideline() != null
-						&& getAdequacyColumnGuideline().sameAs(importable.getAdequacyColumnGuideline()));
+						&& getAdequacyColumnGuideline().sameKey(importable.getAdequacyColumnGuideline()));
 
 		return sameName && sameGuideline;
+	}
+
+	@Override
+	public boolean sameAs(PIRTAdequacyColumnLevelGuideline importable) {
+
+		if (importable == null) {
+			return false;
+		}
+
+		boolean sameName = StringTools.equals(getName(), importable.getName());
+		boolean sameDescription = StringTools.equals(getDescription(), importable.getDescription());
+		boolean sameGuideline = (getAdequacyColumnGuideline() == null
+				&& importable.getAdequacyColumnGuideline() == null)
+				|| (getAdequacyColumnGuideline() != null
+						&& getAdequacyColumnGuideline().sameAs(importable.getAdequacyColumnGuideline()));
+
+		return sameName && sameGuideline && sameDescription;
 	}
 
 	@Override

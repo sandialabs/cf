@@ -297,7 +297,11 @@ public class ZipTools {
 		if (zipEntry.getName() != null && zipEntry.getName().endsWith(DIRECTORY_SUFFIX)) {
 			newResourceCreated = destFile.mkdir();
 		} else {
-			newResourceCreated = destFile.createNewFile();
+			newResourceCreated = true;
+			if (destFile.getParent() != null && !new File(destFile.getParent()).exists()) {
+				newResourceCreated &= new File(destFile.getParent()).mkdirs();
+			}
+			newResourceCreated &= destFile.createNewFile();
 		}
 
 		if (!newResourceCreated) {

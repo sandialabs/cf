@@ -4,10 +4,23 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.application.configuration;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import gov.sandia.cf.application.decision.YmlReaderDecisionSchema;
+import gov.sandia.cf.application.imports.YmlReaderGlobal;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.qoiplanning.YmlReaderQoIPlanningSchema;
+import gov.sandia.cf.application.requirement.YmlReaderSystemRequirementSchema;
+import gov.sandia.cf.application.uncertainty.YmlReaderUncertaintySchema;
+import gov.sandia.cf.constants.configuration.ConfigurationFileType;
+import gov.sandia.cf.model.dto.configuration.ConfigurationSchema;
+import gov.sandia.cf.tools.FileExtension;
+import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -18,15 +31,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  */
 public class ConfigurationFileValidator {
-
-	/**
-	 * Constants
-	 */
-	private static final boolean PIRT_REQUIRED = false;
-	private static final boolean QOIPLANNING_REQUIRED = false;
-	private static final boolean PCMM_REQUIRED = false;
-	private static final boolean UNCERTAINTY_REQUIRED = false;
-	private static final boolean REQUIREMENT_REQUIRED = false;
 
 	private ConfigurationFileValidator() {
 		// do not instantiate
@@ -45,51 +49,49 @@ public class ConfigurationFileValidator {
 		boolean required = false;
 		String fileTypeMsg = RscTools.empty();
 		String pathToValidate = null;
-		Set<String> otherPath = new HashSet<>();
 
 		// Manage
 		if (ConfigurationFileType.PIRT.equals(fileType)) {
-			required = PIRT_REQUIRED;
+			required = false;
 			fileTypeMsg = RscTools.getString(RscConst.MSG_PIRT);
 			pathToValidate = confSchema.get(ConfigurationFileType.PIRT);
-			otherPath = confSchema.valuesExcept(Arrays.asList(ConfigurationFileType.PIRT));
 		} else if (ConfigurationFileType.QOIPLANNING.equals(fileType)) {
-			required = QOIPLANNING_REQUIRED;
+			required = false;
 			fileTypeMsg = RscTools.getString(RscConst.MSG_QOIPLANNING);
 			pathToValidate = confSchema.get(ConfigurationFileType.QOIPLANNING);
-			otherPath = confSchema.valuesExcept(Arrays.asList(ConfigurationFileType.QOIPLANNING));
 		} else if (ConfigurationFileType.PCMM.equals(fileType)) {
-			required = PCMM_REQUIRED;
+			required = false;
 			fileTypeMsg = RscTools.getString(RscConst.MSG_PCMM);
 			pathToValidate = confSchema.get(ConfigurationFileType.PCMM);
-			otherPath = confSchema.valuesExcept(Arrays.asList(ConfigurationFileType.PCMM));
 		} else if (ConfigurationFileType.UNCERTAINTY.equals(fileType)) {
-			required = UNCERTAINTY_REQUIRED;
+			required = false;
 			fileTypeMsg = RscTools.getString(RscConst.MSG_UNCERTAINTY);
 			pathToValidate = confSchema.get(ConfigurationFileType.UNCERTAINTY);
-			otherPath = confSchema.valuesExcept(Arrays.asList(ConfigurationFileType.UNCERTAINTY));
 		} else if (ConfigurationFileType.SYSTEM_REQUIREMENT.equals(fileType)) {
-			required = REQUIREMENT_REQUIRED;
+			required = false;
 			fileTypeMsg = RscTools.getString(RscConst.MSG_SYSREQUIREMENT);
 			pathToValidate = confSchema.get(ConfigurationFileType.SYSTEM_REQUIREMENT);
-			otherPath = confSchema.valuesExcept(Arrays.asList(ConfigurationFileType.SYSTEM_REQUIREMENT));
+		} else if (ConfigurationFileType.DECISION.equals(fileType)) {
+			required = false;
+			fileTypeMsg = RscTools.getString(RscConst.MSG_DECISION);
+			pathToValidate = confSchema.get(ConfigurationFileType.DECISION);
 		}
 
 		// Check file path and return errors
-		return checkFilePath(pathToValidate, fileTypeMsg, required, otherPath);
+		return checkFilePath(fileType, pathToValidate, fileTypeMsg, required);
 	}
 
 	/**
-	 * Check file path
-	 * 
+	 * Check file path.
+	 *
+	 * @param fileType       the file type
 	 * @param pathToValidate the path to validate
 	 * @param fileTypeMsg    the file type name
 	 * @param required       is required?
-	 * @param otherPath      the other file paths
 	 * @return a set of error message if present, otherwise an empty set
 	 */
-	public static Set<String> checkFilePath(String pathToValidate, String fileTypeMsg, boolean required,
-			Set<String> otherPath) {
+	public static Set<String> checkFilePath(ConfigurationFileType fileType, String pathToValidate, String fileTypeMsg,
+			boolean required) {
 		// Initialize
 		Set<String> errMsg = new HashSet<>();
 
@@ -97,24 +99,96 @@ public class ConfigurationFileValidator {
 		if (pathToValidate == null || pathToValidate.isEmpty()) {
 			// Error only if it's required
 			if (required) {
-				errMsg.add(RscTools.getString(RscConst.ERR_CONFFILEWIZARD_EMPTYFILE, fileTypeMsg));
+				errMsg.add(RscTools.getString(RscConst.ERR_NEWCFPROCESS_LOCALSETUP_PAGE_EMPTYFILE, fileTypeMsg));
 			}
 		} else {
 
 			// check if file exists and is a valid YML file
 			File file = new File(pathToValidate);
 			if (file.exists() && file.isFile() && YmlReaderGlobal.isValidYmlFile(file)) {
-
-				// check if file is not the same as another one
-				if (otherPath.contains(pathToValidate)) {
-					errMsg.add(RscTools.getString(RscConst.ERR_CONFFILEWIZARD_SAME_FILES));
+				// check file validity
+				if (!isOfConfigurationFileType(fileType, file)) {
+					errMsg.add(RscTools.getString(RscConst.ERR_NEWCFPROCESS_LOCALSETUP_PAGE_BAD_FILE, fileTypeMsg));
 				}
 			} else {
 				// otherwise add error messages
-				errMsg.add(RscTools.getString(RscConst.ERR_CONFFILEWIZARD_BAD_FILE, fileTypeMsg));
+				errMsg.add(RscTools.getString(RscConst.ERR_NEWCFPROCESS_LOCALSETUP_PAGE_BAD_FILE, fileTypeMsg));
 			}
 		}
 
 		return errMsg;
+	}
+
+	/**
+	 * @param path the path to scan
+	 * @return the map of found compatible schema files in the path
+	 */
+	public static Map<ConfigurationFileType, Set<File>> parseConfigurationFolder(String path) {
+
+		Map<ConfigurationFileType, Set<File>> mapFiles = new EnumMap<>(ConfigurationFileType.class);
+		mapFiles.put(ConfigurationFileType.SYSTEM_REQUIREMENT, new HashSet<>());
+		mapFiles.put(ConfigurationFileType.UNCERTAINTY, new HashSet<>());
+		mapFiles.put(ConfigurationFileType.QOIPLANNING, new HashSet<>());
+		mapFiles.put(ConfigurationFileType.DECISION, new HashSet<>());
+		mapFiles.put(ConfigurationFileType.PIRT, new HashSet<>());
+		mapFiles.put(ConfigurationFileType.PCMM, new HashSet<>());
+
+		if (path == null) {
+			return mapFiles;
+		}
+
+		File confFolderFile = new File(path);
+
+		if (confFolderFile.isDirectory()) {
+			File[] ymlFiles = confFolderFile.listFiles(pathname -> pathname != null && pathname.isFile()
+					&& FileExtension.getYmlExtensions().stream().anyMatch(ext -> ext.getExtensionWithoutDot()
+							.equals(FileTools.getExtensionByFileName(pathname.getPath()))));
+
+			if (ymlFiles != null) {
+				Stream.of(ymlFiles)
+						.forEach(file -> getConfigurationType(file).forEach(type -> mapFiles.get(type).add(file)));
+			}
+		}
+
+		return mapFiles;
+	}
+
+	/**
+	 * @param ymlFile the file to check
+	 * @return the list of compatible configuration types with the file
+	 */
+	public static Set<ConfigurationFileType> getConfigurationType(File ymlFile) {
+
+		Set<ConfigurationFileType> types = new HashSet<>();
+
+		for (ConfigurationFileType type : ConfigurationFileType.values()) {
+			if (isOfConfigurationFileType(type, ymlFile)) {
+				types.add(type);
+			}
+		}
+
+		return types;
+	}
+
+	/**
+	 * @param type    the type to check
+	 * @param ymlFile the file to check
+	 * @return true if the configuration file is of type
+	 */
+	public static boolean isOfConfigurationFileType(ConfigurationFileType type, File ymlFile) {
+		if (ConfigurationFileType.PIRT.equals(type)) {
+			return new YmlReaderPIRTSchema().isValid(ymlFile);
+		} else if (ConfigurationFileType.QOIPLANNING.equals(type)) {
+			return new YmlReaderQoIPlanningSchema().isValid(ymlFile);
+		} else if (ConfigurationFileType.PCMM.equals(type)) {
+			return new YmlReaderPCMMSchema().isValid(ymlFile);
+		} else if (ConfigurationFileType.UNCERTAINTY.equals(type)) {
+			return new YmlReaderUncertaintySchema().isValid(ymlFile);
+		} else if (ConfigurationFileType.SYSTEM_REQUIREMENT.equals(type)) {
+			return new YmlReaderSystemRequirementSchema().isValid(ymlFile);
+		} else if (ConfigurationFileType.DECISION.equals(type)) {
+			return new YmlReaderDecisionSchema().isValid(ymlFile);
+		}
+		return false;
 	}
 }

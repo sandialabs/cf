@@ -40,12 +40,12 @@ import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPCMMApplication;
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.PCMMEvidence;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.home.HomeView;
@@ -129,8 +129,8 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	}
 
 	/**
-	 * Close the database connection if it exists, and delete the temporary folders
-	 * from workspace and file system.
+	 * Close the database connection if it exists, and move the temporary folder to
+	 * the new path from workspace and file system.
 	 * 
 	 * @param res
 	 * @throws CoreException
@@ -138,9 +138,9 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	 */
 	private void moveCFTemporaryFolder(IFile oldFile, IFile newFile) throws CoreException, IOException {
 
-		IFolder cfTmpIFolderOld = WorkspaceTools.getTempFolder(oldFile);
+		IFolder cfTmpIFolderOld = CFTmpFolderManager.getTempFolder(oldFile);
 		File cfTmpFolderOld = WorkspaceTools.toFile(cfTmpIFolderOld);
-		IFolder cfTmpIFolderNew = WorkspaceTools.getTempFolder(newFile);
+		IFolder cfTmpIFolderNew = CFTmpFolderManager.getTempFolder(newFile);
 		File cfTmpFolderNew = WorkspaceTools.toFile(cfTmpIFolderNew);
 
 		if (cfTmpFolderOld != null && cfTmpFolderOld.exists() && cfTmpFolderNew != null) {
@@ -171,27 +171,19 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	private void deleteCFTemporaryFolder(IFile res) throws CoreException {
 
 		// deletes database files if there is no other credibility file
-		IFolder cfTmpIFolder = WorkspaceTools.getTempFolder(res);
+		IFolder cfTmpIFolder = CFTmpFolderManager.getTempFolder(res);
 		File cfTmpFolder = WorkspaceTools.toFile(cfTmpIFolder);
 
 		if (cfTmpFolder != null && cfTmpFolder.exists()) {
 
-			logger.info("Deleting credibility HSQLDB files..."); //$NON-NLS-1$
-
-			// drop database files
-			try {
-				HSQLDBDaoManager.dropDatabaseFiles(WorkspaceTools.toOsPath(res.getParent().getFullPath()));
-			} catch (IOException e) {
-				logger.error("Impossible to delete database files {}", //$NON-NLS-1$
-						WorkspaceTools.toOsPath(res.getParent().getFullPath()), e);
-			}
+			logger.info("Deleting credibility temporary files..."); //$NON-NLS-1$
 
 			// delete temporary folder in workspace
 			if (cfTmpIFolder != null && cfTmpIFolder.exists()) { // delete it if it exists in workspace
 				runDeleteFolderInWorskpace(cfTmpIFolder);
 			}
 
-			logger.info("Credibility HSQLDB files deleted"); //$NON-NLS-1$
+			logger.info("Credibility temporary files deleted"); //$NON-NLS-1$
 		}
 	}
 
@@ -265,7 +257,7 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(PCMMEvidence.Filter.VALUE,
 					ParameterLinkGson.toGson(FormFieldType.LINK_FILE, res.getFullPath().toPortableString()));
-			List<PCMMEvidence> evidences = editor.getAppMgr().getService(IPCMMApplication.class).getEvidenceBy(filters);
+			List<PCMMEvidence> evidences = editor.getAppMgr().getService(IPCMMEvidenceApp.class).getEvidenceBy(filters);
 			if (evidences != null && !evidences.isEmpty()) {
 				Composite layoutTop = editor.getViewMgr().getLayoutTop();
 				if (layoutTop instanceof PCMMViewManager) {

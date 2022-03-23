@@ -13,14 +13,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IGlobalApplication;
-import gov.sandia.cf.application.IImportApplication;
-import gov.sandia.cf.application.IImportDecisionApp;
-import gov.sandia.cf.application.IImportPCMMApp;
-import gov.sandia.cf.application.IImportPIRTApp;
-import gov.sandia.cf.application.IImportQoIPlanningApp;
-import gov.sandia.cf.application.IImportSysRequirementApp;
-import gov.sandia.cf.application.IImportUncertaintyApp;
+import gov.sandia.cf.application.decision.IImportDecisionApp;
+import gov.sandia.cf.application.global.IGlobalApplication;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.pcmm.IImportPCMMApp;
+import gov.sandia.cf.application.pirt.IImportPIRTApp;
+import gov.sandia.cf.application.qoiplanning.IImportQoIPlanningApp;
+import gov.sandia.cf.application.requirement.IImportSysRequirementApp;
+import gov.sandia.cf.application.uncertainty.IImportUncertaintyApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.CFFeature;
 import gov.sandia.cf.model.IImportable;
@@ -82,8 +82,9 @@ public class ImportConfigurationViewController {
 			} else {
 
 				// import approved changes in the database
-				view.getViewManager().getAppManager().getService(IImportApplication.class)
-						.importChanges(view.getViewManager().getCache().getModel(), toChange);
+				view.getViewManager().getAppManager().getService(IImportApplication.class).importChanges(
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						toChange);
 
 				// reload configuration
 				view.getViewManager().getCredibilityEditor().reloadConfiguration();
@@ -130,7 +131,8 @@ public class ImportConfigurationViewController {
 			// add configuration file import history
 			if (changed)
 				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), CFFeature.QOI_PLANNER, schemaPath);
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.QOI_PLANNER, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
@@ -167,8 +169,9 @@ public class ImportConfigurationViewController {
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class)
-						.addConfigurationFile(view.getViewManager().getCache().getModel(), CFFeature.PIRT, schemaPath);
+				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.PIRT, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
@@ -205,8 +208,9 @@ public class ImportConfigurationViewController {
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class)
-						.addConfigurationFile(view.getViewManager().getCache().getModel(), CFFeature.PCMM, schemaPath);
+				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.PCMM, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
@@ -236,7 +240,7 @@ public class ImportConfigurationViewController {
 			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
 					.getService(IImportUncertaintyApp.class)
 					.analyzeUpdateUncertaintyConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getCOMConfiguration(), schemaFile);
+							view.getViewManager().getUncertaintyConfiguration(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.UNCERTAINTY);
@@ -244,7 +248,8 @@ public class ImportConfigurationViewController {
 			// add configuration file import history
 			if (changed)
 				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), CFFeature.UNCERTAINTY, schemaPath);
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.UNCERTAINTY, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
@@ -282,7 +287,8 @@ public class ImportConfigurationViewController {
 			// add configuration file import history
 			if (changed)
 				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), CFFeature.SYSTEM_REQUIREMENTS, schemaPath);
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.SYSTEM_REQUIREMENTS, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
@@ -320,7 +326,8 @@ public class ImportConfigurationViewController {
 			// add configuration file import history
 			if (changed)
 				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), CFFeature.DECISION, schemaPath);
+						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+						CFFeature.DECISION, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);

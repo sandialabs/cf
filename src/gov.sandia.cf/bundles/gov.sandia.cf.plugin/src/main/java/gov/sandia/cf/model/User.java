@@ -122,4 +122,9 @@ public class User implements Serializable, IEntity<User, Integer> {
 		return user;
 	}
 
+	@Override
+	public String toString() {
+		return "User [userID=" + userID + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 }

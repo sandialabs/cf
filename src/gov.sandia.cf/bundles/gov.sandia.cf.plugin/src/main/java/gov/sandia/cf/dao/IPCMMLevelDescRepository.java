@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMLevelDescriptor;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMLevelDescRepository extends ICRUDRepository<PCMMLevelDescriptor, Integer> {
 
 }

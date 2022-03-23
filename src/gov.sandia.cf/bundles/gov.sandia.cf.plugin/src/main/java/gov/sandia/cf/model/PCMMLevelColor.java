@@ -145,6 +145,19 @@ public class PCMMLevelColor implements Serializable, IEntity<PCMMLevelColor, Int
 	public void setFixedColor(String fixedColor) {
 		this.fixedColor = fixedColor;
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PCMMLevelColor newImportable) {
+
+		if (newImportable == null) {
+			return false;
+		}
+
+		return StringTools.equals(getName(), newImportable.getName());
+	}
 
 	@Override
 	public boolean sameAs(PCMMLevelColor newImportable) {

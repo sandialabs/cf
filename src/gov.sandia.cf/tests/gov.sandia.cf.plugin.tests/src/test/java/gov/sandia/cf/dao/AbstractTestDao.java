@@ -8,9 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -29,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
+import gov.sandia.cf.tools.FileTools;
 import junit.runner.Version;
 
 /**
@@ -63,7 +60,7 @@ public abstract class AbstractTestDao {
 	/**
 	 * the dao manager
 	 */
-	private static DaoManager daoManager = new DaoManager(ENTITY_PERSIST_UNIT_NAME_TEST);
+	private static IDaoManager daoManager = new DaoManager(ENTITY_PERSIST_UNIT_NAME_TEST);
 
 	/**
 	 * Create migration table script
@@ -77,7 +74,7 @@ public abstract class AbstractTestDao {
 	/**
 	 * @return the dao manager
 	 */
-	public DaoManager getDaoManager() {
+	public IDaoManager getDaoManager() {
 		return daoManager;
 	}
 
@@ -132,9 +129,7 @@ public abstract class AbstractTestDao {
 		if (daoManager.getDatabaseDirectoryPath() != null && new File(daoManager.getDatabaseDirectoryPath()).exists()) {
 			try {
 				File createdFolder = new File(daoManager.getDatabaseDirectoryPath());
-				HSQLDBDaoManager.dropDatabaseFiles(daoManager.getDatabaseDirectoryPath());
-				Files.walk(createdFolder.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile)
-						.forEach(File::delete);
+				FileTools.deleteDirectoryRecursively(createdFolder);
 				assertFalse("Directory still exists", createdFolder.exists()); //$NON-NLS-1$
 			} catch (IOException e) {
 				fail(e.getMessage());
@@ -159,12 +154,8 @@ public abstract class AbstractTestDao {
 	@AfterAll
 	public static void clean() {
 		daoManager.stop();
-		try {
-			HSQLDBDaoManager.dropDatabaseFiles(TEMP_FOLDER.getRoot().toString());
-		} catch (IOException e) {
-			fail("Exception during temporary folders deletion" + e.getMessage()); //$NON-NLS-1$
-		}
 		TEMP_FOLDER.delete();
+		assertFalse(TEMP_FOLDER.getRoot().exists());
 		logger.info("Test ending"); //$NON-NLS-1$
 	}
 

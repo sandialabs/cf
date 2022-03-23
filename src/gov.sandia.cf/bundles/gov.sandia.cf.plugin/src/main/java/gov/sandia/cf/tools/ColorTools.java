@@ -5,12 +5,12 @@ package gov.sandia.cf.tools;
 
 import java.text.MessageFormat;
 
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
 
 /**
  * 
@@ -50,13 +50,13 @@ public class ColorTools {
 	}
 
 	/**
-	 * @param device   the eclipse device
+	 * @param rscMgr   the resource manager
 	 * @param colorStr the color as hexa string (ie. 44FE87)
 	 * @return a swt Color with @param colorStr as hexa string
 	 */
-	public static Color hexToSwtColor(Device device, String colorStr) {
-		return new Color(device, Integer.valueOf(colorStr.substring(0, 2), 16),
-				Integer.valueOf(colorStr.substring(2, 4), 16), Integer.valueOf(colorStr.substring(4, 6), 16));
+	public static Color hexToSwtColor(ResourceManager rscMgr, String colorStr) {
+		return rscMgr.createColor(new RGB(Integer.valueOf(colorStr.substring(0, 2), 16),
+				Integer.valueOf(colorStr.substring(2, 4), 16), Integer.valueOf(colorStr.substring(4, 6), 16)));
 	}
 
 	/**
@@ -68,22 +68,22 @@ public class ColorTools {
 	}
 
 	/**
-	 * @param rgb the rgb color in a string
+	 * @param rgbString the rgb color in a string
 	 * @return RGB class from String @param rgb. If @param rgb is null, empty or
 	 *         does not contains valid rgb description, return null
 	 * 
 	 *         Example: valid: 0,255,0 invalid: 0255,55
 	 */
-	public static RGB stringRGBToColor(String rgb) {
+	public static RGB stringRGBToColor(String rgbString) {
 
-		RGB color = null;
+		RGB newRgb = null;
 
-		if (rgb != null) {
+		if (rgbString != null) {
 			// trim to delete white spaces
-			rgb = rgb.trim();
+			rgbString = rgbString.trim();
 
 			// split rgb to retrieve int colors
-			String[] splittedRGB = rgb.split(YmlReaderPIRTSchema.CONF_PIRT_RGB_SEPARATOR);
+			String[] splittedRGB = rgbString.split(YmlReaderPIRTSchema.CONF_PIRT_RGB_SEPARATOR);
 
 			// splitted RGB must have 3 values
 			if (splittedRGB != null && splittedRGB.length == 3 && splittedRGB[0] != null && splittedRGB[1] != null
@@ -93,32 +93,34 @@ public class ColorTools {
 				int b = Integer.parseInt(splittedRGB[2].trim());
 
 				// create new color
-				color = new RGB(r, g, b);
+				newRgb = new RGB(r, g, b);
 			}
 		}
 
-		return color;
+		return newRgb;
 	}
 
 	/**
-	 * @param color the color
-	 * @param perc  the percentage of gray
+	 * @param rscMgr the resource manager
+	 * @param color  the color
+	 * @param perc   the percentage of gray
 	 * @return a grayed out color depending of the perc in parameter
 	 */
-	public static Color grayedColor(Color color, int perc) {
-		if (color != null) {
-			return new Color(Display.getCurrent(), grayed(color.getRGB(), perc));
+	public static Color grayedColor(ResourceManager rscMgr, Color color, int perc) {
+		if (color != null && rscMgr != null) {
+			return rscMgr.createColor(grayed(color.getRGB(), perc));
 		}
 		return null;
 	}
 
 	/**
-	 * @param color the color
+	 * @param rscMgr the resource manager
+	 * @param color  the color
 	 * @return a grayed out color with the default percentage of gray
 	 */
-	public static Color grayedColor(Color color) {
-		if (color != null) {
-			return new Color(Display.getCurrent(), grayedRgb(color.getRGB()));
+	public static Color grayedColor(ResourceManager rscMgr, Color color) {
+		if (color != null && rscMgr != null) {
+			return rscMgr.createColor(grayedRgb(color.getRGB()));
 		}
 		return null;
 	}
@@ -162,42 +164,54 @@ public class ColorTools {
 	}
 
 	/**
-	 * @param color the color
+	 * @param rscMgr the resource manager
+	 * @param color  the color
 	 * @return a grayed out color depending of the perc in parameter
 	 */
-	public static Color minusColor(Color color) {
-		return minusColor(color, DEFAULT_STEP);
+	public static Color minusColor(ResourceManager rscMgr, Color color) {
+		return minusColor(rscMgr, color, DEFAULT_STEP);
 	}
 
 	/**
-	 * @param color the color
-	 * @param step  the step of gray
+	 * @param rscMgr the resource manager
+	 * @param color  the color
+	 * @param step   the step of gray
 	 * @return a grayed out color depending of the step in parameter
 	 */
-	public static Color minusColor(Color color, int step) {
-		if (color != null) {
+	public static Color minusColor(ResourceManager rscMgr, Color color, int step) {
+		if (color != null && rscMgr != null) {
 			int red = color.getRed() - step >= 0 ? color.getRed() - step : 0;
 			int green = color.getRed() - step >= 0 ? color.getGreen() - step : 0;
 			int blue = color.getRed() - step >= 0 ? color.getBlue() - step : 0;
-			return new Color(Display.getCurrent(), red, green, blue);
+			return rscMgr.createColor(new RGB(red, green, blue));
 		}
 		return null;
 	}
 
 	/**
-	 * @param device the device
-	 * @param rgb    the rgb
+	 * @param rscMgr    the resource manager
+	 * @param rgbString the rgb string
 	 * @return a swt color from the rgb string
 	 */
-	public static Color stringToColor(Device device, String rgb) {
-		return new Color(device, stringRGBToColor(rgb));
+	public static Color toColor(ResourceManager rscMgr, String rgbString) {
+		if (rscMgr == null || StringUtils.isBlank(rgbString)) {
+			return null;
+		}
+
+		RGB rgbColor = stringRGBToColor(rgbString);
+
+		if (rgbColor == null) {
+			return null;
+		}
+
+		return rscMgr.createColor(rgbColor);
 	}
 
 	/**
 	 * @param color the color to convert
 	 * @return the rgb string for the color
 	 */
-	public static String colorToStringRGB(Color color) {
+	public static String toStringRGB(Color color) {
 		if (color == null) {
 			return null;
 		}
@@ -209,7 +223,7 @@ public class ColorTools {
 	 * @param color the color to convert
 	 * @return the rgb string for the color
 	 */
-	public static String colorToStringRGB(RGB color) {
+	public static String toStringRGB(RGB color) {
 		if (color == null) {
 			return null;
 		}
@@ -221,7 +235,7 @@ public class ColorTools {
 	 * @param stringRGB the rgb as a string
 	 * @return the string rgb color as an awt color
 	 */
-	public static java.awt.Color stringRGBToAwtColor(String stringRGB) {
+	public static java.awt.Color toAwtColor(String stringRGB) {
 		return rgbToAwtColor(stringRGBToColor(stringRGB));
 	}
 
@@ -241,7 +255,7 @@ public class ColorTools {
 	 * @param swtColor the swt color
 	 * @return the rgb color as an awt color
 	 */
-	public static java.awt.Color swtColorToAwtColor(Color swtColor) {
+	public static java.awt.Color swtToAwtColor(Color swtColor) {
 		java.awt.Color color = null;
 		if (swtColor != null) {
 			return rgbToAwtColor(swtColor.getRGB());

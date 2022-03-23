@@ -55,6 +55,14 @@ public class DecisionConstraint extends GenericParameterConstraint<DecisionParam
 	 * {@inheritDoc}
 	 */
 	@Override
+	public boolean sameKey(DecisionConstraint newImportable) {
+		return newImportable != null && StringTools.equals(getRule(), newImportable.getRule());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public boolean sameAs(DecisionConstraint importable) {
 
 		if (importable == null) {

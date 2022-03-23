@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.qoiplanning.QoIPlanningSpecification;
+import gov.sandia.cf.application.qoiplanning.IQoIPlanningApplication;
 import gov.sandia.cf.dao.IQoIPlanningConstraintRepository;
 import gov.sandia.cf.dao.IQoIPlanningParamRepository;
 import gov.sandia.cf.dao.IQoIPlanningSelectValueRepository;
@@ -34,6 +34,7 @@ import gov.sandia.cf.model.QoIPlanningSelectValue;
 import gov.sandia.cf.model.QoIPlanningValue;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.QoIPlanningSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;

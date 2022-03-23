@@ -40,7 +40,7 @@ code_quality:
 # Override Gitlab job (spotbugs-sast)
 spotbugs-sast:
   stage: test
-  image: maven:3.5.4-jdk-8
+  image: maven:3.8.4-jdk-11
   extends: []
   needs: []
   before_script:
@@ -67,26 +67,39 @@ spotbugs-sast:
 # (keep artifacts 3 days)
 build and test:
   stage: build
-  image: maven:3.5.4-jdk-8
+  image: maven:3.8.4-jdk-11
   before_script:
     - echo "==================== [build] Installing GUI test dependencies ============"
     - apt-get update -y
-    - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz
+    - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz libswt-gtk-4-java
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - echo "Creating artifacts folder"
-    - mkdir target
-    - mkdir target/build
-    - mkdir target/coverage
+    - mkdir -p target/build/eclipse
+    - mkdir -p target/build/webapp
+    - mkdir -p target/coverage
   script:
+    # Test and Build Plugin
     - echo "==================== [build] Building and testing CF plugin =============="
     - cd $PROJECT_ROOT_POM
     - mvn $MAVEN_CLI_OPTS clean install
+    # Package Plugin
     - echo "==================== [build] Copying build into the artifacts folder ====="
-    - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/
+    - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/eclipse/
+    # Copy test reports
     - echo "==================== [build] Copying test coverage report into the artifacts folder"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
     - cp tests/gov.sandia.cf.plugin.tests/target/build-test.log ../../target/build-test.log
+    # Test and Build webapp
+    - echo "==================== [build] Building CF webapp =========================="
+    - cd web/gov.sandia.cf.webapp/
+    - mvn clean package spring-boot:repackage -Dpackaging=jar
+    # Package webapp
+    - echo "==================== [build] Packaging SpringBoot .jar ==================="
+    - find target/ -name \*.jar -exec cp {} ../../../../target/build/webapp/ \;
+    - mkdir -p ../../../../target/build/webapp/config/
+    - cp src/main/resources/application-prod.properties ../../../../target/build/webapp/config/application.properties
+    - cd ../../
   artifacts:
     expire_in: 3 days
     paths:
@@ -103,27 +116,34 @@ build and test:
 # (keep artifacts for ever)
 build and test tag:
   stage: build
-  image: maven:3.5.4-jdk-8
+  image: maven:3.8.4-jdk-11
   before_script:
     - echo "==================== [build] Installing GUI test dependencies ============"
     - apt-get update -y
-    - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz
+    - apt-get install -y libgl1-mesa-dev libglu1-mesa xvfb graphviz libswt-gtk-4-java
     - export DISPLAY=:99.0
     - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
     - echo "Creating artifacts folder"
-    - mkdir target
-    - mkdir target/build
-    - mkdir target/coverage
-    - mkdir target/javadoc
+    - mkdir -p target/build
+    - mkdir -p target/coverage
+    - mkdir -p target/javadoc
   script: 
+    # Copy build
+    - echo "==================== [build] Copying build into the artifacts folder ====="
+    - cp -R build/* target/build/
+    # Test plugin
     - echo "==================== [build] Building and testing CF plugin =============="
     - cd $PROJECT_ROOT_POM
     - mvn $MAVEN_CLI_OPTS clean install
-    - echo "==================== [build] Copying build into the artifacts folder ====="
-    - cp -R releng/gov.sandia.cf.update/target/site/. ../../target/build/
-    - echo "==================== [build] Copying test coverage report into the artifacts folder"
+    # Copy test reports
+    - echo "==================== [build] Copying test coverage report ================"
     - cp -R tests/gov.sandia.cf.plugin.tests/target/coverage-site/. ../../target/coverage/
     - cp tests/gov.sandia.cf.plugin.tests/target/build-test.log ../../target/build-test.log
+    # Test webapp
+    - echo "==================== [build] Building and testing CF webapp =============="
+    - cd web/gov.sandia.cf.webapp/
+    - mvn clean package spring-boot:repackage -Dpackaging=jar
+    - cd ../../
     # Generate Javadoc
     - echo "==================== [build] Generating CF Javadoc ======================="
     - cd bundles/gov.sandia.cf.plugin/
@@ -153,27 +173,36 @@ package:
   variables:
     PACKAGENAME: "gov.sandia.cf"
     P2_REPO_FILE_PREFIX: gov.sandia.cf.p2_repo
+    WEBAPP_FILE_PREFIX: gov.sandia.cf.webapp
     JAVADOC_FILE_PREFIX: gov.sandia.cf.javadoc
     LATEST_VERSION: "latest"
   before_script:
     - echo "==================== [package] Install dependencies ======================"
     - apk update && apk add wget curl zip libxml2-utils jq git
-  script:
     - mkdir target/package
-    - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' target/build/site.xml)
+  script:
+    - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' target/build/eclipse/site.xml)
     - if [ -z "$CF_VERSION" ]; then echo "No version found. Impossible to continue package import job." && exit 1; else echo "CF Version $CF_VERSION"; fi;
     # Import p2 repository into Gitlab package registry
-    - echo "==================== [package] Zipping CF build $CF_VERSION to prepare package import"
-    - cd target/build/
-    - zip -q -r ../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip *
+    - echo "==================== [package] Zipping CF plugin $CF_VERSION to prepare package import"
+    - cd target/build/eclipse/
+    - zip -q -r ../../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip *
     - echo "==================== [package] Importing CF build target/package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
-    - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default
+    - cd ../../..
+    # Import webapp into Gitlab package registry
+    - echo "==================== [package] Zipping CF webapp $CF_VERSION to prepare package import"
+    - cd target/build/webapp/
+    - zip -q -r ../../package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip *
+    - echo "==================== [package] Importing CF build target/package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default
+    - cd ../../..
     # Import javadoc (if it exists) into Gitlab package registry
     - if [ -d "../javadoc" ]; then echo "Zipping CF javadoc $CF_VERSION to prepare package import"; else echo "No javadoc found" && exit 0; fi
-    - cd ../javadoc/
+    - cd target/javadoc/
     - zip -q -r ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip *
     - echo "==================== [package] Importing CF javadoc target/package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
-    - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default
   rules:
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
@@ -204,6 +233,7 @@ release snapshot:
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
   script:
+    # Clone and checkout $CI_COMMIT_BRANCH
     - echo "==================== [release] Cloning CF git repository ================="
     - git clone git@gitlab.com:CredibilityFramework/cf.git cf
     - cd cf

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Credibility Framework Help
 Bundle-SymbolicName: gov.sandia.cf.plugin.help;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.0.1
 Bundle-ClassPath: .,
  bin/
 Bundle-Vendor: SANDIA NATIONAL LABORATORIES
@@ -11,4 +11,4 @@ Require-Bundle: org.eclipse.help.ui,
  org.eclipse.equinox.http.jetty
 Automatic-Module-Name: gov.sandia.cf;singleton:=true
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11

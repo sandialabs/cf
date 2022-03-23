@@ -28,22 +28,32 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
-import gov.sandia.cf.application.configuration.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.imports.IImportApplication;
+import gov.sandia.cf.application.pirt.IImportPIRTApp;
+import gov.sandia.cf.application.pirt.YmlReaderPIRTSchema;
+import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
 import gov.sandia.cf.dao.IPCMMPlanningParamRepository;
 import gov.sandia.cf.dao.IUncertaintyParamRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.FormFieldType;
+import gov.sandia.cf.model.GenericValue;
 import gov.sandia.cf.model.IImportable;
 import gov.sandia.cf.model.ImportActionType;
 import gov.sandia.cf.model.Model;
+import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMPlanningParam;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
 import gov.sandia.cf.model.PIRTAdequacyColumnGuideline;
 import gov.sandia.cf.model.PIRTDescriptionHeader;
 import gov.sandia.cf.model.PIRTLevelDifferenceColor;
 import gov.sandia.cf.model.PIRTLevelImportance;
+import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.UncertaintyParam;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.tests.TestEntityFactory;
+import gov.sandia.cf.tests.TestGenericParam;
+import gov.sandia.cf.tests.TestGenericParamSelectValue;
 import gov.sandia.cf.tools.WorkspaceTools;
 
 /**
@@ -104,15 +114,14 @@ class ImportApplicationTest extends AbstractTestApplication {
 	}
 
 	@Test
-	void test_getListOfImportableFromAnalysis_working() throws URISyntaxException, IOException, CredibilityException {
+	void test_getListOfImportableFromAnalysis_TO_ADD_working()
+			throws URISyntaxException, IOException, CredibilityException {
 
 		// create model
 		Model model = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(model);
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
-		assertNotNull(confFile);
 
 		// analyze
 		Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getAppManager().getService(IImportPIRTApp.class)
@@ -122,37 +131,289 @@ class ImportApplicationTest extends AbstractTestApplication {
 		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = getAppManager()
 				.getService(IImportApplication.class).getListOfImportableFromAnalysis(analysis);
 
-		// test
-		assertNotNull(toChange);
-
 		// test PIRTAdequacyColumn
 		assertNotNull(toChange.get(PIRTAdequacyColumn.class));
 		assertEquals(5, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_ADD).size());
 		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_UPDATE).size());
 		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.NO_CHANGES).size());
 
 		// test PIRTDescriptionHeader
 		assertNotNull(toChange.get(PIRTDescriptionHeader.class));
 		assertEquals(5, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_ADD).size());
 		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_UPDATE).size());
 		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.NO_CHANGES).size());
 
 		// test PIRTLevelDifferenceColor
 		assertNotNull(toChange.get(PIRTLevelDifferenceColor.class));
 		assertEquals(3, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_ADD).size());
 		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_UPDATE).size());
 		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.NO_CHANGES).size());
 
 		// test PIRTLevelImportance
 		assertNotNull(toChange.get(PIRTLevelImportance.class));
 		assertEquals(5, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_ADD).size());
 		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_UPDATE).size());
 		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.NO_CHANGES).size());
 
 		// test PIRTAdequacyColumnGuideline
 		assertNotNull(toChange.get(PIRTAdequacyColumnGuideline.class));
 		assertEquals(5, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_ADD).size());
 		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.NO_CHANGES).size());
+
+	}
+
+	@Test
+	void test_getListOfImportableFromAnalysis_TO_DELETE_working()
+			throws URISyntaxException, IOException, CredibilityException {
+
+		// create model
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
+
+		// get configuration file
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-empty.yml")); //$NON-NLS-1$
+		YmlReaderPIRTSchema reader = new YmlReaderPIRTSchema();
+		PIRTSpecification specification = reader
+				.load(new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml"))); //$NON-NLS-1$
+
+		// analyze
+		Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getAppManager().getService(IImportPIRTApp.class)
+				.analyzeUpdatePIRTConfiguration(model, specification, confFile);
+
+		// to change map
+		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = getAppManager()
+				.getService(IImportApplication.class).getListOfImportableFromAnalysis(analysis);
+
+		// test PIRTAdequacyColumn
+		assertNotNull(toChange.get(PIRTAdequacyColumn.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTDescriptionHeader
+		assertNotNull(toChange.get(PIRTDescriptionHeader.class));
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(5, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelDifferenceColor
+		assertNotNull(toChange.get(PIRTLevelDifferenceColor.class));
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(3, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelImportance
+		assertNotNull(toChange.get(PIRTLevelImportance.class));
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(5, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTAdequacyColumnGuideline
+		assertNotNull(toChange.get(PIRTAdequacyColumnGuideline.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.NO_CHANGES).size());
+
+	}
+
+	@Test
+	void test_getListOfImportableFromAnalysis_TO_UPDATE_working()
+			throws URISyntaxException, IOException, CredibilityException {
+
+		// create model
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
+
+		// get configuration file
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
+		YmlReaderPIRTSchema reader = new YmlReaderPIRTSchema();
+		PIRTSpecification specification = reader
+				.load(new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml"))); //$NON-NLS-1$
+
+		// update
+		specification.getColumns().forEach(c -> c.setType("New Type")); //$NON-NLS-1$
+		specification.getHeaders().forEach(c -> c.setIdLabel("New Id label")); //$NON-NLS-1$
+		specification.getColors().forEach(c -> c.setColor("0,0,0")); //$NON-NLS-1$
+		specification.getLevels().values().forEach(c -> c.setLabel("New label")); //$NON-NLS-1$
+		specification.getPirtAdequacyGuidelines().forEach(c -> c.setDescription("New explanation")); //$NON-NLS-1$
+
+		// analyze
+		Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getAppManager().getService(IImportPIRTApp.class)
+				.analyzeUpdatePIRTConfiguration(model, specification, confFile);
+
+		// to change map
+		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = getAppManager()
+				.getService(IImportApplication.class).getListOfImportableFromAnalysis(analysis);
+
+		// test PIRTAdequacyColumn
+		assertNotNull(toChange.get(PIRTAdequacyColumn.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTDescriptionHeader
+		assertNotNull(toChange.get(PIRTDescriptionHeader.class));
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(5, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelDifferenceColor
+		assertNotNull(toChange.get(PIRTLevelDifferenceColor.class));
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(3, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelImportance
+		assertNotNull(toChange.get(PIRTLevelImportance.class));
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(5, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTAdequacyColumnGuideline
+		assertNotNull(toChange.get(PIRTAdequacyColumnGuideline.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.NO_CHANGES).size());
+
+	}
+
+	@Test
+	void test_getListOfImportableFromAnalysis_NO_CHANGES_working()
+			throws URISyntaxException, IOException, CredibilityException {
+
+		// create model
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
+
+		// get configuration file
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
+		YmlReaderPIRTSchema reader = new YmlReaderPIRTSchema();
+		PIRTSpecification specification = reader
+				.load(new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml"))); //$NON-NLS-1$
+
+		// analyze
+		Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getAppManager().getService(IImportPIRTApp.class)
+				.analyzeUpdatePIRTConfiguration(model, specification, confFile);
+
+		// to change map
+		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = getAppManager()
+				.getService(IImportApplication.class).getListOfImportableFromAnalysis(analysis);
+
+		// test PIRTAdequacyColumn
+		assertNotNull(toChange.get(PIRTAdequacyColumn.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTDescriptionHeader
+		assertNotNull(toChange.get(PIRTDescriptionHeader.class));
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(5, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelDifferenceColor
+		assertNotNull(toChange.get(PIRTLevelDifferenceColor.class));
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(3, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelImportance
+		assertNotNull(toChange.get(PIRTLevelImportance.class));
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(5, toChange.get(PIRTLevelImportance.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTAdequacyColumnGuideline
+		assertNotNull(toChange.get(PIRTAdequacyColumnGuideline.class));
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(5, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.NO_CHANGES).size());
+
+	}
+
+	@Test
+	void test_getListOfImportableFromAnalysis_TO_ADD_DELETE_UPDATE_working()
+			throws URISyntaxException, IOException, CredibilityException {
+
+		// create model
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
+
+		// get configuration file
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml")); //$NON-NLS-1$
+		YmlReaderPIRTSchema reader = new YmlReaderPIRTSchema();
+		PIRTSpecification specification = reader
+				.load(new File(WorkspaceTools.getStaticFilePath("configuration/PIRT_schema-V0.3.yml"))); //$NON-NLS-1$
+
+		// update specification to have something TO ADD, To Update and TO DELETE
+		specification.getColumns().get(0).setName("New Key"); //$NON-NLS-1$
+		specification.getColumns().forEach(c -> c.setType("New Type")); //$NON-NLS-1$
+		specification.getHeaders().get(0).setName("New Key"); //$NON-NLS-1$
+		specification.getHeaders().forEach(c -> c.setIdLabel("New Id label")); //$NON-NLS-1$
+		specification.getColors().get(0).setDescription("New Key"); //$NON-NLS-1$
+		specification.getColors().forEach(c -> c.setColor("0,0,0")); //$NON-NLS-1$
+		specification.getLevels().values().forEach(c -> c.setLabel("New label")); //$NON-NLS-1$
+		specification.getPirtAdequacyGuidelines().get(0).setName("New Key"); //$NON-NLS-1$
+		specification.getPirtAdequacyGuidelines().forEach(c -> c.setDescription("New explanation")); //$NON-NLS-1$
+
+		// analyze
+		Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getAppManager().getService(IImportPIRTApp.class)
+				.analyzeUpdatePIRTConfiguration(model, specification, confFile);
+
+		// to change map
+		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = getAppManager()
+				.getService(IImportApplication.class).getListOfImportableFromAnalysis(analysis);
+
+		// test PIRTAdequacyColumn
+		assertNotNull(toChange.get(PIRTAdequacyColumn.class));
+		assertEquals(1, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(1, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(4, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTAdequacyColumn.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTDescriptionHeader
+		assertNotNull(toChange.get(PIRTDescriptionHeader.class));
+		assertEquals(1, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(1, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(4, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTDescriptionHeader.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelDifferenceColor
+		assertNotNull(toChange.get(PIRTLevelDifferenceColor.class));
+		assertEquals(1, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(1, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(2, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelDifferenceColor.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTLevelImportance
+		assertNotNull(toChange.get(PIRTLevelImportance.class));
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(5, toChange.get(PIRTLevelImportance.class).get(ImportActionType.TO_UPDATE).size());
+		assertEquals(0, toChange.get(PIRTLevelImportance.class).get(ImportActionType.NO_CHANGES).size());
+
+		// test PIRTAdequacyColumnGuideline
+		assertNotNull(toChange.get(PIRTAdequacyColumnGuideline.class));
+		assertEquals(1, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_ADD).size());
+		assertEquals(1, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_DELETE).size());
+		assertEquals(4, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.TO_UPDATE).size());
 		assertEquals(0, toChange.get(PIRTAdequacyColumnGuideline.class).get(ImportActionType.NO_CHANGES).size());
 
 	}
@@ -189,4 +450,149 @@ class ImportApplicationTest extends AbstractTestApplication {
 
 	}
 
+	////////////////////////////////// getDatabaseValueForGeneric
+
+	@Test
+	void test_getDatabaseValueForGeneric_Text() {
+
+		String stringValue = "Text value";//$NON-NLS-1$
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.TEXT.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue(stringValue);
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(stringValue, databaseValueForGeneric);
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_RichText() {
+
+		String stringValue = "Text value";//$NON-NLS-1$
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.RICH_TEXT.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue(stringValue);
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(stringValue, databaseValueForGeneric);
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_Date() {
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.DATE.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue("2022-01-01"); //$NON-NLS-1$
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals("2022-01-01", databaseValueForGeneric); //$NON-NLS-1$
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_Float() {
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.FLOAT.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue("1.0"); //$NON-NLS-1$
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals("1.0", databaseValueForGeneric); //$NON-NLS-1$
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_Link_Url() {
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.LINK.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue("http://myurltest.fr"); //$NON-NLS-1$
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(ParameterLinkGson.toGson(FormFieldType.LINK_URL, "http://myurltest.fr"), databaseValueForGeneric); //$NON-NLS-1$
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_Link_File() {
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.LINK.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue("../my/path/to/value.txt"); //$NON-NLS-1$
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(ParameterLinkGson.toGson(FormFieldType.LINK_FILE, "../my/path/to/value.txt"), //$NON-NLS-1$
+				databaseValueForGeneric);
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_Select() {
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.SELECT.getType());
+		TestGenericParamSelectValue selectValue = TestEntityFactory.getNewTestGenericParamSelectValue("my select value", //$NON-NLS-1$
+				newParameter);
+		selectValue.setId(1);
+		TestGenericParamSelectValue selectValue2 = TestEntityFactory
+				.getNewTestGenericParamSelectValue("my select value 2", newParameter); //$NON-NLS-1$
+		selectValue2.setId(2);
+		newParameter.setParameterValueList(Arrays.asList(selectValue, selectValue2));
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue("my select value"); //$NON-NLS-1$
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals("1", databaseValueForGeneric); //$NON-NLS-1$
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_CredibilityElement() {
+
+		PCMMElement newPCMMElement = TestEntityFactory.getNewPCMMElement(getDaoManager(), null);
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.CREDIBILITY_ELEMENT.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue(newPCMMElement.getAbbreviation());
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(newPCMMElement.getId().toString(), databaseValueForGeneric);
+	}
+
+	@Test
+	void test_getDatabaseValueForGeneric_SystemRequirement() {
+
+		SystemRequirement newSystemRequirement = TestEntityFactory.getNewSystemRequirement(getDaoManager(), null, null,
+				null);
+
+		TestGenericParam newParameter = TestEntityFactory.getNewTestGenericParameter();
+		newParameter.setType(FormFieldType.SYSTEM_REQUIREMENT.getType());
+		GenericValue<?, ?> newValue = TestEntityFactory.getNewAnonymousGenericValue();
+		newValue.setValue(newSystemRequirement.getStatement());
+
+		// Test
+		String databaseValueForGeneric = getAppManager().getService(IImportApplication.class)
+				.getDatabaseValueForGeneric(newParameter, newValue);
+		assertEquals(newSystemRequirement.getId().toString(), databaseValueForGeneric);
+
+	}
 }

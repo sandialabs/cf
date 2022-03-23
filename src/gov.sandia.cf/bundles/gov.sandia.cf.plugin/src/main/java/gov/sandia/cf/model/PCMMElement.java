@@ -191,6 +191,14 @@ public class PCMMElement
 		this.levelList = levelList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PCMMElement newImportable) {
+		return newImportable != null && StringTools.equals(getAbbreviation(), newImportable.getAbbreviation());
+	}
+
 	@Override
 	public boolean sameAs(PCMMElement newImportable) {
 

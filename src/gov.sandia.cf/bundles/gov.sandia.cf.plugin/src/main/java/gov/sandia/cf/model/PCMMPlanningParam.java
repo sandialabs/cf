@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
@@ -49,6 +51,23 @@ public class PCMMPlanningParam extends GenericParameter<PCMMPlanningParam>
 	 */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "parameter", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
 	private List<PCMMPlanningParamConstraint> constraintList;
+
+	/**
+	 * The parameter parent
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "PARENT_ID")
+	private PCMMPlanningParam parent;
+
+	@Override
+	public PCMMPlanningParam getParent() {
+		return parent;
+	}
+
+	@Override
+	public void setParent(PCMMPlanningParam parent) {
+		this.parent = parent;
+	}
 
 	/** {@inheritDoc} */
 	@Override
@@ -112,6 +131,14 @@ public class PCMMPlanningParam extends GenericParameter<PCMMPlanningParam>
 	@Override
 	public String toString() {
 		return super.toString();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean sameKey(PCMMPlanningParam newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
 	}
 
 	/** {@inheritDoc} */

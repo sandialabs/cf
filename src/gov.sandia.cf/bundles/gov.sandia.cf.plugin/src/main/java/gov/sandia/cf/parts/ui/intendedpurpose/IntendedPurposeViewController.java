@@ -5,14 +5,20 @@ package gov.sandia.cf.parts.ui.intendedpurpose;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IIntendedPurposeApp;
+import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.IntendedPurpose;
+import gov.sandia.cf.parts.ui.AViewController;
+import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
+import gov.sandia.cf.tools.StringTools;
+import gov.sandia.cf.web.WebEvent;
 
 /**
  * Intended Purpose view controller: Used to control the Intended Purpose view
@@ -20,7 +26,8 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class IntendedPurposeViewController {
+public class IntendedPurposeViewController extends AViewController<IntendedPurposeViewManager>
+		implements IIntendedPurposeViewController {
 
 	/**
 	 * the logger
@@ -37,9 +44,10 @@ public class IntendedPurposeViewController {
 	 */
 	private IntendedPurpose intendedPurpose;
 
-	IntendedPurposeViewController(IntendedPurposeView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	IntendedPurposeViewController(IntendedPurposeViewManager viewMgr) {
+		super(viewMgr);
+		Assert.isNotNull(viewMgr);
+		this.view = new IntendedPurposeView(viewMgr, this, SWT.NONE);
 	}
 
 	/**
@@ -73,7 +81,7 @@ public class IntendedPurposeViewController {
 		}
 
 		// update
-		intendedPurpose.setDescription(value);
+		intendedPurpose.setDescription(StringTools.removeNonPrintableChars(value));
 		updateIntendedPurpose();
 	}
 
@@ -100,7 +108,8 @@ public class IntendedPurposeViewController {
 			try {
 				// update
 				intendedPurpose = view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
-						.updateIntendedPurpose(intendedPurpose, view.getViewManager().getCache().getUser());
+						.updateIntendedPurpose(view.getViewManager().getCache().getModel(), null, intendedPurpose,
+								view.getViewManager().getCache().getUser());
 
 				// set save state
 				view.getViewManager().viewChanged();
@@ -111,6 +120,26 @@ public class IntendedPurposeViewController {
 						e.getMessage());
 			}
 		}
+	}
+
+	@Override
+	public ICredibilityView getView() {
+		return view;
+	}
+
+	@Override
+	public Control getViewControl() {
+		return view;
+	}
+
+	@Override
+	public void quit() {
+		// do nothing
+	}
+
+	@Override
+	public void handleWebEvent(WebEvent e) {
+		// do nothing
 	}
 
 }

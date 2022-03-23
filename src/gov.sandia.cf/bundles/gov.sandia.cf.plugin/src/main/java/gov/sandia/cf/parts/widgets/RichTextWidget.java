@@ -13,6 +13,7 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,12 +24,14 @@ import org.eclipse.swt.widgets.Label;
 
 import gov.sandia.cf.model.Notification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
+import gov.sandia.cf.parts.constants.RichTextEditorConstants;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.CursorTools;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.tools.RscTools;
+import gov.sandia.cf.tools.StringTools;
 
 /**
  * A collapsible richtext editor composite
@@ -40,10 +43,12 @@ public class RichTextWidget extends AHelperWidget {
 
 	boolean enabled;
 	private boolean expanded;
+	private boolean collapsible;
 	private String labelText;
 	private Label label;
 	private ButtonTheme button;
 	private RichTextEditor richtext;
+	private Composite richtextNonEditableComposite;
 	private Browser richtextNonEditable;
 
 	/**
@@ -78,27 +83,29 @@ public class RichTextWidget extends AHelperWidget {
 	 * @param expanded  set the richtext content by default expanded or collpased
 	 */
 	public RichTextWidget(ResourceManager rscMgr, Composite parent, int style, String labelText, boolean expanded) {
-		this(rscMgr, parent, style, labelText, expanded, true);
+		this(rscMgr, parent, style, labelText, expanded, true, true);
 	}
 
 	/**
 	 * Constructs a rich text widget.
-	 * 
-	 * @param rscMgr    the resource manager used to manage the resources (fonts,
-	 *                  colors, images, cursors...)
-	 * @param parent    the parent composite
-	 * @param style     the style
-	 * @param labelText the label text
-	 * @param expanded  set the richtext content by default expanded or collapsed
-	 * @param editable  is editable?
+	 *
+	 * @param rscMgr      the resource manager used to manage the resources (fonts,
+	 *                    colors, images, cursors...)
+	 * @param parent      the parent composite
+	 * @param style       the style
+	 * @param labelText   the label text
+	 * @param expanded    set the richtext content by default expanded or collapsed
+	 * @param editable    is editable?
+	 * @param collapsible is collapsible?
 	 */
 	public RichTextWidget(ResourceManager rscMgr, Composite parent, int style, String labelText, boolean expanded,
-			boolean editable) {
+			boolean editable, boolean collapsible) {
 		super(rscMgr, parent, style & SWT.BORDER, editable);
 
 		this.enabled = true;
 		this.expanded = expanded;
 		this.labelText = labelText;
+		this.collapsible = collapsible;
 
 		// create control
 		createControl();
@@ -125,7 +132,9 @@ public class RichTextWidget extends AHelperWidget {
 
 		label = FormFactory.createLabel(labelComposite, labelText);
 		((GridData) label.getLayoutData()).grabExcessHorizontalSpace = true;
-		CursorTools.setCursor(getRscMgr(), label, SWT.CURSOR_HAND);
+		if (collapsible) {
+			CursorTools.setCursor(getRscMgr(), label, SWT.CURSOR_HAND);
+		}
 
 		// create helper
 		super.createHelper(labelComposite);
@@ -146,11 +155,13 @@ public class RichTextWidget extends AHelperWidget {
 		layout();
 		getParent().layout();
 
-		// label listener
-		label.addListener(SWT.MouseDown, this::resizeWidget);
+		if (collapsible) {
+			// label listener
+			label.addListener(SWT.MouseDown, this::resizeWidget);
 
-		// button listener
-		button.addListener(SWT.Selection, this::resizeWidget);
+			// button listener
+			button.addListener(SWT.Selection, this::resizeWidget);
+		}
 	}
 
 	/**
@@ -184,6 +195,9 @@ public class RichTextWidget extends AHelperWidget {
 			button.setIcon(IconTheme.ICON_NAME_COLLAPSE, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_NO_COLOR),
 					false);
 		}
+
+		button.setEnabled(collapsible);
+		button.setVisible(collapsible);
 	}
 
 	/**
@@ -191,38 +205,47 @@ public class RichTextWidget extends AHelperWidget {
 	 */
 	private void renderNonEditableField() {
 
-		// configure richtext editor
-		RichTextEditorConfiguration editConfig = new RichTextEditorConfiguration();
-		editConfig.setToolbarCollapsible(true);
-		editConfig.setOption(RichTextEditorConfiguration.TOOLBAR_GROUPS, PartsResourceConstants.RICH_EDITOR_TOOLBAR);
+		// embed browser into a composite
+		richtextNonEditableComposite = new Composite(this, SWT.BORDER);
+		GridData dataComposite = new GridData(SWT.FILL, SWT.FILL, true, true);
+		dataComposite.minimumHeight = PartsResourceConstants.RICHTEXTEDITOR_MINHEIGHT;
+		dataComposite.heightHint = PartsResourceConstants.RICHTEXTEDITOR_MINHEIGHT;
+		dataComposite.horizontalSpan = 2;
+		richtextNonEditableComposite.setLayoutData(dataComposite);
+		richtextNonEditableComposite.setLayout(new GridLayout());
 
 		// create richText
-		richtextNonEditable = FormFactory.createNonEditableRichText(this, RscTools.empty());
+		richtextNonEditable = FormFactory.createNonEditableRichText(getRscMgr(), richtextNonEditableComposite,
+				RscTools.empty());
 		GridData dataComments = new GridData(SWT.FILL, SWT.FILL, true, true);
 		dataComments.minimumHeight = PartsResourceConstants.RICHTEXTEDITOR_MINHEIGHT;
 		dataComments.heightHint = PartsResourceConstants.RICHTEXTEDITOR_MINHEIGHT;
 		dataComments.horizontalSpan = 2;
 		richtextNonEditable.setLayoutData(dataComments);
+		CursorTools.setCursor(getRscMgr(), richtextNonEditable, SWT.CURSOR_IBEAM);
 
 		// set expanded/collapsed parameters
-		richtextNonEditable.setVisible(expanded);
+		richtextNonEditableComposite.setVisible(expanded);
 		final int labelHeight = ((GridData) label.getLayoutData()).heightHint + getHelperHeight() + 10;
-		final int richTextHeight = ((GridData) richtextNonEditable.getLayoutData()).heightHint + 10;
+		final int richTextHeight = ((GridData) richtextNonEditableComposite.getLayoutData()).heightHint + 10;
 
 		// set initial size
 		if (!expanded) {
-			richtextNonEditable.setVisible(false);
-			richtextNonEditable.setSize(SWT.DEFAULT, 0);
+			richtextNonEditableComposite.setVisible(false);
+			richtextNonEditableComposite.setSize(SWT.DEFAULT, 0);
 			((GridData) this.getLayoutData()).heightHint = labelHeight;
 			button.setIcon(IconTheme.ICON_NAME_EXPAND, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_NO_COLOR),
 					false);
 		} else {
-			richtextNonEditable.setVisible(true);
-			richtextNonEditable.setSize(SWT.DEFAULT, richTextHeight);
+			richtextNonEditableComposite.setVisible(true);
+			richtextNonEditableComposite.setSize(SWT.DEFAULT, richTextHeight);
 			((GridData) this.getLayoutData()).heightHint = labelHeight + richTextHeight;
 			button.setIcon(IconTheme.ICON_NAME_COLLAPSE, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_NO_COLOR),
 					false);
 		}
+
+		button.setEnabled(collapsible);
+		button.setVisible(collapsible);
 	}
 
 	@Override
@@ -246,7 +269,7 @@ public class RichTextWidget extends AHelperWidget {
 		if (isEditable()) {
 			resizeWidget(e, richtext);
 		} else {
-			resizeWidget(e, richtextNonEditable);
+			resizeWidget(e, richtextNonEditableComposite);
 		}
 
 		this.layout();
@@ -312,7 +335,8 @@ public class RichTextWidget extends AHelperWidget {
 		if (isEditable()) {
 			return richtext != null ? ((GridData) richtext.getLayoutData()).heightHint : SWT.DEFAULT;
 		} else {
-			return richtextNonEditable != null ? ((GridData) richtextNonEditable.getLayoutData()).heightHint
+			return richtextNonEditableComposite != null
+					? ((GridData) richtextNonEditableComposite.getLayoutData()).heightHint
 					: SWT.DEFAULT;
 		}
 	}
@@ -332,12 +356,14 @@ public class RichTextWidget extends AHelperWidget {
 	 * 
 	 * @param text the text to set
 	 */
-	public void setValue(String text) {
+	public void setValue(final String text) {
+
+		String value = StringTools.removeNonPrintableChars(text);
 
 		if (isEditable()) {
-			richtext.setText(text);
+			richtext.setText(value);
 		} else {
-			setNonEditableValue(text);
+			setNonEditableValue(value);
 		}
 
 		// set header font
@@ -417,10 +443,10 @@ public class RichTextWidget extends AHelperWidget {
 		if (previousValue != enabled) {
 			if (!enabled) {
 				richtext.getEditorConfiguration().setOption(RichTextEditorConfiguration.TOOLBAR_GROUPS,
-						PartsResourceConstants.RICH_EDITOR_EMPTY_TOOLBAR);
+						RichTextEditorConstants.EMPTY_TOOLBAR);
 			} else {
 				richtext.getEditorConfiguration().setOption(RichTextEditorConfiguration.TOOLBAR_GROUPS,
-						PartsResourceConstants.RICH_EDITOR_TOOLBAR);
+						RichTextEditorConstants.DEFAULT_TOOLBAR);
 			}
 		}
 	}
@@ -481,6 +507,16 @@ public class RichTextWidget extends AHelperWidget {
 	public void addKeyListener(KeyListener listener) {
 		if (richtext != null)
 			richtext.addKeyListener(listener);
+	}
+
+	/**
+	 * Adds the modify listener.
+	 *
+	 * @param listener the listener
+	 */
+	public void addModifyListener(ModifyListener listener) {
+		if (richtext != null)
+			richtext.addModifyListener(listener);
 	}
 
 	@Override

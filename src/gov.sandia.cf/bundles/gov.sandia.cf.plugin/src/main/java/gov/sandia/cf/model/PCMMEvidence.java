@@ -19,10 +19,11 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import gov.sandia.cf.application.configuration.ParameterLinkGson;
+import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.RscConst;
+import gov.sandia.cf.tools.RscTools;
 
 /**
  * The PCMM evidence
@@ -53,6 +54,7 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 		DATE_CREATION("dateCreation"), //$NON-NLS-1$
 		DATE_UPDATE("dateUpdate"), //$NON-NLS-1$
 		DATE_FILE("dateFile"), //$NON-NLS-1$
+		IMAGE_CAPTION("imageCaption"), //$NON-NLS-1$
 		SECTION("section"); //$NON-NLS-1$
 
 		private String field;
@@ -86,10 +88,20 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 	@Column(name = "SECTION")
 	private String section;
 
+	/** The image caption. */
+	@Column(name = "IMAGE_CAPTION")
+	private String imageCaption;
+
+	/**
+	 * The generated id
+	 */
+	@Column(name = "ID_GENERATED")
+	private String generatedId;
+
 	/**
 	 * The path field linked to PATH column
 	 */
-	@Column(name = "VALUE")
+	@Column(name = "VALUE", columnDefinition = "LONGVARCHAR")
 	@NotBlank(message = RscConst.EX_PCMMEVIDENCE_PATH_BLANK)
 	private String value;
 
@@ -164,6 +176,16 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 	}
 
 	@SuppressWarnings("javadoc")
+	public String getGeneratedId() {
+		return generatedId;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setGeneratedId(String generatedId) {
+		this.generatedId = generatedId;
+	}
+
+	@SuppressWarnings("javadoc")
 	public String getName() {
 		return name;
 	}
@@ -181,6 +203,16 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 	@SuppressWarnings("javadoc")
 	public void setSection(String section) {
 		this.section = section;
+	}
+
+	@SuppressWarnings("javadoc")
+	public String getImageCaption() {
+		return imageCaption;
+	}
+
+	@SuppressWarnings("javadoc")
+	public void setImageCaption(String imageCaption) {
+		this.imageCaption = imageCaption;
 	}
 
 	@SuppressWarnings("javadoc")
@@ -218,6 +250,18 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 	}
 
 	/**
+	 * @return the caption
+	 */
+	public String getCaption() {
+		String caption = null;
+		ParameterLinkGson linkGson = GsonTools.getFromGson(value, ParameterLinkGson.class);
+		if (linkGson != null) {
+			caption = linkGson.caption;
+		}
+		return caption;
+	}
+
+	/**
 	 * Set the file path. Default type is setted to FILE
 	 * 
 	 * @param filePath the evidence file path
@@ -226,6 +270,7 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 		ParameterLinkGson jsonObject = new ParameterLinkGson();
 		jsonObject.type = FormFieldType.LINK_FILE;
 		jsonObject.value = filePath;
+		jsonObject.caption = getCaption();
 
 		// Encode JSON
 		setValue(GsonTools.toGson(jsonObject));
@@ -240,6 +285,7 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 		ParameterLinkGson jsonObject = new ParameterLinkGson();
 		jsonObject.type = FormFieldType.LINK_URL;
 		jsonObject.value = url;
+		jsonObject.caption = getCaption();
 
 		// Encode JSON
 		setValue(GsonTools.toGson(jsonObject));
@@ -348,12 +394,24 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 		entity.setDateUpdate(getDateUpdate());
 		entity.setDateFile(getDateFile());
 		entity.setDescription(getDescription());
+		entity.setSection(getSection());
 		entity.setValue(getValue());
 		entity.setUserCreation(getUserCreation());
 		entity.setRoleCreation(getRoleCreation());
 		entity.setElement(getElement());
 		entity.setSubelement(getSubelement());
 		return entity;
+	}
+
+	@Override
+	public String toString() {
+		return "PCMMEvidence [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "generatedId=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ (generatedId != null ? generatedId : "") + RscTools.COMMA + "name=" + (name != null ? name : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ RscTools.COMMA + "section=" + (section != null ? section : "") + RscTools.COMMA + "value=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				+ (value != null ? value : "") + RscTools.COMMA + "description=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (description != null ? description : "") + RscTools.COMMA + "dateCreation=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (dateCreation != null ? dateCreation.toString() : "") + RscTools.COMMA + "dateFile=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (dateFile != null ? dateFile.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

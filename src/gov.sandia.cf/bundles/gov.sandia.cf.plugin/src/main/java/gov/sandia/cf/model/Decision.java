@@ -243,6 +243,11 @@ public class Decision implements Serializable, IGenericTableItem, IEntity<Decisi
 		this.decisionList = decisionList;
 	}
 
+	@Override
+	public String getItemTitle() {
+		return getTitle();
+	}
+
 	/**
 	 * Create a copy of current entity with id null and referenced entity or entity
 	 * list null
@@ -271,10 +276,9 @@ public class Decision implements Serializable, IGenericTableItem, IEntity<Decisi
 
 	@Override
 	public String toString() {
-		return "Decision [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "userCreation=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				+ (userCreation != null ? userCreation.toString() : "") + "]" //$NON-NLS-1$ //$NON-NLS-2$
-				+ (parent != null ? parent.toString() : "") + "]" //$NON-NLS-1$ //$NON-NLS-2$
-				+ (decisionList != null ? decisionList.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "Decision [" + "id=" + (id != null ? id.toString() : "") + RscTools.COMMA + "title=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ (title != null ? title : "") + RscTools.COMMA + "userCreation=" //$NON-NLS-1$ //$NON-NLS-2$
+				+ (userCreation != null ? userCreation.toString() : "") + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/** {@inheritDoc} */

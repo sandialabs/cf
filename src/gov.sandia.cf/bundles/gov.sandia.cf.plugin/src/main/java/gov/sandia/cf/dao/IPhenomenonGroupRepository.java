@@ -13,6 +13,7 @@ import gov.sandia.cf.model.PhenomenonGroup;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPhenomenonGroupRepository extends ICRUDRepository<PhenomenonGroup, Integer> {
 
 	/**

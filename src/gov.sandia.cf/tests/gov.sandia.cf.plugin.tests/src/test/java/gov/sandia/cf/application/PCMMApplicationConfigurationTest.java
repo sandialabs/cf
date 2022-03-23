@@ -20,8 +20,8 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pcmm.YmlReaderPCMMSchema;
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
+import gov.sandia.cf.application.pcmm.YmlReaderPCMMSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.IAssessable;
 import gov.sandia.cf.model.PCMMElement;
@@ -33,6 +33,7 @@ import gov.sandia.cf.model.PCMMPlanningParam;
 import gov.sandia.cf.model.PCMMPlanningQuestion;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.WorkspaceTools;
 

@@ -67,7 +67,6 @@
 		<class>gov.sandia.cf.model.User</class>
 		<class>gov.sandia.cf.model.Uncertainty</class>
 		<class>gov.sandia.cf.model.UncertaintyConstraint</class>
-		<class>gov.sandia.cf.model.UncertaintyGroup</class>
 		<class>gov.sandia.cf.model.UncertaintyParam</class>
 		<class>gov.sandia.cf.model.UncertaintyValue</class>
 		<class>gov.sandia.cf.model.UncertaintySelectValue</class>

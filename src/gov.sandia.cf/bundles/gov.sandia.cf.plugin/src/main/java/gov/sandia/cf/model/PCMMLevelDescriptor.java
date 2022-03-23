@@ -128,17 +128,28 @@ public class PCMMLevelDescriptor
 		this.level = level;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean sameAs(PCMMLevelDescriptor newImportable) {
+	public boolean sameKey(PCMMLevelDescriptor newImportable) {
+		return newImportable != null && StringTools.equals(getName(), newImportable.getName());
+	}
 
-		if (newImportable == null) {
+	@Override
+	public boolean sameAs(PCMMLevelDescriptor importable) {
+
+		if (importable == null) {
 			return false;
 		}
 
-		boolean sameName = StringTools.equals(getName(), newImportable.getName());
-		boolean sameValue = StringTools.equals(getValue(), newImportable.getValue());
+		boolean sameName = StringTools.equals(getName(), importable.getName());
+		boolean sameValue = StringTools.equals(getValue(), importable.getValue());
+		boolean sameLevel = (getLevel() == null && importable.getLevel() == null)
+				|| (getLevel() != null && importable.getLevel() != null
+						&& StringTools.equals(getLevel().getName(), importable.getLevel().getName()));
 
-		return sameName && sameValue;
+		return sameName && sameValue && sameLevel;
 	}
 
 	@Override

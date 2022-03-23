@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jface.resource.ResourceManager;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 import gov.sandia.cf.tools.SystemTools;
@@ -23,7 +22,7 @@ public class IconTheme {
 	/**
 	 * Default color All icon has to be available in this color
 	 */
-	public static final String ICON_COLOR_DEFAULT = "BLACK"; //$NON-NLS-1$
+	public static final String ICON_COLOR_DEFAULT = ConstantTheme.COLOR_NAME_BLACK;
 
 	/**
 	 * Default icons size
@@ -66,16 +65,22 @@ public class IconTheme {
 	public static final String ICON_NAME_COMMUNICATE = "COMMUNICATE"; //$NON-NLS-1$
 	/** CONFIG icon */
 	public static final String ICON_NAME_CONFIG = "CONFIG"; //$NON-NLS-1$
+	/** The Constant ICON_NAME_CONNECT. */
+	public static final String ICON_NAME_CONNECT = "CONNECT"; //$NON-NLS-1$
 	/** COPY icon */
 	public static final String ICON_NAME_COPY = "COPY"; //$NON-NLS-1$
 	/** DELETE icon */
 	public static final String ICON_NAME_DELETE = "DELETE"; //$NON-NLS-1$
+	/** The Constant ICON_NAME_DISCONNECT. */
+	public static final String ICON_NAME_DISCONNECT = "DISCONNECT"; //$NON-NLS-1$
 	/** EXAMINE icon */
 	public static final String ICON_NAME_EXAMINE = "EXAMINE"; //$NON-NLS-1$
 	/** EXPAND icon */
 	public static final String ICON_NAME_EXPAND = "EXPAND"; //$NON-NLS-1$
 	/** EXPORT icon */
 	public static final String ICON_NAME_EXPORT = "EXPORT"; //$NON-NLS-1$
+	/** The Constant ICON_NAME_FAIL. */
+	public static final String ICON_NAME_FAIL = "FAIL"; //$NON-NLS-1$
 	/** GEN_CF_REPORT icon */
 	public static final String ICON_NAME_GEN_CF_REPORT = "GEN_CF_REPORT"; //$NON-NLS-1$
 	/** HELP icon */
@@ -120,47 +125,28 @@ public class IconTheme {
 	/**
 	 * Icons By Color List
 	 */
-	public static final Map<String, Map<Color, String>> ICONS;
+	public static final Map<String, Map<String, String>> ICONS;
 	static {
 
 		// Initialize
-		Map<String, Map<Color, String>> iconsMap = new HashMap<>();
+		Map<String, Map<String, String>> iconsMap = new HashMap<>();
 
 		// NOT FOUND ICON
-		Map<Color, String> iconNotFound = new HashMap<>();
+		Map<String, String> iconNotFound = new HashMap<>();
 		iconNotFound.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/not_found_icon_128.png"); //$NON-NLS-1$
 		iconNotFound.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
 				"icons/global/not_found_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_NOT_FOUND, iconNotFound);
 
 		// ADD
-		Map<Color, String> iconAdd = new HashMap<>();
+		Map<String, String> iconAdd = new HashMap<>();
 		iconAdd.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/add_icon_128.png"); //$NON-NLS-1$
 		iconAdd.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), "icons/global/add_icon_128_green.png"); //$NON-NLS-1$
 		iconAdd.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/add_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_ADD, iconAdd);
 
-		// DUPLICATE
-		Map<Color, String> iconDuplicate = new HashMap<>();
-		iconDuplicate.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/duplicate_icon_128.png"); //$NON-NLS-1$
-		iconDuplicate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
-				"icons/global/duplicate_icon_128_white.png"); //$NON-NLS-1$
-		iconsMap.put(ICON_NAME_DUPLICATE, iconDuplicate);
-
-		// VIEW
-		Map<Color, String> iconView = new HashMap<>();
-		iconView.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/view_icon_128.png"); //$NON-NLS-1$
-		iconView.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/view_icon_128_white.png"); //$NON-NLS-1$
-		iconsMap.put(ICON_NAME_VIEW, iconView);
-
-		// EDIT
-		Map<Color, String> iconEdit = new HashMap<>();
-		iconEdit.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/edit_icon_128.png"); //$NON-NLS-1$
-		iconEdit.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/edit_icon_128_white.png"); //$NON-NLS-1$
-		iconsMap.put(ICON_NAME_EDIT, iconEdit);
-
 		// AGGREGATE
-		Map<Color, String> iconAggregate = new HashMap<>();
+		Map<String, String> iconAggregate = new HashMap<>();
 		iconAggregate.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/aggregate_icon_128.png"); //$NON-NLS-1$
 		iconAggregate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE),
 				"icons/global/aggregate_icon_128_blue.png"); //$NON-NLS-1$
@@ -169,73 +155,117 @@ public class IconTheme {
 		iconsMap.put(ICON_NAME_AGGREGATE, iconAggregate);
 
 		// ASSESS
-		Map<Color, String> iconAssess = new HashMap<>();
+		Map<String, String> iconAssess = new HashMap<>();
 		iconAssess.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/assess_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_ASSESS, iconAssess);
 
 		// BACK
-		Map<Color, String> iconBack = new HashMap<>();
+		Map<String, String> iconBack = new HashMap<>();
 		iconBack.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/back_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_BACK, iconBack);
 
 		// CHANGE
-		Map<Color, String> iconChange = new HashMap<>();
+		Map<String, String> iconChange = new HashMap<>();
 		iconChange.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/change_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_CHANGE, iconChange);
 
 		// CLOSE
-		Map<Color, String> iconClose = new HashMap<>();
+		Map<String, String> iconClose = new HashMap<>();
 		iconClose.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/close_icon_128.png"); //$NON-NLS-1$
+		iconClose.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED), "icons/global/close_icon_128_red.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_CLOSE, iconClose);
 
 		// COLLAPSE
-		Map<Color, String> iconCollapse = new HashMap<>();
+		Map<String, String> iconCollapse = new HashMap<>();
 		iconCollapse.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/collapse_icon_128_black.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_COLLAPSE, iconCollapse);
 
 		// COMMUNICATE
-		Map<Color, String> iconCommunicate = new HashMap<>();
+		Map<String, String> iconCommunicate = new HashMap<>();
 		iconCommunicate.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/communicate_icon_128.png"); //$NON-NLS-1$
 		iconCommunicate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				"icons/global/communicate_icon_128_primary.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_COMMUNICATE, iconCommunicate);
 
 		// CONFIG
-		Map<Color, String> iconConfig = new HashMap<>();
+		Map<String, String> iconConfig = new HashMap<>();
 		iconConfig.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/config_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_CONFIG, iconConfig);
 
+		// CONNECT
+		Map<String, String> iconConnect = new HashMap<>();
+		iconConnect.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/connect_icon_128.png"); //$NON-NLS-1$
+		iconConnect.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
+				"icons/global/connect_icon_128_white.png"); //$NON-NLS-1$
+		iconConnect.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK),
+				"icons/global/connect_icon_128_gray-dark.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_CONNECT, iconConnect);
+
 		// COPY
-		Map<Color, String> iconCopy = new HashMap<>();
+		Map<String, String> iconCopy = new HashMap<>();
 		iconCopy.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/copy_icon_128_black.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_COPY, iconCopy);
 
 		// DELETE
-		Map<Color, String> iconDelete = new HashMap<>();
+		Map<String, String> iconDelete = new HashMap<>();
 		iconDelete.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/delete_icon_128.png"); //$NON-NLS-1$
 		iconDelete.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
 				"icons/global/delete_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_DELETE, iconDelete);
 
+		// DISCONNECT
+		Map<String, String> iconDisconnect = new HashMap<>();
+		iconDisconnect.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/disconnect_icon_128.png"); //$NON-NLS-1$
+		iconDisconnect.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
+				"icons/global/disconnect_icon_128_white.png"); //$NON-NLS-1$
+		iconDisconnect.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK),
+				"icons/global/disconnect_icon_128_gray-dark.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_DISCONNECT, iconDisconnect);
+
+		// DUPLICATE
+		Map<String, String> iconDuplicate = new HashMap<>();
+		iconDuplicate.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/duplicate_icon_128.png"); //$NON-NLS-1$
+		iconDuplicate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
+				"icons/global/duplicate_icon_128_white.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_DUPLICATE, iconDuplicate);
+
+		// EDIT
+		Map<String, String> iconEdit = new HashMap<>();
+		iconEdit.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/edit_icon_128.png"); //$NON-NLS-1$
+		iconEdit.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), "icons/global/edit_icon_128_green.png"); //$NON-NLS-1$
+		iconEdit.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/edit_icon_128_white.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_EDIT, iconEdit);
+
+		// EMPTY
+		Map<String, String> iconEmpty = new HashMap<>();
+		iconEmpty.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/empty_icon.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_EMPTY, iconEmpty);
+
 		// EXAMINE
-		Map<Color, String> iconExamine = new HashMap<>();
+		Map<String, String> iconExamine = new HashMap<>();
 		iconExamine.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/examine_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_EXAMINE, iconExamine);
 
 		// EXPAND
-		Map<Color, String> iconExpand = new HashMap<>();
+		Map<String, String> iconExpand = new HashMap<>();
 		iconExpand.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/expand_icon_128_black.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_EXPAND, iconExpand);
 
 		// EXPORT
-		Map<Color, String> iconExport = new HashMap<>();
+		Map<String, String> iconExport = new HashMap<>();
 		iconExport.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/export_icon_128_black.png"); //$NON-NLS-1$
 		iconExport.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
 				"icons/global/export_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_EXPORT, iconExport);
 
+		// FAIL
+		Map<String, String> iconFail = new HashMap<>();
+		iconFail.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/fail_icon_128_red.png"); //$NON-NLS-1$
+		iconFail.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED), "icons/global/fail_icon_128_red.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_FAIL, iconFail);
+
 		// GEN_CF_REPORT
-		Map<Color, String> iconGenCfReport = new HashMap<>();
+		Map<String, String> iconGenCfReport = new HashMap<>();
 		iconGenCfReport.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/gen_cf_report_icon_128.png"); //$NON-NLS-1$
 		iconGenCfReport.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				"icons/global/gen_cf_report_icon_128_primary.png"); //$NON-NLS-1$
@@ -244,35 +274,42 @@ public class IconTheme {
 		iconsMap.put(ICON_NAME_GEN_CF_REPORT, iconGenCfReport);
 
 		// HELP
-		Map<Color, String> iconHelp = new HashMap<>();
+		Map<String, String> iconHelp = new HashMap<>();
 		iconHelp.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/help_icon_128.png"); //$NON-NLS-1$
 		iconHelp.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE), "icons/global/help_icon_128_blue.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_HELP, iconHelp);
 
 		// INFO
-		Map<Color, String> iconInfo = new HashMap<>();
+		Map<String, String> iconInfo = new HashMap<>();
 		iconInfo.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/info_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_INFO, iconInfo);
 
 		// IMMUTABLE
-		Map<Color, String> iconIock = new HashMap<>();
+		Map<String, String> iconIock = new HashMap<>();
 		iconIock.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/lock_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_IMMUTABLE, iconIock);
 
 		// IMPORT
-		Map<Color, String> iconImport = new HashMap<>();
+		Map<String, String> iconImport = new HashMap<>();
 		iconImport.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/import_icon_128_black.png"); //$NON-NLS-1$
 		iconImport.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
 				"icons/global/import_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_IMPORT, iconImport);
 
 		// MUTABLE
-		Map<Color, String> iconMencil = new HashMap<>();
+		Map<String, String> iconMencil = new HashMap<>();
 		iconMencil.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/pencil_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_MUTABLE, iconMencil);
 
+		// NOT SAVE
+		Map<String, String> iconNotSave = new HashMap<>();
+		iconNotSave.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/not_save_icon_128.png"); //$NON-NLS-1$
+		iconNotSave.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
+				"icons/global/not_save_icon_128_white.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_NOTSAVE, iconNotSave);
+
 		// OPEN
-		Map<Color, String> iconOpen = new HashMap<>();
+		Map<String, String> iconOpen = new HashMap<>();
 		iconOpen.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/open_icon_128_black.png"); //$NON-NLS-1$
 		iconOpen.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY), "icons/global/open_icon_128_gray.png"); //$NON-NLS-1$
 		iconOpen.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/open_icon_128.png"); //$NON-NLS-1$
@@ -281,84 +318,81 @@ public class IconTheme {
 		iconsMap.put(ICON_NAME_OPEN, iconOpen);
 
 		// PCMM
-		Map<Color, String> iconPcmm = new HashMap<>();
+		Map<String, String> iconPcmm = new HashMap<>();
 		iconPcmm.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/pcmm_icon_128.png"); //$NON-NLS-1$
 		iconPcmm.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				"icons/global/pcmm_icon_128_primary.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_PCMM, iconPcmm);
 
 		// PCMM_BIS
-		Map<Color, String> iconPcmmIco = new HashMap<>();
+		Map<String, String> iconPcmmIco = new HashMap<>();
 		iconPcmmIco.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/pcmm_icon_128_bis.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_PCMM_BIS, iconPcmmIco);
 
 		// PIRT
-		Map<Color, String> iconPirt = new HashMap<>();
+		Map<String, String> iconPirt = new HashMap<>();
 		iconPirt.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/pirt_icon_128.png"); //$NON-NLS-1$
 		iconPirt.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				"icons/global/pirt_icon_128_primary.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_PIRT, iconPirt);
 
 		// PIRT
-		Map<Color, String> iconPlanning = new HashMap<>();
+		Map<String, String> iconPlanning = new HashMap<>();
 		iconPlanning.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/planning_icon_black_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_PLANNING, iconPlanning);
 
 		// QUERY
-		Map<Color, String> iconQuery = new HashMap<>();
+		Map<String, String> iconQuery = new HashMap<>();
 		iconQuery.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/query_icon_128.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_QUERY, iconQuery);
 
 		// RESET
-		Map<Color, String> iconRese = new HashMap<>();
+		Map<String, String> iconRese = new HashMap<>();
 		iconRese.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/reset_icon_128.png"); //$NON-NLS-1$
 		iconRese.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED), "icons/global/reset_icon_128_red.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_RESET, iconRese);
 
 		// REFERENCE
-		Map<Color, String> iconRefe = new HashMap<>();
+		Map<String, String> iconRefe = new HashMap<>();
 		iconRefe.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/book.png"); //$NON-NLS-1$
 		iconRefe.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/book-white.png"); //$NON-NLS-1$
 		iconRefe.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY), "icons/global/book-primary.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_REFERENCE, iconRefe);
 
 		// SAVE
-		Map<Color, String> iconSave = new HashMap<>();
+		Map<String, String> iconSave = new HashMap<>();
 		iconSave.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/save_icon_128.png"); //$NON-NLS-1$
 		iconSave.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), "icons/global/save_icon_128_green.png"); //$NON-NLS-1$
 		iconSave.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/save_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_SAVE, iconSave);
 
-		// NOT SAVE
-		Map<Color, String> iconNotSave = new HashMap<>();
-		iconNotSave.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/not_save_icon_128.png"); //$NON-NLS-1$
-		iconNotSave.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE),
-				"icons/global/not_save_icon_128_white.png"); //$NON-NLS-1$
-		iconsMap.put(ICON_NAME_NOTSAVE, iconNotSave);
-
 		// STAMP
-		Map<Color, String> iconStamp = new HashMap<>();
+		Map<String, String> iconStamp = new HashMap<>();
 		iconStamp.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/stamp_icon_128.png"); //$NON-NLS-1$
 		iconStamp.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE), "icons/global/stamp_icon_128_blue.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_STAMP, iconStamp);
 
 		// TAG
-		Map<Color, String> iconTag = new HashMap<>();
+		Map<String, String> iconTag = new HashMap<>();
 		iconTag.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/tag_icon_128.png"); //$NON-NLS-1$
 		iconTag.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), "icons/global/tag_icon_128_brown.png"); //$NON-NLS-1$
 		iconTag.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/tag_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_TAG, iconTag);
 
-		// Up to date
-		Map<Color, String> iconUpToDate = new HashMap<>();
+		// UTD: UP TO DATE
+		Map<String, String> iconUpToDate = new HashMap<>();
 		iconUpToDate.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/utd_icon_128.png"); //$NON-NLS-1$
+		iconUpToDate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN), "icons/global/utd_icon_128_green.png"); //$NON-NLS-1$
+		iconUpToDate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
+				"icons/global/utd_icon_128_primary.png"); //$NON-NLS-1$
 		iconUpToDate.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/utd_icon_128_white.png"); //$NON-NLS-1$
 		iconsMap.put(ICON_NAME_UPTODATE, iconUpToDate);
 
-		// EMPTY
-		Map<Color, String> iconEmpty = new HashMap<>();
-		iconEmpty.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/empty_icon.png"); //$NON-NLS-1$
-		iconsMap.put(ICON_NAME_EMPTY, iconEmpty);
+		// VIEW
+		Map<String, String> iconView = new HashMap<>();
+		iconView.put(ConstantTheme.getColor(ICON_COLOR_DEFAULT), "icons/global/view_icon_128.png"); //$NON-NLS-1$
+		iconView.put(ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE), "icons/global/view_icon_128_white.png"); //$NON-NLS-1$
+		iconsMap.put(ICON_NAME_VIEW, iconView);
 
 		ICONS = Collections.unmodifiableMap(iconsMap);
 	}
@@ -374,7 +408,8 @@ public class IconTheme {
 	 *
 	 * @return The default icon color
 	 */
-	public static Color getDefaultColor() {
+
+	public static String getDefaultColor() {
 		return ConstantTheme.getColor(ICON_COLOR_DEFAULT);
 	}
 
@@ -385,7 +420,7 @@ public class IconTheme {
 	 * @param color    the icon color
 	 * @return the icon image path
 	 */
-	public static String getIconPath(String iconName, Color color) {
+	public static String getIconPath(String iconName, String color) {
 
 		// Initialize
 		String iconPath = null;
@@ -420,7 +455,7 @@ public class IconTheme {
 	 * @return the image at @param imagePath in the @param display with
 	 *         width= @param width and height= @param height
 	 */
-	public static Image getIconImage(ResourceManager rscMgr, String iconName, Color color) {
+	public static Image getIconImage(ResourceManager rscMgr, String iconName, String color) {
 
 		int iconSize = ICON_SIZE_DEFAULT_WINDOWS;
 		if (!SystemTools.isWindows()) {
@@ -441,7 +476,7 @@ public class IconTheme {
 	 * @return the image at @param imagePath in the @param display with
 	 *         width= @param width and height= @param height
 	 */
-	public static Image getIconImage(ResourceManager rscMgr, String iconName, Color color, int size) {
+	public static Image getIconImage(ResourceManager rscMgr, String iconName, String color, int size) {
 
 		if (rscMgr == null) {
 			return null;

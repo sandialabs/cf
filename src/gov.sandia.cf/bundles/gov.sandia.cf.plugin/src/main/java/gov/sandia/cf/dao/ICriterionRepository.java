@@ -11,6 +11,7 @@ import gov.sandia.cf.model.Criterion;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface ICriterionRepository extends ICRUDRepository<Criterion, Integer> {
 
 }

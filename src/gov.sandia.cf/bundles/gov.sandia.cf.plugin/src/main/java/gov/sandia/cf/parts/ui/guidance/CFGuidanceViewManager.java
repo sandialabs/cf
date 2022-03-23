@@ -27,11 +27,11 @@ import org.eclipse.ui.part.ViewPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
-import gov.sandia.cf.application.configuration.pirt.PIRTSpecification;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.model.CFFeature;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 

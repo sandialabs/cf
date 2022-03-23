@@ -43,11 +43,11 @@ import org.jfree.util.UnitType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.pcmm.PCMMSpecification;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.PCMMAggregation;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMLevelColor;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -165,7 +165,7 @@ public class PCMMChartFactory {
 				// set dataset name
 				dataset.setValue(element.getName(), elementValue);
 				// paint sections
-				plot.setSectionPaint(element.getName(), ColorTools.stringRGBToAwtColor(element.getColor()));
+				plot.setSectionPaint(element.getName(), ColorTools.toAwtColor(element.getColor()));
 				// paint section outlines
 				plot.setSectionOutlinePaint(element.getName(), java.awt.Color.white);
 

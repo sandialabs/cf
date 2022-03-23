@@ -17,11 +17,11 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.ISystemRequirementApplication;
-import gov.sandia.cf.application.configuration.requirement.SystemRequirementSpecification;
-import gov.sandia.cf.application.configuration.requirement.YmlReaderSystemRequirementSchema;
-import gov.sandia.cf.application.configuration.requirement.YmlWriterSystemRequirementSchema;
+import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
+import gov.sandia.cf.application.requirement.YmlReaderSystemRequirementSchema;
+import gov.sandia.cf.application.requirement.YmlWriterSystemRequirementSchema;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.dto.configuration.SystemRequirementSpecification;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;

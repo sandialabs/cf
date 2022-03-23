@@ -18,12 +18,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.IPIRTApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.DialogMode;
+import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.widgets.FormFactory;
@@ -68,7 +68,7 @@ public class QoIDialog extends GenericCFSmallDialog<IViewManager> {
 	 * @param parentShell the parent shell
 	 * @param mode        the dialog mode
 	 */
-	public QoIDialog(IViewManager viewManager, Shell parentShell, DialogMode mode) {
+	public QoIDialog(IViewManager viewManager, Shell parentShell, ViewMode mode) {
 		this(viewManager, parentShell, mode, null);
 	}
 
@@ -80,13 +80,13 @@ public class QoIDialog extends GenericCFSmallDialog<IViewManager> {
 	 * @param mode        the dialog mode
 	 * @param qoiToCopy   the qoi to copy
 	 */
-	public QoIDialog(IViewManager viewManager, Shell parentShell, DialogMode mode, QuantityOfInterest qoiToCopy) {
+	public QoIDialog(IViewManager viewManager, Shell parentShell, ViewMode mode, QuantityOfInterest qoiToCopy) {
 		super(viewManager, parentShell);
 
 		this.mode = mode;
 		this.qoi = new QuantityOfInterest();
 
-		if (this.mode == DialogMode.COPY) {
+		if (this.mode == ViewMode.COPY) {
 
 			String qoiToCopyName = RscTools.getString(RscConst.MSG_OBJECT_NULL);
 
@@ -153,7 +153,7 @@ public class QoIDialog extends GenericCFSmallDialog<IViewManager> {
 		editorDescription = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), formContainer, true, true);
 
 		// Set data
-		if (mode == DialogMode.COPY) {
+		if (mode == ViewMode.COPY) {
 			txtSymbol.setValue(this.qoi.getSymbol());
 			editorDescription.setValue(qoi.getDescription());
 		}
@@ -172,7 +172,7 @@ public class QoIDialog extends GenericCFSmallDialog<IViewManager> {
 		super.configureShell(newShell);
 
 		// Set the new title of the dialog
-		if (mode == DialogMode.COPY) {
+		if (mode == ViewMode.COPY) {
 			newShell.setText(RscTools.getString(RscConst.MSG_COPYQOI_PAGE_NAME));
 		} else {
 			newShell.setText(RscTools.getString(RscConst.MSG_ADDQOI_PAGE_NAME));
@@ -245,7 +245,7 @@ public class QoIDialog extends GenericCFSmallDialog<IViewManager> {
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		if (mode == DialogMode.COPY) {
+		if (mode == ViewMode.COPY) {
 			createButton(parent, IDialogConstants.OK_ID, RscTools.getString(RscConst.MSG_BTN_COPY), true);
 		} else {
 			createButton(parent, IDialogConstants.OK_ID, RscTools.getString(RscConst.MSG_BTN_CREATE), true);

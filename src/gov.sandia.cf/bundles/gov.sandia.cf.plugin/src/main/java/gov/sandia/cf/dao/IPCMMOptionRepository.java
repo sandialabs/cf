@@ -11,6 +11,7 @@ import gov.sandia.cf.model.PCMMOption;
  * @author Didier Verstraete
  *
  */
+@Repository
 public interface IPCMMOptionRepository extends ICRUDRepository<PCMMOption, Integer> {
 
 }

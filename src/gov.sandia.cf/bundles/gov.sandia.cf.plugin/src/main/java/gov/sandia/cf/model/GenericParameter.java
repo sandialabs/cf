@@ -22,7 +22,7 @@ import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.configuration.YmlGenericSchema;
+import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -119,13 +119,6 @@ public abstract class GenericParameter<T extends GenericParameter<T>> implements
 	@Column(name = "REQUIRED")
 	@NotNull(message = RscConst.EX_GENPARAMETER_REQUIRED_NULL)
 	private String required;
-
-	/**
-	 * The parameter parent
-	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PARENT_ID")
-	private GenericParameter<T> parent;
 
 	/**
 	 * The model field linked to MODEL_ID column
@@ -237,15 +230,19 @@ public abstract class GenericParameter<T extends GenericParameter<T>> implements
 	 */
 	public abstract void setChildren(List<GenericParameter<T>> children);
 
-	@SuppressWarnings("javadoc")
-	public GenericParameter<T> getParent() {
-		return parent;
-	}
+	/**
+	 * Gets the parent.
+	 *
+	 * @return the parent
+	 */
+	public abstract T getParent();
 
-	@SuppressWarnings("javadoc")
-	public void setParent(GenericParameter<T> parent) {
-		this.parent = parent;
-	}
+	/**
+	 * Sets the parent.
+	 *
+	 * @param parent the new parent
+	 */
+	public abstract void setParent(T parent);
 
 	/**
 	 * Create a copy of current entity with id null and referenced entity or entity

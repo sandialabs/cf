@@ -35,14 +35,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import gov.sandia.cf.application.configuration.ExportOptions;
-import gov.sandia.cf.application.configuration.arg.ARGBackendDefault;
-import gov.sandia.cf.application.configuration.arg.ARGParametersFactory;
-import gov.sandia.cf.application.configuration.arg.ARGReportTypeDefault;
-import gov.sandia.cf.application.configuration.arg.YmlARGParameterSchema;
-import gov.sandia.cf.application.configuration.arg.YmlARGStructure;
-import gov.sandia.cf.application.impl.ReportARGApplication;
+import gov.sandia.cf.application.report.ARGParametersFactory;
+import gov.sandia.cf.application.report.IReportARGApplication;
+import gov.sandia.cf.application.report.IReportARGExecutionApp;
+import gov.sandia.cf.application.report.ReportARGApplication;
 import gov.sandia.cf.constants.CFVariable;
+import gov.sandia.cf.constants.arg.ARGBackendDefault;
+import gov.sandia.cf.constants.arg.ARGOrientation;
+import gov.sandia.cf.constants.arg.ARGReportTypeDefault;
+import gov.sandia.cf.constants.arg.ARGVersion;
+import gov.sandia.cf.constants.arg.YmlARGParameterSchema;
+import gov.sandia.cf.constants.arg.YmlARGStructure;
+import gov.sandia.cf.constants.configuration.ExportOptions;
 import gov.sandia.cf.dao.ISystemRequirementValueRepository;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
@@ -56,8 +60,10 @@ import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.model.User;
 import gov.sandia.cf.parts.widgets.PCMMElementSelectorWidget;
+import gov.sandia.cf.tests.TestDtoFactory;
 import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.CFVariableResolver;
+import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;
@@ -153,7 +159,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		}
 		assertNotNull(ymlContent);
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
-		assertEquals(YmlARGStructure.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
+		assertEquals(ARGVersion.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY));
 		assertTrue(((List<?>) ymlContent.get(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY)).isEmpty());
 	}
@@ -206,7 +212,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		}
 		assertNotNull(ymlContent);
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
-		assertEquals(YmlARGStructure.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
+		assertEquals(ARGVersion.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY));
 		List<?> list = (List<?>) ymlContent.get(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY);
 		assertFalse(list.isEmpty());
@@ -344,7 +350,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		parameterLink.setType(FormFieldType.LINK.getType());
 		SystemRequirementValue valueLink = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(),
 				sysRequirement, parameterLink, user);
-		valueLink.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
+		valueLink.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
 		valueLink = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(valueLink);
 		values.add(valueLink);
 
@@ -354,9 +360,20 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		parameterFile.setType(FormFieldType.LINK.getType());
 		SystemRequirementValue valueFile = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(),
 				sysRequirement, parameterFile, user);
-		valueFile.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_FILE, "/home/test.pdf")); //$NON-NLS-1$
+		valueFile.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_FILE, "/home/test.pdf")); //$NON-NLS-1$
 		valueFile = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(valueFile);
 		values.add(valueFile);
+
+		// IMAGE - image FILE
+		SystemRequirementParam parameterFileImg = TestEntityFactory.getNewSystemRequirementParam(getDaoManager(), model,
+				null);
+		parameterFileImg.setType(FormFieldType.LINK.getType());
+		SystemRequirementValue valueFileImg = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(),
+				sysRequirement, parameterFileImg, user);
+		valueFileImg.setValue(
+				TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_FILE, "/home/test.jpg", "With caption")); //$NON-NLS-1$ //$NON-NLS-2$
+		valueFileImg = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(valueFile);
+		values.add(valueFileImg);
 
 		// HYPERLINK - Null
 		SystemRequirementValue valueLink2 = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(), null, null,
@@ -373,7 +390,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		// HYPERLINK - Value Blank
 		SystemRequirementValue valueLinkBlankValue = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(),
 				sysRequirement, parameterLink, user);
-		valueLinkBlankValue.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_URL, "")); //$NON-NLS-1$
+		valueLinkBlankValue.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_URL, "")); //$NON-NLS-1$
 		valueLinkBlankValue = getDaoManager().getRepository(ISystemRequirementValueRepository.class)
 				.update(valueLinkBlankValue);
 		values.add(valueLinkBlankValue);
@@ -433,9 +450,9 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		values.add(valueText2);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values,
-				argParameters);
-		assertEquals(3, parentSections.size()); // blank hyperlink should not be displayed
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParameters);
+		assertEquals(4, parentSections.size()); // blank hyperlink should not be displayed
 	}
 
 	@Test
@@ -457,13 +474,13 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 
 		SystemRequirementValue value = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(), sysRequirement,
 				parameter, user);
-		value.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
+		value.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_URL, "http://example.com")); //$NON-NLS-1$
 		value = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(value);
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values,
-				argParameters);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParameters);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -494,13 +511,13 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 
 		SystemRequirementValue value = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(), sysRequirement,
 				parameter, user);
-		value.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_FILE, "/home/test.pdf")); //$NON-NLS-1$
+		value.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_FILE, "/home/test.pdf")); //$NON-NLS-1$
 		value = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(value);
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values,
-				argParameters);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParameters);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -537,12 +554,13 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 
 		SystemRequirementValue value = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(), sysRequirement,
 				parameter, user);
-		value.setValue(TestEntityFactory.getParameterLinkGson(FormFieldType.LINK_FILE, file.getFullPath().toString()));
+		value.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_FILE, file.getFullPath().toString()));
 		value = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(value);
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values, argParam);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParam);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -552,6 +570,55 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		assertEquals(parameter.getName() + RscTools.COLON, map.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY));
 		assertEquals(file.getName(), map.get(YmlARGStructure.ARG_STRUCTURE_HYPERLINK_PATH_KEY)); // $NON-NLS-1$
 		assertEquals(file.getName(), map.get(YmlARGStructure.ARG_STRUCTURE_HYPERLINK_STRING_KEY)); // $NON-NLS-1$
+
+		// clear
+		newCFFile.getProject().delete(true, new NullProgressMonitor());
+	}
+
+	@Test
+	void test_generateGenericValues_Working_File_Image()
+			throws CredibilityException, CoreException, URISyntaxException, IOException {
+
+		// Initialize
+		List<Map<String, Object>> parentSections = new ArrayList<>();
+		List<IGenericTableValue> values = new ArrayList<>();
+		IFile newCFFile = TestEntityFactory.getNewFile("MyProject", "file.cf"); //$NON-NLS-1$ //$NON-NLS-2$
+		ARGParameters argParam = null;
+		argParam = getAppManager().getService(IReportARGExecutionApp.class)
+				.addDefaultARGParameters(newCFFile.getParent().getFullPath());
+		File imageFile = new File(WorkspaceTools.getStaticFilePath("report/arg/image.png")); //$NON-NLS-1$
+		String imagePathRelativeToWks = FileTools.getNormalizedPath(
+				new File(WorkspaceTools.getWorkspacePathToString()).toPath().relativize(imageFile.toPath()));
+
+		// Data
+		Model model = TestEntityFactory.getNewModel(getDaoManager());
+		User user = TestEntityFactory.getNewUser(getDaoManager());
+		SystemRequirement sysRequirement = TestEntityFactory.getNewSystemRequirement(getDaoManager(), model, null,
+				user);
+		SystemRequirementParam parameter = TestEntityFactory.getNewSystemRequirementParam(getDaoManager(), model, null);
+		parameter.setType(FormFieldType.LINK.getType());
+
+		SystemRequirementValue value = TestEntityFactory.getNewSystemRequirementValue(getDaoManager(), sysRequirement,
+				parameter, user);
+		value.setValue(TestDtoFactory.getParameterLinkGson(FormFieldType.LINK_FILE, imagePathRelativeToWks, "Caption")); //$NON-NLS-1$
+		value = getDaoManager().getRepository(ISystemRequirementValueRepository.class).update(value);
+		values.add(value);
+
+		// Test
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParam);
+
+		// Validate
+		assertEquals(2, parentSections.size());
+		Map<String, Object> map = parentSections.get(1);
+		assertNotNull(map);
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_FIGURE, map.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		@SuppressWarnings("unchecked")
+		Map<String, String> args = (Map<String, String>) map.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_ARGS_KEY);
+		assertNotNull(args);
+		assertEquals(imageFile.getName(),
+				FileTools.getFileName(args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_FILE_KEY))); // $NON-NLS-1$
+		assertEquals("Caption", args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_CAPTION_KEY)); // $NON-NLS-1$ //$NON-NLS-1$
 
 		// clear
 		newCFFile.getProject().delete(true, new NullProgressMonitor());
@@ -584,7 +651,8 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values, argParam);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParam);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -628,7 +696,8 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values, argParam);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParam);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -671,7 +740,8 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		values.add(value);
 
 		// Test
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, values, argParam);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(parentSections, sysRequirement,
+				values, argParam);
 
 		// Validate
 		assertEquals(1, parentSections.size());
@@ -692,21 +762,23 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		List<IGenericTableValue> values = null;
 		ARGParameters argParameters = null;
 
-		getAppManager().getService(IReportARGApplication.class).generateGenericValues(sections, values, argParameters);
+		getAppManager().getService(IReportARGApplication.class).generateGenericValues(sections, null, values,
+				argParameters);
 		assertNull(sections);
 	}
 
 	@Test
-	void test_generateHyperlink_nullParagraph() {
+	void test_generateHyperlink_nullSuffixParagraph() {
 		// Launch
-		Map<String, Object> paragraph = getAppManager().getService(IReportARGApplication.class).generateHyperlink(null,
-				"TITLE", null, "PATH", "VALUE"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		Map<String, Object> paragraph = getAppManager().getService(IReportARGApplication.class)
+				.generateHyperlink("TITLE", null, "PATH", "VALUE"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, paragraph.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
 		assertEquals("TITLE", paragraph.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
 		assertEquals("PATH", paragraph.get(YmlARGStructure.ARG_STRUCTURE_HYPERLINK_PATH_KEY)); //$NON-NLS-1$
 		assertEquals("VALUE", paragraph.get(YmlARGStructure.ARG_STRUCTURE_HYPERLINK_STRING_KEY)); //$NON-NLS-1$
+		assertEquals(null, paragraph.get(YmlARGStructure.ARG_STRUCTURE_STRING_SUFFIX_KEY));
 	}
 
 	@Test
@@ -724,9 +796,35 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	}
 
 	@Test
+	void test_generateImage_Working() {
+		// Launch
+		Map<String, Object> paragraph = getAppManager().getService(IReportARGApplication.class).generateImage(null,
+				"/path/to/my/image.png", "Image caption", "Image label"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+		// Tests
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_FIGURE, paragraph.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		@SuppressWarnings("unchecked")
+		Map<String, String> args = (Map<String, String>) paragraph.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_ARGS_KEY);
+		assertNotNull(args);
+		assertNotNull(args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_WIDTH_KEY));
+		assertEquals("/path/to/my/image.png", args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_FILE_KEY)); //$NON-NLS-1$
+		assertEquals("Image caption", args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_CAPTION_KEY)); //$NON-NLS-1$
+		assertEquals("Image label", args.get(YmlARGStructure.ARG_STRUCTURE_FIGURE_LABEL_KEY)); //$NON-NLS-1$
+	}
+
+	@Test
 	void test_generateLabelValue_Working() {
 		String str = getAppManager().getService(IReportARGApplication.class).generateLabelValue("LABEL", "VALUE"); //$NON-NLS-1$ //$NON-NLS-2$
 		assertEquals("LABEL" + RscTools.COLON + "VALUE", str); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
+	void test_generateHtmlParagraph_Working() {
+		Map<String, Object> paragraph = getAppManager().getService(IReportARGApplication.class)
+				.generateHtmlParagraph("<h1>My title</h1>\n\nMy content"); //$NON-NLS-1$
+		// Tests
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_HTML_KEY, paragraph.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		assertEquals("<h1>My title</h1>\n\nMy content", paragraph.get(YmlARGStructure.ARG_STRUCTURE_HTML_STRING_KEY)); //$NON-NLS-1$
 	}
 
 	@Test
@@ -960,7 +1058,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Empty() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection(null,
-				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_SECTION);
+				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_SECTION, null);
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -973,7 +1071,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Empty_paragraph() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection(null,
-				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH);
+				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, null);
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -986,29 +1084,47 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Working() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
-				"TEXT", new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_SECTION); //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_SECTION, null); //$NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
 		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
 		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
 		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertFalse(section.containsKey(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY)); // $NON-NLS-1$
 
 		// Launch
-		section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", "TEXT", null); //$NON-NLS-1$ //$NON-NLS-2$
+		section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", "TEXT", null, null); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
 		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
 		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
 		assertEquals(null, section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertFalse(section.containsKey(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY)); // $NON-NLS-1$
+	}
+
+	@Test
+	void test_generateSection_WorkingOrientationLandscape() {
+		// Launch
+		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_SECTION, //$NON-NLS-1$
+				ARGOrientation.LANDSCAPE);
+
+		// Tests
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
+		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
+		assertEquals(ARGOrientation.LANDSCAPE.getOrientation(),
+				section.get(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY)); // $NON-NLS-1$
+		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
 	}
 
 	@Test
 	void test_generateSection_Working_paragraph_OnlyTitle() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
-				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH); // $NON-NLS-1$
+				null, new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, null); // $NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -1021,7 +1137,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Working_paragraph_TitleAndContent() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
-				"CONTENT", new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH); //$NON-NLS-1$
+				"CONTENT", new ArrayList<Map<String, Object>>(), YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, null); //$NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -1034,7 +1150,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Working_paragraph_subsections_Null() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection(null, // $NON-NLS-1$
-				null, null, YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH); // $NON-NLS-1$
+				null, null, YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, null); // $NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_PARAGRAPH, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -1047,7 +1163,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateSection_Working_subsections_Null() {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
-				"TEXT", null, YmlARGStructure.ARG_STRUCTURE_N_SECTION); //$NON-NLS-1$ s
+				"TEXT", null, YmlARGStructure.ARG_STRUCTURE_N_SECTION, null); //$NON-NLS-1$ s
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
@@ -1069,7 +1185,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 
 		assertNotNull(ymlContent);
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
-		assertEquals(YmlARGStructure.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
+		assertEquals(ARGVersion.ARG_VERSION, ymlContent.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
 		assertTrue(ymlContent.containsKey(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY));
 		assertTrue(((List<?>) ymlContent.get(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY)).isEmpty());
 	}
@@ -1081,7 +1197,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 				.generateStructure(new HashMap<>());
 
 		// Tests
-		assertEquals(YmlARGStructure.ARG_VERSION, structure.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
+		assertEquals(ARGVersion.ARG_VERSION, structure.get(YmlARGStructure.ARG_STRUCTURE_VERSION_KEY));
 		assertEquals(new ArrayList<>(), structure.get(YmlARGStructure.ARG_STRUCTURE_CHAPTERS_KEY));
 	}
 
@@ -1090,13 +1206,30 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSubSection(
 				"TITLE", //$NON-NLS-1$
-				"TEXT", new ArrayList<Map<String, Object>>()); //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), null); //$NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SUBSECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
 		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
 		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
 		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertFalse(section.containsKey(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY));
+	}
+
+	@Test
+	void test_generateSubSection_Orientation_Landscape_Working() {
+		// Launch
+		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSubSection(
+				"TITLE", //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), ARGOrientation.LANDSCAPE); //$NON-NLS-1$
+
+		// Tests
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SUBSECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
+		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
+		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertEquals(ARGOrientation.LANDSCAPE.getOrientation(),
+				section.get(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY));
 	}
 
 	@Test
@@ -1104,13 +1237,30 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 		// Launch
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSubsubSection(
 				"TITLE", //$NON-NLS-1$
-				"TEXT", new ArrayList<Map<String, Object>>()); //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), null); //$NON-NLS-1$
 
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SUBSUBSECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
 		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
 		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
 		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertFalse(section.containsKey(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY)); // $NON-NLS-1$
+	}
+
+	@Test
+	void test_generateSubsubSection_Orientation_Landscape_Working() {
+		// Launch
+		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSubsubSection(
+				"TITLE", //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), ARGOrientation.LANDSCAPE); //$NON-NLS-1$
+
+		// Tests
+		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_SUBSUBSECTION, section.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
+		assertEquals("TITLE", section.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY)); //$NON-NLS-1$
+		assertEquals("TEXT", section.get(YmlARGStructure.ARG_STRUCTURE_STRING_KEY)); //$NON-NLS-1$
+		assertEquals(new ArrayList<Map<String, Object>>(), section.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY));
+		assertEquals(ARGOrientation.LANDSCAPE.getOrientation(),
+				section.get(YmlARGStructure.ARG_STRUCTURE_ORIENTATION_KEY)); // $NON-NLS-1$
 	}
 
 	@Test
@@ -1122,7 +1272,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 	void test_generateInlining_working_section_exists() {
 
 		Map<String, Object> section = getAppManager().getService(IReportARGApplication.class).generateSection("TITLE", //$NON-NLS-1$
-				"TEXT", new ArrayList<Map<String, Object>>()); //$NON-NLS-1$
+				"TEXT", new ArrayList<Map<String, Object>>(), null); //$NON-NLS-1$
 
 		Map<String, Object> sectionGenerated = getAppManager().getService(IReportARGApplication.class)
 				.generateInlining(section, "my/path"); //$NON-NLS-1$
