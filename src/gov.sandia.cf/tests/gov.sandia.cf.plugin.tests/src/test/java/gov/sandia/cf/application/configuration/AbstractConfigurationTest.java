@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
 import gov.sandia.cf.application.ApplicationManager;
 import gov.sandia.cf.dao.AbstractTestDao;
 import gov.sandia.cf.dao.IDaoManager;
-import gov.sandia.cf.dao.hsqldb.HSQLDBDaoManager;
 import junit.runner.Version;
 
 /**
+ * Abstract Configuration JUnit test class
+ * 
  * @author Didier Verstraete
  *
- *         Abstract Configuration JUnit test class
  */
 abstract class AbstractConfigurationTest {
 

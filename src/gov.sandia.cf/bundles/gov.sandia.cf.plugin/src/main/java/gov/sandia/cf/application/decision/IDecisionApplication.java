@@ -89,12 +89,13 @@ public interface IDecisionApplication extends IApplication {
 	public Decision updateDecision(Decision decision, User userUpdate) throws CredibilityException;
 
 	/**
-	 * Delete Decision
-	 * 
+	 * Delete Decision.
+	 *
 	 * @param decision the decision to delete
+	 * @param user the user
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteDecision(Decision decision) throws CredibilityException;
+	public void deleteDecision(Decision decision, User user) throws CredibilityException;
 
 	/**
 	 * Delete All Decision values

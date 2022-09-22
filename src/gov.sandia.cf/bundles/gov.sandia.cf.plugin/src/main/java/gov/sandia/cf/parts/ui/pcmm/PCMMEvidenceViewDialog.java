@@ -108,7 +108,7 @@ public class PCMMEvidenceViewDialog extends GenericCFSmallDialog<PCMMViewManager
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, false);
 	}
 
 	/**

@@ -3,8 +3,6 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +13,11 @@ import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the UncertaintyParamRepository
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the UncertaintyParamRepository
  */
-@RunWith(JUnitPlatform.class)
 class UncertaintyParamRepositoryTest
 		extends AbstractTestRepository<UncertaintyParam, Integer, UncertaintyParamRepository> {
 

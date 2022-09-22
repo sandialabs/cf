@@ -43,11 +43,6 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 	public static final String BTN_EVENT_ADD = "BTN_EVENT_ADD"; //$NON-NLS-1$
 
 	/**
-	 * the Decision home view
-	 */
-	private DecisionView decisionView;
-
-	/**
 	 * the last control opened
 	 */
 	private Control lastControl;
@@ -56,6 +51,9 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 	 * the layout manager to hide/show the different views
 	 */
 	private StackLayout stackLayout;
+
+	/** The decision controller. */
+	private DecisionViewController decisionController;
 
 	/**
 	 * CrediblityView constructor
@@ -86,11 +84,11 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 		this.setLayout(stackLayout);
 
 		// load home view
-		this.decisionView = new DecisionView(this, SWT.NONE);
+		this.decisionController = new DecisionViewController(this);
 
 		// display homeView first
-		this.stackLayout.topControl = decisionView;
-		this.lastControl = decisionView;
+		this.stackLayout.topControl = decisionController.getViewControl();
+		this.lastControl = decisionController.getViewControl();
 
 		this.layout();
 	}
@@ -133,13 +131,9 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 		// save the last opened view
 		saveLastView();
 
-		if (this.decisionView == null) {
-			this.decisionView = new DecisionView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = decisionView;
-		decisionView.refresh();
+		this.stackLayout.topControl = decisionController.getViewControl();
+		decisionController.getView().refresh();
 
 		// Layout
 		this.layout();
@@ -198,8 +192,8 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (decisionView != null) {
-			bcHomeItemPart.setName(decisionView.getItemTitle());
+		if (decisionController != null) {
+			bcHomeItemPart.setName(decisionController.getView().getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -214,7 +208,8 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 	 */
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
-		if (item != null && item.getListener().equals(this) && item.getName().equals((decisionView).getItemTitle())) {
+		if (item != null && item.getListener().equals(this)
+				&& item.getName().equals((decisionController.getView()).getItemTitle())) {
 			openHome();
 		}
 	}
@@ -223,8 +218,8 @@ public class DecisionViewManager extends AViewManager implements Listener, IView
 	public void reload() {
 
 		// reload views
-		if (decisionView != null) {
-			decisionView.reload();
+		if (decisionController.getView() != null) {
+			decisionController.getView().reload();
 		}
 	}
 

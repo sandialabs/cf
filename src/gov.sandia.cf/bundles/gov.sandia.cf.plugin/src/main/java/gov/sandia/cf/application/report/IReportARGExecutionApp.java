@@ -3,7 +3,11 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application.report;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import gov.sandia.cf.application.IApplication;
 import gov.sandia.cf.application.Service;
@@ -40,31 +44,46 @@ public interface IReportARGExecutionApp extends IApplication {
 	ARGParameters updateARGParameters(ARGParameters argParameters) throws CredibilityException;
 
 	/**
-	 * @param argParameters The ARG parameters
-	 * @param errorLog      the error logger
-	 * @param infoLog       the info logger
+	 * Gets the ARG types.
+	 *
+	 * @param argParameters   The ARG parameters
+	 * @param errorLog        the error logger
+	 * @param infoLog         the info logger
+	 * @param progressMonitor the progress monitor
 	 * @return the ARG type loaded from ARG
+	 * @throws URISyntaxException   the URI syntax exception
+	 * @throws IOException          Signals that an I/O exception has occurred.
+	 * @throws CredibilityException the credibility exception
 	 */
-	ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog);
+	ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) throws URISyntaxException, IOException, CredibilityException;
 
 	/**
-	 * @param argParameters The ARG parameters
-	 * @param errorLog      the error logger
-	 * @param infoLog       the info logger
+	 * Gets the ARG version.
+	 *
+	 * @param argParameters   The ARG parameters
+	 * @param errorLog        the error logger
+	 * @param infoLog         the info logger
+	 * @param progressMonitor the progress monitor
 	 * @return the ARG version
+	 * @throws URISyntaxException   the URI syntax exception
+	 * @throws IOException          Signals that an I/O exception has occurred.
+	 * @throws CredibilityException the credibility exception
 	 */
-	String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog);
+	String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) throws URISyntaxException, IOException, CredibilityException;
 
 	/**
-	 * Launch generation ARG command
-	 * 
-	 * @param argParameters The ARG parameters
-	 * @param errorLog      the error logger
-	 * @param infoLog       the info logger
+	 * Launch generation ARG command.
+	 *
+	 * @param argParameters   The ARG parameters
+	 * @param errorLog        the error logger
+	 * @param infoLog         the info logger
+	 * @param progressMonitor the progress monitor
 	 * @throws CredibilityException if an error occurs during report generation
 	 */
-	void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog)
-			throws CredibilityException;
+	void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) throws CredibilityException;
 
 	/**
 	 * Checks if is enabled.

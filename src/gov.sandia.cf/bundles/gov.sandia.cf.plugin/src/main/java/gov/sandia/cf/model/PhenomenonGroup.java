@@ -33,7 +33,8 @@ import gov.sandia.cf.tools.RscTools;
  */
 @Entity
 @Table(name = "PHENOMENAGROUP")
-public class PhenomenonGroup implements Serializable, IEntity<PhenomenonGroup, Integer>, ISelectValue {
+public class PhenomenonGroup
+		implements Serializable, IEntity<PhenomenonGroup, Integer>, ISelectValue, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -118,6 +119,16 @@ public class PhenomenonGroup implements Serializable, IEntity<PhenomenonGroup, I
 	@SuppressWarnings("javadoc")
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public String getGeneratedId() {
+		return getIdLabel();
+	}
+
+	@Override
+	public void setGeneratedId(String generatedId) {
+		setIdLabel(generatedId);
 	}
 
 	@SuppressWarnings("javadoc")

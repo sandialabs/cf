@@ -112,10 +112,9 @@ public class ImportDecisionApp extends AApplication implements IImportDecisionAp
 		// Analyze
 		if (newSpecs != null) {
 			// Decision parameters
-			List<DecisionParam> uncertaintyParameters = getDaoManager().getRepository(IDecisionParamRepository.class)
-					.findAll();
+			List<DecisionParam> parameters = currentSpecs != null ? currentSpecs.getParameters() : null;
 			analysis.put(DecisionParam.class, getAppMgr().getService(IImportApplication.class)
-					.analyzeImport(newSpecs.getParameters(), uncertaintyParameters));
+					.analyzeImport(newSpecs.getParameters(), parameters));
 		}
 
 		return analysis;

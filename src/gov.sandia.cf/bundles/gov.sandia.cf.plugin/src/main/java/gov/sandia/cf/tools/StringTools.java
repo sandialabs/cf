@@ -100,6 +100,20 @@ public class StringTools {
 	}
 
 	/**
+	 * To html paragraph.
+	 *
+	 * @param text the text
+	 * @return the string
+	 */
+	public static String toHtmlParagraph(final String text) {
+		StringBuilder html = new StringBuilder();
+		if (null != text) {
+			html.append("<p>").append(nl2br(StringEscapeUtils.escapeHtml4(text))).append("</p>"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return html.toString();
+	}
+
+	/**
 	 * Clear HTML in a HTML string
 	 * 
 	 * @param html                  the HTML string source

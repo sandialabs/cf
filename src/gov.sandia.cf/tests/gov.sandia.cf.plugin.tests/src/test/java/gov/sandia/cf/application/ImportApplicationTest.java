@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +60,6 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class ImportApplicationTest extends AbstractTestApplication {
 
 	/**

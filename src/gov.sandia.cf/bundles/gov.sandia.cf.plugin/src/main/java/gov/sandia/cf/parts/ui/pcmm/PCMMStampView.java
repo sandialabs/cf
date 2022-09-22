@@ -3,12 +3,10 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pcmm;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -25,16 +23,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMAggregateApp;
 import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
-import gov.sandia.cf.model.Model;
-import gov.sandia.cf.model.PCMMAggregation;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
-import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.Role;
-import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -54,7 +47,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMStampView extends ACredibilityPCMMView {
+public class PCMMStampView extends ACredibilityPCMMView<PCMMStampViewController> {
 	/**
 	 * the logger
 	 */
@@ -64,29 +57,15 @@ public class PCMMStampView extends ACredibilityPCMMView {
 	 * the main composite
 	 */
 	private Composite mainComposite;
-	/**
-	 * the pcmm elements map
-	 */
-	private List<PCMMElement> elements;
 
 	/**
-	 * the aggregation map
+	 * Instantiates a new PCMM stamp view.
+	 *
+	 * @param viewController the view controller
+	 * @param style          the view style
 	 */
-	private Map<PCMMElement, PCMMAggregation<PCMMElement>> aggregation;
-
-	/**
-	 * Filters
-	 */
-	private Map<EntityFilter, Object> filters;
-
-	/**
-	 * @param parentView the parent composite
-	 * @param style      the view style
-	 */
-	public PCMMStampView(PCMMViewManager parentView, int style) {
-		super(parentView, parentView, style);
-		this.filters = new HashMap<>();
-		this.elements = new ArrayList<>();
+	public PCMMStampView(PCMMStampViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// create the view
 		createPage();
@@ -128,7 +107,7 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		 */
 		// main composite
 		mainComposite = new Composite(this, SWT.BORDER);
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		drawMainComposite();
 
@@ -152,8 +131,10 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> getViewManager().openHome());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) e -> getViewController().getViewManager().openHome());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnBackOptions);
 
 		// Button - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -161,9 +142,10 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
-		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> getViewManager().openPCMMHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnHelpLevelOptions);
+		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) e -> getViewController().getViewManager().openPCMMHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -171,7 +153,8 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PCMM_STAMP);
 
 		// layout view
@@ -191,11 +174,11 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		// label Filters
 		Label lblFilter = new Label(formFilterContainer, SWT.LEFT);
 		lblFilter.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_LABEL));
-		lblFilter.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		lblFilter.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData lblFilterGridData = new GridData();
 		lblFilter.setLayoutData(lblFilterGridData);
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblFilter);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblFilter);
 
 		// form container
 		Composite formRoleContainer = new Composite(formFilterContainer, SWT.NONE);
@@ -205,13 +188,14 @@ public class PCMMStampView extends ACredibilityPCMMView {
 
 		// label role
 		Label lblRole = new Label(formRoleContainer, SWT.RIGHT);
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblRole);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblRole);
 		lblRole.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_ROLE_LABEL));
 		GridData lblSubtitleGridData = new GridData();
 		lblRole.setLayoutData(lblSubtitleGridData);
 
 		// Get roles and the selected one
-		List<Role> roles = getViewManager().getAppManager().getService(IPCMMApplication.class).getRoles();
+		List<Role> roles = getViewController().getViewManager().getAppManager().getService(IPCMMApplication.class)
+				.getRoles();
 		Role roleSelected = new Role();
 		roles.add(roleSelected);
 
@@ -236,10 +220,10 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		cbxRole.addSelectionChangedListener(element -> {
 			// Initialize
 			IStructuredSelection selection = (IStructuredSelection) element.getSelection();
-			filters.put(PCMMAssessment.Filter.ROLECREATION, selection.getFirstElement());
+			getViewController().putFilter(PCMMAssessment.Filter.ROLECREATION, selection.getFirstElement());
 
 			// Reload
-			reload(true);
+			getViewController().reloadData(true);
 		});
 	}
 
@@ -248,69 +232,7 @@ public class PCMMStampView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void reload() {
-		reload(false);
-	}
-
-	/**
-	 * Reload the view
-	 * 
-	 * @param isFilter activate filters or not
-	 */
-	private void reload(boolean isFilter) {
-
-		// Hide Role
-		this.hideRoleSelection();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-			try {
-				// Get elements
-				this.elements = getViewManager().getAppManager().getService(IPCMMApplication.class)
-						.getElementList(model);
-
-				// Manage "all" role filter
-				if (filters.containsKey(PCMMAssessment.Filter.ROLECREATION)) {
-					Role role = (Role) filters.get(PCMMAssessment.Filter.ROLECREATION);
-					if (null == role.getId()) {
-						filters.remove(PCMMAssessment.Filter.ROLECREATION);
-					}
-				}
-
-				// Add tag filter
-				filters.put(PCMMAssessment.Filter.TAG, getViewManager().getSelectedTag());
-
-				if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())) {
-					this.aggregation = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-							.aggregateSubelements(getViewManager().getPCMMConfiguration(), elements, filters);
-
-					// check the completeness of the assessments
-					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-							.isCompleteAggregation(model, getViewManager().getSelectedTag())) {
-						MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMSTAMP_DIALOG_TITLE),
-								RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_MSG));
-					}
-				} else if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())) {
-					this.aggregation = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-							.aggregateAssessmentSimplified(getViewManager().getPCMMConfiguration(), elements, filters);
-
-					// check the completeness of the assessments
-					if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-							.isCompleteAggregationSimplified(model, getViewManager().getSelectedTag())) {
-						MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMSTAMP_DIALOG_TITLE),
-								RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_SIMPLIFIED_MSG));
-					}
-				}
-
-				// repaint the view composites
-				drawMainComposite();
-
-			} catch (CredibilityException e) {
-				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMSTAMP_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMSTAMP_DIALOG_LOADING_MSG));
-				logger.warn("An error occurred while loading the stamp data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			}
-		}
+		getViewController().reloadData(false);
 	}
 
 	/**
@@ -326,7 +248,7 @@ public class PCMMStampView extends ACredibilityPCMMView {
 	 * 
 	 * @param compositeMain the parent composite to populate
 	 */
-	private void drawMainComposite() {
+	void drawMainComposite() {
 
 		// dispose composite children
 		ViewTools.disposeChildren(mainComposite);
@@ -336,6 +258,8 @@ public class PCMMStampView extends ACredibilityPCMMView {
 		mainComposite.setLayoutData(gdMainComposite);
 		GridLayout layoutMainComp = new GridLayout(1, false);
 		mainComposite.setLayout(layoutMainComp);
+		
+		List<PCMMElement> elements = getViewController().getElements();
 
 		// draw the content
 		if (elements == null || elements.isEmpty()) {
@@ -350,12 +274,13 @@ public class PCMMStampView extends ACredibilityPCMMView {
 			txtPIRT.setText(RscTools.getString(RscConst.MSG_PCMMSTAMP_LBL_DESCRIPTION));
 			GridData txtPIRTGridData = new GridData(SWT.CENTER, SWT.NONE, true, false);
 			txtPIRT.setLayoutData(txtPIRTGridData);
-			FontTools.setImportantTextFont(getViewManager().getRscMgr(), txtPIRT);
+			FontTools.setImportantTextFont(getViewController().getViewManager().getRscMgr(), txtPIRT);
 
 			// Create PCMM Stamp Chart Composite
 			try {
-				PCMMChartFactory.createPCMMStampChart(mainComposite, getViewManager().getPCMMConfiguration(),
-						aggregation);
+				PCMMChartFactory.createPCMMStampChart(mainComposite,
+						getViewController().getViewManager().getPCMMConfiguration(),
+						getViewController().getAggregation());
 			} catch (CredibilityException e) {
 				logger.error("Impossible to create the PCMM Stamp chart", e); //$NON-NLS-1$
 			}

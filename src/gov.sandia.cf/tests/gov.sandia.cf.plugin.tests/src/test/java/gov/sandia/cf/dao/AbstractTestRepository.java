@@ -28,30 +28,41 @@ import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.IEntity;
 
 /**
- * @author Didier Verstraete
+ * Abstract DAO JUnit test class.
  *
- *         Abstract DAO JUnit test class
+ * @author Didier Verstraete
+ * @param <MODEL>         the generic type
+ * @param <PK>            the generic type
+ * @param <REPOSITORYMGR> the generic type
  */
 abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPOSITORYMGR extends AbstractCRUDRepository<MODEL, PK>>
 		extends AbstractTestDao {
 
 	/**
+	 * Gets the repository class.
+	 *
 	 * @return the REPOSITORYMGR class
 	 */
 	abstract Class<REPOSITORYMGR> getRepositoryClass();
 
 	/**
+	 * Gets the model class.
+	 *
 	 * @return the MODEL class
 	 */
 	abstract Class<MODEL> getModelClass();
 
 	/**
+	 * Gets the model fulfilled.
+	 *
 	 * @param model the model to fulfill
 	 * @return the MODEL fulfilled
 	 */
 	abstract MODEL getModelFulfilled(MODEL model);
 
 	/**
+	 * Gets the repository.
+	 *
 	 * @return the repository manager
 	 */
 	REPOSITORYMGR getRepository() {
@@ -76,10 +87,10 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 	}
 
 	/**
-	 * Compare the strings of the expected and actual entities
-	 * 
-	 * @param expected
-	 * @param actual
+	 * Compare the strings of the expected and actual entities.
+	 *
+	 * @param expected the expected
+	 * @param actual   the actual
 	 */
 	void compareString(MODEL expected, MODEL actual) {
 
@@ -100,6 +111,8 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 	}
 
 	/**
+	 * Gets the model instance.
+	 *
 	 * @return an instance of the MODEL
 	 */
 	MODEL getModelInstance() {
@@ -107,8 +120,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 		MODEL instance = null;
 
 		try {
-			instance = getModelClass().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			instance = getModelClass().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail(e.getMessage());
 		}
 
@@ -116,7 +130,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 	}
 
 	/**
-	 * @param model
+	 * Fulfill model strings.
+	 *
+	 * @param model the model
 	 * @return a model with string fields fulfilled with their field name
 	 */
 	MODEL fulfillModelStrings(MODEL model) {
@@ -138,6 +154,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 		return model;
 	}
 
+	/**
+	 * Test instantiate constructor no parameter.
+	 */
 	@Test
 	void testInstantiate_ConstructorNoParameter() {
 		try {
@@ -162,6 +181,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 		}
 	}
 
+	/**
+	 * Test instantiate constructor with parameter.
+	 */
 	@Test
 	void testInstantiate_ConstructorWithParameter() {
 		try {
@@ -190,6 +212,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 		}
 	}
 
+	/**
+	 * Test CRUD.
+	 */
 	@Test
 	void testCRUD() {
 
@@ -256,6 +281,9 @@ abstract class AbstractTestRepository<MODEL extends IEntity<MODEL, PK>, PK, REPO
 
 	}
 
+	/**
+	 * Test execute query.
+	 */
 	@SuppressWarnings("unchecked")
 	@Test
 	void testExecuteQuery() {

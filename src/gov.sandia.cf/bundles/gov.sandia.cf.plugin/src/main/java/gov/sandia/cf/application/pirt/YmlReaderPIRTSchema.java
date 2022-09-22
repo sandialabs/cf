@@ -109,12 +109,12 @@ public class YmlReaderPIRTSchema implements IYmlReader<PIRTSpecification> {
 	}
 
 	/**
-	 * @param reader the file reader
-	 * 
+	 * Read.
+	 *
+	 * @param ymlSchema the yml schema
 	 * @return a CredibilityProjectSpecification class loaded with @param reader.
 	 * @throws CredibilityException if an error occurs during reading process
 	 * @throws IOException          if a reading exception occurs
-	 * 
 	 */
 	private PIRTSpecification read(File ymlSchema) throws CredibilityException, IOException {
 

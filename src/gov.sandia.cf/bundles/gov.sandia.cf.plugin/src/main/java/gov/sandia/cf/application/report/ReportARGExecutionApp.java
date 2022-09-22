@@ -5,6 +5,7 @@ package gov.sandia.cf.application.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
@@ -15,6 +16,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -117,41 +120,41 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
 	@Override
-	public ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog) {
+	public ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor monitor) throws URISyntaxException, IOException, CredibilityException {
 
 		ARGType argTypes = new ARGType();
 
 		if (argParameters == null) {
-			logger.error("Impossible to get the arg version: the arg parameters are null."); //$NON-NLS-1$
+			logger.error("Impossible to get the arg types: the arg parameters are null."); //$NON-NLS-1$
 			return argTypes;
 		}
 
 		// create log builder to get the current result from log
 		StringBuilder logBuilder = new StringBuilder();
 
-		try {
-			// Get paths
-			File scriptArg = new File(
-					WorkspaceTools.getStaticFilePath(ARGQueryTypesConstants.SCRIPT_PY_QUERY_ARG_TYPES));
-			String argExecutablePath = argParameters.getArgExecPath();
+		monitor.beginTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGTYPES_JOB_INIT), 0);
 
-			// arg get version command
-			String command = MessageFormat.format("{0} \"{1}\" {2} \"{3}\"", CMD_PYTHON_DEFAULT, //$NON-NLS-1$
-					scriptArg.getAbsolutePath(), ARGQueryTypesConstants.ARG_TYPES_SCRIPT_ARGFILE_PARAM,
-					argExecutablePath);
+		// Get paths
+		File scriptArg = new File(WorkspaceTools.getStaticFilePath(ARGQueryTypesConstants.SCRIPT_PY_QUERY_ARG_TYPES));
+		String argExecutablePath = argParameters.getArgExecPath();
 
-			// Generate commands
-			String argSetEnvScriptPath = argParameters.getArgPreScript();
-			if (argSetEnvScriptPath != null && !argSetEnvScriptPath.isEmpty()) {
-				executeCommandWithPreScript(argParameters, command, errorLog, logBuilder);
-			} else {
-				executeCommandWithoutPreScript(command, errorLog, logBuilder);
-			}
-		} catch (Exception e) {
-			logger.error("An exception occurs while getting ARG version", e); //$NON-NLS-1$
+		// arg get version command
+		String command = MessageFormat.format("{0} \"{1}\" {2} \"{3}\"", CMD_PYTHON_DEFAULT, //$NON-NLS-1$
+				scriptArg.getAbsolutePath(), ARGQueryTypesConstants.ARG_TYPES_SCRIPT_ARGFILE_PARAM, argExecutablePath);
+
+		// Generate commands
+		String argSetEnvScriptPath = argParameters.getArgPreScript();
+		if (argSetEnvScriptPath != null && !argSetEnvScriptPath.isEmpty()) {
+			monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGTYPES_JOB_EXECWITHPRESCRIPT));
+			executeCommandWithPreScript(argParameters, command, errorLog, logBuilder, new NullProgressMonitor());
+		} else {
+			monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGTYPES_JOB_EXEC));
+			executeCommandWithoutPreScript(command, errorLog, logBuilder, new NullProgressMonitor());
 		}
 
 		// get the arg types from python console log
+		monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGTYPES_JOB_RETRIEVERESULT));
 		String[] split = logBuilder.toString().split("\n"); //$NON-NLS-1$
 		Optional<String> argTypesString = Stream.of(split)
 				.filter(s -> s.startsWith(ARGQueryTypesConstants.ARG_TYPES_DICO_KEYWORD)).findFirst();
@@ -180,7 +183,8 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 
 	/** {@inheritDoc} */
 	@Override
-	public String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog) {
+	public String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor monitor) throws URISyntaxException, IOException, CredibilityException {
 
 		if (argParameters == null) {
 			logger.error("Impossible to get the arg version: the arg parameters are null."); //$NON-NLS-1$
@@ -190,37 +194,39 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 		// create log builder to get the current result from log
 		StringBuilder logBuilder = new StringBuilder();
 
-		try {
-			// Get paths
-			File scriptArg = new File(
-					WorkspaceTools.getStaticFilePath(ARGQueryVersionConstants.SCRIPT_PY_QUERY_ARG_VERSION));
-			String argExecutablePath = argParameters.getArgExecPath();
+		monitor.beginTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGVERSION_JOB_INIT), 0);
 
-			// arg get version command
-			String command = MessageFormat.format("{0} \"{1}\" {2} \"{3}\"", CMD_PYTHON_DEFAULT, //$NON-NLS-1$
-					scriptArg.getAbsolutePath(), ARGQueryVersionConstants.ARGFILE_PARAM, argExecutablePath);
+		// Get paths
+		File scriptArg = new File(
+				WorkspaceTools.getStaticFilePath(ARGQueryVersionConstants.SCRIPT_PY_QUERY_ARG_VERSION));
+		String argExecutablePath = argParameters.getArgExecPath();
 
-			// Generate commands
-			String argSetEnvScriptPath = argParameters.getArgPreScript();
-			if (argSetEnvScriptPath != null && !argSetEnvScriptPath.isEmpty()) {
-				executeCommandWithPreScript(argParameters, command, errorLog, logBuilder);
-			} else {
-				executeCommandWithoutPreScript(command, errorLog, logBuilder);
-			}
-		} catch (Exception e) {
-			logger.error("An exception occurs while getting ARG version", e); //$NON-NLS-1$
+		// arg get version command
+		String command = MessageFormat.format("{0} \"{1}\" {2} \"{3}\"", CMD_PYTHON_DEFAULT, //$NON-NLS-1$
+				scriptArg.getAbsolutePath(), ARGQueryVersionConstants.ARGFILE_PARAM, argExecutablePath);
+
+		// Generate commands
+		String argSetEnvScriptPath = argParameters.getArgPreScript();
+		if (argSetEnvScriptPath != null && !argSetEnvScriptPath.isEmpty()) {
+			monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGVERSION_JOB_EXECWITHPRESCRIPT));
+			executeCommandWithPreScript(argParameters, command, errorLog, logBuilder, monitor);
+		} else {
+			monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGVERSION_JOB_EXEC));
+			executeCommandWithoutPreScript(command, errorLog, logBuilder, monitor);
 		}
 
 		// get the arg version from python console log
+		monitor.subTask(RscTools.getString(RscConst.MSG_REPORTARGEXEC_GETARGVERSION_JOB_RETRIEVERESULT));
 		String[] split = logBuilder.toString().split("\n"); //$NON-NLS-1$
-		Optional<String> argVersionString = Stream.of(split)
+
+		Optional<String> argVersionLog = Stream.of(split)
 				.filter(s -> s.startsWith(ARGQueryVersionConstants.VERSION_KEYWORD)).findFirst();
 
 		// append log
 		infoLog.append(logBuilder);
 
-		return argVersionString.isPresent()
-				? argVersionString.get().substring(ARGQueryVersionConstants.VERSION_KEYWORD.length())
+		return argVersionLog.isPresent()
+				? argVersionLog.get().substring(ARGQueryVersionConstants.VERSION_KEYWORD.length())
 				: RscTools.empty();
 	}
 
@@ -228,8 +234,8 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog)
-			throws CredibilityException {
+	public void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) throws CredibilityException {
 
 		if (argParameters == null) {
 			logger.error("Report generation error: the arg parameters are null."); //$NON-NLS-1$
@@ -254,22 +260,23 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 		// Generate commands
 		String argSetEnvScriptPath = argParameters.getArgPreScript();
 		if (argSetEnvScriptPath != null && !argSetEnvScriptPath.isEmpty()) {
-			executeCommandWithPreScript(argParameters, command, errorLog, infoLog);
+			executeCommandWithPreScript(argParameters, command, errorLog, infoLog, progressMonitor);
 		} else {
-			executeCommandWithoutPreScript(command, errorLog, infoLog);
+			executeCommandWithoutPreScript(command, errorLog, infoLog, progressMonitor);
 		}
 	}
 
 	/**
 	 * Execute command without pre script.
 	 *
-	 * @param command  the command
-	 * @param errorLog the error log
-	 * @param infoLog  the info log
+	 * @param command         the command
+	 * @param errorLog        the error log
+	 * @param infoLog         the info log
+	 * @param progressMonitor the progress monitor
 	 * @throws CredibilityException the credibility exception
 	 */
-	private void executeCommandWithoutPreScript(String command, StringBuilder errorLog, StringBuilder infoLog)
-			throws CredibilityException {
+	private void executeCommandWithoutPreScript(String command, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) throws CredibilityException {
 
 		if (StringUtils.isBlank(command)) {
 			logger.error("Command execution error: the command is blank."); //$NON-NLS-1$
@@ -277,7 +284,7 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 		}
 
 		// Run process
-		int returnCode = RuntimeTools.executeSync(errorLog, infoLog, command, false);
+		int returnCode = RuntimeTools.execute(errorLog, infoLog, command, false, progressMonitor);
 
 		if (returnCode != RuntimeTools.OK_CODE) {
 			throw new CredibilityException(errorLog.toString());
@@ -287,14 +294,15 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 	/**
 	 * Execute command with pre script.
 	 *
-	 * @param argParameters the arg parameters
-	 * @param command       the command
-	 * @param errorLog      the error log
-	 * @param infoLog       the info log
+	 * @param argParameters   the arg parameters
+	 * @param command         the command
+	 * @param errorLog        the error log
+	 * @param infoLog         the info log
+	 * @param progressMonitor the progress monitor
 	 * @throws CredibilityException the credibility exception
 	 */
 	private void executeCommandWithPreScript(ARGParameters argParameters, final String command, StringBuilder errorLog,
-			StringBuilder infoLog) throws CredibilityException {
+			StringBuilder infoLog, IProgressMonitor progressMonitor) throws CredibilityException {
 
 		if (argParameters == null) {
 			logger.error("Report generation error: the arg parameters are null."); //$NON-NLS-1$
@@ -340,8 +348,8 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 			StringBuilder errorLogTmp = new StringBuilder();
 
 			// execute script file
-			int returnCode = RuntimeTools.executeSync(errorLogTmp, infoLog,
-					RuntimeTools.getScriptFileCmd(scriptFile.getPath()), false);
+			int returnCode = RuntimeTools.execute(errorLogTmp, infoLog,
+					RuntimeTools.getScriptFileCmd(scriptFile.getPath()), false, progressMonitor);
 
 			errorLog.append(errorLogTmp);
 
@@ -357,7 +365,7 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean isEnabled() {
 		return true;

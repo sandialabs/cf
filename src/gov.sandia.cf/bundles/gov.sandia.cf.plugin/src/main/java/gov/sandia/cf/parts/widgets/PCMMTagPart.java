@@ -33,7 +33,7 @@ import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
-import gov.sandia.cf.parts.ui.IViewManager;
+import gov.sandia.cf.parts.ui.IViewController;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -74,24 +74,24 @@ public class PCMMTagPart extends Composite {
 	/**
 	 * The view manager
 	 */
-	private IViewManager viewMgr;
+	private IViewController viewController;
 
 	/**
 	 * The constructor
 	 * 
-	 * @param viewMgr        the view manager
+	 * @param viewController the view controller
 	 * @param parent         the parent view
 	 * @param actionListener the action listener
 	 * @param tagList        the tag list
 	 * @param selectedTag    the selected tag
 	 * @param style          the style
 	 */
-	public PCMMTagPart(IViewManager viewMgr, Composite parent, ITagAction actionListener, List<Tag> tagList,
+	public PCMMTagPart(IViewController viewController, Composite parent, ITagAction actionListener, List<Tag> tagList,
 			Tag selectedTag, int style) {
 		super(parent, style);
 
-		Assert.isNotNull(viewMgr);
-		this.viewMgr = viewMgr;
+		Assert.isNotNull(viewController);
+		this.viewController = viewController;
 		this.tagList = new ArrayList<>();
 		this.actionListener = actionListener;
 		this.selectedTag = selectedTag;
@@ -180,7 +180,8 @@ public class PCMMTagPart extends Composite {
 		btnNewTagOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_TAG);
 		btnNewTagOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BROWN);
 		btnNewTagOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> actionListener.tagCurrentPCMM());
-		btnNewTag = new ButtonTheme(viewMgr.getRscMgr(), buttonComposite, SWT.CENTER, btnNewTagOptions);
+		btnNewTag = new ButtonTheme(viewController.getViewManager().getRscMgr(), buttonComposite, SWT.CENTER,
+				btnNewTagOptions);
 		btnNewTag.setToolTipText(RscTools.getString(RscConst.MSG_TAG_PART_BTN_NEWTAG_TOOLTIP));
 		btnNewTag.setEnabled(isTagSelected());
 
@@ -191,7 +192,7 @@ public class PCMMTagPart extends Composite {
 		btnManageTagOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CONFIG);
 		btnManageTagOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnManageTagOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> actionListener.manageTags());
-		new ButtonTheme(viewMgr.getRscMgr(), buttonComposite, SWT.CENTER, btnManageTagOptions);
+		new ButtonTheme(viewController.getViewManager().getRscMgr(), buttonComposite, SWT.CENTER, btnManageTagOptions);
 
 		// Set min height for the progress composite
 		Point computedSize = this.computeSize(SWT.DEFAULT, SWT.DEFAULT);

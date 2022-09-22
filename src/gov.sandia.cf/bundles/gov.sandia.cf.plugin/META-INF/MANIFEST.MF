@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Credibility Framework
 Bundle-SymbolicName: gov.sandia.cf.plugin;singleton:=true
-Bundle-Version: 1.0.1
+Bundle-Version: 1.0.2
 Bundle-ClassPath: .,
  bin/,
  lib/classmate-1.3.4.jar,
@@ -82,3 +82,4 @@ Import-Package: javax.inject,
 Automatic-Module-Name: gov.sandia.cf;singleton:=true
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: gov.sandia.cf.services.extensionpoint

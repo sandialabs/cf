@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +53,6 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * 
  * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class ReportARGPlanningAppTest extends AbstractTestApplication {
 
 	/**
@@ -224,7 +221,7 @@ class ReportARGPlanningAppTest extends AbstractTestApplication {
 		assertEquals(newUncertaintyGroup.getName(),
 				((Map<?, ?>) ((List<?>) map.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).get(0))
 						.get(YmlARGStructure.ARG_STRUCTURE_TITLE_KEY));
-		assertEquals(1, ((List<?>) ((Map<?, ?>) ((List<?>) map.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).get(0))
+		assertEquals(2, ((List<?>) ((Map<?, ?>) ((List<?>) map.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).get(0))
 				.get(YmlARGStructure.ARG_STRUCTURE_SECTIONS_KEY)).size());
 	}
 

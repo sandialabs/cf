@@ -6,6 +6,7 @@ package gov.sandia.cf.application.pcmm;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -138,8 +139,9 @@ public class YmlReaderPCMMSchema implements IYmlReader<PCMMSpecification> {
 	}
 
 	/**
-	 * @param reader         the reader
-	 * @param specifications the credibility project specifications
+	 * Read.
+	 *
+	 * @param ymlSchema the yml schema
 	 * @return a CredibilityProjectSpecification class loaded with @param reader.
 	 * @throws CredibilityException if an error occured while processing the queries
 	 * @throws IOException          if a reading exception occurs
@@ -297,7 +299,9 @@ public class YmlReaderPCMMSchema implements IYmlReader<PCMMSpecification> {
 	}
 
 	/**
-	 * @param yamlPhases the yaml phases
+	 * Creates the options.
+	 *
+	 * @param phases the phases
 	 * @return a list of PCMMOption classes from parameters definition
 	 */
 	private List<PCMMOption> createOptions(List<PCMMPhase> phases) {
@@ -493,7 +497,11 @@ public class YmlReaderPCMMSchema implements IYmlReader<PCMMSpecification> {
 	}
 
 	/**
+	 * Populate planning.
+	 *
 	 * @param specifications the pcmm specifications to populate
+	 * @param planning the planning
+	 * @param elements the elements
 	 * @return the PCMM specifications with the planning included
 	 */
 	private PCMMSpecification populatePlanning(PCMMSpecification specifications, Map<?, ?> planning,
@@ -526,7 +534,10 @@ public class YmlReaderPCMMSchema implements IYmlReader<PCMMSpecification> {
 	}
 
 	/**
+	 * Populate planning fields.
+	 *
 	 * @param planningFields the yml map of planning fields
+	 * @param planningTypes the planning types
 	 * @return the planning fields.
 	 */
 	@SuppressWarnings("unchecked")
@@ -545,7 +556,8 @@ public class YmlReaderPCMMSchema implements IYmlReader<PCMMSpecification> {
 						field = YmlReaderGenericSchema.createGenericParameter(PCMMPlanningParam.class,
 								PCMMPlanningSelectValue.class, PCMMPlanningParamConstraint.class,
 								(Entry<String, Map<String, Object>>) entry);
-					} catch (InstantiationException | IllegalAccessException e) {
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						logger.warn(e.getMessage(), e);
 					}
 

@@ -33,6 +33,15 @@ public class CredibilityFrameworkConstants {
 	 */
 	public static final String CF_PLUGIN_NAME = "gov.sandia.cf.plugin"; //$NON-NLS-1$
 
+	/** The Constant CF_PACKAGE_ROOT. */
+	public static final String CF_PACKAGE_ROOT = "gov.sandia.cf"; //$NON-NLS-1$
+
+	/** The Constant CF_EXTENSIONPOINT_PREDEFINEDPROPERTIES_ID. */
+	public static final String CF_EXTENSIONPOINT_PREDEFINEDPROPERTIES_ID = "cfPropertiesDefinition"; //$NON-NLS-1$
+
+	/** The Constant CF_EXTENSIONPOINT_PREDEFINEDPROPERTIES_CLASS. */
+	public static final String CF_EXTENSIONPOINT_PREDEFINEDPROPERTIES_CLASS = "predefinedPropertiesClass"; //$NON-NLS-1$
+
 	/**
 	 * Properties to manage the views outside of the current part
 	 */

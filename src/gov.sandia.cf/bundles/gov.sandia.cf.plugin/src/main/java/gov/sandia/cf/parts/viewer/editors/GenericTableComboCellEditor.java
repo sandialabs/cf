@@ -106,7 +106,7 @@ public class GenericTableComboCellEditor extends AGenericTableCellEditor {
 					getViewer().refresh();
 					if (getView() != null) {
 						fireValueChanged((IGenericTableItem) element, columnValue);
-						getView().getViewManager().viewChanged();
+						getView().getViewController().viewChanged();
 					}
 					break;
 				}

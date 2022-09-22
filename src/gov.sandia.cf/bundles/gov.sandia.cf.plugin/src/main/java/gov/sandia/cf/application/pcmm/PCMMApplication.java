@@ -260,10 +260,10 @@ public class PCMMApplication extends AApplication implements IPCMMApplication {
 	/**
 	 * By default the mode is DEFAULT. If there is at least one level associated to
 	 * one PCMM Element, the mode returned is SIMPLIFIED.
-	 * 
-	 * @param elements the PCMM Elements to check the mode
+	 *
+	 * @param model the model
 	 * @return the PCMM mode activated
-	 * @throws CredibilityException
+	 * @throws CredibilityException the credibility exception
 	 */
 	private PCMMMode getPCMMMode(Model model) throws CredibilityException {
 		PCMMMode mode = PCMMMode.DEFAULT;

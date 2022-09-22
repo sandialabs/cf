@@ -45,13 +45,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.model.Model;
-import gov.sandia.cf.model.PIRTDescriptionHeader;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.User;
 import gov.sandia.cf.model.dto.configuration.PIRTQuery;
-import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
@@ -89,21 +85,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
+public class PIRTQoIView extends ACredibilitySubView<PIRTQoIViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PIRTQoIView.class);
-
-	/**
-	 * Controller
-	 */
-	private PIRTQoIViewController viewCtrl;
-
-	/**
-	 * PIRT Configuration
-	 */
-	private PIRTSpecification pirtConfiguration;
 
 	/**
 	 * the description table viewer
@@ -128,17 +114,16 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 	 */
 	private Composite compositeTable;
 
+	/** The cbx query. */
 	private ComboViewer cbxQuery;
 
 	/**
-	 * @param viewManager the view manager
-	 * @param parent      the parent view
-	 * @param style       the view style
+	 * @param viewController the view manager
+	 * @param parent         the parent view
+	 * @param style          the view style
 	 */
-	public PIRTQoIView(PIRTViewManager viewManager, PIRTTabFolder parent, int style) {
-		super(viewManager, parent, style);
-
-		this.viewCtrl = new PIRTQoIViewController(this);
+	public PIRTQoIView(PIRTQoIViewController viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		openEditors = new HashMap<>();
@@ -169,9 +154,6 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		logger.debug("Render PIRT QoI Page"); //$NON-NLS-1$
 
-		// Configuration
-		pirtConfiguration = getViewManager().getCache().getPIRTSpecification();
-
 		// Renders
 		renderHeaderTable();
 
@@ -183,12 +165,6 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh data and Save state
-		refresh();
-
-		// Refresh
-		refreshViewer();
 	}
 
 	/**
@@ -199,10 +175,10 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		logger.debug("Render PIRT QoI Header table"); //$NON-NLS-1$
 
 		// Table Header - Create
-		tableHeaderBar = new TableHeaderBar(getViewManager(), this,
+		tableHeaderBar = new TableHeaderBar(getViewController().getViewManager(), this,
 				RscTools.getString(RscConst.TABLE_QOI_HEADER_BAR_LABEL));
 		tableHeaderBar.setContentProvider(new PIRTQoITableHeaderContentProvider());
-		tableHeaderBar.setCellModifier(new PIRTQoITableHeaderCellModifier(viewCtrl));
+		tableHeaderBar.setCellModifier(new PIRTQoITableHeaderCellModifier(getViewController()));
 	}
 
 	/**
@@ -240,15 +216,15 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		btnAddQoIOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_ADD);
 		btnAddQoIOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddQoIOptions.put(ButtonTheme.OPTION_DATA, btnAddQoIData);
-		Button btnAddQoI = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
-				btnAddQoIOptions);
-		btnAddQoI.addListener(SWT.Selection, event -> viewCtrl.addQuantityOfInterest());
+		Button btnAddQoI = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsHeaderRight, SWT.CENTER, btnAddQoIOptions);
+		btnAddQoI.addListener(SWT.Selection, event -> getViewController().addQuantityOfInterest());
 
 		/**
 		 * PIRT queries composite
 		 */
-		if (getViewManager().getCache().getPIRTQueries() != null
-				&& !getViewManager().getCache().getPIRTQueries().isEmpty()) {
+		if (getViewController().getViewManager().getCache().getPIRTQueries() != null
+				&& !getViewController().getViewManager().getCache().getPIRTQueries().isEmpty()) {
 			renderPIRTQueries(compositeButtonsHeaderLeft);
 		}
 	}
@@ -267,7 +243,7 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		// Query - label
 		Label lblQuery = new Label(parent, SWT.CENTER);
 		lblQuery.setText(RscTools.getString(RscConst.MSG_QOIHOMEVIEW_LBL_QUERY));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), lblQuery);
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), lblQuery);
 
 		// Query - Combo list available queries
 		cbxQuery = new ComboViewer(parent, SWT.CENTER);
@@ -278,10 +254,10 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 				return ((PIRTQuery) element).getName();
 			}
 		});
-		cbxQuery.setInput(getViewManager().getCache().getPIRTQueries());
+		cbxQuery.setInput(getViewController().getViewManager().getCache().getPIRTQueries());
 		cbxQuery.getCombo().addKeyListener(new ComboDropDownKeyListener());
 		cbxQuery.getControl().setLayoutData(new RowData(250, 30));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), cbxQuery.getControl());
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), cbxQuery.getControl());
 
 		// Query - Button - Execute Query
 		Map<String, Object> btnQueryOptions = new HashMap<>();
@@ -289,8 +265,9 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		btnQueryOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnQueryOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_QUERY);
 		btnQueryOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		Button btnQuery = new ButtonTheme(getViewManager().getRscMgr(), parent, SWT.CENTER, btnQueryOptions);
-		btnQuery.addListener(SWT.Selection, event -> viewCtrl.queryPIRT());
+		Button btnQuery = new ButtonTheme(getViewController().getViewManager().getRscMgr(), parent, SWT.CENTER,
+				btnQueryOptions);
+		btnQuery.addListener(SWT.Selection, event -> getViewController().queryPIRT());
 	}
 
 	/**
@@ -323,23 +300,24 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Columns - Id
 		columnProperties.add(treeViewer.getIdColumn().getColumn().getText());
-		treeViewer.getIdColumn().setLabelProvider(new QoILabelProvider(getViewManager().getRscMgr()) {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof QuantityOfInterest) {
-					if (StringUtils.isBlank(((QuantityOfInterest) element).getGeneratedId())) {
-						((QuantityOfInterest) element).setGeneratedId(treeViewer.getIdColumnText(element));
+		treeViewer.getIdColumn()
+				.setLabelProvider(new QoILabelProvider(getViewController().getViewManager().getRscMgr()) {
+					@Override
+					public String getText(Object element) {
+						if (element instanceof QuantityOfInterest) {
+							if (StringUtils.isBlank(((QuantityOfInterest) element).getGeneratedId())) {
+								((QuantityOfInterest) element).setGeneratedId(treeViewer.getIdColumnText(element));
+							}
+							return ((QuantityOfInterest) element).getGeneratedId();
+						}
+						return treeViewer.getIdColumnText(element);
 					}
-					return ((QuantityOfInterest) element).getGeneratedId();
-				}
-				return treeViewer.getIdColumnText(element);
-			}
-		});
+				});
 
 		// Columns - Symbol
 		TreeViewerColumn nameColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		nameColumn.getColumn().setText(PIRTQoITableQoI.getColumnSymbolProperty());
-		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewManager().getRscMgr()));
+		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnSymbolProperty());
@@ -347,7 +325,8 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		// Columns - Description
 		TreeViewerColumn descriptionColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		descriptionColumn.getColumn().setText(PIRTQoITableQoI.getColumnDescriptionProperty());
-		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider(getViewManager().getRscMgr()));
+		descriptionColumn
+				.setLabelProvider(new QoIDescriptionLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnDescriptionProperty());
@@ -355,7 +334,8 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		// Columns - Creation Date
 		TreeViewerColumn creationDateColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		creationDateColumn.getColumn().setText(PIRTQoITableQoI.getColumnCreationDateProperty());
-		creationDateColumn.setLabelProvider(new QoICreationDateLabelProvider(getViewManager().getRscMgr()));
+		creationDateColumn
+				.setLabelProvider(new QoICreationDateLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnPixelData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_CREATIONDATECOLUMN_WIDTH, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnCreationDateProperty());
@@ -414,13 +394,13 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Tree - Hint
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
@@ -452,9 +432,10 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 				if (!openEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnEditItem = TableFactory.createOpenButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnEditItem.addListener(SWT.Selection, event -> viewCtrl.openQuantityOfInterest(element));
+					ButtonTheme btnEditItem = TableFactory
+							.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnEditItem.addListener(SWT.Selection,
+							event -> getViewController().openQuantityOfInterest(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -489,8 +470,9 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 					// Button
 					ButtonTheme btnDuplicateQoI = TableFactory
-							.createCopyButtonColumnAction(getViewManager().getRscMgr(), cell);
-					btnDuplicateQoI.addListener(SWT.Selection, event -> viewCtrl.duplicateQuantityOfInterest(element));
+							.createCopyButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDuplicateQoI.addListener(SWT.Selection,
+							event -> getViewController().duplicateQuantityOfInterest(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -524,9 +506,9 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 						&& null == ((QuantityOfInterest) element).getTagDate()) {
 
 					// Button
-					ButtonTheme btnTagQoI = TableFactory.createTagButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnTagQoI.addListener(SWT.Selection, event -> viewCtrl.doTagAction(element));
+					ButtonTheme btnTagQoI = TableFactory
+							.createTagButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnTagQoI.addListener(SWT.Selection, event -> getViewController().doTagAction(element));
 					btnTagQoI.setToolTipText(RscTools.getString(RscConst.MSG_PHENOMENAVIEW_BTN_ADDTAG_TOOLTIP));
 
 					// Draw cell
@@ -561,7 +543,7 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 					QuantityOfInterest qoi = (QuantityOfInterest) element;
 
 					// Get current user
-					User currentUser = getViewManager().getCache().getUser();
+					User currentUser = getViewController().getViewManager().getCache().getUser();
 
 					// Can delete - not tagged
 					canDelete = (null == qoi.getTagDate());
@@ -580,9 +562,10 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 				if (canDelete && !deleteEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnDeleteQoI = TableFactory.createDeleteButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnDeleteQoI.addListener(SWT.Selection, event -> viewCtrl.deleteQuantityOfInterest(element));
+					ButtonTheme btnDeleteQoI = TableFactory
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDeleteQoI.addListener(SWT.Selection,
+							event -> getViewController().deleteQuantityOfInterest(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -625,7 +608,7 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 			if (selection != null && !selection.isEmpty()) {
 				Object element = ((IStructuredSelection) selection).getFirstElement();
 				if (element instanceof QuantityOfInterest) {
-					viewCtrl.openQuantityOfInterest(element);
+					getViewController().openQuantityOfInterest(element);
 				}
 			}
 		});
@@ -664,7 +647,8 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
-		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new QoIDropSupport(viewCtrl, treeViewer));
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
+				new QoIDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
@@ -683,7 +667,8 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		Button btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnBackOptions);
+		Button btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
+				btnBackOptions);
 
 		// Footer buttons - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -691,8 +676,10 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
-		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> getViewManager().openPIRTHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
+		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) e -> getViewController().getViewManager().openPIRTHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.PUSH | SWT.CENTER,
+				btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -700,11 +687,11 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.PIRT_QOI);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();
@@ -728,9 +715,27 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 	}
 
 	/**
+	 * Sets the table header data.
+	 *
+	 * @param data the new table header data
+	 */
+	void setTableHeaderData(Object data) {
+		if (tableHeaderBar != null) {
+			tableHeaderBar.setInput(data);
+		}
+	}
+
+	/**
+	 * Refresh table header.
+	 */
+	void refreshTableHeader() {
+		tableHeaderBar.refreshViewer();
+	}
+
+	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 
 		// Dispose the table components
 		if (treeViewer != null && treeViewer.getTree() != null && !treeViewer.getTree().isDisposed()) {
@@ -767,51 +772,7 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 	/** {@inheritDoc} */
 	@Override
 	public void reload() {
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		List<QuantityOfInterest> qoiList = new ArrayList<>();
-
-		if (model != null) {
-			// set model to table header
-			tableHeaderBar.setInput(model);
-
-			tableHeaderBar.refreshViewer();
-
-			// qoi list
-			qoiList = getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
-		}
-
-		/**
-		 * Refresh the table
-		 */
-		// Get expanded elements
-		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
-		if (treeViewer != null) {
-			initialization = false;
-			elements = treeViewer.getExpandedElements();
-		}
-		refreshMainTable();
-
-		treeViewer.setInput(qoiList);
-
-		// Set expanded elements
-		if (initialization) {
-			treeViewer.expandAll();
-		} else {
-			treeViewer.setExpandedElements(elements);
-		}
-		treeViewer.refresh();
-	}
-
-	/**
-	 * TODO: TO BE MOVED. Controller has to have the PIRT configuration, not the
-	 * view.
-	 * 
-	 * @return the PIRT description headers from the PIRT configuration
-	 */
-	List<PIRTDescriptionHeader> getPIRTDescriptionHeaders() {
-		return pirtConfiguration.getHeaders();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -830,6 +791,46 @@ public class PIRTQoIView extends ACredibilitySubView<PIRTViewManager> {
 
 		IStructuredSelection structuredSelection = (IStructuredSelection) selection;
 		return (PIRTQuery) structuredSelection.getFirstElement();
+	}
+
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		if (treeViewer != null) {
+			elements = treeViewer.getExpandedElements();
+		}
+		return elements;
+	}
+
+	/**
+	 * Sets the tree expanded elements.
+	 *
+	 * @param elements the new tree expanded elements
+	 */
+	void setTreeExpandedElements(Object[] elements) {
+		if (treeViewer != null) {
+			if (elements == null || elements.length == 0) {
+				treeViewer.expandAll();
+			} else {
+				treeViewer.setExpandedElements(elements);
+			}
+			treeViewer.refresh();
+		}
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
 	}
 
 }

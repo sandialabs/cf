@@ -81,6 +81,8 @@ public class RscTools {
 	public static final String THREE_DOTS = "..."; //$NON-NLS-1$
 	/** CARRIAGE_RETURN character */
 	public static final String CARRIAGE_RETURN = "\n"; //$NON-NLS-1$
+	/**  TAB character. */
+	public static final String TAB = "\t"; //$NON-NLS-1$
 
 	/**
 	 * Private constructor to not allow instantiation.

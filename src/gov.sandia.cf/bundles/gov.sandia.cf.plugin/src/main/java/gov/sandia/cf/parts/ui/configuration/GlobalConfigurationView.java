@@ -40,16 +40,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationViewManager> {
+public class GlobalConfigurationView extends ACredibilitySubView<GlobalConfigurationViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(GlobalConfigurationView.class);
-
-	/**
-	 * Controller
-	 */
-	private GlobalConfigurationViewController viewCtrl;
 
 	/**
 	 * The main composite
@@ -62,14 +57,12 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 	private SelectWidget<OpenLinkBrowserOption> cbxOpenLinkOpts;
 
 	/**
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the view style
+	 * @param viewController the view manager
+	 * @param parent         the parent composite
+	 * @param style          the view style
 	 */
-	public GlobalConfigurationView(ConfigurationViewManager viewManager, Composite parent, int style) {
-		super(viewManager, parent, style);
-
-		this.viewCtrl = new GlobalConfigurationViewController(this);
+	public GlobalConfigurationView(GlobalConfigurationViewController viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// create the view
 		renderPage();
@@ -125,7 +118,7 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
@@ -153,23 +146,23 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		schemaComposite.setBackground(schemaComposite.getParent().getBackground());
 
 		// Browser option collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER, schemaComposite,
-				RscTools.getString(RscConst.MSG_CONF_GLOBALVIEW_BROWSER_TITLE), false, true);
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+				schemaComposite, RscTools.getString(RscConst.MSG_CONF_GLOBALVIEW_BROWSER_TITLE), false, true);
 
 		// label
 		Label label = FormFactory.createLabel(schemaComposite,
 				RscTools.getString(RscConst.PREFS_GLOBAL_OPEN_LINK_BROWSER_OPTION));
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
-		cbxOpenLinkOpts = FormFactory.createSelectWidget(getViewManager().getRscMgr(), schemaComposite, true, null,
-				Arrays.asList(OpenLinkBrowserOption.values()));
+		cbxOpenLinkOpts = FormFactory.createSelectWidget(getViewController().getViewManager().getRscMgr(),
+				schemaComposite, true, null, Arrays.asList(OpenLinkBrowserOption.values()));
 		cbxOpenLinkOpts.setValue(null);
 
 		// text input listener
-		cbxOpenLinkOpts
-				.addSelectionChangedListener(e -> viewCtrl.updateGlobalConfigurationAction(cbxOpenLinkOpts.getValue()));
+		cbxOpenLinkOpts.addSelectionChangedListener(
+				e -> getViewController().updateGlobalConfigurationAction(cbxOpenLinkOpts.getValue()));
 	}
 
 	/**
@@ -198,8 +191,8 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -208,14 +201,14 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtonsFooterLeft, ContextualHelpId.EXPORT);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackButton(btnBack);
+		getViewController().getViewManager().plugBackButton(btnBack);
 
 		// layout view
 		compositeButtonsFooter.layout();
@@ -224,25 +217,22 @@ public class GlobalConfigurationView extends ACredibilitySubView<ConfigurationVi
 	/** {@inheritDoc} */
 	@Override
 	public void reload() {
-		reloadOpenLinkBrowserOptions();
+		getViewController().reloadData();
 	}
 
 	/**
 	 * Reload the open link browser options
 	 */
-	private void reloadOpenLinkBrowserOptions() {
+	void reloadOpenLinkBrowserOptions() {
 		if (cbxOpenLinkOpts != null) {
 			OpenLinkBrowserOption finalOption = null;
 			try {
-				finalOption = OpenLinkBrowserOption.valueOf(viewCtrl.getConfiguration().getOpenLinkBrowserOpts());
+				finalOption = OpenLinkBrowserOption
+						.valueOf(getViewController().getConfiguration().getOpenLinkBrowserOpts());
 			} catch (IllegalArgumentException e) {
 				finalOption = OpenLinkBrowserOption.ECLIPSE_PREFERENCE;
 			}
 			cbxOpenLinkOpts.setValue(finalOption);
 		}
-	}
-
-	OpenLinkBrowserOption getCbxOpenLinkOpts() {
-		return cbxOpenLinkOpts.getValue();
 	}
 }

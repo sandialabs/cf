@@ -164,7 +164,9 @@ public class YmlWriterGlobalDataCustom {
 	}
 
 	/**
-	 * @param model the model to export
+	 * To map model.
+	 *
+	 * @param options the options
 	 * @return a map containing the model data
 	 */
 	private Map<String, Object> toMapModel(final Map<ExportOptions, Object> options) {
@@ -216,7 +218,9 @@ public class YmlWriterGlobalDataCustom {
 	}
 
 	/**
-	 * @param userList the user list to export
+	 * To map user list.
+	 *
+	 * @param options the options
 	 * @return a map of Users
 	 */
 	private Map<String, Object> toMapUserList(final Map<ExportOptions, Object> options) {

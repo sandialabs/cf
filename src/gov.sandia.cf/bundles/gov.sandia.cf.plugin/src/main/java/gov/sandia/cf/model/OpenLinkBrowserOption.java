@@ -15,7 +15,7 @@ import java.util.List;
 @SuppressWarnings("javadoc")
 public enum OpenLinkBrowserOption implements ISelectValue {
 
-	EXERTNAL_BROWSER("Use External Browser"), //$NON-NLS-1$
+	EXTERNAL_BROWSER("Use External Browser"), //$NON-NLS-1$
 	INTERNAL_BROWSER("Use Internal Browser"), //$NON-NLS-1$
 	ECLIPSE_PREFERENCE("Use Platform Preferences"), //$NON-NLS-1$
 	CF_PREFERENCE("Use Credibility Framework Preferences"); //$NON-NLS-1$

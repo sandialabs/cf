@@ -32,7 +32,7 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 	/**
 	 * the Report home view
 	 */
-	private ReportView reportView;
+	private ReportViewController reportViewCtrl;
 
 	/**
 	 * the last control opened
@@ -55,6 +55,8 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 		super(parentView, parent, style);
 		this.lastControl = null;
 
+		this.reportViewCtrl = new ReportViewController(this);
+
 		// create the view
 		createPartControl(parent);
 	}
@@ -71,12 +73,9 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 		this.stackLayout = new StackLayout();
 		this.setLayout(stackLayout);
 
-		// load home view
-		this.reportView = new ReportView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = reportView;
-		this.lastControl = reportView;
+		this.stackLayout.topControl = reportViewCtrl.getViewControl();
+		this.lastControl = reportViewCtrl.getViewControl();
 
 		this.layout();
 	}
@@ -86,6 +85,7 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 	 * 
 	 * @param button the button
 	 */
+	@Override
 	public void plugBackHomeButton(Button button) {
 		this.viewManager.plugBackHomeButton(button);
 	}
@@ -97,13 +97,9 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 		// save the last opened view
 		saveLastView();
 
-		if (this.reportView == null) {
-			this.reportView = new ReportView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = reportView;
-		reportView.refresh();
+		this.stackLayout.topControl = reportViewCtrl.getViewControl();
+		reportViewCtrl.refresh();
 
 		this.layout();
 	}
@@ -166,8 +162,8 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (reportView != null) {
-			bcHomeItemPart.setName(reportView.getItemTitle());
+		if (reportViewCtrl != null) {
+			bcHomeItemPart.setName(reportViewCtrl.getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -182,7 +178,7 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 	 */
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
-		if (item != null && item.getListener().equals(this) && item.getName().equals((reportView).getItemTitle())) {
+		if (item != null && item.getListener().equals(this) && item.getName().equals((reportViewCtrl).getItemTitle())) {
 			openHome();
 		}
 	}
@@ -196,8 +192,8 @@ public class ReportViewManager extends AViewManager implements Listener, IViewMa
 	public void reload() {
 
 		// reload views
-		if (reportView != null) {
-			reportView.reload();
+		if (reportViewCtrl != null) {
+			reportViewCtrl.reload();
 		}
 	}
 

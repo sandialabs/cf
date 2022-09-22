@@ -71,11 +71,16 @@ public interface IViewController {
 	 * Quit.
 	 */
 	void quit();
-	
+
 	/**
 	 * Handle web event.
 	 *
 	 * @param e the e
 	 */
 	void handleWebEvent(WebEvent e);
+
+	/**
+	 * Set the view changed properties and mechanisms
+	 */
+	void viewChanged();
 }

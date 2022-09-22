@@ -10,11 +10,13 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ExpandEvent;
 import org.eclipse.swt.events.ExpandListener;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -255,7 +257,14 @@ public class FormFieldWidget<S extends GenericParameterSelectValue<?>> extends C
 
 			// for richtext editors add modify listener
 			if (FormFieldType.RICH_TEXT.equals(type) && control instanceof RichTextWidget) {
-				((RichTextWidget) control).addModifyListener(e -> listener.notify());
+				((RichTextWidget) control).addModifyListener(e -> {
+					Event event = new Event();
+					event.data = e.data;
+					event.item = e.widget;
+					event.display = e.display;
+					event.time = e.time;
+					listener.keyReleased(new KeyEvent(event));
+				});
 			}
 		}
 	}
@@ -376,6 +385,19 @@ public class FormFieldWidget<S extends GenericParameterSelectValue<?>> extends C
 	 */
 	public boolean isEditable() {
 		return editable;
+	}
+
+	/**
+	 * Validate.
+	 *
+	 * @return true, if valid.
+	 */
+	public boolean validate() {
+		if (FormFieldType.LINK.equals(type)) {
+			link.validateLink();
+			return link.getNotification() == null;
+		}
+		return true;
 	}
 
 	/**

@@ -32,6 +32,8 @@ public class PartsResourceConstants {
 	public static final int DESCRIPTIVE_DIALOG_SIZE_Y = 700;
 	public static final int DIALOG_TXT_INPUT_HEIGHT = 20;
 	public static final int RICHTEXTEDITOR_MINHEIGHT = 200;
+	public static final int DESCRIPTIVE_DIALOG_MIN_SIZE_X = 200;
+	public static final int DESCRIPTIVE_DIALOG_MIN_SIZE_Y = 100;
 	/* Tables */
 	public static final int TABLE_VIEWER_SUPPORT_LISTENER_EVENTYPE = SWT.MouseDoubleClick;
 	public static final RGB TABLE_NON_EDITABLE_CELL_COLOR = new RGB(250, 250, 250);

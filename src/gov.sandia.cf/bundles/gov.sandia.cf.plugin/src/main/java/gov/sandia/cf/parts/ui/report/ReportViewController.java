@@ -16,12 +16,16 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.slf4j.Logger;
@@ -33,6 +37,7 @@ import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.application.report.IReportARGExecutionApp;
 import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
@@ -58,6 +63,8 @@ import gov.sandia.cf.model.dto.arg.ARGType;
 import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.parts.dialogs.NewFileTreeSelectionDialog;
+import gov.sandia.cf.parts.ui.AViewController;
+import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.TextWidget;
 import gov.sandia.cf.preferences.PrefTools;
@@ -73,21 +80,275 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-public class ReportViewController {
+public class ReportViewController extends AViewController<ReportViewManager, ReportView>
+		implements IReportViewController {
 
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(ReportViewController.class);
 
-	/**
-	 * The view
-	 */
-	private ReportView view;
+	private ARGParameters argParameters;
+	private List<QuantityOfInterest> pirtQoIList;
+	private Map<QuantityOfInterest, Map<Class<?>, Control>> pirtControlMap;
+	private List<Tag> pcmmTagList;
+	private ARGType argTypes;
 
-	ReportViewController(ReportView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	private String argVersion;
+
+	private boolean asyncDataLoading = false;
+
+	/**
+	 * Instantiates a new report view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param view        the view
+	 */
+	ReportViewController(ReportViewManager viewManager, ReportView view) {
+		super(viewManager);
+		super.setView(view);
+	}
+
+	/**
+	 * Instantiates a new report view controller.
+	 *
+	 * @param viewManager the view manager
+	 */
+	ReportViewController(ReportViewManager viewManager) {
+		super(viewManager);
+		super.setView(new ReportView(this, SWT.NONE));
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+		// reload parameters from database
+		argParameters = getViewManager().getAppManager().getService(IReportARGExecutionApp.class).getARGParameters();
+
+		// get default parameters
+		if (argParameters == null) {
+			try {
+
+				// persist ARG default parameters
+				argParameters = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
+						.addDefaultARGParameters(getViewManager().getCredibilityEditor().getCfProjectPath());
+
+				if (argParameters == null) {
+					return;
+				}
+			} catch (CredibilityException e) {
+				logger.error("Impossible to load the arg parameters.", e); //$NON-NLS-1$
+			}
+		}
+
+		// execute asynchronously data loading
+		Display.getCurrent().asyncExec(() -> {
+			startAsyncDataLoading();
+
+			// reload combo-box parameters
+			reloadARGTypes(new NullProgressMonitor());
+			reloadARGVersion(new NullProgressMonitor());
+
+			// reload execution environment
+			getView().refreshARGSetup();
+
+			// reload
+			getView().refreshARGParameters();
+			getView().refreshPlanning();
+			reloadPIRT();
+			reloadPCMM();
+			getView().refreshCustomEnding();
+
+			stopAsyncDataLoading();
+		});
+	}
+
+	/**
+	 * Reload ARG types job.
+	 */
+	void reloadARGTypesJob() {
+		Display.getCurrent().asyncExec(() -> {
+			startAsyncDataLoading();
+
+			try {
+				StringBuilder consoleLog = new StringBuilder();
+
+				argTypes = getViewManager().getAppManager().getService(IReportARGExecutionApp.class).getARGTypes(
+						computeARGParametersForExecution(argParameters), consoleLog, consoleLog,
+						new NullProgressMonitor());
+
+				getView().logInConsole(consoleLog.toString());
+
+				getView().refreshARGParametersARGTypes();
+
+			} catch (Exception e) {
+				logger.warn(e.getMessage());
+			}
+
+			stopAsyncDataLoading();
+		});
+	}
+
+	/**
+	 * Reload the ARG parameters : if not present, add default data.
+	 *
+	 * @param monitor the monitor
+	 */
+	void reloadARGTypes(IProgressMonitor monitor) {
+
+		try {
+			StringBuilder consoleLog = new StringBuilder();
+
+			argTypes = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
+					.getARGTypes(computeARGParametersForExecution(argParameters), consoleLog, consoleLog, monitor);
+
+			getView().logInConsole(consoleLog.toString());
+
+		} catch (Exception e) {
+			logger.warn(RscTools.getString(RscConst.EX_ARG_COMMAND_EXCEPTION), e);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+					RscTools.getString(RscConst.EX_ARG_COMMAND_EXCEPTION));
+		}
+	}
+
+	/**
+	 * Reload ARG version job.
+	 */
+	void reloadARGVersionJob() {
+		Display.getCurrent().asyncExec(() -> {
+			startAsyncDataLoading();
+
+			try {
+				StringBuilder consoleLog = new StringBuilder();
+
+				argVersion = getViewManager().getAppManager().getService(IReportARGExecutionApp.class).getARGVersion(
+						computeARGParametersForExecution(argParameters), consoleLog, consoleLog,
+						new NullProgressMonitor());
+
+				getView().logInConsole(consoleLog.toString());
+
+				getView().refreshARGSetupARGVersion();
+
+			} catch (Exception e) {
+				logger.warn(e.getMessage());
+			}
+
+			stopAsyncDataLoading();
+		});
+	}
+
+	/**
+	 * Reload ARG version.
+	 *
+	 * @param monitor the monitor
+	 */
+	void reloadARGVersion(IProgressMonitor monitor) {
+		try {
+			StringBuilder consoleLog = new StringBuilder();
+
+			argVersion = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
+					.getARGVersion(computeARGParametersForExecution(argParameters), consoleLog, consoleLog, monitor);
+
+			getView().logInConsole(consoleLog.toString());
+
+		} catch (Exception e) {
+			logger.warn(RscTools.getString(RscConst.EX_ARG_COMMAND_EXCEPTION), e);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+					RscTools.getString(RscConst.EX_ARG_COMMAND_EXCEPTION));
+		}
+	}
+
+	/**
+	 * Reload PIRT data
+	 */
+	void reloadPIRT() {
+		// QoI list
+		pirtQoIList = new ArrayList<>();
+		pirtControlMap = new HashMap<>();
+
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		if (model != null) {
+			// Get QoI list
+			pirtQoIList = getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
+		}
+
+		// load checkbox
+		getView().refreshPIRT();
+
+		// Render
+		getView().refreshPIRTQoIList();
+	}
+
+	/**
+	 * Reload PCMM data
+	 */
+	void reloadPCMM() {
+		// Get Tag list
+		pcmmTagList = getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
+
+		getView().refreshPCMMTagList();
+		getView().refreshPCMM();
+	}
+
+	/**
+	 * Start async data loading.
+	 */
+	private void startAsyncDataLoading() {
+		getView().enableView(false);
+		asyncDataLoading = true;
+	}
+
+	/**
+	 * Stop async data loading.
+	 */
+	private void stopAsyncDataLoading() {
+		getView().enableView(true);
+		asyncDataLoading = false;
+	}
+
+	/**
+	 * Checks if is data loading.
+	 *
+	 * @return true, if is data loading
+	 */
+	boolean isAsyncDataLoading() {
+		return asyncDataLoading;
+	}
+
+	/**
+	 * @return the ARG version
+	 */
+	String getARGVersion() {
+		return argVersion;
+	}
+
+	/**
+	 * Gets the pirt control map.
+	 *
+	 * @return the pirt control map
+	 */
+	Map<QuantityOfInterest, Map<Class<?>, Control>> getPirtControlMap() {
+		return pirtControlMap;
+	}
+
+	/**
+	 * Gets the pirt qo I list.
+	 *
+	 * @return the pirt qo I list
+	 */
+	List<QuantityOfInterest> getPirtQoIList() {
+		return pirtQoIList;
+	}
+
+	/**
+	 * Gets the pcmm tag list.
+	 *
+	 * @return the pcmm tag list
+	 */
+	List<Tag> getPcmmTagList() {
+		return pcmmTagList;
 	}
 
 	/**
@@ -115,9 +376,9 @@ public class ReportViewController {
 	 */
 	public boolean validateArgSetupExecutable() {
 
-		Notification notifArgSetupExecutable = checkArgSetupExecutable(view.getTxtArgSetupExecutable().getValue());
+		Notification notifArgSetupExecutable = checkArgSetupExecutable(getView().getTxtArgSetupExecutable().getValue());
 		if (notifArgSetupExecutable != null) {
-			view.getTxtArgSetupExecutable().setHelper(notifArgSetupExecutable);
+			getView().getTxtArgSetupExecutable().setHelper(notifArgSetupExecutable);
 			return false;
 		}
 
@@ -187,9 +448,9 @@ public class ReportViewController {
 	 */
 	public boolean validateArgParametersFilePath() {
 
-		Notification notifParamFile = checkARGParametersFile(view.getArgParameters());
+		Notification notifParamFile = checkARGParametersFile(argParameters);
 		if (notifParamFile != null) {
-			view.getTxtARGParamParametersFile().setHelper(notifParamFile);
+			getView().getTxtARGParamParametersFile().setHelper(notifParamFile);
 			return !notifParamFile.isError();
 		}
 
@@ -259,9 +520,9 @@ public class ReportViewController {
 	 */
 	public boolean validateArgStructureFilePath() {
 
-		Notification notifStructFile = checkARGStructureFile(view.getArgParameters());
+		Notification notifStructFile = checkARGStructureFile(argParameters);
 		if (notifStructFile != null) {
-			view.getTxtARGParamStructureFile().setHelper(notifStructFile);
+			getView().getTxtARGParamStructureFile().setHelper(notifStructFile);
 			return !notifStructFile.isError();
 		}
 
@@ -320,9 +581,9 @@ public class ReportViewController {
 	 */
 	public boolean validateArgOutputPath() {
 
-		Notification notifOutput = checkARGParamOutput(view.getArgParameters());
+		Notification notifOutput = checkARGParamOutput(argParameters);
 		if (notifOutput != null) {
-			view.getTxtARGParamOutput().setHelper(notifOutput);
+			getView().getTxtARGParamOutput().setHelper(notifOutput);
 			return !notifOutput.isError();
 		}
 
@@ -356,6 +617,11 @@ public class ReportViewController {
 			return NotificationFactory.getNewError(e.getMessage());
 		}
 
+		if (pathResolved == null || pathResolved.isBlank()) {
+			return NotificationFactory.getNewError(RscTools.getString(
+					RscConst.ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_NOTEXIST, RscTools.empty()));
+		}
+
 		// check is a file
 		File structureFile = new File(pathResolved);
 
@@ -381,9 +647,9 @@ public class ReportViewController {
 	 */
 	public boolean validateArgCustomEnding() {
 
-		Notification notifOutput = checkARGCustomEnding(view.getArgParameters());
+		Notification notifOutput = checkARGCustomEnding(argParameters);
 		if (notifOutput != null) {
-			view.getTxtCustomEndingFilePath().setHelper(notifOutput);
+			getView().getTxtCustomEndingFilePath().setHelper(notifOutput);
 			return !notifOutput.isError();
 		}
 
@@ -395,22 +661,16 @@ public class ReportViewController {
 	 *         installation
 	 */
 	ARGType getARGTypes() {
+		return argTypes;
+	}
 
-		ARGType argType = null;
-
-		try {
-
-			StringBuilder consoleLog = new StringBuilder(view.getTxtConsole().getTextWidget().getText());
-			argType = view.getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
-					.getARGTypes(computeARGParametersForExecution(view.getArgParameters()), consoleLog, consoleLog);
-			view.getTxtConsole().getTextWidget().setText(consoleLog.toString());
-			view.getTxtConsole().setTopIndex(view.getTxtConsole().getTextWidget().getLineCount() - 1);
-
-		} catch (CredibilityException e) {
-			logger.warn(e.getMessage());
-		}
-
-		return argType;
+	/**
+	 * Gets the ARG parameters.
+	 *
+	 * @return the ARG parameters
+	 */
+	ARGParameters getARGParameters() {
+		return argParameters;
 	}
 
 	/**
@@ -425,7 +685,7 @@ public class ReportViewController {
 			return;
 		}
 
-		NewFileTreeSelectionDialog dialog = FormFactory.getNewResourceTreeDialog(view.getViewManager().getRscMgr());
+		NewFileTreeSelectionDialog dialog = FormFactory.getNewResourceTreeDialog(getViewManager().getRscMgr());
 		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		dialog.setTitle(title);
 		if (!StringUtils.isBlank(textWidget.getValue())) {
@@ -434,7 +694,7 @@ public class ReportViewController {
 
 			if (rsc == null || !rsc.exists()) {
 				rsc = WorkspaceTools
-						.getResourceInWorkspaceForPath(view.getViewManager().getCredibilityEditor().getCfProjectPath());
+						.getResourceInWorkspaceForPath(getViewManager().getCredibilityEditor().getCfProjectPath());
 			}
 
 			if (rsc != null) {
@@ -457,7 +717,7 @@ public class ReportViewController {
 	void generateReport() {
 
 		// validate ARG parameters
-		view.clearHelpers();
+		getView().clearHelpers();
 
 		boolean valid = validateArgSetupExecutable();
 		valid &= validateArgParametersFilePath();
@@ -473,87 +733,144 @@ public class ReportViewController {
 		StringBuilder errorLog = new StringBuilder();
 		StringBuilder consoleLog = new StringBuilder();
 
-		if (view.getTxtConsole() != null) {
-			consoleLog.append(view.getTxtConsole().getTextWidget().getText());
+		if (getView().getTxtConsole() != null) {
+			consoleLog.append(getView().getTxtConsole().getTextWidget().getText());
 		}
 
-		// launch generation process
-		ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(view.getShell());
 		try {
-			progressDialog.run(true, false,
-					new GenerateARGReportRunnable(view.getViewManager(),
-							computeARGParametersForExecution(view.getArgParameters()), getUserSelectionOptions(),
-							errorLog, consoleLog));
-		} catch (CredibilityException | InvocationTargetException e) {
-			logger.error(e.getMessage());
-			MessageDialog.openError(Display.getCurrent().getActiveShell(),
-					RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			logger.error(e.getMessage());
-			MessageDialog.openError(Display.getCurrent().getActiveShell(),
-					RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
-		}
-		progressDialog.close();
+			final IViewManager viewManager = getViewManager();
+			final ARGParameters argParametersForExecution = computeARGParametersForExecution(argParameters);
+			final Map<ExportOptions, Object> userSelection = getUserSelectionOptions();
 
-		// write log in console
-		if (view.getTxtConsole() != null) {
-			view.getTxtConsole().getTextWidget().setText(consoleLog.toString());
-			view.getTxtConsole().setTopIndex(view.getTxtConsole().getTextWidget().getLineCount() - 1);
+			if (argParametersForExecution == null) {
+				throw new CredibilityException(
+						RscTools.getString(RscConst.ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_NULL));
+			}
+
+			String backendType = !StringUtils.isBlank(argParametersForExecution.getBackendType())
+					? argParametersForExecution.getBackendType()
+					: RscTools.getString(RscConst.MSG_OBJECT_NULL);
+			String filename = !StringUtils.isBlank(argParametersForExecution.getFilename())
+					? argParametersForExecution.getFilename()
+					: RscTools.getString(RscConst.MSG_OBJECT_NULL);
+
+			// execute asynchronously to keep fluid UI
+			final Display display = Display.getCurrent();
+			Job job = Job.create(
+					RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_JOB_TITLE, backendType, filename),
+					monitor -> {
+						try {
+							new GenerateARGReportRunnable(viewManager, argParametersForExecution, userSelection,
+									errorLog, consoleLog).run(monitor);
+
+							// write log in console
+							display.asyncExec(() -> {
+								if (getView().getTxtConsole() != null) {
+									getView().getTxtConsole().getTextWidget().setText(consoleLog.toString());
+									getView().getTxtConsole()
+											.setTopIndex(getView().getTxtConsole().getTextWidget().getLineCount() - 1);
+								}
+							});
+
+							// if job is cancelled
+							return monitor.isCanceled() ? Status.CANCEL_STATUS : Status.OK_STATUS;
+
+						} catch (InvocationTargetException e) {
+							logger.error(e.getMessage());
+							MessageDialog.openError(Display.getCurrent().getActiveShell(),
+									RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+							logger.error(e.getMessage());
+							MessageDialog.openError(Display.getCurrent().getActiveShell(),
+									RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+						}
+
+						// this return statement is only accessed when an exception is triggered
+						return Status.CANCEL_STATUS;
+					});
+			job.setUser(true);
+			job.schedule();
+
+		} catch (CredibilityException e) {
+			logger.error(e.getMessage());
+			MessageDialog.openError(Display.getCurrent().getActiveShell(),
+					RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
 		}
+	}
+
+	/**
+	 * Open local ARG Setup preferences.
+	 *
+	 * @return true, if successful
+	 */
+	boolean openPreferences() {
+		boolean done = false;
+		PreferenceDialog pref = PrefTools.getCFPrefDialog(getView().getShell());
+		if (pref != null) {
+			int open = pref.open();
+			done = (open == Window.OK);
+
+			// reload the ARG setup and parameters
+			reloadARGTypesJob();
+			reloadARGVersionJob();
+		}
+		return done;
 	}
 
 	/**
 	 * update if the value of the txtArgSetupExecutable changed and set
 	 * argParameters arg executable, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGSetupExecutable(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getArgExecPath())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getArgExecPath())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setArgExecPath(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setArgExecPath(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 
 		// reload ARG types
-		view.reloadARGTypes();
-
-		// reload ARG Parameters
-		view.reloadARGParameters();
+		reloadARGTypesJob();
+		reloadARGVersionJob();
 	}
 
 	/**
 	 * update if the value of the txtARGParamParametersFile changed and set
 	 * argParameters parameters file, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGSetupPreScript(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getArgPreScript())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getArgPreScript())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setArgPreScript(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setArgPreScript(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the chboxUseARGLocalConf changed and set argParameters
-	 * use ARG local configuration
+	 * use ARG local configuration.
+	 *
+	 * @param value the value
 	 */
 	void changedARGSetupUseLocalConf(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
-		if (view.getArgParameters().getUseArgLocalConf() == null
-				|| (value != view.getArgParameters().getUseArgLocalConf().booleanValue())) {
-			view.getArgParameters().setUseArgLocalConf(value);
+		if (argParameters.getUseArgLocalConf() == null
+				|| (value != argParameters.getUseArgLocalConf().booleanValue())) {
+			argParameters.setUseArgLocalConf(value);
 			updateARGParameters();
 		}
 	}
@@ -561,267 +878,298 @@ public class ReportViewController {
 	/**
 	 * update if the value of the txtARGParamParametersFile changed and set
 	 * argParameters parameters file, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParametersFile(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getParametersFilePath())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getParametersFilePath())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setParametersFilePath(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setParametersFilePath(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the txtARGParamStructureFile changed and set
 	 * argParameters structure file, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGStructureFile(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getStructureFilePath())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getStructureFilePath())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setStructureFilePath(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setStructureFilePath(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the txtARGParamOutput changed and set argParameters
 	 * output, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamOutput(String value) {
-		if (view.getArgParameters() == null || value == null || value.equals(view.getArgParameters().getOutput())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getOutput())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setOutput(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setOutput(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the txtARGParamFilename changed and set argParameters
 	 * filename, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamFilename(String value) {
 
-		if (view.getArgParameters() == null || value == null || value.equals(view.getArgParameters().getFilename())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getFilename())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setFilename(value);
+		argParameters.setFilename(value);
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the txtARGParamReportTitle changed and set
 	 * argParameters report title, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamReportTitle(String value) {
 
-		if (view.getArgParameters() == null || value == null || value.equals(view.getArgParameters().getTitle())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getTitle())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setTitle(value);
+		argParameters.setTitle(value);
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the txtARGParamAuthor changed and set argParameters
 	 * report author, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamAuthor(String value) {
 
-		if (view.getArgParameters() == null || value == null || value.equals(view.getArgParameters().getAuthor())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getAuthor())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setAuthor(value);
+		argParameters.setAuthor(value);
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the cbxARGParamReportType changed and set
 	 * argParameters report type, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamReportType(String value) {
 
-		if (view.getArgParameters() == null || value == null || value.equals(view.getArgParameters().getReportType())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getReportType())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setReportType(value);
+		argParameters.setReportType(value);
 		updateARGParameters();
 	}
 
 	/**
 	 * update if the value of the cbxARGParamBackendType changed and set
 	 * argParameters backend type, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamBackendType(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getBackendType())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getBackendType())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setBackendType(value);
+		argParameters.setBackendType(value);
 		updateARGParameters();
 
 		// enable/disable inlining
-		view.reloadWordInlining();
+		getView().refreshWordInlining();
 	}
 
 	/**
 	 * update if the value of the inline word document option changed, otherwise do
 	 * nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGParamInlineWordDoc(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// update
-		if (view.getArgParameters().getInlineWordDoc() == null
-				|| (value != view.getArgParameters().getInlineWordDoc().booleanValue())) {
-			view.getArgParameters().setInlineWordDoc(value);
+		if (argParameters.getInlineWordDoc() == null || (value != argParameters.getInlineWordDoc().booleanValue())) {
+			argParameters.setInlineWordDoc(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the planning option changed
+	 * update if the value of the planning option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning
-		if (view.getArgParameters().getPlanningEnabled() == null
-				|| (value != view.getArgParameters().getPlanningEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningEnabled(value);
+		if (argParameters.getPlanningEnabled() == null
+				|| (value != argParameters.getPlanningEnabled().booleanValue())) {
+			argParameters.setPlanningEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the Planning Intended Purpose option changed
+	 * update if the value of the Planning Intended Purpose option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningIntendedPurposeOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning Intended Purpose
-		if (view.getArgParameters().getPlanningIntendedPurposeEnabled() == null
-				|| (value != view.getArgParameters().getPlanningIntendedPurposeEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningIntendedPurposeEnabled(value);
+		if (argParameters.getPlanningIntendedPurposeEnabled() == null
+				|| (value != argParameters.getPlanningIntendedPurposeEnabled().booleanValue())) {
+			argParameters.setPlanningIntendedPurposeEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the Planning System Requirement option changed
+	 * update if the value of the Planning System Requirement option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningSysRequirementOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning System Requirement
-		if (view.getArgParameters().getPlanningSysReqEnabled() == null
-				|| (value != view.getArgParameters().getPlanningSysReqEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningSysReqEnabled(value);
+		if (argParameters.getPlanningSysReqEnabled() == null
+				|| (value != argParameters.getPlanningSysReqEnabled().booleanValue())) {
+			argParameters.setPlanningSysReqEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the Planning QoI Planner option changed
+	 * update if the value of the Planning QoI Planner option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningQoIPlannerOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning QoI Planner
-		if (view.getArgParameters().getPlanningQoIPlannerEnabled() == null
-				|| (value != view.getArgParameters().getPlanningQoIPlannerEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningQoIPlannerEnabled(value);
+		if (argParameters.getPlanningQoIPlannerEnabled() == null
+				|| (value != argParameters.getPlanningQoIPlannerEnabled().booleanValue())) {
+			argParameters.setPlanningQoIPlannerEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the Planning Uncertainty option changed
+	 * update if the value of the Planning Uncertainty option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningUncertaintyOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning Uncertainty
-		if (view.getArgParameters().getPlanningUncertaintyEnabled() == null
-				|| (value != view.getArgParameters().getPlanningUncertaintyEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningUncertaintyEnabled(value);
+		if (argParameters.getPlanningUncertaintyEnabled() == null
+				|| (value != argParameters.getPlanningUncertaintyEnabled().booleanValue())) {
+			argParameters.setPlanningUncertaintyEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the Planning Decision option changed
+	 * update if the value of the Planning Decision option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPlanningDecisionOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// Planning Decision
-		if (view.getArgParameters().getPlanningDecisionEnabled() == null
-				|| (value != view.getArgParameters().getPlanningDecisionEnabled().booleanValue())) {
-			view.getArgParameters().setPlanningDecisionEnabled(value);
+		if (argParameters.getPlanningDecisionEnabled() == null
+				|| (value != argParameters.getPlanningDecisionEnabled().booleanValue())) {
+			argParameters.setPlanningDecisionEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the PIRT options changed
+	 * update if the value of the PIRT options changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPIRTEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// PIRT
-		if (view.getArgParameters().getPirtEnabled() == null
-				|| (value != view.getArgParameters().getPirtEnabled().booleanValue())) {
-			view.getArgParameters().setPirtEnabled(value);
+		if (argParameters.getPirtEnabled() == null || (value != argParameters.getPirtEnabled().booleanValue())) {
+			argParameters.setPirtEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the QoI options changed
+	 * update if the value of the QoI options changed.
+	 *
+	 * @param qoi     the qoi
+	 * @param tag     the tag
+	 * @param enabled the enabled
 	 */
 	void changedQoISelected(QuantityOfInterest qoi, QuantityOfInterest tag, boolean enabled) {
 
@@ -830,16 +1178,15 @@ public class ReportViewController {
 		}
 
 		// if option list is null
-		if (view.getArgParameters().getQoiSelectedList() == null
-				|| view.getArgParameters().getQoiSelectedList().isEmpty()) {
+		if (argParameters.getQoiSelectedList() == null || argParameters.getQoiSelectedList().isEmpty()) {
 			List<ARGParametersQoIOption> options = new ArrayList<>();
 			ARGParametersQoIOption option = new ARGParametersQoIOption();
-			option.setArgParameter(view.getArgParameters());
+			option.setArgParameter(argParameters);
 			option.setQoi(qoi);
 			option.setTag(tag);
 			option.setEnabled(enabled);
 			options.add(option);
-			view.getArgParameters().setQoiSelectedList(options);
+			argParameters.setQoiSelectedList(options);
 
 			updateARGParameters();
 
@@ -849,7 +1196,7 @@ public class ReportViewController {
 		boolean changed = false;
 		boolean found = false;
 
-		for (ARGParametersQoIOption opt : view.getArgParameters().getQoiSelectedList()) {
+		for (ARGParametersQoIOption opt : argParameters.getQoiSelectedList()) {
 			// if found try to update
 			if (opt != null && qoi.equals(opt.getQoi())) {
 				found = true;
@@ -869,11 +1216,11 @@ public class ReportViewController {
 		// if not found create it
 		if (!found) {
 			ARGParametersQoIOption option = new ARGParametersQoIOption();
-			option.setArgParameter(view.getArgParameters());
+			option.setArgParameter(argParameters);
 			option.setQoi(qoi);
 			option.setTag(tag);
 			option.setEnabled(enabled);
-			view.getArgParameters().getQoiSelectedList().add(option);
+			argParameters.getQoiSelectedList().add(option);
 
 			changed = true;
 		}
@@ -884,98 +1231,105 @@ public class ReportViewController {
 	}
 
 	/**
-	 * update if the value of the PCMM option changed
+	 * update if the value of the PCMM option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPCMMEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
-		if (view.getArgParameters().getPcmmEnabled() == null
-				|| (value != view.getArgParameters().getPcmmEnabled().booleanValue())) {
-			view.getArgParameters().setPcmmEnabled(value);
+		if (argParameters.getPcmmEnabled() == null || (value != argParameters.getPcmmEnabled().booleanValue())) {
+			argParameters.setPcmmEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the PCMM Planning option changed
+	 * update if the value of the PCMM Planning option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPCMMPlanningEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
-		if (view.getArgParameters().getPcmmPlanningEnabled() == null
-				|| (value != view.getArgParameters().getPcmmPlanningEnabled().booleanValue())) {
-			view.getArgParameters().setPcmmPlanningEnabled(value);
+		if (argParameters.getPcmmPlanningEnabled() == null
+				|| (value != argParameters.getPcmmPlanningEnabled().booleanValue())) {
+			argParameters.setPcmmPlanningEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the PCMM Evidence option changed
+	 * update if the value of the PCMM Evidence option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPCMMEvidenceEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
-		if (view.getArgParameters().getPcmmEvidenceEnabled() == null
-				|| (value != view.getArgParameters().getPcmmEvidenceEnabled().booleanValue())) {
-			view.getArgParameters().setPcmmEvidenceEnabled(value);
+		if (argParameters.getPcmmEvidenceEnabled() == null
+				|| (value != argParameters.getPcmmEvidenceEnabled().booleanValue())) {
+			argParameters.setPcmmEvidenceEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the PCMM Assessment option changed
+	 * update if the value of the PCMM Assessment option changed.
+	 *
+	 * @param value the value
 	 */
 	void changedPCMMAssessmentEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
-		if (view.getArgParameters().getPcmmAssessmentEnabled() == null
-				|| (value != view.getArgParameters().getPcmmAssessmentEnabled().booleanValue())) {
-			view.getArgParameters().setPcmmAssessmentEnabled(value);
+		if (argParameters.getPcmmAssessmentEnabled() == null
+				|| (value != argParameters.getPcmmAssessmentEnabled().booleanValue())) {
+			argParameters.setPcmmAssessmentEnabled(value);
 			updateARGParameters();
 		}
 	}
 
 	/**
-	 * update if the value of the PCMM tag selection changed
+	 * update if the value of the PCMM tag selection changed.
+	 *
+	 * @param tagSelected the tag selected
 	 */
 	void changedPCMMTagSelected(Tag tagSelected) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		boolean changed = false;
 
 		// persisted tag is not null and selected tag is null
-		if (view.getArgParameters().getPcmmTagSelected() != null
-				&& (tagSelected == null || tagSelected.getId() == null)) {
-			view.getArgParameters().setPcmmTagSelected(null);
+		if (argParameters.getPcmmTagSelected() != null && (tagSelected == null || tagSelected.getId() == null)) {
+			argParameters.setPcmmTagSelected(null);
 			changed = true;
 		}
 
 		// persisted tag is null and selected tag is not null
-		if (view.getArgParameters().getPcmmTagSelected() == null && tagSelected != null
-				&& tagSelected.getId() != null) {
-			view.getArgParameters().setPcmmTagSelected(tagSelected);
+		if (argParameters.getPcmmTagSelected() == null && tagSelected != null && tagSelected.getId() != null) {
+			argParameters.setPcmmTagSelected(tagSelected);
 			changed = true;
 		}
 
 		// persisted tag is not null and selected tag is not null -> compare
-		if (view.getArgParameters().getPcmmTagSelected() != null && tagSelected != null && tagSelected.getId() != null
-				&& !tagSelected.equals(view.getArgParameters().getPcmmTagSelected())) {
-			view.getArgParameters().setPcmmTagSelected(tagSelected);
+		if (argParameters.getPcmmTagSelected() != null && tagSelected != null && tagSelected.getId() != null
+				&& !tagSelected.equals(argParameters.getPcmmTagSelected())) {
+			argParameters.setPcmmTagSelected(tagSelected);
 			changed = true;
 		}
 
@@ -987,32 +1341,35 @@ public class ReportViewController {
 	/**
 	 * update if the value of the textCustomEndingFilePath changed and set
 	 * argParameters structure file, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedARGCustomEndingFile(String value) {
 
-		if (view.getArgParameters() == null || value == null
-				|| value.equals(view.getArgParameters().getCustomEndingFilePath())) {
+		if (argParameters == null || value == null || value.equals(argParameters.getCustomEndingFilePath())) {
 			return;
 		}
 
 		// update
-		view.getArgParameters().setCustomEndingFilePath(FileTools.getNormalizedPath(Paths.get(value)));
+		argParameters.setCustomEndingFilePath(FileTools.getNormalizedPath(Paths.get(value)));
 		updateARGParameters();
 	}
 
 	/**
-	 * update if the value of the ARG custom ending options changed
+	 * update if the value of the ARG custom ending options changed.
+	 *
+	 * @param value the value
 	 */
 	void changedARGCustomEndingEnabledOption(boolean value) {
 
-		if (view.getArgParameters() == null) {
+		if (argParameters == null) {
 			return;
 		}
 
 		// PIRT
-		if (view.getArgParameters().getCustomEndingEnabled() == null
-				|| (value != view.getArgParameters().getCustomEndingEnabled().booleanValue())) {
-			view.getArgParameters().setCustomEndingEnabled(value);
+		if (argParameters.getCustomEndingEnabled() == null
+				|| (value != argParameters.getCustomEndingEnabled().booleanValue())) {
+			argParameters.setCustomEndingEnabled(value);
 			updateARGParameters();
 		}
 	}
@@ -1022,20 +1379,18 @@ public class ReportViewController {
 	 */
 	void updateARGParameters() {
 
-		if (view.getArgParameters() != null) {
+		if (argParameters != null) {
 			try {
 				// update arg parameters
-				ARGParameters newArgParameters = view.getViewManager().getAppManager()
-						.getService(IReportARGExecutionApp.class).updateARGParameters(view.getArgParameters());
-
-				view.setARGParameters(newArgParameters);
+				argParameters = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
+						.updateARGParameters(argParameters);
 
 				// set save state
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating the ARG parameters", e); //$NON-NLS-1$
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
 						e.getMessage());
 			}
 		}
@@ -1085,7 +1440,7 @@ public class ReportViewController {
 
 		// Initialize
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
-		Model model = view.getViewManager().getCache().getModel();
+		Model model = getViewManager().getCache().getModel();
 		options.put(ExportOptions.MODEL, model);
 
 		getARGOptionsPlanning(options, model);
@@ -1109,22 +1464,23 @@ public class ReportViewController {
 	private void getARGOptionsPlanning(Map<ExportOptions, Object> options, Model model) throws CredibilityException {
 
 		// PLANNING - Get generation parameters
-		options.put(ExportOptions.PLANNING_INCLUDE, view.getChboxPlanning().getSelection());
-		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, view.getChboxPlanningIntendedPurpose().getSelection());
-		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, view.getChboxPlanningSystemRequirement().getSelection());
-		options.put(ExportOptions.QOI_PLANNER_INCLUDE, view.getChboxPlanningQoIPlanner().getSelection());
-		options.put(ExportOptions.PLANNING_UNCERTAINTY_INCLUDE, view.getChboxPlanningUncertainty().getSelection());
-		options.put(ExportOptions.DECISION_INCLUDE, view.getChboxPlanningDecision().getSelection());
+		options.put(ExportOptions.PLANNING_INCLUDE, getView().getChboxPlanning().getSelection());
+		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, getView().getChboxPlanningIntendedPurpose().getSelection());
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE,
+				getView().getChboxPlanningSystemRequirement().getSelection());
+		options.put(ExportOptions.QOI_PLANNER_INCLUDE, getView().getChboxPlanningQoIPlanner().getSelection());
+		options.put(ExportOptions.PLANNING_UNCERTAINTY_INCLUDE, getView().getChboxPlanningUncertainty().getSelection());
+		options.put(ExportOptions.DECISION_INCLUDE, getView().getChboxPlanningDecision().getSelection());
 
 		// PLANNING section
 		options.put(ExportOptions.INTENDED_PURPOSE,
-				view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class).get(model));
-		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, view.getViewManager().getAppManager()
+				getViewManager().getAppManager().getService(IIntendedPurposeApp.class).get(model));
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, getViewManager().getAppManager()
 				.getService(ISystemRequirementApplication.class).getRequirementWithChildrenByModel(model));
-		options.put(ExportOptions.PLANNING_UNCERTAINTIES, view.getViewManager().getAppManager()
+		options.put(ExportOptions.PLANNING_UNCERTAINTIES, getViewManager().getAppManager()
 				.getService(IUncertaintyApplication.class).getUncertaintyGroupByModel(model));
-		options.put(ExportOptions.DECISION_LIST, view.getViewManager().getAppManager()
-				.getService(IDecisionApplication.class).getDecisionRootByModel(model));
+		options.put(ExportOptions.DECISION_LIST,
+				getViewManager().getAppManager().getService(IDecisionApplication.class).getDecisionRootByModel(model));
 	}
 
 	/**
@@ -1135,12 +1491,12 @@ public class ReportViewController {
 	private void getARGOptionsPIRT(Map<ExportOptions, Object> options) {
 
 		// PIRT- Get generation parameters
-		options.put(ExportOptions.PIRT_INCLUDE, view.getChboxPirt().getSelection());
-		options.put(ExportOptions.PIRT_SPECIFICATION, view.getViewManager().getCache().getPIRTSpecification());
+		options.put(ExportOptions.PIRT_INCLUDE, getView().getChboxPirt().getSelection());
+		options.put(ExportOptions.PIRT_SPECIFICATION, getViewManager().getCache().getPIRTSpecification());
 
 		Map<QuantityOfInterest, Map<ExportOptions, Object>> pirtQoIDataList = new HashMap<>();
-		if (view.getArgParameters() != null && view.getArgParameters().getQoiSelectedList() != null) {
-			view.getArgParameters().getQoiSelectedList().stream().filter(Objects::nonNull).forEach(qoi -> {
+		if (argParameters != null && argParameters.getQoiSelectedList() != null) {
+			argParameters.getQoiSelectedList().stream().filter(Objects::nonNull).forEach(qoi -> {
 				Map<ExportOptions, Object> qoiData = new EnumMap<>(ExportOptions.class);
 				qoiData.put(ExportOptions.PIRT_QOI_INCLUDE, qoi.getEnabled());
 				qoiData.put(ExportOptions.PIRT_QOI_TAG, qoi.getTag());
@@ -1159,30 +1515,30 @@ public class ReportViewController {
 	private void getARGOptionsPCMM(Map<ExportOptions, Object> options, Model model) {
 
 		// PCMM - Get generation parameters
-		Tag pcmmTag = view.getCbxSelection(Tag.class, view.getCbxPcmmTag());
+		Tag pcmmTag = getView().getCbxSelection(Tag.class, getView().getCbxPcmmTag());
 		if (pcmmTag == null || pcmmTag.getId() == null) {
 			pcmmTag = null;
 		}
 
 		// PCMM - Options
 		PCMMMode mode = null;
-		PCMMSpecification pcmmConfig = view.getViewManager().getPCMMConfiguration();
+		PCMMSpecification pcmmConfig = getViewManager().getPCMMConfiguration();
 
 		if (pcmmConfig != null) {
 
 			// Report options
 			mode = pcmmConfig.getMode();
-			options.put(ExportOptions.PCMM_INCLUDE, view.getChboxPcmm().getSelection());
+			options.put(ExportOptions.PCMM_INCLUDE, getView().getChboxPcmm().getSelection());
 			options.put(ExportOptions.PCMM_MODE, mode);
 			options.put(ExportOptions.PCMM_TAG, pcmmTag);
-			options.put(ExportOptions.PCMM_PLANNING_INCLUDE, view.getChboxPcmmPlanning().getSelection());
-			options.put(ExportOptions.PCMM_EVIDENCE_INCLUDE, view.getChboxPcmmEvidence().getSelection());
-			options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, view.getChboxPcmmAssessment().getSelection());
+			options.put(ExportOptions.PCMM_PLANNING_INCLUDE, getView().getChboxPcmmPlanning().getSelection());
+			options.put(ExportOptions.PCMM_EVIDENCE_INCLUDE, getView().getChboxPcmmEvidence().getSelection());
+			options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, getView().getChboxPcmmAssessment().getSelection());
 
 			// Get planning parameters
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(GenericParameter.Filter.PARENT, null);
-			List<PCMMPlanningParam> planningParameters = view.getViewManager().getAppManager()
+			List<PCMMPlanningParam> planningParameters = getViewManager().getAppManager()
 					.getService(IPCMMPlanningApplication.class).getPlanningFieldsBy(filters);
 			options.put(ExportOptions.PCMM_PLANNING_PARAMETERS, planningParameters);
 
@@ -1195,8 +1551,8 @@ public class ReportViewController {
 
 			try {
 				// PCMM Elements
-				List<PCMMElement> pcmmElements = view.getViewManager().getAppManager()
-						.getService(IPCMMApplication.class).getElementList(model);
+				List<PCMMElement> pcmmElements = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						.getElementList(model);
 				options.put(ExportOptions.PCMM_ELEMENTS, pcmmElements);
 
 				// PCMM Data
@@ -1204,48 +1560,48 @@ public class ReportViewController {
 
 					// Planning Questions
 					pcmmPlanningQuestions.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningQuestionsByElement(pcmmElement, mode));
 
 					// Planning Question Values
 					pcmmPlanningQuestionValues.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTag));
 
 					// Planning Parameter values
 					pcmmPlanningValues.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningValueByElement(pcmmElement, mode, pcmmTag));
 
 					// Evidence
-					pcmmEvidences.put(pcmmElement, view.getViewManager().getAppManager()
-							.getService(IPCMMEvidenceApp.class).getEvidenceByTag(pcmmTag));
+					pcmmEvidences.put(pcmmElement, getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+							.getEvidenceByTag(pcmmTag));
 
 					// Assessments
-					pcmmAssessments.put(pcmmElement, view.getViewManager().getAppManager()
+					pcmmAssessments.put(pcmmElement, getViewManager().getAppManager()
 							.getService(IPCMMAssessmentApp.class).getAssessmentByTag(pcmmTag));
 				}
 
 				// Planning
-				if (view.getChboxPcmmPlanning().getSelection()) {
+				if (getView().getChboxPcmmPlanning().getSelection()) {
 					options.put(ExportOptions.PCMM_PLANNING_QUESTIONS, pcmmPlanningQuestions);
 					options.put(ExportOptions.PCMM_PLANNING_QUESTION_VALUES, pcmmPlanningQuestionValues);
 					options.put(ExportOptions.PCMM_PLANNING_PARAMETERS_VALUES, pcmmPlanningValues);
 				}
 
 				// Evidence
-				if (view.getChboxPcmmEvidence().getSelection()) {
+				if (getView().getChboxPcmmEvidence().getSelection()) {
 					options.put(ExportOptions.PCMM_EVIDENCE_LIST, pcmmEvidences);
 				}
 
 				// Assessments
-				if (view.getChboxPcmmAssessment().getSelection()) {
+				if (getView().getChboxPcmmAssessment().getSelection()) {
 					options.put(ExportOptions.PCMM_ASSESSMENT_LIST, pcmmAssessments);
 				}
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage());
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
 						e.getMessage());
 			}
 		}
@@ -1258,7 +1614,7 @@ public class ReportViewController {
 	 * @param options the report options map
 	 */
 	private void getARGOptionsCustomEnding(Map<ExportOptions, Object> options) {
-		options.put(ExportOptions.CUSTOM_ENDING_INCLUDE, view.getChboxCustomEnding().getSelection());
+		options.put(ExportOptions.CUSTOM_ENDING_INCLUDE, getView().getChboxCustomEnding().getSelection());
 	}
 
 }

@@ -14,13 +14,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
@@ -35,9 +32,8 @@ import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.QoIPlanningValue;
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.constants.ViewMode;
-import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.dialogs.GenericCFScrolledDialog;
 import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.widgets.FormFactory;
@@ -53,7 +49,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManager> {
+public class QoIPlanningDialog extends GenericCFScrolledDialog<QoIPlanningViewManager> {
 
 	/**
 	 * the logger
@@ -195,64 +191,34 @@ public class QoIPlanningDialog extends GenericCFSmallDialog<QoIPlanningViewManag
 	protected void createButtonsForButtonBar(Composite parent) {
 		String okButtonName = (buttonName != null && !buttonName.isEmpty()) ? buttonName : IDialogConstants.OK_LABEL;
 		createButton(parent, IDialogConstants.OK_ID, okButtonName, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		if (!ViewMode.VIEW.equals(this.mode)) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Control createDialogArea(Composite parent) {
+	protected Composite createDialogScrolledContent(Composite parent) {
 
 		logger.debug("Create QoI Planning dialog area"); //$NON-NLS-1$
 
-		Composite container = (Composite) super.createDialogArea(parent);
-
-		// scroll container
-		ScrolledComposite scrollContainer = new ScrolledComposite(container, SWT.V_SCROLL);
-		GridData scrollScData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scrollScData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scrollScData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		scrollContainer.setLayoutData(scrollScData);
-		scrollContainer.setLayout(new GridLayout());
-
-		// form container
-		Composite formContainer = new Composite(scrollContainer, SWT.NONE);
-		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		formContainer.setLayoutData(scData);
-		GridLayout gridLayout = new GridLayout(2, false);
-		formContainer.setLayout(gridLayout);
+		Composite content = createDefaultDialogScrolledContent(parent);
 
 		// Select content type
 		if (mode == ViewMode.VIEW) {
-			renderNonEditableContent(formContainer);
+			renderNonEditableContent(content);
 		} else {
-			renderEditableContent(formContainer);
+			renderEditableContent(content);
 		}
 
-		// set scroll container size
-		scrollContainer.setContent(formContainer);
-		scrollContainer.setExpandHorizontal(true);
-		scrollContainer.setExpandVertical(true);
-		scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		formContainer.addListener(SWT.Resize,
-				e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-		formContainer
-				.addPaintListener(e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-
-		// Load data
-		loadData();
-
-		// Return Control
-		return container;
+		return content;
 	}
 
-	/**
-	 * Load QoI Planning data
-	 */
-	private void loadData() {
+	/** {@inheritDoc} */
+	@Override
+	protected void loadDataAfterCreation() {
 
 		if (qoi == null) {
 			return;

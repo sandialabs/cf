@@ -6,6 +6,7 @@ package gov.sandia.cf.tests;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import org.eclipse.core.resources.IFile;
@@ -486,10 +487,11 @@ public class TestEntityFactory {
 		// create select value
 		C selectValue = null;
 		try {
-			selectValue = classSelectValue.newInstance();
+			selectValue = classSelectValue.getDeclaredConstructor().newInstance();
 			selectValue.setParameter(parameter);
 			selectValue.setName("ParamQOI"); //$NON-NLS-1$
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail(e.getMessage());
 		}
 
@@ -521,10 +523,11 @@ public class TestEntityFactory {
 		// create constraint
 		C constraint = null;
 		try {
-			constraint = classConstraint.newInstance();
+			constraint = classConstraint.getDeclaredConstructor().newInstance();
 			constraint.setParameter(parameter);
 			constraint.setRule("1.0"); //$NON-NLS-1$
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail(e.getMessage());
 		}
 
@@ -1702,7 +1705,7 @@ public class TestEntityFactory {
 	/**
 	 * Gets the new test generic param select value.
 	 *
-	 * @param name the name
+	 * @param name      the name
 	 * @param parameter the parameter
 	 * @return the new test generic param select value
 	 */

@@ -96,8 +96,9 @@ public class ImportUncertaintyApp extends AApplication implements IImportUncerta
 		// Analyze specifications
 		if (newSpecs != null) {
 			// Uncertainty parameters
+			List<UncertaintyParam> parameters = currentSpecs != null ? currentSpecs.getParameters() : null;
 			analysis.put(UncertaintyParam.class, getAppMgr().getService(IImportApplication.class)
-					.analyzeImport(newSpecs.getParameters(), currentSpecs.getParameters()));
+					.analyzeImport(newSpecs.getParameters(), parameters));
 		}
 
 		// Analyze data
@@ -148,7 +149,7 @@ public class ImportUncertaintyApp extends AApplication implements IImportUncerta
 			importUncertainties(model, user, null, uncertaintiesToAdd);
 
 			// delete Uncertainties
-			getAppMgr().getService(IUncertaintyApplication.class).deleteAllUncertainties(uncertaintiesToDelete);
+			getAppMgr().getService(IUncertaintyApplication.class).deleteAllUncertainties(uncertaintiesToDelete, user);
 
 		}
 	}

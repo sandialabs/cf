@@ -5,8 +5,6 @@ package gov.sandia.cf.dao;
 
 import java.util.Date;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +15,11 @@ import gov.sandia.cf.model.User;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the UncertaintyRepository
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the UncertaintyRepository
  */
-@RunWith(JUnitPlatform.class)
 class UncertaintyRepositoryTest extends AbstractTestRepository<Uncertainty, Integer, UncertaintyRepository> {
 
 	/**

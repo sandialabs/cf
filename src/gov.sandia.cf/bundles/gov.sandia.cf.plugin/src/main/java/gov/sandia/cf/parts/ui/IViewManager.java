@@ -121,6 +121,11 @@ public interface IViewManager {
 	void refreshSaveState();
 
 	/**
+	 * Refresh PCMM role.
+	 */
+	void refreshPCMMRole();
+
+	/**
 	 * Plug the button to the PIRT view
 	 * 
 	 * @param button the button to set

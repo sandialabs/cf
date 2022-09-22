@@ -37,7 +37,8 @@ import gov.sandia.cf.tools.RscTools;
  */
 @Entity
 @Table(name = "COM_REQUIREMENT")
-public class SystemRequirement implements Serializable, IGenericTableItem, IEntity<SystemRequirement, Integer> {
+public class SystemRequirement
+		implements Serializable, IGenericTableItem, IEntity<SystemRequirement, Integer>, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -218,12 +219,12 @@ public class SystemRequirement implements Serializable, IGenericTableItem, IEnti
 		return level;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public String getGeneratedId() {
 		return generatedId;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public void setGeneratedId(String generatedId) {
 		this.generatedId = generatedId;
 	}

@@ -14,12 +14,14 @@ import org.eclipse.swt.graphics.RGB;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.parts.theme.ConstantTheme;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class ColorToolsTest.
+ *
+ * @author Didier Verstraete
+ */
 class ColorToolsTest {
 
 	private static ResourceManager rscMgr;

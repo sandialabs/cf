@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +24,11 @@ import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PCMMPlanningTableItemRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PCMMPlanningTableItemRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class PCMMPlanningTableItemRepositoryTest
 		extends AbstractTestRepository<PCMMPlanningTableItem, Integer, PCMMPlanningTableItemRepository> {
 

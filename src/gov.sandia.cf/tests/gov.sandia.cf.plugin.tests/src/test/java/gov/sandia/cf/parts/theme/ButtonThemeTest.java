@@ -17,12 +17,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.tools.ColorTools;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class ButtonThemeTest.
+ *
+ * @author Didier Verstraete
+ */
 class ButtonThemeTest {
 
 	@Test

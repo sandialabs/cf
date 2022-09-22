@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -41,9 +40,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMApplication;
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
@@ -80,23 +76,16 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class ExportConfigurationView extends ACredibilitySubView<ConfigurationViewManager> {
+public class ExportConfigurationView extends ACredibilitySubView<ExportConfigurationViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(ExportConfigurationView.class);
 
 	/**
-	 * Controller
-	 */
-	private ExportConfigurationViewController viewCtrl;
-
-	/**
 	 * The main composite
 	 */
 	private Composite mainComposite;
-
-	private Model model;
 
 	private Text textPIRTSchemaPath;
 	private Text textPCMMSchemaPath;
@@ -122,17 +111,12 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	private Button uncertaintyCheckbox;
 
 	/**
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the view style
+	 * @param viewController the view manager
+	 * @param parent         the parent composite
+	 * @param style          the view style
 	 */
-	public ExportConfigurationView(ConfigurationViewManager viewManager, Composite parent, int style) {
-		super(viewManager, parent, style);
-
-		this.viewCtrl = new ExportConfigurationViewController(this);
-
-		model = getViewManager().getCache().getModel();
-		Assert.isNotNull(model, "CF model can not be null."); //$NON-NLS-1$
+	public ExportConfigurationView(ExportConfigurationViewController viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// create the view
 		renderPage();
@@ -162,10 +146,6 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh data and Save state
-		refresh();
-
 	}
 
 	/**
@@ -192,7 +172,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
@@ -226,8 +206,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		schemaComposite.setBackground(schemaComposite.getParent().getBackground());
 
 		// QoI Planning collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER, schemaComposite,
-				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_QOIPLANNING_TITLE), false, true);
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+				schemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_QOIPLANNING_TITLE), false, true);
 
 		// label
 		GridData gdlabelSchemaPath = new GridData(GridData.FILL_HORIZONTAL);
@@ -235,7 +215,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(schemaComposite,
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_QOIPLANNING_SCHEMAPATH), gdlabelSchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textQoIPlanningSchemaPath = FormFactory.createText(schemaComposite, null, SWT.BORDER | SWT.SINGLE);
@@ -248,8 +228,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), schemaComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				schemaComposite, null, optionsBtnBrowse);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -257,9 +237,10 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportQoIPlanningSchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), schemaComposite, null,
-				optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().exportQoIPlanningSchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				schemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -276,7 +257,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textQoIPlanningSchemaPath,
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textQoIPlanningSchemaPath,
 				exportButton, PrefTools.CONF_EXPORT_QOIPLANNING_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
@@ -295,8 +276,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		pirtSchemaComposite.setBackground(pirtSchemaComposite.getParent().getBackground());
 
 		// PIRT collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER, pirtSchemaComposite,
-				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PIRT_TITLE), false, true);
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+				pirtSchemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PIRT_TITLE), false, true);
 
 		// label
 		GridData gdlabelPIRTSchemaPath = new GridData(GridData.FILL_HORIZONTAL);
@@ -304,7 +285,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(pirtSchemaComposite,
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PIRTSCHEMAPATH), gdlabelPIRTSchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textPIRTSchemaPath = FormFactory.createText(pirtSchemaComposite, null, SWT.BORDER | SWT.SINGLE);
@@ -316,8 +297,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), pirtSchemaComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				pirtSchemaComposite, null, optionsBtnBrowse);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -325,9 +306,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportPIRTSchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), pirtSchemaComposite, null,
-				optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().exportPIRTSchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				pirtSchemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -344,8 +325,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textPIRTSchemaPath, exportButton,
-				PrefTools.CONF_EXPORT_PIRT_SCHEMA_FILE_LAST_PATH_KEY));
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textPIRTSchemaPath,
+				exportButton, PrefTools.CONF_EXPORT_PIRT_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
 	/**
@@ -363,8 +344,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		pcmmSchemaComposite.setBackground(pcmmSchemaComposite.getParent().getBackground());
 
 		// PCMM collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER, pcmmSchemaComposite,
-				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PCMM_TITLE), false, true);
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+				pcmmSchemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PCMM_TITLE), false, true);
 
 		// label
 		GridData gdlabelPCMMSchemaPath = new GridData(GridData.FILL_HORIZONTAL);
@@ -372,7 +353,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(pcmmSchemaComposite,
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_PCMMSCHEMAPATH), gdlabelPCMMSchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textPCMMSchemaPath = FormFactory.createText(pcmmSchemaComposite, null, SWT.BORDER | SWT.SINGLE);
@@ -384,8 +365,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), pcmmSchemaComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				pcmmSchemaComposite, null, optionsBtnBrowse);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -393,9 +374,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportPCMMSchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), pcmmSchemaComposite, null,
-				optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().exportPCMMSchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				pcmmSchemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -412,8 +393,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textPCMMSchemaPath, exportButton,
-				PrefTools.CONF_EXPORT_PCMM_SCHEMA_FILE_LAST_PATH_KEY));
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textPCMMSchemaPath,
+				exportButton, PrefTools.CONF_EXPORT_PCMM_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
 	/**
@@ -431,7 +412,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		uncertaintySchemaComposite.setBackground(uncertaintySchemaComposite.getParent().getBackground());
 
 		// Uncertainty collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
 				uncertaintySchemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_UNCERTAINTY_TITLE), false,
 				true);
 
@@ -441,7 +422,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(uncertaintySchemaComposite,
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_UNCERTAINTYSCHEMAPATH), gdlabelUncertaintySchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textUncertaintySchemaPath = FormFactory.createText(uncertaintySchemaComposite, null, SWT.BORDER | SWT.SINGLE);
@@ -454,8 +435,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), uncertaintySchemaComposite,
-				null, optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				uncertaintySchemaComposite, null, optionsBtnBrowse);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -463,9 +444,10 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportUncertaintySchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), uncertaintySchemaComposite,
-				null, optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().exportUncertaintySchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				uncertaintySchemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -482,7 +464,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textUncertaintySchemaPath,
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textUncertaintySchemaPath,
 				exportButton, PrefTools.CONF_EXPORT_UNCERTAINTY_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
@@ -501,7 +483,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		sysRequirementsSchemaComposite.setBackground(sysRequirementsSchemaComposite.getParent().getBackground());
 
 		// System Requirements collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
 				sysRequirementsSchemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_SYSREQUIREMENTS_TITLE),
 				false, true);
 
@@ -512,7 +494,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_SYSREQUIREMENTS_SCHEMAPATH),
 				gdlabelSysRequirementsSchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textSysRequirementsSchemaPath = FormFactory.createText(sysRequirementsSchemaComposite, null,
@@ -526,7 +508,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(),
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
 				sysRequirementsSchemaComposite, null, optionsBtnBrowse);
 
 		// button export
@@ -535,8 +517,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportSysRequirementsSchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(),
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().exportSysRequirementsSchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
 				sysRequirementsSchemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
@@ -554,8 +537,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textSysRequirementsSchemaPath,
-				exportButton, PrefTools.CONF_EXPORT_REQUIREMENTS_SCHEMA_FILE_LAST_PATH_KEY));
+		browseButton.addListener(SWT.Selection,
+				event -> getViewController().browseExportFile(textSysRequirementsSchemaPath, exportButton,
+						PrefTools.CONF_EXPORT_REQUIREMENTS_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
 	/**
@@ -573,7 +557,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		decisionSchemaComposite.setBackground(decisionSchemaComposite.getParent().getBackground());
 
 		// Decision collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
 				decisionSchemaComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DECISION_TITLE), false, true);
 
 		// label
@@ -582,7 +566,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(decisionSchemaComposite,
 				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DECISION_SCHEMAPATH), gdlabelDecisionSchemaPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
 		textDecisionSchemaPath = FormFactory.createText(decisionSchemaComposite, null, SWT.BORDER | SWT.SINGLE);
@@ -595,8 +579,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), decisionSchemaComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				decisionSchemaComposite, null, optionsBtnBrowse);
 
 		// button export
 		Map<String, Object> optionsBtnExport = new HashMap<>();
@@ -604,9 +588,10 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportDecisionSchema());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), decisionSchemaComposite, null,
-				optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().exportDecisionSchema());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				decisionSchemaComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -623,8 +608,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textDecisionSchemaPath, exportButton,
-				PrefTools.CONF_EXPORT_DECISION_SCHEMA_FILE_LAST_PATH_KEY));
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textDecisionSchemaPath,
+				exportButton, PrefTools.CONF_EXPORT_DECISION_SCHEMA_FILE_LAST_PATH_KEY));
 	}
 
 	/**
@@ -642,8 +627,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
 		// Uncertainty collapse
-		new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER, dataComposite,
-				RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_TITLE), false, true);
+		new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), mainComposite, SWT.FILL | SWT.BORDER,
+				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_TITLE), false, true);
 
 		// label
 		GridData gdlabelExportPath = new GridData(GridData.FILL_HORIZONTAL);
@@ -651,7 +636,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label label = FormFactory.createLabel(dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_LBL),
 				gdlabelExportPath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// select export file path
 		Composite exportPathComposite = new Composite(dataComposite, SWT.FILL);
@@ -670,8 +655,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), exportPathComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				exportPathComposite, null, optionsBtnBrowse);
 
 		// render Intended Purpose selection
 		renderIntendedPurposeData(dataComposite);
@@ -697,9 +682,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		optionsBtnExport.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EXPORT);
 		optionsBtnExport.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnExport.put(ButtonTheme.OPTION_OUTLINE, false);
-		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.exportData());
-		ButtonTheme exportButton = FormFactory.createButton(getViewManager().getRscMgr(), dataComposite, null,
-				optionsBtnExport);
+		optionsBtnExport.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().exportData());
+		ButtonTheme exportButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				dataComposite, null, optionsBtnExport);
 		GridData gdBtnExport = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		gdBtnExport.horizontalSpan = 2;
 		exportButton.setLayoutData(gdBtnExport);
@@ -715,12 +700,14 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			}
 		});
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseExportFile(textExportDataPath, exportButton,
-				PrefTools.CONF_EXPORT_DATA_FILE_LAST_PATH_KEY));
+		browseButton.addListener(SWT.Selection, event -> getViewController().browseExportFile(textExportDataPath,
+				exportButton, PrefTools.CONF_EXPORT_DATA_FILE_LAST_PATH_KEY));
 	}
 
 	/**
-	 * Render PIRT composite
+	 * Render PIRT composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderPIRTData(Composite parent) {
 
@@ -732,21 +719,22 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		pirtDataComposite.setBackground(pirtDataComposite.getParent().getBackground());
 
 		// PIRT collapse
-		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				pirtDataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_PIRT_LBL), true, true);
+		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, pirtDataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_PIRT_LBL), true,
+				true);
 		pirtCheckbox = pirtCollapse.getCheckbox();
 
 		// PIRT QoI selection - Label
 		Label checkboxesLabel = FormFactory.createLabel(pirtDataComposite,
 				RscTools.getString(RscConst.MSG_EXPORTVIEW_PIRT_QOI_LBL));
 		checkboxesLabel.setBackground(checkboxesLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), checkboxesLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), checkboxesLabel);
 
 		// Initialize PIRT tree
 		renderPIRTQoITree(pirtDataComposite);
 
 		// reload data
-		reloadPIRTQoITree();
+		refreshPIRTQoITree();
 
 		// Refresh
 		pirtQoITree.refresh(true);
@@ -774,12 +762,13 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 
 		// Tree - Hint
 		gdViewer.minimumHeight = pirtQoITree.getTree().getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
+				- 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		pirtQoITree.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		pirtQoITree.getTree().setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		pirtQoITree.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		pirtQoITree.getTree().setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Initialize data
@@ -790,7 +779,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Name
 		TreeViewerColumn nameColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		nameColumn.getColumn().setText(PIRTQoITableQoI.getColumnSymbolProperty());
-		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewManager().getRscMgr()));
+		nameColumn.setLabelProvider(new QoINameLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnSymbolProperty());
@@ -798,7 +787,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Description
 		TreeViewerColumn descriptionColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		descriptionColumn.getColumn().setText(PIRTQoITableQoI.getColumnDescriptionProperty());
-		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider(getViewManager().getRscMgr()));
+		descriptionColumn
+				.setLabelProvider(new QoIDescriptionLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnWeightData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_NAMECOLUMN_WEIGHT, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnDescriptionProperty());
@@ -806,7 +796,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Creation Date
 		TreeViewerColumn creationDateColumn = new TreeViewerColumn(pirtQoITree, SWT.LEFT);
 		creationDateColumn.getColumn().setText(PIRTQoITableQoI.getColumnCreationDateProperty());
-		creationDateColumn.setLabelProvider(new QoICreationDateLabelProvider(getViewManager().getRscMgr()));
+		creationDateColumn
+				.setLabelProvider(new QoICreationDateLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout.addColumnData(
 				new ColumnPixelData(PartsResourceConstants.QOIHOME_VIEW_TABLEPHEN_CREATIONDATECOLUMN_WIDTH, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnCreationDateProperty());
@@ -822,7 +813,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Add tree viewer events
+	 * Add tree viewer events.
+	 *
+	 * @param treeViewer the tree viewer
 	 */
 	private void renderTreeAddEvents(TreeViewer treeViewer) {
 		// Get tree
@@ -851,13 +844,11 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Reload PIRT Tree data
+	 * Refresh PIRT Tree data
 	 */
-	private void reloadPIRTQoITree() {
+	void refreshPIRTQoITree() {
 
-		// load data
-		List<QuantityOfInterest> qoiList = getViewManager().getAppManager().getService(IPIRTApplication.class)
-				.getQoIList(getViewManager().getCache().getModel());
+		List<QuantityOfInterest> qoiList = getViewController().getQois();
 
 		if (qoiList != null) {
 
@@ -881,7 +872,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Render PCMM composite
+	 * Render PCMM composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderPCMMData(Composite parent) {
 		// PCMM main composite
@@ -892,8 +885,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		pcmmDataComposite.setBackground(pcmmDataComposite.getParent().getBackground());
 
 		// PCMM collapse
-		CollapsibleWidget pcmmCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				pcmmDataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_PCMM_LBL), true, true);
+		CollapsibleWidget pcmmCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, pcmmDataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_PCMM_LBL), true,
+				true);
 		pcmmCheckbox = pcmmCollapse.getCheckbox();
 
 		// PCMM tag selection
@@ -909,7 +903,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Render PCMM tag selection
+	 * Render PCMM tag selection.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderPCMMTagSelection(Composite parent) {
 
@@ -917,13 +913,13 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		Label checkboxesLabel = FormFactory.createLabel(parent,
 				RscTools.getString(RscConst.MSG_EXPORTVIEW_PCMM_TAG_LBL));
 		checkboxesLabel.setBackground(checkboxesLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), checkboxesLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), checkboxesLabel);
 
 		// Initialize PCMM tag tree
 		renderPCMMTagTree(parent);
 
 		// reload data
-		reloadPCMMTagTree();
+		refreshPCMMTagTree();
 
 		// Refresh
 		pcmmTagTree.refresh(true);
@@ -951,12 +947,13 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 
 		// Tree - Hint
 		gdViewer.minimumHeight = pcmmTagTree.getTree().getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
+				- 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		pcmmTagTree.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		pcmmTagTree.getTree().setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		pcmmTagTree.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		pcmmTagTree.getTree().setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Initialize data
@@ -967,7 +964,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		// Name
 		TreeViewerColumn nameColumn = new TreeViewerColumn(pcmmTagTree, SWT.LEFT);
 		nameColumn.getColumn().setText(RscTools.getString(RscConst.MSG_TAG_MGRTAGDIALOG_LBL));
-		nameColumn.setLabelProvider(new PCMMTagNameLabelProvider(getViewManager()));
+		nameColumn.setLabelProvider(new PCMMTagNameLabelProvider(getViewController().getViewManager()));
 		treeViewerLayout.addColumnData(new ColumnWeightData(PCMMManageTagDialog.COL_NAME_WIDTH, true));
 		columnProperties.add(RscTools.getString(RscConst.MSG_TAG_MGRTAGDIALOG_LBL));
 
@@ -1008,7 +1005,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	/**
 	 * Reload PCMM tag Tree data
 	 */
-	private void reloadPCMMTagTree() {
+	void refreshPCMMTagTree() {
 
 		// load data
 		List<Tag> tagList = new ArrayList<>();
@@ -1019,7 +1016,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		tagList.add(currentVersion);
 
 		// add other tags
-		tagList.addAll(getViewManager().getAppManager().getService(IPCMMApplication.class).getTags());
+		tagList.addAll(getViewController().getTags());
 
 		// Set input
 		pcmmTagTree.setInput(tagList);
@@ -1036,14 +1033,16 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Render PCMM feature selection
+	 * Render PCMM feature selection.
+	 *
+	 * @param pcmmComposite the pcmm composite
 	 */
 	private void renderPCMMFeatures(Composite pcmmComposite) {
 		// Check parameter - Label
 		Label checkboxesLabel = FormFactory.createLabel(pcmmComposite,
 				RscTools.getString(RscConst.MSG_EXPORTVIEW_PCMM_FEATURES_LBL));
 		checkboxesLabel.setBackground(checkboxesLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), checkboxesLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), checkboxesLabel);
 
 		// Check-box Planning
 		Composite pcmmCheckboxPlanningComposite = new Composite(pcmmComposite, SWT.FILL);
@@ -1083,7 +1082,9 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	}
 
 	/**
-	 * Render Intended Purpose data composite
+	 * Render Intended Purpose data composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderIntendedPurposeData(Composite parent) {
 		// main composite
@@ -1094,19 +1095,22 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_INTPURPOSE_LBL), true, true);
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_INTPURPOSE_LBL), true,
+				true);
 		intendedPurposeCheckbox = collapse.getCheckbox();
 
 		// export description
 		CLabel label = new CLabel(dataComposite, SWT.NONE);
 		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_INTPURPOSE_LBL));
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 	}
 
 	/**
-	 * Render Decision data composite
+	 * Render Decision data composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderDecisionData(Composite parent) {
 		// main composite
@@ -1117,19 +1121,22 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_DECISION_LBL), true, true);
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_DECISION_LBL), true,
+				true);
 		decisionCheckbox = collapse.getCheckbox();
 
 		// export description
 		CLabel label = new CLabel(dataComposite, SWT.NONE);
 		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_DECISION_LBL));
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 	}
 
 	/**
-	 * Render System Requirement data composite
+	 * Render System Requirement data composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderSystemRequirementData(Composite parent) {
 		// main composite
@@ -1140,19 +1147,21 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_SYSREQ_LBL), true, true);
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_SYSREQ_LBL), true, true);
 		systemRequirementCheckbox = collapse.getCheckbox();
 
 		// export description
 		CLabel label = new CLabel(dataComposite, SWT.NONE);
 		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_SYSREQ_LBL));
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 	}
 
 	/**
-	 * Render Uncertainty data composite
+	 * Render Uncertainty data composite.
+	 *
+	 * @param parent the parent
 	 */
 	private void renderUncertaintyData(Composite parent) {
 		// main composite
@@ -1163,15 +1172,16 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		dataComposite.setBackground(dataComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.FILL,
-				dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_UNCERTAINTY_LBL), true, true);
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(), parent,
+				SWT.FILL, dataComposite, RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATA_UNCERTAINTY_LBL), true,
+				true);
 		uncertaintyCheckbox = collapse.getCheckbox();
 
 		// export description
 		CLabel label = new CLabel(dataComposite, SWT.NONE);
 		label.setText(RscTools.getString(RscConst.MSG_EXPORTVIEW_UNCERTAINTY_LBL));
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 	}
 
 	/**
@@ -1200,8 +1210,8 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -1210,14 +1220,14 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtonsFooterLeft, ContextualHelpId.EXPORT);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackButton(btnBack);
+		getViewController().getViewManager().plugBackButton(btnBack);
 
 		// layout view
 		compositeButtonsFooter.layout();
@@ -1228,8 +1238,7 @@ public class ExportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	 */
 	@Override
 	public void reload() {
-		reloadPIRTQoITree();
-		reloadPCMMTagTree();
+		getViewController().reloadData();
 	}
 
 	/**

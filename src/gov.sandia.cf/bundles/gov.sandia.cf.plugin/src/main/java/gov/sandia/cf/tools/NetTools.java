@@ -100,7 +100,7 @@ public class NetTools {
 		}
 
 		switch (finalOption) {
-		case EXERTNAL_BROWSER:
+		case EXTERNAL_BROWSER:
 			openURLExternally(url);
 			break;
 		case INTERNAL_BROWSER:

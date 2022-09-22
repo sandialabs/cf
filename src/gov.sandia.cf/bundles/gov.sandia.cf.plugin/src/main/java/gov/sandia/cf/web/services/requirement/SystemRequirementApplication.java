@@ -79,7 +79,7 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 	}
 
 	@Override
-	public void deleteRequirement(SystemRequirement requirement) throws CredibilityException {
+	public void deleteRequirement(SystemRequirement requirement, User user) throws CredibilityException {
 		// TODO to implement
 
 	}

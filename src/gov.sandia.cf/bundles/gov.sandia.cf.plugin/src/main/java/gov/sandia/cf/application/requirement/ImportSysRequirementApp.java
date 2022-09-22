@@ -114,10 +114,9 @@ public class ImportSysRequirementApp extends AApplication implements IImportSysR
 		// Analyze
 		if (newSpecs != null) {
 			// System Requirements parameters
-			List<SystemRequirementParam> requirementParameters = getDaoManager()
-					.getRepository(ISystemRequirementParamRepository.class).findAll();
+			List<SystemRequirementParam> parameters = currentSpecs != null ? currentSpecs.getParameters() : null;
 			analysis.put(SystemRequirementParam.class, getAppMgr().getService(IImportApplication.class)
-					.analyzeImport(newSpecs.getParameters(), requirementParameters));
+					.analyzeImport(newSpecs.getParameters(), parameters));
 		}
 
 		return analysis;
@@ -138,8 +137,8 @@ public class ImportSysRequirementApp extends AApplication implements IImportSysR
 			importSysRequirementConfiguration(model, specs);
 
 			// add configuration file import history
-			getAppMgr().getService(IGlobalApplication.class).addConfigurationFile(model, user, CFFeature.SYSTEM_REQUIREMENTS,
-					requirementSchemaFile.getPath());
+			getAppMgr().getService(IGlobalApplication.class).addConfigurationFile(model, user,
+					CFFeature.SYSTEM_REQUIREMENTS, requirementSchemaFile.getPath());
 		}
 	}
 

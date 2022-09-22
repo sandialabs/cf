@@ -180,7 +180,9 @@ public class NewTagDialog extends GenericCFDialog<IViewManager> {
 	}
 
 	/**
-	 * Check the tag name
+	 * Check the tag name.
+	 *
+	 * @return true, if successful
 	 */
 	private boolean checkName() {
 

@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +32,10 @@ import gov.sandia.cf.model.SystemRequirementValue;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_006_SystemRequirementStatementFieldTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_006_SystemRequirementStatementFieldTest extends AbstractTestDao {
 
 	/**

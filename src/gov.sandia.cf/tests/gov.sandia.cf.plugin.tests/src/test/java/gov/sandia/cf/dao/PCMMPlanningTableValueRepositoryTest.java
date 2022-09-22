@@ -5,8 +5,6 @@ package gov.sandia.cf.dao;
 
 import java.util.Date;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,11 +13,11 @@ import gov.sandia.cf.model.PCMMPlanningTableValue;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PCMMPlanningTableValueRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PCMMPlanningTableValueRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class PCMMPlanningTableValueRepositoryTest
 		extends AbstractTestRepository<PCMMPlanningTableValue, Integer, PCMMPlanningTableValueRepository> {
 

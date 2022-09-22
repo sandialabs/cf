@@ -259,7 +259,10 @@ public class NewCFProcessLocalSetupScanPage extends WizardPage implements INewCF
 	}
 
 	/**
-	 * Render Schema File content
+	 * Render Schema File content.
+	 *
+	 * @param title the title
+	 * @return the combo viewer
 	 */
 	private ComboViewer renderSchemaFileContent(String title) {
 
@@ -537,7 +540,9 @@ public class NewCFProcessLocalSetupScanPage extends WizardPage implements INewCF
 	}
 
 	/**
-	 * Update the error messages of wizard and the page complete field
+	 * Update the error messages of wizard and the page complete field.
+	 *
+	 * @param error the error
 	 */
 	private void updateMessages(boolean error) {
 
@@ -568,6 +573,9 @@ public class NewCFProcessLocalSetupScanPage extends WizardPage implements INewCF
 	}
 
 	/**
+	 * Gets the selected file.
+	 *
+	 * @param cbx the cbx
 	 * @return the editable field value
 	 */
 	private File getSelectedFile(ComboViewer cbx) {

@@ -17,7 +17,7 @@ import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.constants.TableHeaderBarButtonType;
 import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.model.QoIHeaderParts;
-import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaView;
+import gov.sandia.cf.parts.ui.pirt.PIRTPhenomenaViewController;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTQoIDescriptionDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTQoITagDescriptionDialog;
 import gov.sandia.cf.tools.DateTools;
@@ -40,14 +40,15 @@ public class PIRTPhenTableHeaderContentProvider implements IStructuredContentPro
 	/**
 	 * Parent view
 	 */
-	private PIRTPhenomenaView parent;
+	private PIRTPhenomenaViewController viewController;
 
 	/**
-	 * Constructor
-	 * @param parent the parent view
+	 * Constructor.
+	 *
+	 * @param viewController the view controller
 	 */
-	public PIRTPhenTableHeaderContentProvider(PIRTPhenomenaView parent) {
-		this.parent = parent;
+	public PIRTPhenTableHeaderContentProvider(PIRTPhenomenaViewController viewController) {
+		this.viewController = viewController;
 	}
 
 	@Override
@@ -78,8 +79,9 @@ public class PIRTPhenTableHeaderContentProvider implements IStructuredContentPro
 					(null != qoi.getTagDate()) ? TableHeaderBarButtonType.VIEW : TableHeaderBarButtonType.EDIT);
 			descriptionHeader.setBtnListener(event -> {
 				// open description dialog
-				PIRTQoIDescriptionDialog qoiDescriptionDialog = new PIRTQoIDescriptionDialog(parent.getViewManager(),
-						parent.getShell(), (null != qoi.getTagDate()) ? ViewMode.VIEW : ViewMode.UPDATE);
+				PIRTQoIDescriptionDialog qoiDescriptionDialog = new PIRTQoIDescriptionDialog(
+						viewController.getViewManager(), viewController.getViewControl().getShell(),
+						(null != qoi.getTagDate()) ? ViewMode.VIEW : ViewMode.UPDATE);
 				// update qoi
 				updateQoI(qoiDescriptionDialog.openDialog(qoi));
 			});
@@ -118,7 +120,7 @@ public class PIRTPhenTableHeaderContentProvider implements IStructuredContentPro
 				tagDescriptionHeader.setBtnListener(event -> {
 					// open tag description dialog
 					PIRTQoITagDescriptionDialog qoiDescriptionDialog = new PIRTQoITagDescriptionDialog(
-							parent.getViewManager(), parent.getShell());
+							viewController.getViewManager(), viewController.getViewControl().getShell());
 					// update qoi
 					updateQoI(qoiDescriptionDialog.openDialog(qoi));
 				});
@@ -147,14 +149,14 @@ public class PIRTPhenTableHeaderContentProvider implements IStructuredContentPro
 	private void updateQoI(QuantityOfInterest qoiModified) {
 		try {
 			if (qoiModified != null) {
-				parent.getViewManager().getAppManager().getService(IPIRTApplication.class).updateQoI(qoiModified,
-						parent.getViewManager().getCache().getUser());
+				viewController.getViewManager().getAppManager().getService(IPIRTApplication.class)
+						.updateQoI(qoiModified, viewController.getViewManager().getCache().getUser());
 
 				// Refresh
-				parent.refresh();
+				viewController.refresh();
 
 				// fire view change to save credibility file
-				parent.getViewManager().viewChanged();
+				viewController.getViewManager().viewChanged();
 			}
 		} catch (CredibilityException e) {
 			logger.error("An error occured while updating QoI: {}\n{}", qoiModified, e.getMessage(), e); //$NON-NLS-1$

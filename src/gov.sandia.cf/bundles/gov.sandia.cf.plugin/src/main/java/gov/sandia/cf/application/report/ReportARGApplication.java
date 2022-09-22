@@ -333,6 +333,11 @@ public class ReportARGApplication extends AApplication implements IReportARGAppl
 			htmlParagraph = generateHtmlParagraph();
 		}
 
+		// remove the tabs and new lines to write pure html content
+		if (htmlValue != null) {
+			htmlValue = htmlValue.replace(RscTools.TAB, RscTools.empty());
+			htmlValue = htmlValue.replace(RscTools.CARRIAGE_RETURN, RscTools.empty());
+		}
 		htmlParagraph.put(YmlARGStructure.ARG_STRUCTURE_HTML_STRING_KEY, htmlValue);
 
 		return htmlParagraph;
@@ -847,7 +852,10 @@ public class ReportARGApplication extends AApplication implements IReportARGAppl
 	}
 
 	/**
+	 * Generate generic value hyperlink.
+	 *
 	 * @param value the generic value to display
+	 * @param argParameters the arg parameters
 	 * @return a map containing the link if the path is not empty, otherwise a
 	 *         paragraph with the value parameter name.
 	 * @throws CredibilityException if an error occurs during CF variable parsing
@@ -963,9 +971,10 @@ public class ReportARGApplication extends AApplication implements IReportARGAppl
 	}
 
 	/**
-	 * Generate GenericValue line
-	 * 
+	 * Generate GenericValue line.
+	 *
 	 * @param genericValue The GenericValue
+	 * @return the generic value line
 	 */
 	private String generateGenericValueLine(IGenericTableValue genericValue) {
 

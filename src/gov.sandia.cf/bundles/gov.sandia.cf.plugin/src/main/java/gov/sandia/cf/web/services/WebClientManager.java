@@ -4,6 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.web.services;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -139,9 +140,10 @@ public class WebClientManager implements IApplicationManager, IWebClientManager 
 			}
 		} else {
 			try {
-				service = serviceClass.newInstance();
+				service = serviceClass.getDeclaredConstructor().newInstance();
 				mapEnabledService.put(serviceClass, service);
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				throw new CredibilityServiceRuntimeException(CredibilityServiceRuntimeMessage.INSTANTIATION_ERROR,
 						interfaceClass.getName(), e.getMessage());
 			}

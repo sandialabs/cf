@@ -52,8 +52,8 @@ public class LauncherTile extends Composite {
 	private IViewManager viewMgr;
 
 	/**
-	 * Private constructor to do not permit instantiation except from the Launcher
-	 * 
+	 * Private constructor to do not permit instantiation except from the Launcher.
+	 *
 	 * @param viewMgr    the view manager
 	 * @param parent     the parent composite
 	 * @param style      the SWT style
@@ -61,7 +61,7 @@ public class LauncherTile extends Composite {
 	 * @param text       the text to display
 	 * @param iconName   the icon name
 	 * @param background the background color
-	 * @param active     is active? or not?
+	 * @param enabled the enabled
 	 */
 	LauncherTile(IViewManager viewMgr, Composite parent, int style, final String id, final String text,
 			final String iconName, final Color background, final boolean enabled) {

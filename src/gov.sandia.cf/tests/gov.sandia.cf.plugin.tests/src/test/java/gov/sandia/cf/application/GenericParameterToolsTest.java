@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.application.tools.GenericParameterTools;
 import gov.sandia.cf.model.Decision;
@@ -27,7 +25,6 @@ import gov.sandia.cf.tests.TestEntityFactory;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class GenericParameterToolsTest extends AbstractTestApplication {
 
 	/*******************************

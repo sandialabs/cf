@@ -14,9 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
 import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
 import gov.sandia.cf.constants.configuration.ExportOptions;
@@ -54,6 +56,7 @@ import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.Uncertainty;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.query.EntityFilter;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.preferences.PrefTools;
 import gov.sandia.cf.tools.FileExtension;
 import gov.sandia.cf.tools.FileTools;
@@ -68,7 +71,8 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-public class ExportConfigurationViewController {
+public class ExportConfigurationViewController
+		extends AViewController<ConfigurationViewManager, ExportConfigurationView> {
 
 	/**
 	 * the logger
@@ -76,18 +80,46 @@ public class ExportConfigurationViewController {
 	private static final Logger logger = LoggerFactory.getLogger(ExportConfigurationViewController.class);
 
 	/**
-	 * The view
-	 */
-	private ExportConfigurationView view;
-
-	/**
 	 * the extensions needed to filter file browser
 	 */
 	private String[] confFileDefaultExtensions = new String[] { FileTools.YML_FILTER, FileTools.YAML_FILTER };
 
-	ExportConfigurationViewController(ExportConfigurationView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	/**
+	 * Instantiates a new export configuration view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param parent      the parent
+	 */
+	ExportConfigurationViewController(ConfigurationViewManager viewManager, Composite parent) {
+		super(viewManager);
+		super.setView(new ExportConfigurationView(this, parent, SWT.NONE));
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+		getView().refreshPIRTQoITree();
+		getView().refreshPCMMTagTree();
+	}
+
+	/**
+	 * Gets the qois.
+	 *
+	 * @return the qois
+	 */
+	List<QuantityOfInterest> getQois() {
+		return getViewManager().getAppManager().getService(IPIRTApplication.class)
+				.getQoIList(getViewManager().getCache().getModel());
+	}
+
+	/**
+	 * Gets the tags.
+	 *
+	 * @return the tags
+	 */
+	List<Tag> getTags() {
+		return getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
 	}
 
 	/**
@@ -108,7 +140,7 @@ public class ExportConfigurationViewController {
 		if (!StringUtils.isBlank(textWidget.getText())) {
 			defaultPath = textWidget.getText();
 		} else {
-			defaultPath = WorkspaceTools.toOsPath(view.getViewManager().getCredibilityEditor().getCfProjectPath());
+			defaultPath = WorkspaceTools.toOsPath(getViewManager().getCredibilityEditor().getCfProjectPath());
 		}
 
 		// select export file
@@ -140,7 +172,7 @@ public class ExportConfigurationViewController {
 	 * @return the file selected by the user
 	 */
 	String selectFileDialog(String filterPath) {
-		FileDialog dialog = new FileDialog(view.getShell());
+		FileDialog dialog = new FileDialog(getView().getShell());
 		dialog.setFilterPath(filterPath);
 		dialog.setFileName(filterPath);
 		dialog.setFilterExtensions(confFileDefaultExtensions);
@@ -157,28 +189,28 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextQoIPlanningSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextQoIPlanningSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
 
 		// export configuration
 		try {
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportQoIPlanningSchema(
-					new File(view.getTextQoIPlanningSchemaPath()),
-					view.getViewManager().getCache().getQoIPlanningSpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportQoIPlanningSchema(
+					new File(getView().getTextQoIPlanningSchemaPath()),
+					getViewManager().getCache().getQoIPlanningSpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -194,8 +226,8 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextPIRTSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextPIRTSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
@@ -203,19 +235,19 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export configuration
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportPIRTSchema(
-					new File(view.getTextPIRTSchemaPath()), view.getViewManager().getCache().getPIRTSpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportPIRTSchema(
+					new File(getView().getTextPIRTSchemaPath()), getViewManager().getCache().getPIRTSpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -232,8 +264,8 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextPCMMSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextPCMMSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
@@ -241,19 +273,19 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export configuration
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportPCMMSchema(
-					new File(view.getTextPCMMSchemaPath()), view.getViewManager().getCache().getPCMMSpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportPCMMSchema(
+					new File(getView().getTextPCMMSchemaPath()), getViewManager().getCache().getPCMMSpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -269,8 +301,8 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextUncertaintySchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextUncertaintySchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
@@ -278,20 +310,20 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export configuration
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportUncertaintySchema(
-					new File(view.getTextUncertaintySchemaPath()),
-					view.getViewManager().getCache().getUncertaintySpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportUncertaintySchema(
+					new File(getView().getTextUncertaintySchemaPath()),
+					getViewManager().getCache().getUncertaintySpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -307,8 +339,8 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextSysRequirementsSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextSysRequirementsSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
@@ -316,20 +348,20 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export configuration
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportSysRequirementsSchema(
-					new File(view.getTextSysRequirementsSchemaPath()),
-					view.getViewManager().getCache().getSystemRequirementSpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportSysRequirementsSchema(
+					new File(getView().getTextSysRequirementsSchemaPath()),
+					getViewManager().getCache().getSystemRequirementSpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -345,8 +377,8 @@ public class ExportConfigurationViewController {
 			return;
 		}
 
-		if (view.getTextDecisionSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextDecisionSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_FILE_NULL));
 			return;
 		}
@@ -354,20 +386,20 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export configuration
-			view.getViewManager().getAppManager().getService(IExportApplication.class).exportDecisionSchema(
-					new File(view.getTextDecisionSchemaPath()),
-					view.getViewManager().getCache().getDecisionSpecification());
+			getViewManager().getAppManager().getService(IExportApplication.class).exportDecisionSchema(
+					new File(getView().getTextDecisionSchemaPath()),
+					getViewManager().getCache().getDecisionSpecification());
 
 			// refresh project
 			WorkspaceTools.refreshProject();
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_EXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -384,8 +416,8 @@ public class ExportConfigurationViewController {
 		}
 
 		Map<ExportOptions, Object> exportOptions = getExportOptions();
-		if (view.getTextDataSchemaPath() == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+		if (getView().getTextDataSchemaPath() == null) {
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATAEXPORT_FILE_NULL));
 			return;
 		}
@@ -393,16 +425,16 @@ public class ExportConfigurationViewController {
 		try {
 
 			// export data
-			view.getViewManager().getAppManager().getService(IExportApplication.class)
-					.exportData(new File(view.getTextDataSchemaPath()), exportOptions);
+			getViewManager().getAppManager().getService(IExportApplication.class)
+					.exportData(new File(getView().getTextDataSchemaPath()), exportOptions);
 
 			// Inform success
-			MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+			MessageDialog.openInformation(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_DATAEXPORT_SUCCESS));
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_EXPORTVIEW_DATAEXPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -415,14 +447,15 @@ public class ExportConfigurationViewController {
 	 * @return true if the user confirm save need, otherwise false.
 	 */
 	private boolean checkSaveNeed() {
-		if (view.getViewManager().isDirty()) {
-			boolean openConfirm = MessageDialog.openConfirm(view.getShell(),
+		if (getViewManager().isDirty()) {
+			boolean openConfirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_NEEDSAVE));
 			if (openConfirm) {
-				view.getViewManager().doSave();
+				getViewManager().doSave();
 			} else {
-				MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
+				MessageDialog.openInformation(getView().getShell(),
+						RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_TITLE),
 						RscTools.getString(RscConst.MSG_CONF_EXPORTVIEW_EXPORT_CANCELLED));
 				return false;
 			}
@@ -439,10 +472,10 @@ public class ExportConfigurationViewController {
 
 		// Initialize
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
-		options.put(ExportOptions.MODEL, view.getViewManager().getCache().getModel());
+		options.put(ExportOptions.MODEL, getViewManager().getCache().getModel());
 		options.put(ExportOptions.USER_LIST,
-				view.getViewManager().getAppManager().getService(IUserApplication.class).getUsers());
-		options.put(ExportOptions.PCMM_ROLE_LIST, view.getViewManager().getCache().getPCMMSpecification().getRoles());
+				getViewManager().getAppManager().getService(IUserApplication.class).getUsers());
+		options.put(ExportOptions.PCMM_ROLE_LIST, getViewManager().getCache().getPCMMSpecification().getRoles());
 
 		options.putAll(getIntendedPurposeExportOptions());
 		options.putAll(getDecisionExportOptions());
@@ -466,16 +499,17 @@ public class ExportConfigurationViewController {
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
 
 		// Intended Purpose - is selected?
-		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, view.isIntendedPurposeSelected());
+		options.put(ExportOptions.INTENDEDPURPOSE_INCLUDE, getView().isIntendedPurposeSelected());
 
 		// Intended Purpose - get data
 		try {
-			IntendedPurpose intendedPurpose = view.getViewManager().getAppManager()
-					.getService(IIntendedPurposeApp.class).get(view.getViewManager().getCache().getModel());
+			IntendedPurpose intendedPurpose = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
+					.get(getViewManager().getCache().getModel());
 			options.put(ExportOptions.INTENDED_PURPOSE, intendedPurpose);
 		} catch (CredibilityException e) {
 			logger.error(e.getMessage());
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+					e.getMessage());
 		}
 
 		return options;
@@ -492,18 +526,18 @@ public class ExportConfigurationViewController {
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
 
 		// Decision - Get generation parameters
-		options.put(ExportOptions.DECISION_INCLUDE, view.isDecisionSelected());
+		options.put(ExportOptions.DECISION_INCLUDE, getView().isDecisionSelected());
 
 		// Decision specification
-		options.put(ExportOptions.DECISION_SPECIFICATION, view.getViewManager().getCache().getDecisionSpecification());
+		options.put(ExportOptions.DECISION_SPECIFICATION, getViewManager().getCache().getDecisionSpecification());
 
 		// Decision - get Decision parameters
-		List<DecisionParam> parameters = view.getViewManager().getCache().getDecisionSpecification().getParameters();
+		List<DecisionParam> parameters = getViewManager().getCache().getDecisionSpecification().getParameters();
 		options.put(ExportOptions.DECISION_PARAMETERS, parameters);
 
 		// Decision - get Decision values
-		List<Decision> values = view.getViewManager().getAppManager().getService(IDecisionApplication.class)
-				.getDecisionRootByModel(view.getViewManager().getCache().getModel());
+		List<Decision> values = getViewManager().getAppManager().getService(IDecisionApplication.class)
+				.getDecisionRootByModel(getViewManager().getCache().getModel());
 		options.put(ExportOptions.DECISION_LIST, values);
 
 		return options;
@@ -520,21 +554,21 @@ public class ExportConfigurationViewController {
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
 
 		// System Requirement - Get generation parameters
-		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, view.isSystemRequirementSelected());
+		options.put(ExportOptions.SYSTEM_REQUIREMENT_INCLUDE, getView().isSystemRequirementSelected());
 
 		// System Requirement specification
 		options.put(ExportOptions.SYSTEM_REQUIREMENT_SPECIFICATION,
-				view.getViewManager().getCache().getSystemRequirementSpecification());
+				getViewManager().getCache().getSystemRequirementSpecification());
 
 		// System Requirement - get System Requirement parameters
-		List<SystemRequirementParam> parameters = view.getViewManager().getCache().getSystemRequirementSpecification()
+		List<SystemRequirementParam> parameters = getViewManager().getCache().getSystemRequirementSpecification()
 				.getParameters();
 		options.put(ExportOptions.SYSTEM_REQUIREMENT_PARAMETERS, parameters);
 
 		// System Requirement - get System Requirement values
-		List<SystemRequirement> values = view.getViewManager().getAppManager()
+		List<SystemRequirement> values = getViewManager().getAppManager()
 				.getService(ISystemRequirementApplication.class)
-				.getRequirementRootByModel(view.getViewManager().getCache().getModel());
+				.getRequirementRootByModel(getViewManager().getCache().getModel());
 		options.put(ExportOptions.SYSTEM_REQUIREMENT_LIST, values);
 
 		return options;
@@ -551,21 +585,19 @@ public class ExportConfigurationViewController {
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
 
 		// Uncertainty - Get generation parameters
-		options.put(ExportOptions.UNCERTAINTY_INCLUDE, view.isUncertaintySelected());
+		options.put(ExportOptions.UNCERTAINTY_INCLUDE, getView().isUncertaintySelected());
 
 		// Uncertainty specification
-		options.put(ExportOptions.UNCERTAINTY_SPECIFICATION,
-				view.getViewManager().getCache().getUncertaintySpecification());
+		options.put(ExportOptions.UNCERTAINTY_SPECIFICATION, getViewManager().getCache().getUncertaintySpecification());
 
 		// Uncertainty - get uncertainty parameters and their content
-		List<UncertaintyParam> parameters = view.getViewManager().getCache().getUncertaintySpecification()
-				.getParameters();
+		List<UncertaintyParam> parameters = getViewManager().getCache().getUncertaintySpecification().getParameters();
 		options.put(ExportOptions.UNCERTAINTY_PARAMETERS, parameters);
 
 		// Uncertainty - get uncertainty groups and their content
-		List<Uncertainty> uncertaintyGroupList = view.getViewManager().getAppManager()
+		List<Uncertainty> uncertaintyGroupList = getViewManager().getAppManager()
 				.getService(IUncertaintyApplication.class)
-				.getUncertaintyGroupByModel(view.getViewManager().getCache().getModel());
+				.getUncertaintyGroupByModel(getViewManager().getCache().getModel());
 		options.put(ExportOptions.UNCERTAINTY_GROUP_LIST, uncertaintyGroupList);
 
 		return options;
@@ -582,16 +614,16 @@ public class ExportConfigurationViewController {
 		Map<ExportOptions, Object> options = new EnumMap<>(ExportOptions.class);
 
 		// PIRT- Get generation parameters
-		options.put(ExportOptions.PIRT_INCLUDE, view.isPIRTSelected());
+		options.put(ExportOptions.PIRT_INCLUDE, getView().isPIRTSelected());
 
 		// PIRT specification
-		options.put(ExportOptions.PIRT_SPECIFICATION, view.getViewManager().getCache().getPIRTSpecification());
+		options.put(ExportOptions.PIRT_SPECIFICATION, getViewManager().getCache().getPIRTSpecification());
 
 		// PIRT - get tree selected QoIs
 		List<QuantityOfInterest> qoiList = null;
-		Object[] checkedQoIs = view.getPIRTQoISelected();
+		Object[] checkedQoIs = getView().getPIRTQoISelected();
 		if (checkedQoIs != null && checkedQoIs.length > 0) {
-			qoiList = Arrays.stream(checkedQoIs).filter(o -> o instanceof QuantityOfInterest)
+			qoiList = Arrays.stream(checkedQoIs).filter(QuantityOfInterest.class::isInstance)
 					.map(QuantityOfInterest.class::cast).collect(Collectors.toList());
 		}
 		options.put(ExportOptions.PIRT_QOI_LIST, qoiList);
@@ -614,31 +646,31 @@ public class ExportConfigurationViewController {
 		List<Tag> pcmmTagList = getSelectedTagList();
 
 		// PCMM specification
-		options.put(ExportOptions.PCMM_SPECIFICATION, view.getViewManager().getCache().getPCMMSpecification());
+		options.put(ExportOptions.PCMM_SPECIFICATION, getViewManager().getCache().getPCMMSpecification());
 
 		// PCMM - Options
-		PCMMMode mode = view.getViewManager().getPCMMConfiguration().getMode();
-		options.put(ExportOptions.PCMM_INCLUDE, view.isPCMMSelected());
+		PCMMMode mode = getViewManager().getPCMMConfiguration().getMode();
+		options.put(ExportOptions.PCMM_INCLUDE, getView().isPCMMSelected());
 		options.put(ExportOptions.PCMM_MODE, mode);
-		options.put(ExportOptions.PCMM_ROLE_LIST, view.getViewManager().getCache().getPCMMSpecification().getRoles());
-		options.put(ExportOptions.PCMM_ELEMENTS, view.getViewManager().getCache().getPCMMSpecification().getElements());
+		options.put(ExportOptions.PCMM_ROLE_LIST, getViewManager().getCache().getPCMMSpecification().getRoles());
+		options.put(ExportOptions.PCMM_ELEMENTS, getViewManager().getCache().getPCMMSpecification().getElements());
 		options.put(ExportOptions.PCMM_PLANNING_PARAMETERS,
-				view.getViewManager().getCache().getPCMMSpecification().getPlanningFields());
+				getViewManager().getCache().getPCMMSpecification().getPlanningFields());
 		options.put(ExportOptions.PCMM_PLANNING_QUESTIONS,
-				view.getViewManager().getCache().getPCMMSpecification().getPlanningQuestions());
+				getViewManager().getCache().getPCMMSpecification().getPlanningQuestions());
 
 		options.put(ExportOptions.PCMM_TAG_LIST, pcmmTagList);
-		options.put(ExportOptions.PCMM_PLANNING_INCLUDE, view.isPCMMPlanningSelected());
-		options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, view.isPCMMAssessmentSelected());
-		options.put(ExportOptions.PCMM_EVIDENCE_INCLUDE, view.isPCMMEvidenceSelected());
+		options.put(ExportOptions.PCMM_PLANNING_INCLUDE, getView().isPCMMPlanningSelected());
+		options.put(ExportOptions.PCMM_ASSESSMENT_INCLUDE, getView().isPCMMAssessmentSelected());
+		options.put(ExportOptions.PCMM_EVIDENCE_INCLUDE, getView().isPCMMEvidenceSelected());
 
 		// Get Elements
 		try {
 			/**
 			 * PCMM Elements
 			 */
-			List<PCMMElement> pcmmElements = view.getViewManager().getAppManager().getService(IPCMMApplication.class)
-					.getElementList(view.getViewManager().getCache().getModel());
+			List<PCMMElement> pcmmElements = getViewManager().getAppManager().getService(IPCMMApplication.class)
+					.getElementList(getViewManager().getCache().getModel());
 			options.put(ExportOptions.PCMM_ELEMENTS, pcmmElements);
 
 			/**
@@ -647,7 +679,7 @@ public class ExportConfigurationViewController {
 			// Get planning parameters
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(GenericParameter.Filter.PARENT, null);
-			List<PCMMPlanningParam> planningParameters = view.getViewManager().getAppManager()
+			List<PCMMPlanningParam> planningParameters = getViewManager().getAppManager()
 					.getService(IPCMMPlanningApplication.class).getPlanningFieldsBy(filters);
 			options.put(ExportOptions.PCMM_PLANNING_PARAMETERS, planningParameters);
 
@@ -662,45 +694,45 @@ public class ExportConfigurationViewController {
 			for (PCMMElement pcmmElement : pcmmElements) {
 
 				// Planning
-				if (view.isPCMMPlanningSelected()) {
+				if (getView().isPCMMPlanningSelected()) {
 
 					// Questions
 					pcmmPlanningQuestions.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningQuestionsByElement(pcmmElement, mode));
 
 					// Question Values
 					pcmmPlanningQuestionValues.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningQuestionsValueByElement(pcmmElement, mode, pcmmTagList));
 
 					// Parameter values
 					pcmmPlanningValues.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningValueByElement(pcmmElement, mode, pcmmTagList));
 
 					// Parameter table item values
 					pcmmPlanningItems.put(pcmmElement,
-							view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 									.getPlanningTableItemByElement(pcmmElement, mode, pcmmTagList));
 
 				}
 
 				// Evidences
-				if (view.isPCMMEvidenceSelected()) {
-					pcmmEvidence.put(pcmmElement, view.getViewManager().getAppManager()
-							.getService(IPCMMEvidenceApp.class).getEvidenceByTag(pcmmTagList));
+				if (getView().isPCMMEvidenceSelected()) {
+					pcmmEvidence.put(pcmmElement, getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+							.getEvidenceByTag(pcmmTagList));
 				}
 
 				// Assessments
-				if (view.isPCMMAssessmentSelected()) {
-					pcmmAssessments.put(pcmmElement, view.getViewManager().getAppManager()
+				if (getView().isPCMMAssessmentSelected()) {
+					pcmmAssessments.put(pcmmElement, getViewManager().getAppManager()
 							.getService(IPCMMAssessmentApp.class).getAssessmentByTag(pcmmTagList));
 				}
 			}
 
 			// Planning
-			if (view.isPCMMPlanningSelected()) {
+			if (getView().isPCMMPlanningSelected()) {
 				options.put(ExportOptions.PCMM_PLANNING_QUESTIONS, pcmmPlanningQuestions);
 				options.put(ExportOptions.PCMM_PLANNING_QUESTION_VALUES, pcmmPlanningQuestionValues);
 				options.put(ExportOptions.PCMM_PLANNING_PARAMETERS_VALUES, pcmmPlanningValues);
@@ -708,18 +740,19 @@ public class ExportConfigurationViewController {
 			}
 
 			// Evidences
-			if (view.isPCMMEvidenceSelected()) {
+			if (getView().isPCMMEvidenceSelected()) {
 				options.put(ExportOptions.PCMM_EVIDENCE_LIST, pcmmEvidence);
 			}
 
 			// Assessments
-			if (view.isPCMMAssessmentSelected()) {
+			if (getView().isPCMMAssessmentSelected()) {
 				options.put(ExportOptions.PCMM_ASSESSMENT_LIST, pcmmAssessments);
 			}
 
 		} catch (CredibilityException e) {
 			logger.error(e.getMessage());
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+					e.getMessage());
 		}
 
 		return options;
@@ -733,9 +766,9 @@ public class ExportConfigurationViewController {
 	private List<Tag> getSelectedTagList() {
 
 		List<Tag> pcmmTagList = new ArrayList<>();
-		Object[] checkedTags = view.getPCMMTagSelected();
+		Object[] checkedTags = getView().getPCMMTagSelected();
 		if (checkedTags != null && checkedTags.length > 0) {
-			for (Tag tag : Arrays.stream(checkedTags).filter(o -> o instanceof Tag).map(Tag.class::cast)
+			for (Tag tag : Arrays.stream(checkedTags).filter(Tag.class::isInstance).map(Tag.class::cast)
 					.collect(Collectors.toList())) {
 
 				if (tag != null && tag.getId() != null) {
@@ -750,5 +783,4 @@ public class ExportConfigurationViewController {
 
 		return pcmmTagList;
 	}
-
 }

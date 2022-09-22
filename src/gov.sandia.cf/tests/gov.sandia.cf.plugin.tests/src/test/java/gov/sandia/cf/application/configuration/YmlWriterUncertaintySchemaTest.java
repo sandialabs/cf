@@ -14,8 +14,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,6 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class YmlWriterUncertaintySchemaTest extends AbstractConfigurationTest {
 
 	/**

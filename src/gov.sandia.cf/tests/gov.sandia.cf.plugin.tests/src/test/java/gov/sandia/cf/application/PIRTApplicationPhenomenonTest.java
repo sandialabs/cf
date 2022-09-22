@@ -15,8 +15,6 @@ import javax.persistence.RollbackException;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the PIRT Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 
 	/**
@@ -116,7 +113,7 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 
 		try {
 			// delete
-			getPIRTApp().deletePhenomenon(getted);
+			getPIRTApp().deletePhenomenon(getted, null);
 
 			list = getPIRTApp().getPhenomena();
 			assertTrue(list.isEmpty());
@@ -148,7 +145,7 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 			// ********************************
 			// test delete
 			// ********************************
-			getPIRTApp().deletePhenomenon(newPhenomenon);
+			getPIRTApp().deletePhenomenon(newPhenomenon, null);
 
 			List<Phenomenon> list = getPIRTApp().getPhenomena();
 			assertTrue(list.isEmpty());
@@ -229,7 +226,7 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 	@Test
 	void testDeletePhenomenon_ErrorPhenomenonNull() {
 		try {
-			getPIRTApp().deletePhenomenon(null);
+			getPIRTApp().deletePhenomenon(null, null);
 			fail("Deleting a phenomenon null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETEPHENOMENON_PHENOMENONNULL), e.getMessage());
@@ -239,7 +236,7 @@ class PIRTApplicationPhenomenonTest extends AbstractTestApplication {
 	@Test
 	void testDeletePhenomenon_ErrorIdNull() {
 		try {
-			getPIRTApp().deletePhenomenon(new Phenomenon());
+			getPIRTApp().deletePhenomenon(new Phenomenon(), null);
 			fail("Deleting a phenomenon with an id null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETEPHENOMENON_IDNULL), e.getMessage());

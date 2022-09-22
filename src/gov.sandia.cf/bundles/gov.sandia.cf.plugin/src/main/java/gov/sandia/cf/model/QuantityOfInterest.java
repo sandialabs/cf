@@ -36,7 +36,8 @@ import gov.sandia.cf.tools.RscTools;
  */
 @Entity
 @Table(name = "QOI")
-public class QuantityOfInterest implements Serializable, IEntity<QuantityOfInterest, Integer>, IGenericTableItem {
+public class QuantityOfInterest
+		implements Serializable, IEntity<QuantityOfInterest, Integer>, IGenericTableItem, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -310,12 +311,12 @@ public class QuantityOfInterest implements Serializable, IEntity<QuantityOfInter
 		this.model = model;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public String getGeneratedId() {
 		return generatedId;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public void setGeneratedId(String generatedId) {
 		this.generatedId = generatedId;
 	}

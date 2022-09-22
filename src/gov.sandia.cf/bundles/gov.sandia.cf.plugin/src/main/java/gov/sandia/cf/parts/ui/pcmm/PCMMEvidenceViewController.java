@@ -3,28 +3,33 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pcmm;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
+import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.IAssessable;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.constants.ViewMode;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.WorkspaceTools;
@@ -35,7 +40,7 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMEvidenceViewController {
+public class PCMMEvidenceViewController extends AViewController<PCMMViewManager, PCMMEvidenceView> {
 
 	/**
 	 * the logger
@@ -43,18 +48,78 @@ public class PCMMEvidenceViewController {
 	private static final Logger logger = LoggerFactory.getLogger(PCMMEvidenceViewController.class);
 
 	/**
-	 * The view
+	 * the pcmm element
 	 */
-	private PCMMEvidenceView view;
+	private PCMMElement elementSelected;
 
 	/**
-	 * Constructor
-	 * 
-	 * @param view the PCMM evidence view to manage
+	 * The last selected file
 	 */
-	PCMMEvidenceViewController(PCMMEvidenceView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	private IFile lastSelectedFile = null;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param viewManager the view manager
+	 */
+	PCMMEvidenceViewController(PCMMViewManager viewManager) {
+		super(viewManager);
+		super.setView(new PCMMEvidenceView(this, SWT.NONE));
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+		// Trigger GuidanceLevel View
+		getViewManager().getCredibilityEditor().setPartProperty(
+				CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
+				elementSelected != null ? elementSelected.getAbbreviation() : RscTools.empty());
+
+		// Show role selection
+		getView().showRoleSelection();
+
+		List<PCMMElement> pcmmElementList = new ArrayList<>();
+
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		if (model != null) {
+			try {
+				// Load pcmm elements from database
+				pcmmElementList = getViewManager().getAppManager().getService(IPCMMApplication.class)
+						.getElementList(model);
+
+			} catch (CredibilityException e) {
+				MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+						RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_LOADING_MSG));
+				logger.warn("An error has occurred while loading the evidence data:\n{}", e.getMessage(), e); //$NON-NLS-1$
+			}
+		}
+
+		// Get expanded elements
+		Object[] elements = getView().getExpandedElements();
+
+		// Refresh the table
+		getView().refreshMainTable();
+
+		// set pcmm elements
+		getView().setTreeData(pcmmElementList);
+
+		// Set expanded elements
+		if (elements == null || elements.length == 0) {
+			if (elementSelected != null) {
+
+				// refresh element
+				getViewManager().getAppManager().getService(IPCMMApplication.class).refreshElement(elementSelected);
+
+				getView().expandElement(elementSelected);
+			}
+		} else {
+			getView().setExpandedElements(elements);
+		}
+
+		// refresh the viewer
+		getView().refreshViewer();
 	}
 
 	/**
@@ -69,25 +134,25 @@ public class PCMMEvidenceViewController {
 		/**
 		 * Check the PCMM mode
 		 */
-		if (PCMMMode.DEFAULT.equals(view.getViewManager().getPCMMConfiguration().getMode())) {
+		if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())) {
 			// get the selected sub-element to associate the evidence with
 			PCMMSubelement subelementSelected = (PCMMSubelement) element;
 
 			// check the sub-element
 			if (subelementSelected == null) {
-				MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+				MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTSUBELEMENT_MSG));
 			} else {
 				// add the evidence
 				evidenceCreated = addEvidence(subelementSelected, null);
 			}
-		} else if (PCMMMode.SIMPLIFIED.equals(view.getViewManager().getPCMMConfiguration().getMode())) {
+		} else if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())) {
 			// get the selected element to associate the evidence with
 			PCMMElement elementSelectedTemp = (PCMMElement) element;
 
 			// check the element
 			if (elementSelectedTemp == null) {
-				MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+				MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTELEMENT_MSG));
 			} else {
 				// add the evidence
@@ -113,25 +178,29 @@ public class PCMMEvidenceViewController {
 	 */
 	public PCMMEvidence addEvidence(IAssessable assessable, IFile defaultFile) {
 
-		if (getPcmmElement() == null) {
+		if (elementSelected == null) {
 			String message = "Impossible to add the evidence. There is no PCMM element selected."; //$NON-NLS-1$
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+					message);
 			logger.warn(message);
 			return null;
 		} else if (assessable == null) {
 			String message = RscTools.getString(RscConst.ERR_PCMMEVID_ADD_BADSELECT_NOTSUBELEMENT_MSG);
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+					message);
 			logger.warn(message);
 			return null;
-		} else if (assessable instanceof PCMMElement && !getPcmmElement().equals(assessable)) {
+		} else if (assessable instanceof PCMMElement && !elementSelected.equals(assessable)) {
 			String message = "Impossible to add the evidence. The selected element is not an authorized PCMM element"; //$NON-NLS-1$
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+					message);
 			logger.warn(message);
 			return null;
 		} else if (assessable instanceof PCMMSubelement && (((PCMMSubelement) assessable).getElement() == null
-				|| !getPcmmElement().equals(((PCMMSubelement) assessable).getElement()))) {
+				|| !elementSelected.equals(((PCMMSubelement) assessable).getElement()))) {
 			String message = "Impossible to add the evidence. The selected subelement is not into the authorized PCMM element"; //$NON-NLS-1$
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE), message);
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_ADD_TITLE),
+					message);
 			logger.warn(message);
 			return null;
 		}
@@ -151,15 +220,15 @@ public class PCMMEvidenceViewController {
 
 			// expand element
 			if (evidenceCreated != null) {
-				view.expandElement(evidenceCreated.getElement());
-				view.expandSubelement(evidenceCreated.getSubelement());
+				getView().expandElement(evidenceCreated.getElement());
+				getView().expandSubelement(evidenceCreated.getSubelement());
 			}
 			// view changed
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 		} catch (CredibilityException e) {
 			logger.error("An error occurred while adding new PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
 		}
 
@@ -184,11 +253,11 @@ public class PCMMEvidenceViewController {
 		// Keep file location
 		if (FormFieldType.LINK_FILE.equals(evidence.getType())) {
 			// Last selection
-			view.setLastSelectedFile(WorkspaceTools.getFileInWorkspaceForPath(new Path(evidence.getPath())));
+			lastSelectedFile = WorkspaceTools.getFileInWorkspaceForPath(new Path(evidence.getPath()));
 
 			// Set last updated date
-			if (getLastSelectedFile() != null) {
-				long lastUpdated = getLastSelectedFile().getRawLocation().makeAbsolute().toFile().lastModified();
+			if (lastSelectedFile != null) {
+				long lastUpdated = lastSelectedFile.getRawLocation().makeAbsolute().toFile().lastModified();
 				evidence.setDateFile(new Date(lastUpdated));
 			}
 		}
@@ -201,11 +270,11 @@ public class PCMMEvidenceViewController {
 		}
 
 		// set user and role creation parameters
-		evidence.setUserCreation(view.getViewManager().getCache().getUser());
-		evidence.setRoleCreation(view.getViewManager().getCurrentUserRole());
+		evidence.setUserCreation(getViewManager().getCache().getUser());
+		evidence.setRoleCreation(getViewManager().getCurrentUserRole());
 
 		// Add Evidence in database
-		PCMMEvidence evidenceCreated = view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+		PCMMEvidence evidenceCreated = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 				.addEvidence(evidence);
 
 		// Associate the evidence with the assessable item
@@ -221,9 +290,9 @@ public class PCMMEvidenceViewController {
 	/**
 	 * Add a new PCMM evidence
 	 * 
-	 * This method is called if the PCMM Mode is SIMPLIFIED
-	 * 
-	 * @param element the element to associate the evidence with
+	 * This method is called if the PCMM Mode is SIMPLIFIED.
+	 *
+	 * @param editedEvidence the edited evidence
 	 */
 	void editEvidence(PCMMEvidence editedEvidence) {
 
@@ -234,9 +303,9 @@ public class PCMMEvidenceViewController {
 
 		// Item
 		IAssessable item = null;
-		if (PCMMMode.DEFAULT == view.getViewManager().getCache().getPCMMSpecification().getMode()) {
+		if (PCMMMode.DEFAULT == getViewManager().getCache().getPCMMSpecification().getMode()) {
 			item = editedEvidence.getSubelement();
-		} else if (PCMMMode.SIMPLIFIED == view.getViewManager().getCache().getPCMMSpecification().getMode()) {
+		} else if (PCMMMode.SIMPLIFIED == getViewManager().getCache().getPCMMSpecification().getMode()) {
 			item = editedEvidence.getElement();
 		}
 
@@ -249,34 +318,36 @@ public class PCMMEvidenceViewController {
 
 			// Save
 			try {
-				view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).updateEvidence(evidence);
+				getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).updateEvidence(evidence);
 				changed |= true;
 			} catch (CredibilityException e) {
 				logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_ADDING_MSG) + e.getMessage());
 			}
 
 			if (changed) {
 				// Set view changed
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 			}
 		}
 	}
 
 	/**
 	 * Display a new resource selection dialog.
-	 * 
-	 * @param evidence The edited evidence
+	 *
+	 * @param evidence    The edited evidence
+	 * @param item        the item
+	 * @param defaultFile the default file
 	 * @return the list of the selected resources
 	 */
 	PCMMEvidence showEvidenceDialog(PCMMEvidence evidence, IAssessable item, IFile defaultFile) {
 		// Get last selected file
-		if (null == getLastSelectedFile()) {
-			view.setLastSelectedFile(WorkspaceTools.getActiveCfFile());
+		if (lastSelectedFile == null) {
+			lastSelectedFile = WorkspaceTools.getActiveCfFile();
 		}
 
 		// Evidence dialog to add/edit the evidence
@@ -287,7 +358,7 @@ public class PCMMEvidenceViewController {
 		if (defaultFile != null) {
 			evidence.setFilePath(defaultFile.getFullPath().toPortableString());
 		}
-		PCMMEvidenceDialog dialog = new PCMMEvidenceDialog(view.getViewManager(), view.getShell(), evidence, item,
+		PCMMEvidenceDialog dialog = new PCMMEvidenceDialog(getViewManager(), getView().getShell(), evidence, item,
 				mode);
 
 		// open the dialog
@@ -309,7 +380,7 @@ public class PCMMEvidenceViewController {
 			String deleteDetailMessage = RscTools.getString(RscConst.MSG_PCMMEVID_MULTI_DELETE_CONFIRM_QUESTION);
 
 			// confirm dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_PCMMEVID_DELETE_CONFIRM_TITLE), deleteDetailMessage);
 
 			if (!confirm) {
@@ -324,7 +395,8 @@ public class PCMMEvidenceViewController {
 						deleteEvidence((PCMMEvidence) next);
 					} catch (CredibilityException e) {
 						logger.error("An error has occurred while deleting PCMMevidence:\n{}", e.getMessage(), e); //$NON-NLS-1$
-						MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+						MessageDialog.openError(getView().getShell(),
+								RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 								RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_DELETING_MSG) + e.getMessage());
 						break;
 					}
@@ -332,7 +404,7 @@ public class PCMMEvidenceViewController {
 			}
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 		}
 	}
 
@@ -355,7 +427,7 @@ public class PCMMEvidenceViewController {
 					: RscTools.empty();
 
 			// confirm dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_PCMMEVID_DELETE_CONFIRM_TITLE), deleteDetailMessage);
 
 			if (!confirm) {
@@ -366,10 +438,10 @@ public class PCMMEvidenceViewController {
 			deleteEvidence(evidence);
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 		} catch (CredibilityException e) {
 			logger.error("An error has occurred while deleting PCMMevidence:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_DELETING_MSG) + e.getMessage());
 		}
 	}
@@ -382,7 +454,7 @@ public class PCMMEvidenceViewController {
 	 */
 	void deleteEvidence(PCMMEvidence evidence) throws CredibilityException {
 
-		if (evidence == null) {
+		if (evidence == null || elementSelected == null) {
 			return;
 		}
 
@@ -390,11 +462,11 @@ public class PCMMEvidenceViewController {
 		 * Delete from phenomena viewer
 		 */
 		if (evidence.getElement() != null) {
-			getPcmmElement().getEvidenceList().remove(evidence);
+			elementSelected.getEvidenceList().remove(evidence);
 		} else if (evidence.getSubelement() != null) {
-			int index = getPcmmElement().getSubElementList().indexOf(evidence.getSubelement());
+			int index = elementSelected.getSubElementList().indexOf(evidence.getSubelement());
 			if (index >= 0) {
-				PCMMSubelement sub = getPcmmElement().getSubElementList().get(index);
+				PCMMSubelement sub = elementSelected.getSubElementList().get(index);
 				sub.getEvidenceList().remove(evidence);
 			}
 		}
@@ -402,10 +474,10 @@ public class PCMMEvidenceViewController {
 		/**
 		 * Delete from database
 		 */
-		view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).deleteEvidence(evidence);
+		getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).deleteEvidence(evidence);
 
 		// Set view changed
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -435,23 +507,23 @@ public class PCMMEvidenceViewController {
 
 		// update
 		try {
-			evidenceUpdated = view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
-					.moveEvidence(evidence, null, newAssessable);
+			evidenceUpdated = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).moveEvidence(evidence,
+					null, newAssessable);
 			changed = true;
 		} catch (CredibilityException e) {
 			logger.error("An error has occurred while updating PCMM evidence: \n{}", e.getMessage(), e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_PCMMEVID_DIALOG_TITLE),
 					RscTools.getString(RscConst.ERR_PCMMEVID_DIALOG_UPDATING_MSG) + e.getMessage());
 		}
 
 		if (changed) {
 
 			// refresh
-			view.getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(oldAssessable);
-			view.getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(newAssessable);
+			getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(oldAssessable);
+			getViewManager().getAppManager().getService(IPCMMApplication.class).refreshAssessable(newAssessable);
 
 			// Set view changed
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 		}
 
 		return evidenceUpdated;
@@ -466,11 +538,11 @@ public class PCMMEvidenceViewController {
 	 */
 	public void reorderEvidence(PCMMEvidence evidence, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).reorderEvidence(evidence, newIndex,
-				view.getViewManager().getCache().getUser());
+		getViewManager().getAppManager().getService(IPCMMEvidenceApp.class).reorderEvidence(evidence, newIndex,
+				getViewManager().getCache().getUser());
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -479,10 +551,10 @@ public class PCMMEvidenceViewController {
 	public void viewChangedAndRefresh() {
 
 		// Set view changed
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 
 		// Refresh
-		view.refresh();
+		getView().refresh();
 	}
 
 	/**
@@ -491,9 +563,31 @@ public class PCMMEvidenceViewController {
 	public void refreshIfChanged() {
 
 		// Refresh
-		if (view.getViewManager().isDirty()) {
-			view.refresh();
+		if (getViewManager().isDirty()) {
+			getView().refresh();
 		}
+	}
+
+	/**
+	 * Check if the element in parameter is contained in the current selected
+	 * element of the parent view
+	 * 
+	 * @param evidence the evidence to check
+	 * @return boolean True if is selected
+	 */
+	protected boolean isFromCurrentPCMMElement(PCMMEvidence evidence) {
+		// Initialize
+		boolean isFromCurrentPCMMElement = false;
+
+		// Check the PCMM mode
+		if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())) {
+			isFromCurrentPCMMElement = elementSelected != null && evidence.getSubelement() != null
+					&& elementSelected.equals(evidence.getSubelement().getElement());
+		} else if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())) {
+			isFromCurrentPCMMElement = elementSelected != null && elementSelected.equals(evidence.getElement());
+		}
+
+		return isFromCurrentPCMMElement;
 	}
 
 	/**
@@ -502,36 +596,41 @@ public class PCMMEvidenceViewController {
 	 * @return true if the selected tag is a real tag, otherwise false
 	 */
 	public boolean isTagMode() {
-		return view.getViewManager().isTagMode();
+		return getViewManager().isTagMode();
 	}
 
 	/**
 	 * @return the pcmm element
 	 */
-	public PCMMElement getPcmmElement() {
-		return view.getPcmmElement();
+	public PCMMElement getElementSelected() {
+		return elementSelected;
 	}
 
 	/**
-	 * @return the last selected file
+	 * Sets the element selected.
+	 *
+	 * @param elementSelected the new element selected
 	 */
-	public IFile getLastSelectedFile() {
-		return view.getLastSelectedFile();
+	public void setElementSelected(PCMMElement elementSelected) {
+		PCMMElement oldElement = this.elementSelected;
+		this.elementSelected = elementSelected;
+
+		getView().setPcmmElement(oldElement, elementSelected);
 	}
 
 	/**
 	 * @return the pcmm configuration
 	 */
 	public PCMMSpecification getPCMMConfiguration() {
-		return view.getViewManager().getPCMMConfiguration();
+		return getViewManager().getPCMMConfiguration();
 	}
 
 	/**
 	 * @return the pcmm mode
 	 */
 	public PCMMMode getPCMMMode() {
-		return view.getViewManager().getPCMMConfiguration() != null
-				? view.getViewManager().getPCMMConfiguration().getMode()
+		return getViewManager().getPCMMConfiguration() != null ? getViewManager().getPCMMConfiguration().getMode()
 				: null;
 	}
+
 }

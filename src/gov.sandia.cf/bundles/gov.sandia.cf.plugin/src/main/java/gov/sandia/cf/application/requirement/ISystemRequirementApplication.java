@@ -78,12 +78,13 @@ public interface ISystemRequirementApplication extends IApplication {
 			throws CredibilityException;
 
 	/**
-	 * Delete Requirement
-	 * 
+	 * Delete Requirement.
+	 *
 	 * @param requirement the requirement to delete
+	 * @param user the user
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteRequirement(SystemRequirement requirement) throws CredibilityException;
+	public void deleteRequirement(SystemRequirement requirement, User user) throws CredibilityException;
 
 	/**
 	 * Delete All Requirement values

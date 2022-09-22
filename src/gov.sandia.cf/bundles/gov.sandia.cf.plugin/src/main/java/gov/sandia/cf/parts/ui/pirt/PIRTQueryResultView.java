@@ -22,11 +22,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.model.dto.configuration.PIRTQuery;
 import gov.sandia.cf.parts.listeners.SortTableColumnListener;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -47,40 +44,25 @@ import gov.sandia.cf.tools.RscTools;
  * @param <T> the result type class
  *
  */
-public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager> {
-	/**
-	 * the logger
-	 */
-	private static final Logger logger = LoggerFactory.getLogger(PIRTQueryResultView.class);
+public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTQueryResultViewController<T>> {
 
 	/**
 	 * the quantity of interest table viewer
 	 */
 	private TableViewer tableResult;
-	/**
-	 * the pirt query
-	 */
-	private PIRTQuery pirtQuery;
-	/**
-	 * the pirt query result
-	 */
-	private List<T> queryResult;
 
 	/**
-	 * @param viewManager the parent view manager
-	 * @param parent      the parent composite
-	 * @param pirtQuery   the pirt query
-	 * @param queryResult the pirt query result
-	 * @param style       the view style
+	 * Instantiates a new PIRT query result view.
+	 *
+	 * @param viewController the parent view manager
+	 * @param parent         the parent composite
+	 * @param style          the view style
 	 */
-	public PIRTQueryResultView(PIRTViewManager viewManager, PIRTTabFolder parent, PIRTQuery pirtQuery,
-			List<T> queryResult, int style) {
-		super(viewManager, parent, style);
-		this.pirtQuery = pirtQuery;
-		this.queryResult = queryResult;
+	public PIRTQueryResultView(PIRTQueryResultViewController<T> viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// create the view
-		if (pirtQuery != null) {
+		if (getViewController().getPirtQuery() != null) {
 			createPage();
 		}
 	}
@@ -117,7 +99,8 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 		 * Header
 		 */
 		// reset title with the query name
-		setTitle(RscTools.getString(RscConst.MSG_PIRT_QUERYRSVIEW_ITEMTITLE, pirtQuery.getName(),
+		setTitle(RscTools.getString(RscConst.MSG_PIRT_QUERYRSVIEW_ITEMTITLE,
+				getViewController().getPirtQuery().getName(),
 				DateTools.formatDate(DateTools.getCurrentDate(), DateTools.getDateTimeFormat())));
 
 		/**
@@ -145,6 +128,7 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 			// TODO implement clicking on a result
 		});
 
+		List<T> queryResult = getViewController().getQueryResult();
 		if (queryResult != null && !queryResult.isEmpty()) {
 			for (Field field : queryResult.get(0).getClass().getDeclaredFields()) {
 
@@ -180,8 +164,10 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().openHomePage());
-		Button btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().openHomePage());
+		Button btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
+				btnBackOptions);
 
 		// button Close
 		Map<String, Object> btnCloseOptions = new HashMap<>();
@@ -189,13 +175,14 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 		btnCloseOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnCloseOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CLOSE);
 		btnCloseOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnCloseOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().closePage(pirtQuery));
-		Button btnClose = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.PUSH | SWT.CENTER,
-				btnCloseOptions);
+		btnCloseOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().closePage(getViewController().getPirtQuery()));
+		Button btnClose = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.PUSH | SWT.CENTER, btnCloseOptions);
 
 		// buttons global settings
-		FontTools.setButtonFont(getViewManager().getRscMgr(), btnBack);
-		FontTools.setButtonFont(getViewManager().getRscMgr(), btnClose);
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), btnBack);
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), btnClose);
 
 		// layout view
 		compositeButtons.layout();
@@ -205,15 +192,22 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 	}
 
 	/**
+	 * Sets the table data.
+	 *
+	 * @param data the new table data
+	 */
+	void setTableData(Object data) {
+		if (tableResult != null) {
+			tableResult.setInput(data);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void reload() {
-		if (queryResult != null && !queryResult.isEmpty()) {
-			tableResult.setInput(queryResult);
-		}
-		refreshViewer();
-		logger.debug("Loading datas"); //$NON-NLS-1$
+		getViewController().reloadData();
 	}
 
 	/**
@@ -236,7 +230,7 @@ public class PIRTQueryResultView<T> extends ACredibilitySubView<PIRTViewManager>
 	 * @param qoi the qoi to close associated page
 	 */
 	public void closePage(QuantityOfInterest qoi) {
-		getViewManager().closePage(qoi);
+		getViewController().getViewManager().closePage(qoi);
 	}
 
 }

@@ -99,9 +99,9 @@ public class GenericValueFieldWidget<P extends GenericParameter<P>>
 	}
 
 	/**
-	 * Set the default value for edition
-	 * 
-	 * @param value the generic value
+	 * Set the default value for edition.
+	 *
+	 * @param textValue the new default value
 	 */
 	private void setDefaultValue(String textValue) {
 		if (super.isEditable()) {

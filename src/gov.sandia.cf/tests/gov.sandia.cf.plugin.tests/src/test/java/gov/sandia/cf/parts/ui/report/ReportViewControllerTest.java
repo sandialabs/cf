@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class ReportViewControllerTest extends AbstractTestParts {
 
 	/**
@@ -43,14 +42,22 @@ class ReportViewControllerTest extends AbstractTestParts {
 	 */
 	public static Logger logger = LoggerFactory.getLogger(AbstractTestParts.class);
 
-	/**
-	 * Parameters file
-	 */
+	@Mock
+	ReportViewManager viewManager;
+
+	@Mock
+	ReportView view;
+
+	private ReportViewController ctrl;
+
+	@BeforeEach
+	public void setUp() {
+		MockitoAnnotations.initMocks(this);
+		ctrl = new ReportViewController(viewManager, view);
+	}
 
 	@Test
 	void test_checkARGParametersFile_ArgParam_Null() {
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(null);
 
 		assertNotNull(notif);
@@ -67,8 +74,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setParametersFilePath(RscTools.empty());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(argParameters);
 
 		assertNotNull(notif);
@@ -88,8 +93,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setParametersFilePath(CFVariable.WORKSPACE.get() + newFile.getParent().getFullPath().toString());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(argParameters);
 
 		// test
@@ -112,8 +115,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		argParameters.setParametersFilePath(CFVariable.WORKSPACE.get() + FileTools.PATH_SEPARATOR + "directory" //$NON-NLS-1$
 				+ FileTools.PATH_SEPARATOR + "newFile.yml"); //$NON-NLS-1$
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(argParameters);
 
 		// test
@@ -135,8 +136,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setParametersFilePath(argParameters.getStructureFilePath());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(argParameters);
 
 		// test
@@ -156,8 +155,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		IFile newFile = TestEntityFactory.getNewFile("Project", "cfFile.cf"); //$NON-NLS-1$ //$NON-NLS-2$
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParametersFile(argParameters);
 
 		// test
@@ -173,8 +170,7 @@ class ReportViewControllerTest extends AbstractTestParts {
 
 	@Test
 	void test_checkARGStructureFile_ArgParam_Null() {
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
+
 		Notification notif = ctrl.checkARGStructureFile(null);
 
 		assertNotNull(notif);
@@ -191,8 +187,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setStructureFilePath(RscTools.empty());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGStructureFile(argParameters);
 
 		assertNotNull(notif);
@@ -212,8 +206,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setStructureFilePath(CFVariable.WORKSPACE.get() + newFile.getParent().getFullPath().toString());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGStructureFile(argParameters);
 
 		// test
@@ -236,8 +228,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		argParameters.setStructureFilePath(CFVariable.WORKSPACE.get() + FileTools.PATH_SEPARATOR + "directory" //$NON-NLS-1$
 				+ FileTools.PATH_SEPARATOR + "newFile.yml"); //$NON-NLS-1$
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGStructureFile(argParameters);
 
 		// test
@@ -259,8 +249,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setStructureFilePath(argParameters.getParametersFilePath());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGStructureFile(argParameters);
 
 		// test
@@ -280,8 +268,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		IFile newFile = TestEntityFactory.getNewFile("Project", "cfFile.cf"); //$NON-NLS-1$ //$NON-NLS-2$
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGStructureFile(argParameters);
 
 		// test
@@ -297,8 +283,7 @@ class ReportViewControllerTest extends AbstractTestParts {
 
 	@Test
 	void test_checkARGOutput_ArgParam_Null() {
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
+
 		Notification notif = ctrl.checkARGParamOutput(null);
 
 		assertNotNull(notif);
@@ -315,8 +300,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setOutput(RscTools.empty());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParamOutput(argParameters);
 
 		assertNotNull(notif);
@@ -336,8 +319,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setOutput(CFVariable.WORKSPACE.get() + newFile.getFullPath().toString());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParamOutput(argParameters);
 
 		// test
@@ -357,8 +338,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 		argParameters.setOutput(CFVariable.WORKSPACE.get() + FileTools.PATH_SEPARATOR + "directory"); //$NON-NLS-1$
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParamOutput(argParameters);
 
 		// test
@@ -378,8 +357,6 @@ class ReportViewControllerTest extends AbstractTestParts {
 		IFile newFile = TestEntityFactory.getNewFile("Project", "cfFile.cf"); //$NON-NLS-1$ //$NON-NLS-2$
 		ARGParameters argParameters = ARGParametersFactory.getDefaultParameters(newFile.getParent().getFullPath());
 
-		ReportView view = Mockito.mock(ReportView.class);
-		ReportViewController ctrl = new ReportViewController(view);
 		Notification notif = ctrl.checkARGParamOutput(argParameters);
 
 		// test

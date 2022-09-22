@@ -11,14 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -26,6 +28,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.ExpandEvent;
+import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -40,19 +44,12 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMApplication;
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.application.report.IReportARGExecutionApp;
 import gov.sandia.cf.constants.arg.ARGBackendDefault;
 import gov.sandia.cf.constants.arg.ARGReportTypeDefault;
 import gov.sandia.cf.constants.arg.ARGVersion;
-import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.model.ARGParametersQoIOption;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
@@ -60,6 +57,7 @@ import gov.sandia.cf.model.comparator.QoiTaggedComparator;
 import gov.sandia.cf.model.comparator.TagComparatorByDateTag;
 import gov.sandia.cf.model.comparator.VersionComparator;
 import gov.sandia.cf.model.dto.arg.ARGType;
+import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.dialogs.ContainerPickerDialog;
 import gov.sandia.cf.parts.theme.ButtonTheme;
 import gov.sandia.cf.parts.theme.ConstantTheme;
@@ -88,16 +86,7 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Maxime N.
  *
  */
-public class ReportView extends ACredibilitySubView<ReportViewManager> {
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = LoggerFactory.getLogger(ReportView.class);
-
-	/**
-	 * Controller
-	 */
-	private ReportViewController viewCtrl;
+public class ReportView extends ACredibilitySubView<ReportViewController> implements ExpandListener {
 
 	/**
 	 * Composites
@@ -120,7 +109,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	/**
 	 * ARG Parameters
 	 */
-	private ARGParameters argParameters;
 	private TextWidget txtARGParamOutput;
 	private TextWidget txtARGParamParametersFile;
 	private TextWidget txtARGParamStructureFile;
@@ -148,8 +136,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	 * PIRT Elements
 	 */
 	private Button chboxPirt;
-	private List<QuantityOfInterest> pirtQoIList;
-	private Map<QuantityOfInterest, Map<Class<?>, Control>> pirtControlMap;
 
 	/**
 	 * PCMM Elements
@@ -159,7 +145,6 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	private Button chboxPcmmPlanning;
 	private Button chboxPcmmEvidence;
 	private Button chboxPcmmAssessment;
-	private List<Tag> pcmmTagList;
 
 	/**
 	 * Custom ending file
@@ -172,18 +157,19 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	 */
 	private TextViewer txtConsole;
 
-	private ARGType argTypes;
+	private ScrolledComposite scrollComposite;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param viewManager The view manager
-	 * @param style       The view style
+	 * The constructor.
+	 *
+	 * @param viewController the view ctrl
+	 * @param style          The view style
 	 */
-	public ReportView(ReportViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
+	public ReportView(ReportViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
-		this.viewCtrl = new ReportViewController(this);
+		Assert.isNotNull(viewController);
+
 		this.askFirstTimeForMigration = true;
 
 		// create the view
@@ -211,306 +197,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	 */
 	@Override
 	public void reload() {
-
-		// reload parameters from database
-		argParameters = getViewManager().getAppManager().getService(IReportARGExecutionApp.class).getARGParameters();
-
-		// get default parameters
-		if (argParameters == null) {
-			try {
-
-				// persist ARG default parameters
-				argParameters = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
-						.addDefaultARGParameters(getViewManager().getCredibilityEditor().getCfProjectPath());
-
-				if (argParameters == null) {
-					return;
-				}
-			} catch (CredibilityException e) {
-				logger.error("Impossible to load the arg parameters.", e); //$NON-NLS-1$
-			}
-		}
-
-		// reload execution environment
-		reloadARGSetup();
-
-		// reload combo-box parameters
-		reloadARGTypes();
-
-		// reload
-		reloadARGParameters();
-		reloadPlanning();
-		reloadPIRT();
-		reloadPCMM();
-		reloadCustomEnding();
-	}
-
-	/**
-	 * Reload the ARG parameters : if not present, add default data.
-	 */
-	void reloadARGTypes() {
-
-		// reload combo-box parameters
-		argTypes = viewCtrl.getARGTypes();
-	}
-
-	/**
-	 * Reload the ARG parameters : if not present, add default data.
-	 */
-	void reloadARGParameters() {
-
-		// ARG Back-end type - text input
-		if (argTypes != null && argTypes.getBackendTypes() != null) {
-			List<Object> backend = argTypes.getBackendTypes().stream().map(Object.class::cast)
-					.collect(Collectors.toList());
-			cbxARGParamBackendType.setInput(backend);
-		}
-
-		// ARG Report type - text input
-		if (argTypes != null && argTypes.getReportTypes() != null) {
-			List<Object> reportTypes = argTypes.getReportTypes().stream().map(Object.class::cast)
-					.collect(Collectors.toList());
-			cbxARGParamReportType.setInput(reportTypes);
-			lblReportType.setVisible(reportTypes.size() > 1);
-			cbxARGParamReportType.getControl().setVisible(reportTypes.size() > 1);
-		}
-
-		if (argParameters != null) {
-			txtARGParamOutput.setValue(argParameters.getOutput());
-			txtARGParamParametersFile.setValue(argParameters.getParametersFilePath());
-			txtARGParamStructureFile.setValue(argParameters.getStructureFilePath());
-			txtARGParamFilename.setValue(argParameters.getFilename());
-			txtARGParamReportTitle.setValue(argParameters.getTitle());
-			txtARGParamAuthor
-					.setValue(argParameters.getAuthor() != null ? argParameters.getAuthor() : RscTools.empty());
-			cbxARGParamBackendType.setSelection(new StructuredSelection(argParameters.getBackendType()));
-
-			if (chboxARGParamInlineWordDoc != null) {
-
-				boolean enableInlining = PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY);
-				if (enableInlining) {
-					// force to true if the value is null
-					chboxARGParamInlineWordDoc.setSelection(argParameters.getInlineWordDoc() == null
-							|| Boolean.TRUE.equals(argParameters.getInlineWordDoc()));
-					chboxARGParamInlineWordDoc.notifyListeners(SWT.Selection, new Event());
-				}
-
-				// reload widget display
-				reloadWordInlining();
-			}
-			cbxARGParamReportType.setSelection(new StructuredSelection(argParameters.getReportType()));
-		}
-	}
-
-	/**
-	 * @return the ARG version populated with current ARG installation
-	 */
-	private String getARGVersion() {
-
-		String argVersion = null;
-
-		try {
-
-			StringBuilder consoleLog = new StringBuilder(txtConsole.getTextWidget().getText());
-			argVersion = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
-					.getARGVersion(viewCtrl.computeARGParametersForExecution(argParameters), consoleLog, consoleLog);
-			txtConsole.getTextWidget().setText(consoleLog.toString());
-			txtConsole.setTopIndex(txtConsole.getTextWidget().getLineCount() - 1);
-
-		} catch (CredibilityException e) {
-			logger.warn(e.getMessage());
-		}
-
-		return argVersion;
-	}
-
-	/**
-	 * Reload ARG Setup data
-	 */
-	void reloadARGSetup() {
-
-		// set default conf
-		if (argParameters != null) {
-			if (chboxUseARGLocalConf != null) {
-				chboxUseARGLocalConf.setSelection(Boolean.TRUE.equals(argParameters.getUseArgLocalConf()));
-				chboxUseARGLocalConf.notifyListeners(SWT.Selection, new Event());
-			}
-			if (txtArgSetupExecutable != null) {
-				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
-					txtArgSetupExecutable.setValue(FileTools.getNormalizedPath(PrefTools.getARGExecutablePath()));
-				} else {
-					txtArgSetupExecutable.setValue(argParameters.getArgExecPath());
-				}
-			}
-			if (txtArgSetupPreScript != null) {
-				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
-					txtArgSetupPreScript.setValue(FileTools.getNormalizedPath(PrefTools.getARGSetEnvScriptPath()));
-				} else {
-					txtArgSetupPreScript.setValue(argParameters.getArgPreScript());
-				}
-			}
-		}
-
-		// check and ask for prefs migration to .cf file
-		if (askFirstTimeForMigration && argParameters != null
-				&& !Boolean.TRUE.equals(argParameters.getUseArgLocalConf()) && txtArgSetupExecutable != null
-				&& StringUtils.isBlank(txtArgSetupExecutable.getValue())
-				&& !StringUtils.isBlank(PrefTools.getARGExecutablePath())) {
-
-			boolean migrationQuestion = MessageDialog.openQuestion(getShell(),
-					RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE),
-					RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_QUESTION_ASKTOPERSISTPREFS));
-			if (migrationQuestion) {
-				txtArgSetupExecutable.setValue(PrefTools.getARGExecutablePath());
-				viewCtrl.changedARGSetupExecutable(txtArgSetupExecutable.getValue());
-				if (StringUtils.isBlank(txtArgSetupPreScript.getValue())) {
-					txtArgSetupPreScript.setValue(PrefTools.getARGSetEnvScriptPath());
-					viewCtrl.changedARGSetupPreScript(txtArgSetupPreScript.getValue());
-				}
-			}
-
-			askFirstTimeForMigration = false;
-		}
-
-		// Get ARG version
-		reloadARGSetupARGVersion();
-	}
-
-	/**
-	 * Reload ARG Setup ARG version information
-	 */
-	void reloadARGSetupARGVersion() {
-
-		// Get ARG version
-		String argVersion = getARGVersion();
-		int versionComparison = new VersionComparator().compare(ARGVersion.ARG_VERSION, argVersion);
-		if (versionComparison > 0) {
-			textARGVersion.setText(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_VERSION_WARN, argVersion,
-					ARGVersion.ARG_VERSION));
-			textARGVersion.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE)));
-			textARGVersion.setVisible(true);
-			textARGVersion.setImage(FormFactory.getWarningIcon(getViewManager().getRscMgr()));
-			((GridData) textARGVersion.getLayoutData()).heightHint = textARGVersion.computeSize(SWT.DEFAULT,
-					SWT.DEFAULT).y;
-
-			textARGVersion.requestLayout();
-			textARGVersion.getParent().requestLayout();
-		} else {
-			textARGVersion.setText(null);
-			textARGVersion.setForeground(null);
-			textARGVersion.setVisible(false);
-			textARGVersion.setImage(null);
-			((GridData) textARGVersion.getLayoutData()).heightHint = 0;
-
-			textARGVersion.requestLayout();
-			textARGVersion.getParent().requestLayout();
-		}
-	}
-
-	/**
-	 * Reload Planning data
-	 */
-	void reloadPlanning() {
-		// load checkboxes
-		if (argParameters != null) {
-			if (chboxPlanning != null) {
-				chboxPlanning.setSelection(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-
-			if (chboxPlanningIntendedPurpose != null) {
-				chboxPlanningIntendedPurpose
-						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningIntendedPurposeEnabled()));
-				chboxPlanningIntendedPurpose.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-			if (chboxPlanningSystemRequirement != null) {
-				chboxPlanningSystemRequirement
-						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningSysReqEnabled()));
-				chboxPlanningSystemRequirement.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-			if (chboxPlanningQoIPlanner != null) {
-				chboxPlanningQoIPlanner.setSelection(Boolean.TRUE.equals(argParameters.getPlanningQoIPlannerEnabled()));
-				chboxPlanningQoIPlanner.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-			if (chboxPlanningUncertainty != null) {
-				chboxPlanningUncertainty
-						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningUncertaintyEnabled()));
-				chboxPlanningUncertainty.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-			if (chboxPlanningDecision != null) {
-				chboxPlanningDecision.setSelection(Boolean.TRUE.equals(argParameters.getPlanningDecisionEnabled()));
-				chboxPlanningDecision.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
-			}
-		}
-	}
-
-	/**
-	 * Reload PIRT data
-	 */
-	void reloadPIRT() {
-		// QoI list
-		pirtQoIList = new ArrayList<>();
-		pirtControlMap = new HashMap<>();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-			// Get QoI list
-			pirtQoIList = getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
-		}
-
-		// load checkbox
-		if (argParameters != null && chboxPirt != null) {
-			chboxPirt.setSelection(Boolean.TRUE.equals(argParameters.getPirtEnabled()));
-		}
-
-		// Render
-		refreshPIRTQoIList();
-	}
-
-	/**
-	 * Reload PCMM data
-	 */
-	void reloadPCMM() {
-		// Get Tag list
-		pcmmTagList = getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
-		refreshPCMMTagList();
-
-		// load checkboxes
-		if (argParameters != null) {
-			if (chboxPcmm != null) {
-				chboxPcmm.setSelection(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
-				cbxPcmmTag.getControl().setEnabled(chboxPcmm.getSelection());
-			}
-			if (chboxPcmmPlanning != null) {
-				chboxPcmmPlanning.setSelection(Boolean.TRUE.equals(argParameters.getPcmmPlanningEnabled()));
-				chboxPcmmPlanning.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
-			}
-			if (chboxPcmmEvidence != null) {
-				chboxPcmmEvidence.setSelection(Boolean.TRUE.equals(argParameters.getPcmmEvidenceEnabled()));
-				chboxPcmmEvidence.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
-			}
-			if (chboxPcmmAssessment != null) {
-				chboxPcmmAssessment.setSelection(Boolean.TRUE.equals(argParameters.getPcmmAssessmentEnabled()));
-				chboxPcmmAssessment.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
-			}
-		}
-	}
-
-	/**
-	 * Reload Custom ending
-	 */
-	void reloadCustomEnding() {
-		// load checkboxes
-		if (argParameters != null) {
-			if (chboxCustomEnding != null) {
-				chboxCustomEnding.setSelection(Boolean.TRUE.equals(argParameters.getCustomEndingEnabled()));
-				chboxCustomEnding.notifyListeners(SWT.Selection, new Event());
-			}
-			if (txtCustomEndingFilePath != null) {
-				txtCustomEndingFilePath.setValue(argParameters.getCustomEndingFilePath());
-			}
-		}
+		getViewController().reloadData();
 	}
 
 	/**
@@ -533,25 +220,24 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		GridData firstData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		first.setLayoutData(firstData);
 
-		ScrolledComposite firstScroll = new ScrolledComposite(first, SWT.V_SCROLL);
-		firstScroll.setLayout(new GridLayout(1, false));
-		firstScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		firstScroll.addListener(SWT.Resize, event -> {
-			int width = firstScroll.getClientArea().width;
-			firstScroll.setMinSize(firstScroll.getParent().computeSize(width, SWT.DEFAULT));
-		});
+		scrollComposite = new ScrolledComposite(first, SWT.V_SCROLL);
+		scrollComposite.setLayout(new GridLayout(1, false));
+		scrollComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scrollComposite.addListener(SWT.Resize, event -> scrollComposite.setMinSize(
+				mainComposite.computeSize(PartsResourceConstants.DESCRIPTIVE_DIALOG_MIN_SIZE_X, SWT.DEFAULT)));
 
-		mainComposite = new Composite(firstScroll, SWT.NONE);
+		mainComposite = new Composite(scrollComposite, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
-		firstScroll.setContent(mainComposite);
-		firstScroll.setExpandHorizontal(true);
-		firstScroll.setExpandVertical(true);
-		firstScroll.setMinSize(mainComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		scrollComposite.setContent(mainComposite);
+		scrollComposite.setExpandHorizontal(true);
+		scrollComposite.setExpandVertical(true);
+		scrollComposite.setMinSize(
+				mainComposite.computeSize(PartsResourceConstants.DESCRIPTIVE_DIALOG_MIN_SIZE_X, SWT.DEFAULT));
 
 		// Render sub-composites
 		renderARGSetup();
@@ -589,8 +275,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -599,8 +285,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtonsFooterLeft, ContextualHelpId.REPORTING);
@@ -611,12 +297,12 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		btngenOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btngenOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_GEN_CF_REPORT);
 		btngenOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
-		btngenOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.generateReport());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterRight, SWT.RIGHT | SWT.LEFT_TO_RIGHT,
-				btngenOptions);
+		btngenOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().generateReport());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterRight,
+				SWT.RIGHT | SWT.LEFT_TO_RIGHT, btngenOptions);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtonsFooter.layout();
@@ -634,17 +320,19 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		argSetupComposite.setLayout(gridLayout);
 		argSetupComposite.setBackground(argSetupComposite.getParent().getBackground());
 
-		// PIRT collapse
-		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, argSetupComposite);
-		pirtCollapse.setLabel(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE));
+		// ARG Setup collapse
+		CollapsibleWidget argSetupCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, argSetupComposite);
+		argSetupCollapse.setLabel(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE));
+
+		argSetupCollapse.addExpandListener(this);
 
 		// ARG executable - Label
 		CLabel argExecLabel = new CLabel(argSetupComposite, SWT.NONE);
 		argExecLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		argExecLabel.setText(RscTools.getString(RscConst.PREFS_GLOBAL_ARG_EXECUTABLE));
 		argExecLabel.setBackground(argExecLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), argExecLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), argExecLabel);
 
 		// Browse composite
 		Composite browseCompositeARGExecutable = new Composite(argSetupComposite, SWT.FILL);
@@ -655,13 +343,13 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		browseCompositeARGExecutable.setBackground(browseCompositeARGExecutable.getParent().getBackground());
 
 		// ARG executable - Label Content
-		txtArgSetupExecutable = FormFactory.createTextWidget(getViewManager().getRscMgr(), browseCompositeARGExecutable,
-				true, null);
+		txtArgSetupExecutable = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				browseCompositeARGExecutable, true, null);
 		txtArgSetupExecutable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		txtArgSetupExecutable.setEnabled(true);
 		txtArgSetupExecutable.setBackground(txtArgSetupExecutable.getParent().getBackground());
 		txtArgSetupExecutable.addListener(SWT.KeyUp, e -> {
-			viewCtrl.changedARGSetupExecutable(txtArgSetupExecutable.getValue());
+			getViewController().changedARGSetupExecutable(txtArgSetupExecutable.getValue());
 			txtArgSetupExecutable.clearHelper();
 		});
 
@@ -670,7 +358,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		optionsBtnBrowseARGExecutable.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowseARGExecutable.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowseARGExecutable.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme btnBrowseARGExecutable = FormFactory.createButton(getViewManager().getRscMgr(),
+		ButtonTheme btnBrowseARGExecutable = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
 				browseCompositeARGExecutable, null, optionsBtnBrowseARGExecutable);
 
 		btnBrowseARGExecutable.addListener(SWT.Selection, event -> {
@@ -682,7 +370,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 
 			if (!StringUtils.isBlank(path)) {
 				txtArgSetupExecutable.setValue(FileTools.getNormalizedPath(path));
-				viewCtrl.changedARGSetupExecutable(txtArgSetupExecutable.getValue());
+				getViewController().changedARGSetupExecutable(txtArgSetupExecutable.getValue());
 				txtArgSetupExecutable.clearHelper();
 			}
 		});
@@ -692,7 +380,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		argSetEnvLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 1, 1));
 		argSetEnvLabel.setText(RscTools.getString(RscConst.PREFS_GLOBAL_ARG_SETENV));
 		argSetEnvLabel.setBackground(argSetEnvLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), argSetEnvLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), argSetEnvLabel);
 
 		// Browse composite
 		Composite browseCompositeARGPreScript = new Composite(argSetupComposite, SWT.FILL);
@@ -703,20 +391,20 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		browseCompositeARGPreScript.setBackground(browseCompositeARGPreScript.getParent().getBackground());
 
 		// ARG setenv - Label Content
-		txtArgSetupPreScript = FormFactory.createTextWidget(getViewManager().getRscMgr(), browseCompositeARGPreScript,
-				true, null);
+		txtArgSetupPreScript = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				browseCompositeARGPreScript, true, null);
 		txtArgSetupPreScript.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		txtArgSetupPreScript.setEnabled(true);
 		txtArgSetupPreScript.setBackground(txtArgSetupPreScript.getParent().getBackground());
 		txtArgSetupPreScript.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGSetupPreScript(txtArgSetupPreScript.getValue()));
+				e -> getViewController().changedARGSetupPreScript(txtArgSetupPreScript.getValue()));
 
 		// button browse
 		Map<String, Object> optionsBtnBrowseARGPreScript = new HashMap<>();
 		optionsBtnBrowseARGPreScript.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowseARGPreScript.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowseARGPreScript.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme btnBrowseARGPreScript = FormFactory.createButton(getViewManager().getRscMgr(),
+		ButtonTheme btnBrowseARGPreScript = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
 				browseCompositeARGPreScript, null, optionsBtnBrowseARGPreScript);
 
 		btnBrowseARGPreScript.addListener(SWT.Selection, event -> {
@@ -728,7 +416,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 
 			if (!StringUtils.isBlank(path)) {
 				txtArgSetupPreScript.setValue(FileTools.getNormalizedPath(path));
-				viewCtrl.changedARGSetupPreScript(txtArgSetupPreScript.getValue());
+				getViewController().changedARGSetupPreScript(txtArgSetupPreScript.getValue());
 			}
 		});
 
@@ -752,8 +440,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		argSetupBottomComposite.setBackground(argSetupBottomComposite.getParent().getBackground());
 
 		// ARG version - Label
-		textARGVersion = FormFactory.getNotificationLabel(getViewManager().getRscMgr(), argSetupBottomComposite,
-				NotificationFactory.getNewWarning());
+		textARGVersion = FormFactory.getNotificationLabel(getViewController().getViewManager().getRscMgr(),
+				argSetupBottomComposite, NotificationFactory.getNewWarning());
 
 		// ARG setup buttons - Open Preferences
 		Map<String, Object> btnOpenPrefsOptions = new HashMap<>();
@@ -764,7 +452,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		btnOpenPrefsOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnOpenPrefsOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> {
 
-			boolean done = openPreferences();
+			boolean done = getViewController().openPreferences();
 
 			if (done && !StringUtils.isBlank(PrefTools.getARGExecutablePath())
 					&& !chboxUseARGLocalConf.getSelection()) {
@@ -778,8 +466,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 				}
 			}
 		});
-		ButtonTheme prefButton = FormFactory.createButton(getViewManager().getRscMgr(), argSetupBottomComposite, null,
-				btnOpenPrefsOptions);
+		ButtonTheme prefButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				argSetupBottomComposite, null, btnOpenPrefsOptions);
 		GridData gdBtnOpenPrefs = new GridData(SWT.RIGHT, SWT.BOTTOM, true, false);
 		prefButton.setLayoutData(gdBtnOpenPrefs);
 
@@ -792,14 +480,17 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 							RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE),
 							RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_QUESTION_NOTSETTED_OPENPREFS));
 					if (openQuestion) {
-						openPreferences();
+						getViewController().openPreferences();
 					}
 				}
 				txtArgSetupExecutable.setValue(PrefTools.getARGExecutablePath());
 				txtArgSetupPreScript.setValue(PrefTools.getARGSetEnvScriptPath());
 			} else {
-				txtArgSetupExecutable.setValue(StringTools.getOrEmpty(argParameters.getArgExecPath()));
-				txtArgSetupPreScript.setValue(StringTools.getOrEmpty(argParameters.getArgPreScript()));
+				ARGParameters argParameters = getViewController().getARGParameters();
+				if (argParameters != null) {
+					txtArgSetupExecutable.setValue(StringTools.getOrEmpty(argParameters.getArgExecPath()));
+					txtArgSetupPreScript.setValue(StringTools.getOrEmpty(argParameters.getArgPreScript()));
+				}
 			}
 
 			// enable/disable widgets
@@ -809,34 +500,14 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			btnBrowseARGPreScript.setEnabled(!chboxUseARGLocalConf.getSelection());
 
 			// update use local conf
-			viewCtrl.changedARGSetupUseLocalConf(chboxUseARGLocalConf.getSelection());
+			getViewController().changedARGSetupUseLocalConf(chboxUseARGLocalConf.getSelection());
 
 			// reload if ARG is setted
-			if (!StringUtils.isBlank(txtArgSetupExecutable.getValue())) {
-				reloadARGSetupARGVersion();
-				reloadARGTypes();
-				reloadARGParameters();
+			if (!StringUtils.isBlank(txtArgSetupExecutable.getValue()) && !getViewController().isAsyncDataLoading()) {
+				refreshARGSetupARGVersion();
 				txtArgSetupExecutable.clearHelper();
 			}
 		});
-	}
-
-	/**
-	 * Open local ARG Setup preferences
-	 */
-	private boolean openPreferences() {
-		boolean done = false;
-		PreferenceDialog pref = PrefTools.getCFPrefDialog(getShell());
-		if (pref != null) {
-			int open = pref.open();
-			done = (open == Window.OK);
-
-			// reload the ARG setup and parameters
-			reloadARGSetup();
-			reloadARGTypes();
-			reloadARGParameters();
-		}
-		return done;
 	}
 
 	/**
@@ -852,9 +523,11 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		parametersComposite.setBackground(parametersComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget argParamCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, parametersComposite);
+		CollapsibleWidget argParamCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, parametersComposite);
 		argParamCollapse.setLabel(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_TITLE));
+
+		argParamCollapse.addExpandListener(this);
 
 		/*
 		 * Parameters file
@@ -863,7 +536,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblParametersFile = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_PARAMFILE));
 		lblParametersFile.setBackground(lblParametersFile.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblParametersFile);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblParametersFile);
 
 		// Browse composite
 		Composite browseCompositeARGParamFile = new Composite(parametersComposite, SWT.FILL);
@@ -874,22 +547,22 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		browseCompositeARGParamFile.setBackground(browseCompositeARGParamFile.getParent().getBackground());
 
 		// ARG Parameters file - text input
-		txtARGParamParametersFile = FormFactory.createTextWidget(getViewManager().getRscMgr(),
+		txtARGParamParametersFile = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
 				browseCompositeARGParamFile, true, null);
 		txtARGParamParametersFile.setBackground(txtARGParamParametersFile.getParent().getBackground());
 		txtARGParamParametersFile.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGParametersFile(txtARGParamParametersFile.getValue()));
+				e -> getViewController().changedARGParametersFile(txtARGParamParametersFile.getValue()));
 
 		// button browse
 		Map<String, Object> optionsBtnBrowseARGParamFile = new HashMap<>();
 		optionsBtnBrowseARGParamFile.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowseARGParamFile.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowseARGParamFile.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme btnBrowseARGParamFile = FormFactory.createButton(getViewManager().getRscMgr(),
+		ButtonTheme btnBrowseARGParamFile = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
 				browseCompositeARGParamFile, null, optionsBtnBrowseARGParamFile);
 
 		btnBrowseARGParamFile.addListener(SWT.Selection,
-				event -> viewCtrl.browseIntoWorkspace(txtARGParamParametersFile,
+				event -> getViewController().browseIntoWorkspace(txtARGParamParametersFile,
 						RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_PARAMFILE)));
 
 		/*
@@ -899,7 +572,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblStructureFile = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_STRUCTFILE));
 		lblStructureFile.setBackground(lblStructureFile.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblStructureFile);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblStructureFile);
 
 		// Browse composite
 		Composite browseCompositeStructureFile = new Composite(parametersComposite, SWT.FILL);
@@ -910,22 +583,23 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		browseCompositeStructureFile.setBackground(browseCompositeStructureFile.getParent().getBackground());
 
 		// ARG structure file - text input
-		txtARGParamStructureFile = FormFactory.createTextWidget(getViewManager().getRscMgr(),
+		txtARGParamStructureFile = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
 				browseCompositeStructureFile, true, null);
 		txtARGParamStructureFile.setBackground(txtARGParamStructureFile.getParent().getBackground());
 		txtARGParamStructureFile.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGStructureFile(txtARGParamStructureFile.getValue()));
+				e -> getViewController().changedARGStructureFile(txtARGParamStructureFile.getValue()));
 
 		// button browse
 		Map<String, Object> optionsBtnBrowseARGStructureFile = new HashMap<>();
 		optionsBtnBrowseARGStructureFile.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowseARGStructureFile.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowseARGStructureFile.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme btnBrowseARGStructureFile = FormFactory.createButton(getViewManager().getRscMgr(),
-				browseCompositeStructureFile, null, optionsBtnBrowseARGStructureFile);
+		ButtonTheme btnBrowseARGStructureFile = FormFactory.createButton(
+				getViewController().getViewManager().getRscMgr(), browseCompositeStructureFile, null,
+				optionsBtnBrowseARGStructureFile);
 
 		btnBrowseARGStructureFile.addListener(SWT.Selection,
-				event -> viewCtrl.browseIntoWorkspace(txtARGParamStructureFile,
+				event -> getViewController().browseIntoWorkspace(txtARGParamStructureFile,
 						RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_STRUCTFILE)));
 
 		/*
@@ -935,7 +609,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblOutput = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_OUTPUTFOLDER));
 		lblOutput.setBackground(lblOutput.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblOutput);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblOutput);
 
 		// Browse output composite
 		Composite browseOutputComposite = new Composite(parametersComposite, SWT.FILL);
@@ -946,18 +620,19 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		browseOutputComposite.setBackground(browseOutputComposite.getParent().getBackground());
 
 		// ARG output folder - text input
-		txtARGParamOutput = FormFactory.createTextWidget(getViewManager().getRscMgr(), browseOutputComposite, true,
-				null);
+		txtARGParamOutput = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				browseOutputComposite, true, null);
 		txtARGParamOutput.setBackground(txtARGParamOutput.getParent().getBackground());
-		txtARGParamOutput.addListener(SWT.KeyUp, e -> viewCtrl.changedARGParamOutput(txtARGParamOutput.getValue()));
+		txtARGParamOutput.addListener(SWT.KeyUp,
+				e -> getViewController().changedARGParamOutput(txtARGParamOutput.getValue()));
 
 		// button browse
 		Map<String, Object> optionsBtnBrowseARGOutput = new HashMap<>();
 		optionsBtnBrowseARGOutput.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowseARGOutput.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowseARGOutput.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme btnBrowseARGOutput = FormFactory.createButton(getViewManager().getRscMgr(), browseOutputComposite,
-				null, optionsBtnBrowseARGOutput);
+		ButtonTheme btnBrowseARGOutput = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				browseOutputComposite, null, optionsBtnBrowseARGOutput);
 
 		btnBrowseARGOutput.addListener(SWT.Selection, event -> {
 			IContainer initialSelection = WorkspaceTools
@@ -969,7 +644,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			if (dialog.open() == Window.OK) {
 				Path resource = (Path) dialog.getFirstResult();
 				txtARGParamOutput.setValue(FileTools.prefixWorkspaceVar(resource.toString()));
-				viewCtrl.changedARGParamOutput(txtARGParamOutput.getValue());
+				getViewController().changedARGParamOutput(txtARGParamOutput.getValue());
 			}
 		});
 
@@ -980,14 +655,14 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblFilename = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_FILENAME));
 		lblFilename.setBackground(lblFilename.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblFilename);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblFilename);
 
 		// ARG filename - text input
-		txtARGParamFilename = FormFactory.createTextWidget(getViewManager().getRscMgr(), parametersComposite, true,
-				null);
+		txtARGParamFilename = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				parametersComposite, true, null);
 		txtARGParamFilename.setBackground(txtARGParamFilename.getParent().getBackground());
 		txtARGParamFilename.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGParamFilename(txtARGParamFilename.getValue()));
+				e -> getViewController().changedARGParamFilename(txtARGParamFilename.getValue()));
 
 		/*
 		 * Title
@@ -996,14 +671,14 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblReportTitle = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_REPORTTITLE));
 		lblReportTitle.setBackground(lblReportTitle.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblReportTitle);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblReportTitle);
 
 		// ARG Report Title - text input
-		txtARGParamReportTitle = FormFactory.createTextWidget(getViewManager().getRscMgr(), parametersComposite, true,
-				null);
+		txtARGParamReportTitle = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				parametersComposite, true, null);
 		txtARGParamReportTitle.setBackground(txtARGParamReportTitle.getParent().getBackground());
 		txtARGParamReportTitle.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGParamReportTitle(txtARGParamReportTitle.getValue()));
+				e -> getViewController().changedARGParamReportTitle(txtARGParamReportTitle.getValue()));
 
 		/*
 		 * Author
@@ -1012,14 +687,15 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblARGParamAuthor = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_AUTHOR));
 		lblARGParamAuthor.setBackground(lblARGParamAuthor.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblARGParamAuthor);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblARGParamAuthor);
 
 		// ARG Author - text input
-		txtARGParamAuthor = FormFactory.createTextWidget(getViewManager().getRscMgr(), parametersComposite, true, null);
+		txtARGParamAuthor = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				parametersComposite, true, null);
 		txtARGParamAuthor.setBackground(txtARGParamAuthor.getParent().getBackground());
 		txtARGParamAuthor.addListener(SWT.KeyUp, e ->
 
-		viewCtrl.changedARGParamAuthor(txtARGParamAuthor.getValue()));
+		getViewController().changedARGParamAuthor(txtARGParamAuthor.getValue()));
 
 		/*
 		 * Back-end type
@@ -1028,14 +704,14 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label lblBackendType = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_BACKENDTYPE));
 		lblBackendType.setBackground(lblBackendType.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblBackendType);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblBackendType);
 
 		// ARG Back-end type - text input
 		List<Object> backend = ARGBackendDefault.getValues().stream().map(ARGBackendDefault::getBackend)
 				.collect(Collectors.toList());
 		cbxARGParamBackendType = FormFactory.createCombo(parametersComposite, null, backend);
-		cbxARGParamBackendType.getControl().addListener(SWT.Selection,
-				event -> viewCtrl.changedARGParamBackendType(getCbxSelection(String.class, cbxARGParamBackendType)));
+		cbxARGParamBackendType.getControl().addListener(SWT.Selection, event -> getViewController()
+				.changedARGParamBackendType(getCbxSelection(String.class, cbxARGParamBackendType)));
 
 		/*
 		 * Inline Word document
@@ -1054,8 +730,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			chboxARGParamInlineWordDoc.setSelection(true);
 		}
 		chboxARGParamInlineWordDoc.addListener(SWT.Selection,
-				event -> viewCtrl.changedARGParamInlineWordDoc(chboxARGParamInlineWordDoc.getSelection()));
-		reloadWordInlining();
+				event -> getViewController().changedARGParamInlineWordDoc(chboxARGParamInlineWordDoc.getSelection()));
+		refreshWordInlining();
 
 		/*
 		 * Report type
@@ -1064,7 +740,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		lblReportType = FormFactory.createLabel(parametersComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_ARGPARAM_REPORTTYPE));
 		lblReportType.setBackground(lblReportType.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblReportType);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblReportType);
 		lblReportType.setVisible(false); // deactivated
 											// if
 											// there
@@ -1080,23 +756,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		cbxARGParamReportType = FormFactory.createCombo(parametersComposite, null, reportTypes);
 		cbxARGParamReportType.getControl().addListener(SWT.Selection, event ->
 
-		viewCtrl.changedARGParamReportType(getCbxSelection(String.class, cbxARGParamReportType)));
+		getViewController().changedARGParamReportType(getCbxSelection(String.class, cbxARGParamReportType)));
 		cbxARGParamReportType.getControl().setVisible(false); // deactivated if there is only one report type
-	}
-
-	/**
-	 * Reload the word inlining checkbox
-	 */
-	void reloadWordInlining() {
-		if (chboxARGParamInlineWordDoc != null) {
-			boolean enableInlining = PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY);
-			String backendSelection = (String) ((IStructuredSelection) cbxARGParamBackendType.getSelection())
-					.getFirstElement();
-			chboxARGParamInlineWordDoc
-					.setEnabled(ARGBackendDefault.WORD.getBackend().equals(backendSelection) && enableInlining);
-			chboxARGParamInlineWordDoc
-					.setVisible(ARGBackendDefault.WORD.getBackend().equals(backendSelection) && enableInlining);
-		}
 	}
 
 	/**
@@ -1112,9 +773,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		pirtComposite.setBackground(pirtComposite.getParent().getBackground());
 
 		// PIRT collapse
-		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, pirtComposite, RscTools.getString(RscConst.MSG_REPORTVIEW_PIRT_TITLE), true,
-				true);
+		CollapsibleWidget pirtCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, pirtComposite,
+				RscTools.getString(RscConst.MSG_REPORTVIEW_PIRT_TITLE), true, true);
+		pirtCollapse.addExpandListener(this);
 		chboxPirt = pirtCollapse.getCheckbox();
 
 		// Select tag - Label
@@ -1122,7 +784,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		qoiListLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		qoiListLabel.setText(RscTools.getString(RscConst.MSG_REPORTVIEW_PIRT_QOI_LIST));
 		qoiListLabel.setBackground(qoiListLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), qoiListLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), qoiListLabel);
 
 		// QoI composite
 		pirtQoIComposite = new Composite(pirtComposite, SWT.FILL);
@@ -1138,24 +800,310 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		chboxPirt.addListener(SWT.Selection, event -> {
 
 			// update ARG parameters
-			viewCtrl.changedPIRTEnabledOption(chboxPirt.getSelection());
+			getViewController().changedPIRTEnabledOption(chboxPirt.getSelection());
 
 			// disable/enable the associated qoi
-			pirtControlMap.forEach((qoi, controlMap) -> {
-				Control button = controlMap.get(Button.class);
-				Control select = controlMap.get(Combo.class);
-				if (button instanceof Button) {
-					button.setEnabled(chboxPirt.getSelection());
-					select.setEnabled(chboxPirt.getSelection() && ((Button) button).getSelection());
-				}
-			});
+			Map<QuantityOfInterest, Map<Class<?>, Control>> pirtControlMap = getViewController().getPirtControlMap();
+			if (pirtControlMap != null) {
+				pirtControlMap.forEach((qoi, controlMap) -> {
+					Control button = controlMap.get(Button.class);
+					Control select = controlMap.get(Combo.class);
+					if (button instanceof Button) {
+						button.setEnabled(chboxPirt.getSelection());
+						select.setEnabled(chboxPirt.getSelection() && ((Button) button).getSelection());
+					}
+				});
+			}
 		});
+	}
+
+	@Override
+	public void itemExpanded(ExpandEvent e) {
+		// increase page size if an element is expanded
+		scrollComposite.setMinSize(
+				mainComposite.computeSize(PartsResourceConstants.DESCRIPTIVE_DIALOG_MIN_SIZE_X, SWT.DEFAULT));
+	}
+
+	@Override
+	public void itemCollapsed(ExpandEvent e) {
+		// decrease page size if an element is collapsed
+		scrollComposite.setMinSize(
+				mainComposite.computeSize(PartsResourceConstants.DESCRIPTIVE_DIALOG_MIN_SIZE_X, SWT.DEFAULT));
+	}
+
+	/**
+	 * Reload the ARG parameters : if not present, add default data.
+	 */
+	void refreshARGParameters() {
+
+		// refresh ARG types
+		refreshARGParametersARGTypes();
+
+		ARGParameters argParameters = getViewController().getARGParameters();
+
+		if (argParameters != null) {
+			txtARGParamOutput.setValue(argParameters.getOutput());
+			txtARGParamParametersFile.setValue(argParameters.getParametersFilePath());
+			txtARGParamStructureFile.setValue(argParameters.getStructureFilePath());
+			txtARGParamFilename.setValue(argParameters.getFilename());
+			txtARGParamReportTitle.setValue(argParameters.getTitle());
+			txtARGParamAuthor
+					.setValue(argParameters.getAuthor() != null ? argParameters.getAuthor() : RscTools.empty());
+			cbxARGParamBackendType.setSelection(new StructuredSelection(argParameters.getBackendType()));
+
+			if (chboxARGParamInlineWordDoc != null) {
+
+				boolean enableInlining = PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY);
+				if (enableInlining) {
+					// force to true if the value is null
+					chboxARGParamInlineWordDoc.setSelection(argParameters.getInlineWordDoc() == null
+							|| Boolean.TRUE.equals(argParameters.getInlineWordDoc()));
+					chboxARGParamInlineWordDoc.notifyListeners(SWT.Selection, new Event());
+				}
+
+				// reload widget display
+				refreshWordInlining();
+			}
+			cbxARGParamReportType.setSelection(new StructuredSelection(argParameters.getReportType()));
+		}
+	}
+
+	/**
+	 * Refresh ARG parameters ARG types.
+	 */
+	void refreshARGParametersARGTypes() {
+		ARGType argTypes = getViewController().getARGTypes();
+
+		// ARG Back-end type - text input
+		if (argTypes != null && argTypes.getBackendTypes() != null) {
+			List<Object> backend = argTypes.getBackendTypes().stream().map(Object.class::cast)
+					.collect(Collectors.toList());
+
+			// get current selection
+			ISelection selection = cbxARGParamBackendType.getSelection();
+
+			// set input
+			cbxARGParamBackendType.setInput(backend);
+
+			// reset selected
+			if (!selection.isEmpty()) {
+				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+				Object selected = structuredSelection.getFirstElement();
+				if (backend != null && backend.contains(selected)) {
+					cbxARGParamBackendType.setSelection(selection);
+				}
+			}
+		}
+
+		// ARG Report type - text input
+		if (argTypes != null && argTypes.getReportTypes() != null) {
+			List<Object> reportTypes = argTypes.getReportTypes().stream().map(Object.class::cast)
+					.collect(Collectors.toList());
+
+			// get current selection
+			ISelection selection = cbxARGParamBackendType.getSelection();
+
+			// set input
+			cbxARGParamReportType.setInput(reportTypes);
+			lblReportType.setVisible(reportTypes.size() > 1);
+			cbxARGParamReportType.getControl().setVisible(reportTypes.size() > 1);
+
+			// reset selected
+			if (!selection.isEmpty()) {
+				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+				Object selected = structuredSelection.getFirstElement();
+				if (reportTypes.contains(selected)) {
+					cbxARGParamBackendType.setSelection(selection);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reload ARG Setup data
+	 */
+	void refreshARGSetup() {
+
+		ARGParameters argParameters = getViewController().getARGParameters();
+
+		// set default conf
+		if (argParameters != null) {
+			if (chboxUseARGLocalConf != null) {
+				chboxUseARGLocalConf.setSelection(Boolean.TRUE.equals(argParameters.getUseArgLocalConf()));
+				chboxUseARGLocalConf.notifyListeners(SWT.Selection, new Event());
+			}
+			if (txtArgSetupExecutable != null) {
+				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
+					txtArgSetupExecutable.setValue(FileTools.getNormalizedPath(PrefTools.getARGExecutablePath()));
+				} else {
+					txtArgSetupExecutable.setValue(argParameters.getArgExecPath());
+				}
+			}
+			if (txtArgSetupPreScript != null) {
+				if (Boolean.TRUE.equals(argParameters.getUseArgLocalConf())) {
+					txtArgSetupPreScript.setValue(FileTools.getNormalizedPath(PrefTools.getARGSetEnvScriptPath()));
+				} else {
+					txtArgSetupPreScript.setValue(argParameters.getArgPreScript());
+				}
+			}
+		}
+
+		// check and ask for prefs migration to .cf file
+		if (askFirstTimeForMigration && argParameters != null
+				&& !Boolean.TRUE.equals(argParameters.getUseArgLocalConf()) && txtArgSetupExecutable != null
+				&& StringUtils.isBlank(txtArgSetupExecutable.getValue())
+				&& !StringUtils.isBlank(PrefTools.getARGExecutablePath())) {
+
+			boolean migrationQuestion = MessageDialog.openQuestion(getShell(),
+					RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_TITLE),
+					RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_QUESTION_ASKTOPERSISTPREFS));
+			if (migrationQuestion) {
+				txtArgSetupExecutable.setValue(PrefTools.getARGExecutablePath());
+				getViewController().changedARGSetupExecutable(txtArgSetupExecutable.getValue());
+				if (StringUtils.isBlank(txtArgSetupPreScript.getValue())) {
+					txtArgSetupPreScript.setValue(PrefTools.getARGSetEnvScriptPath());
+					getViewController().changedARGSetupPreScript(txtArgSetupPreScript.getValue());
+				}
+			}
+
+			askFirstTimeForMigration = false;
+		}
+
+		// Get ARG version
+		refreshARGSetupARGVersion();
+	}
+
+	/**
+	 * Reload ARG Setup ARG version information
+	 */
+	void refreshARGSetupARGVersion() {
+
+		// Get ARG version
+		String argVersion = getViewController().getARGVersion();
+		int versionComparison = new VersionComparator().compare(ARGVersion.ARG_VERSION, argVersion);
+		if (versionComparison > 0) {
+			textARGVersion.setText(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGSETUP_VERSION_WARN, argVersion,
+					ARGVersion.ARG_VERSION));
+			textARGVersion.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE)));
+			textARGVersion.setVisible(true);
+			textARGVersion.setImage(FormFactory.getWarningIcon(getViewController().getViewManager().getRscMgr()));
+			((GridData) textARGVersion.getLayoutData()).heightHint = textARGVersion.computeSize(SWT.DEFAULT,
+					SWT.DEFAULT).y;
+
+			textARGVersion.requestLayout();
+			textARGVersion.getParent().requestLayout();
+		} else {
+			textARGVersion.setText(null);
+			textARGVersion.setForeground(null);
+			textARGVersion.setVisible(false);
+			textARGVersion.setImage(null);
+			((GridData) textARGVersion.getLayoutData()).heightHint = 0;
+
+			textARGVersion.requestLayout();
+			textARGVersion.getParent().requestLayout();
+		}
+	}
+
+	/**
+	 * Reload the word inlining checkbox
+	 */
+	void refreshWordInlining() {
+		if (chboxARGParamInlineWordDoc != null) {
+			boolean enableInlining = PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY);
+			String backendSelection = (String) ((IStructuredSelection) cbxARGParamBackendType.getSelection())
+					.getFirstElement();
+			chboxARGParamInlineWordDoc
+					.setEnabled(ARGBackendDefault.WORD.getBackend().equals(backendSelection) && enableInlining);
+			chboxARGParamInlineWordDoc
+					.setVisible(ARGBackendDefault.WORD.getBackend().equals(backendSelection) && enableInlining);
+		}
+	}
+
+	/**
+	 * Reload Planning data
+	 */
+	void refreshPlanning() {
+
+		ARGParameters argParameters = getViewController().getARGParameters();
+
+		// load checkboxes
+		if (argParameters != null) {
+			if (chboxPlanning != null) {
+				chboxPlanning.setSelection(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+
+			if (chboxPlanningIntendedPurpose != null) {
+				chboxPlanningIntendedPurpose
+						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningIntendedPurposeEnabled()));
+				chboxPlanningIntendedPurpose.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+			if (chboxPlanningSystemRequirement != null) {
+				chboxPlanningSystemRequirement
+						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningSysReqEnabled()));
+				chboxPlanningSystemRequirement.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+			if (chboxPlanningQoIPlanner != null) {
+				chboxPlanningQoIPlanner.setSelection(Boolean.TRUE.equals(argParameters.getPlanningQoIPlannerEnabled()));
+				chboxPlanningQoIPlanner.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+			if (chboxPlanningUncertainty != null) {
+				chboxPlanningUncertainty
+						.setSelection(Boolean.TRUE.equals(argParameters.getPlanningUncertaintyEnabled()));
+				chboxPlanningUncertainty.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+			if (chboxPlanningDecision != null) {
+				chboxPlanningDecision.setSelection(Boolean.TRUE.equals(argParameters.getPlanningDecisionEnabled()));
+				chboxPlanningDecision.setEnabled(Boolean.TRUE.equals(argParameters.getPlanningEnabled()));
+			}
+		}
+	}
+
+	/**
+	 * Reload Custom ending
+	 */
+	void refreshCustomEnding() {
+
+		ARGParameters argParameters = getViewController().getARGParameters();
+
+		// load checkboxes
+		if (argParameters != null) {
+			if (chboxCustomEnding != null) {
+				chboxCustomEnding.setSelection(Boolean.TRUE.equals(argParameters.getCustomEndingEnabled()));
+				chboxCustomEnding.notifyListeners(SWT.Selection, new Event());
+			}
+			if (txtCustomEndingFilePath != null) {
+				txtCustomEndingFilePath.setValue(argParameters.getCustomEndingFilePath());
+			}
+		}
+	}
+
+	/**
+	 * Log in console.
+	 *
+	 * @param output the output
+	 */
+	void logInConsole(String output) {
+		StringBuilder consoleLog = new StringBuilder(getTxtConsole().getTextWidget().getText());
+		consoleLog.append(output);
+		getTxtConsole().getTextWidget().setText(consoleLog.toString());
+		getTxtConsole().setTopIndex(getTxtConsole().getTextWidget().getLineCount() - 1);
+	}
+
+	/**
+	 * Refresh PIRT.
+	 */
+	void refreshPIRT() {
+		ARGParameters argParameters = getViewController().getARGParameters();
+		if (argParameters != null && chboxPirt != null) {
+			chboxPirt.setSelection(Boolean.TRUE.equals(argParameters.getPirtEnabled()));
+		}
 	}
 
 	/**
 	 * Refresh the PIRT QoI List widgets
 	 */
-	private void refreshPIRTQoIList() {
+	void refreshPIRTQoIList() {
 		// Dispose pirtComposite children
 		if (pirtQoIComposite != null && !pirtQoIComposite.isDisposed()) {
 			for (Control child : pirtQoIComposite.getChildren()) {
@@ -1164,9 +1112,12 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 				}
 			}
 			pirtQoIComposite.layout();
+			mainComposite.layout();
+			mainComposite.getParent().requestLayout();
 		}
 
 		// Render QoIs
+		List<QuantityOfInterest> pirtQoIList = getViewController().getPirtQoIList();
 		if (pirtQoIList != null && !pirtQoIList.isEmpty()) {
 			for (QuantityOfInterest qoi : pirtQoIList) {
 				renderPIRTQoI(pirtQoIComposite, qoi);
@@ -1176,14 +1127,16 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		// Layout the table composite
 		if (pirtQoIComposite != null && !pirtQoIComposite.isDisposed()) {
 			pirtQoIComposite.layout();
+			scrollComposite.setMinSize(
+					mainComposite.computeSize(PartsResourceConstants.DESCRIPTIVE_DIALOG_MIN_SIZE_X, SWT.DEFAULT));
 		}
 	}
 
 	/**
-	 * Render PIRT QuantityOfInterest
-	 * 
-	 * @param pirtQoIComposite the pirt composite
-	 * @param qoi              The Quantity Of Interest to render
+	 * Render PIRT QuantityOfInterest.
+	 *
+	 * @param pirtQoIComposite   the pirt composite
+	 * @param quantityOfInterest the quantity of interest
 	 */
 	private void renderPIRTQoI(Composite pirtQoIComposite, QuantityOfInterest quantityOfInterest) {
 
@@ -1192,6 +1145,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		// load preselected data
 		boolean selected = true;
 		QuantityOfInterest tagSelection = quantityOfInterest;
+		ARGParameters argParameters = getViewController().getARGParameters();
 		if (argParameters != null && argParameters.getQoiSelectedList() != null) {
 			Optional<ARGParametersQoIOption> qoiOption = argParameters.getQoiSelectedList().stream()
 					.filter(opt -> quantityOfInterest.equals(opt.getQoi())).findFirst();
@@ -1236,7 +1190,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		if (!tempsPirtQoiTagged.contains(tagSelection) && !tempsPirtQoiTagged.isEmpty()) {
 			tagSelection = (QuantityOfInterest) tempsPirtQoiTagged.get(0);
 		}
-		viewCtrl.changedQoISelected(quantityOfInterest, tagSelection, qoiButton.getSelection());
+		getViewController().changedQoISelected(quantityOfInterest, tagSelection, qoiButton.getSelection());
 
 		// Select - Combo
 		ComboViewer qoiSelect = FormFactory.createCombo(pirtQoIComposite, null, tempsPirtQoiTagged);
@@ -1259,7 +1213,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		qoiSelect.getControl().setEnabled(chboxPirt.getSelection() && qoiButton.getSelection());
 		controlMap.put(Combo.class, qoiSelect.getControl());
 
-		pirtControlMap.put(quantityOfInterest, controlMap);
+		Map<QuantityOfInterest, Map<Class<?>, Control>> pirtControlMap = getViewController().getPirtControlMap();
+		if (pirtControlMap != null) {
+			pirtControlMap.put(quantityOfInterest, controlMap);
+		}
 
 		// QoI tagged list - set data
 		qoiSelect.setSelection(new StructuredSelection(tagSelection));
@@ -1269,13 +1226,13 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean btnSelected = qoiButton.getSelection();
-				viewCtrl.changedQoISelected(quantityOfInterest, quantityOfInterest, btnSelected);
+				getViewController().changedQoISelected(quantityOfInterest, quantityOfInterest, btnSelected);
 				qoiSelect.getControl().setEnabled(chboxPirt.getSelection() && btnSelected);
 			}
 		});
 
 		qoiSelect.getControl().addListener(SWT.Selection,
-				selectionChangedEvent -> viewCtrl.changedQoISelected(quantityOfInterest,
+				selectionChangedEvent -> getViewController().changedQoISelected(quantityOfInterest,
 						getCbxSelection(QuantityOfInterest.class, qoiSelect), qoiButton.getSelection()));
 
 		// Generate
@@ -1294,9 +1251,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		pcmmComposite.setBackground(pcmmComposite.getParent().getBackground());
 
 		// PCMM collapse
-		CollapsibleWidget pcmmCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, pcmmComposite, RscTools.getString(RscConst.MSG_REPORTVIEW_PCMM_TITLE), true,
-				true);
+		CollapsibleWidget pcmmCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, pcmmComposite,
+				RscTools.getString(RscConst.MSG_REPORTVIEW_PCMM_TITLE), true, true);
+		pcmmCollapse.addExpandListener(this);
 		chboxPcmm = pcmmCollapse.getCheckbox();
 
 		// Elements
@@ -1319,17 +1277,17 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			}
 
 			// Update ARG parameters
-			viewCtrl.changedPCMMEnabledOption(chboxPcmm.getSelection());
+			getViewController().changedPCMMEnabledOption(chboxPcmm.getSelection());
 		});
 
 		chboxPcmmPlanning.addListener(SWT.Selection,
-				event -> viewCtrl.changedPCMMPlanningEnabledOption(chboxPcmmPlanning.getSelection()));
+				event -> getViewController().changedPCMMPlanningEnabledOption(chboxPcmmPlanning.getSelection()));
 		chboxPcmmEvidence.addListener(SWT.Selection,
-				event -> viewCtrl.changedPCMMEvidenceEnabledOption(chboxPcmmEvidence.getSelection()));
+				event -> getViewController().changedPCMMEvidenceEnabledOption(chboxPcmmEvidence.getSelection()));
 		chboxPcmmAssessment.addListener(SWT.Selection,
-				event -> viewCtrl.changedPCMMAssessmentEnabledOption(chboxPcmmAssessment.getSelection()));
+				event -> getViewController().changedPCMMAssessmentEnabledOption(chboxPcmmAssessment.getSelection()));
 		cbxPcmmTag.getControl().addListener(SWT.Selection,
-				event -> viewCtrl.changedPCMMTagSelected(getCbxSelection(Tag.class, cbxPcmmTag)));
+				event -> getViewController().changedPCMMTagSelected(getCbxSelection(Tag.class, cbxPcmmTag)));
 	}
 
 	/**
@@ -1349,7 +1307,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label selectTagLabel = FormFactory.createLabel(pcmmTagSelectComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_PCMM_SELECT_TAG));
 		selectTagLabel.setBackground(selectTagLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), selectTagLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), selectTagLabel);
 
 		// Select tag - Combo
 		renderPCMMTagList(pcmmTagSelectComposite);
@@ -1358,7 +1316,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		CLabel divideLabel = new CLabel(pcmmComposite, SWT.LEFT);
 		divideLabel.setText(" "); //$NON-NLS-1$
 		divideLabel.setBackground(divideLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), divideLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), divideLabel);
 	}
 
 	/**
@@ -1394,7 +1352,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label checkboxesLabel = FormFactory.createLabel(pcmmComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_PCMM_SELECT_CHECKBOXES));
 		checkboxesLabel.setBackground(checkboxesLabel.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), checkboxesLabel);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), checkboxesLabel);
 
 		// Check-box Planning
 		Composite pcmmCheckboxPlanningComposite = new Composite(pcmmComposite, SWT.FILL);
@@ -1431,13 +1389,39 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	}
 
 	/**
+	 * Refresh PCMM.
+	 */
+	void refreshPCMM() {
+		ARGParameters argParameters = getViewController().getARGParameters();
+		if (argParameters != null) {
+			if (chboxPcmm != null) {
+				chboxPcmm.setSelection(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
+				cbxPcmmTag.getControl().setEnabled(chboxPcmm.getSelection());
+			}
+			if (chboxPcmmPlanning != null) {
+				chboxPcmmPlanning.setSelection(Boolean.TRUE.equals(argParameters.getPcmmPlanningEnabled()));
+				chboxPcmmPlanning.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
+			}
+			if (chboxPcmmEvidence != null) {
+				chboxPcmmEvidence.setSelection(Boolean.TRUE.equals(argParameters.getPcmmEvidenceEnabled()));
+				chboxPcmmEvidence.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
+			}
+			if (chboxPcmmAssessment != null) {
+				chboxPcmmAssessment.setSelection(Boolean.TRUE.equals(argParameters.getPcmmAssessmentEnabled()));
+				chboxPcmmAssessment.setEnabled(Boolean.TRUE.equals(argParameters.getPcmmEnabled()));
+			}
+		}
+	}
+
+	/**
 	 * Refresh the pcmm tag list
 	 */
-	private void refreshPCMMTagList() {
+	void refreshPCMMTagList() {
 
 		List<Tag> tempsTagList = new ArrayList<>();
 
 		// add the first empty element to select the non-tagged state
+		List<Tag> pcmmTagList = getViewController().getPcmmTagList();
 		Tag noTag = new Tag();
 		tempsTagList.add(noTag);
 
@@ -1452,6 +1436,7 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		cbxPcmmTag.setInput(tempsTagList);
 
 		// set selection
+		ARGParameters argParameters = getViewController().getARGParameters();
 		if (argParameters != null && argParameters.getPcmmTagSelected() != null) {
 			cbxPcmmTag.setSelection(new StructuredSelection(argParameters.getPcmmTagSelected()));
 		} else {
@@ -1476,9 +1461,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		argEndingComposite.setBackground(argEndingComposite.getParent().getBackground());
 
 		// PCMM collapse
-		CollapsibleWidget customEndingCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, argEndingComposite,
+		CollapsibleWidget customEndingCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, argEndingComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_CUSTOMENDING_TITLE), true, true);
+		customEndingCollapse.addExpandListener(this);
 		chboxCustomEnding = customEndingCollapse.getCheckbox();
 
 		// label
@@ -1487,11 +1473,11 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		Label label = FormFactory.createLabel(argEndingComposite,
 				RscTools.getString(RscConst.MSG_REPORTVIEW_CUSTOMENDING_LABEL), gdlabelFilePath);
 		label.setBackground(label.getParent().getBackground());
-		FontTools.setBoldFont(getViewManager().getRscMgr(), label);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// text path
-		txtCustomEndingFilePath = FormFactory.createTextWidget(getViewManager().getRscMgr(), argEndingComposite, true,
-				null);
+		txtCustomEndingFilePath = FormFactory.createTextWidget(getViewController().getViewManager().getRscMgr(),
+				argEndingComposite, true, null);
 		txtCustomEndingFilePath.setBackground(txtCustomEndingFilePath.getParent().getBackground());
 
 		// button browse
@@ -1499,8 +1485,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		optionsBtnBrowse.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_BROWSE));
 		optionsBtnBrowse.put(ButtonTheme.OPTION_ENABLED, true);
 		optionsBtnBrowse.put(ButtonTheme.OPTION_OUTLINE, true);
-		ButtonTheme browseButton = FormFactory.createButton(getViewManager().getRscMgr(), argEndingComposite, null,
-				optionsBtnBrowse);
+		ButtonTheme browseButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+				argEndingComposite, null, optionsBtnBrowse);
 
 		// add listener
 		chboxCustomEnding.addListener(SWT.Selection, event -> {
@@ -1514,16 +1500,17 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			}
 
 			// Update ARG parameters
-			viewCtrl.changedARGCustomEndingEnabledOption(chboxCustomEnding.getSelection());
+			getViewController().changedARGCustomEndingEnabledOption(chboxCustomEnding.getSelection());
 		});
 
 		// text input listener
 		txtCustomEndingFilePath.addListener(SWT.KeyUp,
-				e -> viewCtrl.changedARGCustomEndingFile(txtCustomEndingFilePath.getValue()));
+				e -> getViewController().changedARGCustomEndingFile(txtCustomEndingFilePath.getValue()));
 
 		// browse button listener
-		browseButton.addListener(SWT.Selection, event -> viewCtrl.browseIntoWorkspace(txtCustomEndingFilePath,
-				RscTools.getString(RscConst.MSG_REPORTVIEW_CUSTOMENDING_TITLE)));
+		browseButton.addListener(SWT.Selection,
+				event -> getViewController().browseIntoWorkspace(txtCustomEndingFilePath,
+						RscTools.getString(RscConst.MSG_REPORTVIEW_CUSTOMENDING_TITLE)));
 
 	}
 
@@ -1541,9 +1528,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		argConsoleComposite.setBackground(argConsoleComposite.getParent().getBackground());
 
 		// collapse
-		CollapsibleWidget collapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, argConsoleComposite);
+		CollapsibleWidget collapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, argConsoleComposite);
 		collapse.setLabel(RscTools.getString(RscConst.MSG_REPORTVIEW_ARGCONSOLE_TITLE));
+		collapse.addExpandListener(this);
 
 		// Console buttons composite
 		Composite argConsoleButtonsComposite = new Composite(argConsoleComposite, SWT.RIGHT_TO_LEFT);
@@ -1563,7 +1551,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 				txtConsole.getTextWidget().setText(RscTools.empty());
 			}
 		});
-		new ButtonTheme(getViewManager().getRscMgr(), argConsoleButtonsComposite, SWT.CENTER, btnClearOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), argConsoleButtonsComposite, SWT.CENTER,
+				btnClearOptions);
 
 		// Console buttons - Copy
 		Map<String, Object> btnCopyOptions = new HashMap<>();
@@ -1576,7 +1565,8 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 				SystemTools.copyToClipboard(txtConsole.getTextWidget().getText());
 			}
 		});
-		new ButtonTheme(getViewManager().getRscMgr(), argConsoleButtonsComposite, SWT.CENTER, btnCopyOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), argConsoleButtonsComposite, SWT.CENTER,
+				btnCopyOptions);
 
 		// ARG Console
 		txtConsole = new TextViewer(argConsoleComposite, SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
@@ -1599,9 +1589,10 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		planningComposite.setBackground(planningComposite.getParent().getBackground());
 
 		// PLANNING collapse
-		CollapsibleWidget planningCollapse = new CollapsibleWidget(getViewManager().getRscMgr(), mainComposite,
-				SWT.FILL | SWT.BORDER, planningComposite, RscTools.getString(RscConst.MSG_REPORTVIEW_PLANNING_TITLE),
-				true, true);
+		CollapsibleWidget planningCollapse = new CollapsibleWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.FILL | SWT.BORDER, planningComposite,
+				RscTools.getString(RscConst.MSG_REPORTVIEW_PLANNING_TITLE), true, true);
+		planningCollapse.addExpandListener(this);
 		chboxPlanning = planningCollapse.getCheckbox();
 
 		// Render features
@@ -1626,19 +1617,19 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 			}
 
 			// update ARG Parameters
-			viewCtrl.changedPlanningEnabledOption(chboxPlanning.getSelection());
+			getViewController().changedPlanningEnabledOption(chboxPlanning.getSelection());
 		});
 
-		chboxPlanningIntendedPurpose.addListener(SWT.Selection,
-				event -> viewCtrl.changedPlanningIntendedPurposeOption(chboxPlanningIntendedPurpose.getSelection()));
-		chboxPlanningSystemRequirement.addListener(SWT.Selection,
-				event -> viewCtrl.changedPlanningSysRequirementOption(chboxPlanningSystemRequirement.getSelection()));
+		chboxPlanningIntendedPurpose.addListener(SWT.Selection, event -> getViewController()
+				.changedPlanningIntendedPurposeOption(chboxPlanningIntendedPurpose.getSelection()));
+		chboxPlanningSystemRequirement.addListener(SWT.Selection, event -> getViewController()
+				.changedPlanningSysRequirementOption(chboxPlanningSystemRequirement.getSelection()));
 		chboxPlanningQoIPlanner.addListener(SWT.Selection,
-				event -> viewCtrl.changedPlanningQoIPlannerOption(chboxPlanningQoIPlanner.getSelection()));
+				event -> getViewController().changedPlanningQoIPlannerOption(chboxPlanningQoIPlanner.getSelection()));
 		chboxPlanningUncertainty.addListener(SWT.Selection,
-				event -> viewCtrl.changedPlanningUncertaintyOption(chboxPlanningUncertainty.getSelection()));
+				event -> getViewController().changedPlanningUncertaintyOption(chboxPlanningUncertainty.getSelection()));
 		chboxPlanningDecision.addListener(SWT.Selection,
-				event -> viewCtrl.changedPlanningDecisionOption(chboxPlanningDecision.getSelection()));
+				event -> getViewController().changedPlanningDecisionOption(chboxPlanningDecision.getSelection()));
 	}
 
 	/**
@@ -1737,17 +1728,47 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 		return selection;
 	}
 
-	ARGParameters getArgParameters() {
-		return argParameters;
-	}
-
 	/**
-	 * Set the arg parameter
-	 * 
-	 * @param parameters
+	 * Enable buttons.
+	 *
+	 * @param enabled the enabled
 	 */
-	void setARGParameters(ARGParameters parameters) {
-		argParameters = parameters;
+	void enableView(boolean enabled) {
+		txtArgSetupExecutable.setEnabled(enabled && !chboxUseARGLocalConf.getSelection());
+		txtArgSetupPreScript.setEnabled(enabled && !chboxUseARGLocalConf.getSelection());
+		textARGVersion.setEnabled(enabled);
+		chboxUseARGLocalConf.setEnabled(enabled);
+
+		txtARGParamOutput.setEnabled(enabled);
+		txtARGParamParametersFile.setEnabled(enabled);
+		txtARGParamStructureFile.setEnabled(enabled);
+		txtARGParamFilename.setEnabled(enabled);
+		txtARGParamReportTitle.setEnabled(enabled);
+		txtARGParamAuthor.setEnabled(enabled);
+		cbxARGParamReportType.getControl().setEnabled(enabled);
+		cbxARGParamBackendType.getControl().setEnabled(enabled);
+
+		chboxARGParamInlineWordDoc
+				.setEnabled(enabled && PrefTools.getPreferenceBoolean(PrefTools.DEVOPTS_REPORT_INLINEWORD_KEY));
+
+		chboxPlanning.setEnabled(enabled);
+		chboxPlanningIntendedPurpose.setEnabled(enabled && chboxPlanning.getSelection());
+		chboxPlanningUncertainty.setEnabled(enabled && chboxPlanning.getSelection());
+		chboxPlanningSystemRequirement.setEnabled(enabled && chboxPlanning.getSelection());
+		chboxPlanningQoIPlanner.setEnabled(enabled && chboxPlanning.getSelection());
+		chboxPlanningDecision.setEnabled(enabled && chboxPlanning.getSelection());
+
+		chboxPirt.setEnabled(enabled);
+		Stream.of(pirtQoIComposite.getChildren()).forEach(c -> c.setEnabled(enabled && chboxPirt.getSelection()));
+
+		chboxPcmm.setEnabled(enabled);
+		cbxPcmmTag.getControl().setEnabled(enabled && chboxPcmm.getSelection());
+		chboxPcmmPlanning.setEnabled(enabled && chboxPcmm.getSelection());
+		chboxPcmmEvidence.setEnabled(enabled && chboxPcmm.getSelection());
+		chboxPcmmAssessment.setEnabled(enabled && chboxPcmm.getSelection());
+
+		chboxCustomEnding.setEnabled(enabled);
+		txtCustomEndingFilePath.setEnabled(enabled && chboxCustomEnding.getSelection());
 	}
 
 	TextWidget getTxtArgSetupExecutable() {
@@ -1837,5 +1858,4 @@ public class ReportView extends ACredibilitySubView<ReportViewManager> {
 	Button getChboxCustomEnding() {
 		return chboxCustomEnding;
 	}
-
 }

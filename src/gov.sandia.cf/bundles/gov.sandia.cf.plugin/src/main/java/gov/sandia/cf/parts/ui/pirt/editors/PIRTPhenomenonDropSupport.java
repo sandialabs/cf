@@ -200,7 +200,7 @@ public class PIRTPhenomenonDropSupport extends ViewerDropAdapter {
 
 			try {
 				// update dragged phenomenon
-				viewCtrl.updatePhenomenon(dragged);
+				dragged = viewCtrl.updatePhenomenon(dragged);
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$

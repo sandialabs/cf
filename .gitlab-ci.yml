@@ -12,6 +12,7 @@ include:
 stages:
   - test # check code with gitlab code quality check and SpotBugs
   - build # build the artifacts and launch unit tests
+  - coverage # converts jacoco tests coverage to cobertura
   - package # package the artifacts and import them into Gitlab Package Registry
   - release # create a new release (snapshot or stable) (create a tag and merge develop branch if necessary)
   - publish # publish documentation, p2 repository and javadoc from Gitlab Package Registry to Gitlab Pages
@@ -106,7 +107,9 @@ build and test:
       - target
     reports:
       junit: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/surefire-reports/TEST-*.xml
-      cobertura: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/coverage-site/jacoco.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/coverage-site/jacoco.xml
   rules:
     - if: '$CI_COMMIT_BRANCH'
     - when: never
@@ -159,12 +162,57 @@ build and test tag:
       - target
     reports:
       junit: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/surefire-reports/TEST-*.xml
-      cobertura: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/coverage-site/jacoco.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: src/gov.sandia.cf/tests/gov.sandia.cf.plugin.tests/target/coverage-site/jacoco.xml
   rules:
     - if: '$CI_COMMIT_TAG'
     - when: never
 
-    
+
+#####################################
+########## Stage coverage ###########
+#####################################
+coverage-build:
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or choose an existing stage like `deploy`.
+  stage: coverage
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
+  script:
+    # convert report from jacoco to cobertura, using relative project path
+    - python /opt/cover2cover.py target/coverage/jacoco.xml $CI_PROJECT_DIR/src/gov.sandia.cf/bundles/gov.sandia.cf.plugin/src/main/java > target/coverage/cobertura.xml
+  needs:
+    - job: "build and test"
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: target/coverage/cobertura.xml
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+    - when: never
+
+coverage-build-tag:
+  # Must be in a stage later than test-jdk11's stage.
+  # The `visualize` stage does not exist by default.
+  # Please define it first, or choose an existing stage like `deploy`.
+  stage: coverage
+  image: registry.gitlab.com/haynes/jacoco2cobertura:1.0.7
+  script:
+    # convert report from jacoco to cobertura, using relative project path
+    - python /opt/cover2cover.py target/coverage/jacoco.xml $CI_PROJECT_DIR/src/gov.sandia.cf/bundles/gov.sandia.cf.plugin/src/main/java > target/coverage/cobertura.xml
+  needs:
+    - job: "build and test tag"
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: target/coverage/cobertura.xml
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - when: never
+
 #####################################
 ########## Stage package ############
 #####################################
@@ -188,12 +236,23 @@ package:
   script:
     - export CF_VERSION=$(xmllint --xpath 'string(//site/feature/@version)' target/build/eclipse/site.xml)
     - if [ -z "$CF_VERSION" ]; then echo "No version found. Impossible to continue package import job." && exit 1; else echo "CF Version $CF_VERSION"; fi;
+    # Remove existing packages folders
+    - echo "==================== [package] Remove $CF_VERSION folder"
+    - wget -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
+    - export DELETE_CURRENT_VERSION_API_PATH=$(jq -r --arg CF_VERSION "$CF_VERSION" '.[] | select(.version==$CF_VERSION) | ._links.delete_api_path' ./packages.json)
+    - if [ -z "$DELETE_CURRENT_VERSION_API_PATH" ]; then echo "$CF_VERSION package not found in Package Registry"; else curl --request DELETE --user $DEPLOY_CREDENTIALS  $DELETE_CURRENT_VERSION_API_PATH; fi;
+    - echo "==================== [package] Remove $LATEST_VERSION folder"
+    - wget -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
+    - export DELETE_LATEST_API_PATH=$(jq -r --arg LATEST_VERSION "$LATEST_VERSION" '.[] | select(.version==$LATEST_VERSION) | ._links.delete_api_path' ./packages.json)
+    - if [ -z "$DELETE_LATEST_API_PATH" ]; then echo "Latest package not found in Package Registry"; else curl --request DELETE --user $DEPLOY_CREDENTIALS  $DELETE_LATEST_API_PATH; fi;
     # Import p2 repository into Gitlab package registry
     - echo "==================== [package] Zipping CF plugin $CF_VERSION to prepare package import"
     - cd target/build/eclipse/
     - zip -q -r ../../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip *
     - echo "==================== [package] Importing CF build target/package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
     - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default
+    - echo "==================== [package] Importing CF build target/package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$P2_REPO_FILE_PREFIX.$CF_VERSION.zip?status=default
     - cd ../../..
     # Import webapp into Gitlab package registry
     - echo "==================== [package] Zipping CF webapp $CF_VERSION to prepare package import"
@@ -201,6 +260,8 @@ package:
     - zip -q -r ../../package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip *
     - echo "==================== [package] Importing CF build target/package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default"
     - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default
+    - echo "==================== [package] Importing CF build target/package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../../package/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$WEBAPP_FILE_PREFIX.$CF_VERSION.zip?status=default
     - cd ../../..
     # Import javadoc (if it exists) into Gitlab package registry
     - if [ -d "../javadoc" ]; then echo "Zipping CF javadoc $CF_VERSION to prepare package import"; else echo "No javadoc found" && exit 0; fi
@@ -208,6 +269,8 @@ package:
     - zip -q -r ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip *
     - echo "==================== [package] Importing CF javadoc target/package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
     - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/$CF_VERSION/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default
+    - echo "==================== [package] Importing CF javadoc target/package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip into Gitlab package registry $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default"
+    - curl --user $DEPLOY_CREDENTIALS --upload-file ../package/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/$PACKAGENAME/latest/$JAVADOC_FILE_PREFIX.$CF_VERSION.zip?status=default
   rules:
     - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
@@ -242,7 +305,7 @@ release snapshot:
     - echo "==================== [release] Cloning CF git repository ================="
     - git clone git@gitlab.com:CredibilityFramework/cf.git cf
     - cd cf
-    - echo "==================== [release] Checkout branch $CI_COMMIT_BRANCH ========="
+    - echo "==================== [release] Checkout branch $CI_COMMIT_BRANCH ==========="
     - git checkout $CI_COMMIT_BRANCH
     - git branch -a
     - git status
@@ -257,7 +320,7 @@ release snapshot:
   allow_failure: true
 
 
-# Release a stable version on the master branch
+# Release a stable version on the master branch:
 #  - only manually if it is the develop branch
 # /!\ This jobs needs to define variable before execution: 'VERSION' before being executed otherwise it will trigger an error and exit job.
 release in master:
@@ -293,6 +356,7 @@ release in master:
     - git status
     - git merge --no-ff $BRANCH_DEVELOP
     - git push
+    # Tag and push from master               
     - echo "==================== [release] Tag new CF build $CF_VERSION =============="
     - git tag -a $CF_VERSION -m "Autogenerated tag for version $CF_VERSION"
     - git push origin $CF_VERSION
@@ -321,8 +385,8 @@ pages:
   stage: publish
   variables: 
     PACKAGENAME: "gov.sandia.cf" # used into ci/doc/site/unzip-packages.sh script
-    P2_REPO_FILE_PREFIX: "gov.sandia.cf.p2_repo" # used into ci/doc/site/unzip-packages.sh script     
-    WEBAPP_FILE_PREFIX: "gov.sandia.cf.webapp" # used into ci/doc/site/unzip-packages.sh script                                                                                
+    P2_REPO_FILE_PREFIX: "gov.sandia.cf.p2_repo" # used into ci/doc/site/unzip-packages.sh script
+    WEBAPP_FILE_PREFIX: "gov.sandia.cf.webapp" # used into ci/doc/site/unzip-packages.sh script
     JAVADOC_FILE_PREFIX: "gov.sandia.cf.javadoc" # used into ci/doc/site/unzip-packages.sh script
   before_script:
     - echo "==================== [publish] Install dependencies ===================="

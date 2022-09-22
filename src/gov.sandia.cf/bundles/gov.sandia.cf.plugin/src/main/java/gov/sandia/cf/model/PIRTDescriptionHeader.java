@@ -25,8 +25,8 @@ import gov.sandia.cf.tools.StringTools;
  */
 @Entity
 @Table(name = "PIRT_DESC_HEADER")
-public class PIRTDescriptionHeader
-		implements Serializable, IEntity<PIRTDescriptionHeader, Integer>, IImportable<PIRTDescriptionHeader> {
+public class PIRTDescriptionHeader implements Serializable, IEntity<PIRTDescriptionHeader, Integer>,
+		IImportable<PIRTDescriptionHeader>, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -123,6 +123,16 @@ public class PIRTDescriptionHeader
 	@SuppressWarnings("javadoc")
 	public void setIdLabel(String idLabel) {
 		this.idLabel = idLabel;
+	}
+
+	@Override
+	public String getGeneratedId() {
+		return getIdLabel();
+	}
+
+	@Override
+	public void setGeneratedId(String generatedId) {
+		setIdLabel(generatedId);
 	}
 
 	/**

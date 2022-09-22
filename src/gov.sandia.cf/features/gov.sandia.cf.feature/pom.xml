@@ -9,14 +9,14 @@
 	<parent>
 		<groupId>gov.sandia.cf</groupId>
 		<artifactId>gov.sandia.cf.features</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>gov.sandia.cf</groupId>
 			<artifactId>gov.sandia.cf.plugin</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 	</dependencies>
 </project>

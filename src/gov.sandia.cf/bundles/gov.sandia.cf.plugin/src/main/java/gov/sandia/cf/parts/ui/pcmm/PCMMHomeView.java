@@ -5,20 +5,15 @@ package gov.sandia.cf.parts.ui.pcmm;
 
 import java.awt.BasicStroke;
 import java.awt.event.MouseEvent;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -36,13 +31,8 @@ import org.jfree.experimental.chart.swt.ChartComposite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMApplication;
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.exceptions.CredibilityException;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMPhase;
-import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.Tag;
 import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.parts.theme.ButtonTheme;
@@ -50,7 +40,6 @@ import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.tools.ViewTools;
-import gov.sandia.cf.parts.widgets.ITagAction;
 import gov.sandia.cf.parts.widgets.PCMMChartFactory;
 import gov.sandia.cf.parts.widgets.PCMMProgressBarPart;
 import gov.sandia.cf.parts.widgets.PCMMTagPart;
@@ -66,33 +55,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListener, ITagAction {
+public class PCMMHomeView extends ACredibilityPCMMView<PCMMHomeViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PCMMHomeView.class);
-
-	/** Buttons events PIRT */
-	public static final String BTN_EVENT_PCMM_CLOSE = "PCMM_CLOSE"; //$NON-NLS-1$
-
-	/**
-	 * The pie section attribute
-	 */
-	public static final String PIE_SECTION_ATTRIBUTE = "PIE_SECTION_ATTRIBUTE"; //$NON-NLS-1$
-
-	/**
-	 * The command names for buttons
-	 */
-	/** PCMM PLANNING event COMMAND */
-	public static final String PLANNING_COMMAND = "PLANNING_COMMAND"; //$NON-NLS-1$
-	/** PCMM EVIDENCE event COMMAND */
-	public static final String EVIDENCE_COMMAND = "EVIDENCE_COMMAND"; //$NON-NLS-1$
-	/** PCMM ASSESS event COMMAND */
-	public static final String ASSESS_COMMAND = "ASSESS_COMMAND"; //$NON-NLS-1$
-	/**
-	 * Configuration
-	 */
-	private PCMMSpecification pcmmConfiguration;
 
 	/**
 	 * The main composite
@@ -104,53 +71,16 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	 */
 	private PCMMTagPart pcmmTagPart;
 
-	/**
-	 * the pcmm elements map
-	 */
-	private Map<String, PCMMElement> elements;
-
-	/**
-	 * the tag list
-	 */
-	private List<Tag> tagList;
-
 	private Composite compositeButtonsFooter;
 
 	/**
-	 * The pcmm phases enabled
+	 * Instantiates a new PCMM home view.
+	 *
+	 * @param viewController the view controller
+	 * @param style          the view style
 	 */
-	private List<PCMMPhase> phaseEnabled;
-
-	/**
-	 * @param viewManager  the parent view
-	 * @param style        the view style
-	 * @param phaseEnabled the list of PCMM phases enabled for this view
-	 */
-	public PCMMHomeView(PCMMViewManager viewManager, int style, final List<PCMMPhase> phaseEnabled) {
-		super(viewManager, viewManager, style);
-
-		// Initialize
-		this.elements = new LinkedHashMap<>();
-		this.pcmmConfiguration = getViewManager().getPCMMConfiguration();
-
-		if (phaseEnabled == null) {
-			this.phaseEnabled = new ArrayList<>();
-		} else {
-			this.phaseEnabled = phaseEnabled;
-		}
-
-		List<PCMMPhase> enabledAndActivatedPhases = null;
-		if (pcmmConfiguration != null) {
-			enabledAndActivatedPhases = this.phaseEnabled.stream().filter(this.pcmmConfiguration.getPhases()::contains)
-					.collect(Collectors.toList());
-		}
-
-		// set title if there is only one phase activated
-		if (enabledAndActivatedPhases != null && enabledAndActivatedPhases.size() == 1) {
-			String title = MessageFormat.format("{0} - {1}", RscTools.getString(RscConst.MSG_PCMMVIEW_TITLE), //$NON-NLS-1$
-					enabledAndActivatedPhases.get(0));
-			setTitle(title);
-		}
+	public PCMMHomeView(PCMMHomeViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// create the view
 		renderPage();
@@ -161,9 +91,9 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	 */
 	@Override
 	public String getTitle() {
-		if (getViewManager().getSelectedTag() != null) {
-			this.lblTitle.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_TAG,
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
+		if (getViewController().getViewManager().getSelectedTag() != null) {
+			this.lblTitle.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+					IconTheme.ICON_NAME_TAG, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
 		}
 		return RscTools.getString(RscConst.MSG_PCMMVIEW_TITLE);
 	}
@@ -182,7 +112,7 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	private void renderPage() {
 		// Initialize
 		mainComposite = new Composite(this, SWT.BORDER);
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Render the main composite
@@ -190,9 +120,6 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 
 		// Render Footer
 		renderFooter();
-
-		// Refresh
-		refresh();
 	}
 
 	/**
@@ -211,7 +138,7 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	/**
 	 * Reload footer
 	 */
-	private void reloadFooterButtons() {
+	void reloadFooterButtons() {
 		// Footer buttons - Composite
 		ViewTools.disposeChildren(compositeButtonsFooter);
 
@@ -231,11 +158,11 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
 
 		// Button Back - Plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// Button - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -244,9 +171,9 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> getViewManager().openPCMMHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnHelpLevelOptions);
+				(Listener) event -> getViewController().getViewManager().openPCMMHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -254,10 +181,15 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PCMM_HOME);
 
-		if (pcmmConfiguration != null) {
+		// get data
+		PCMMSpecification pcmmConfiguration = getViewController().getPCMMConfiguration();
+		List<PCMMPhase> phaseEnabled = getViewController().getPhaseEnabled();
+
+		if (pcmmConfiguration != null && phaseEnabled != null) {
 
 			// button PCMM Stamp
 			if (pcmmConfiguration.isPcmmAssessEnabled() && phaseEnabled.contains(PCMMPhase.STAMP)
@@ -268,11 +200,15 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 				btnPCMMStampOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 				btnPCMMStampOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_STAMP);
 				btnPCMMStampOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
-				ButtonTheme btnPCMMStamp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterRight,
-						SWT.RIGHT | SWT.LEFT_TO_RIGHT, btnPCMMStampOptions); // force normal orientation left_to_right
+				ButtonTheme btnPCMMStamp = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+						compositeButtonsFooterRight, SWT.RIGHT | SWT.LEFT_TO_RIGHT, btnPCMMStampOptions); // force
+																											// normal
+																											// orientation
+																											// left_to_right
 
 				// open pcmm stamp view
-				btnPCMMStamp.addListener(SWT.Selection, event -> getViewManager().openPCMMStampView());
+				btnPCMMStamp.addListener(SWT.Selection,
+						event -> getViewController().getViewManager().openPCMMStampView());
 			}
 
 			// button PCMM Aggregate
@@ -285,14 +221,15 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 				btnAggregateOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 				btnAggregateOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_AGGREGATE);
 				btnAggregateOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
-				ButtonTheme btnPCMMAggregate = new ButtonTheme(getViewManager().getRscMgr(),
+				ButtonTheme btnPCMMAggregate = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
 						compositeButtonsFooterRight, SWT.RIGHT | SWT.LEFT_TO_RIGHT, btnAggregateOptions); // force
 																											// normal
 																											// orientation
 																											// left_to_right
 
 				// open pcmm aggregate view
-				btnPCMMAggregate.addListener(SWT.Selection, event -> getViewManager().openPCMMAggregateView());
+				btnPCMMAggregate.addListener(SWT.Selection,
+						event -> getViewController().getViewManager().openPCMMAggregateView());
 			}
 		}
 
@@ -305,38 +242,7 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	 */
 	@Override
 	public void reload() {
-		// Show role selection
-		showRoleSelection();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-			try {
-				// Load the PCMM elements
-				List<PCMMElement> elementsList = getViewManager().getAppManager().getService(IPCMMApplication.class)
-						.getElementList(model);
-
-				// If element list is not empty
-				if (null != elementsList && !elementsList.isEmpty()) {
-
-					// Create not sorted map by name
-					elementsList.forEach(element -> this.elements.put(element.getName(), element));
-
-					// load the tags
-					tagList = getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
-				}
-
-			} catch (CredibilityException e) {
-				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMHOME_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMHOME_DIALOG_LOADING_MSG));
-				logger.warn("An error occurred while loading the home data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			}
-			// repaint the view composites
-			renderMain();
-
-			// reload footer
-			reloadFooterButtons();
-		}
+		getViewController().reloadData();
 	}
 
 	/**
@@ -348,65 +254,18 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Sets the tag list.
+	 *
+	 * @param tagList the new tag list
 	 */
-	@Override
-	public void widgetSelected(SelectionEvent e) {
-
-		// handle context menu selection
-		String command = (String) ((MenuItem) e.getSource()).getData();
-
-		PieSectionEntity pieSectionEntity = (PieSectionEntity) ((MenuItem) e.getSource()).getParent()
-				.getData(PIE_SECTION_ATTRIBUTE);
-
-		PCMMElement pcmmElementSelected = this.elements.get(pieSectionEntity.getSectionKey().toString());
-
-		// WARNING: Hardcoded - Check if PIRT have QoI and it's PMMF element
-		boolean isAvailabledAccess = true;
-		if (null != pcmmElementSelected.getAbbreviation() && pcmmElementSelected.getAbbreviation().equals("PMMF")) { //$NON-NLS-1$
-			Model model = getViewManager().getCache().getModel();
-			if (null != model) {
-				List<QuantityOfInterest> qois = getViewManager().getAppManager().getService(IPIRTApplication.class)
-						.getRootQoI(model);
-				isAvailabledAccess = (null != qois && !qois.isEmpty());
-			}
-		}
-
-		// Check access
-		if (isAvailabledAccess) {
-
-			// open planning view
-			if (command.equals(PLANNING_COMMAND)) {
-				getViewManager().openPCMMPlanningView(pcmmElementSelected);
-			}
-			// open evidence view
-			else if (command.equals(EVIDENCE_COMMAND)) {
-				getViewManager().openPCMMEvidenceView(pcmmElementSelected);
-			}
-			// open pcmm assess view
-			else if (command.equals(ASSESS_COMMAND)) {
-				getViewManager().openPCMMAssessView(pcmmElementSelected);
-			}
-		} else {
-			// Open error dialog
-			MessageDialog.openError(getShell(), RscTools.getString(RscConst.ERR_PCMMHOME_PREREQUISITE_TITLE),
-					RscTools.getString(RscConst.ERR_PCMMHOME_PREREQUISITE_TXT));
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void widgetDefaultSelected(SelectionEvent e) {
-		// redirect to widget selected method
-		widgetSelected(e);
+	void setTagList(List<Tag> tagList) {
+		pcmmTagPart.setTagList(tagList);
 	}
 
 	/**
 	 * Create the main composite with the PCMM wheel
 	 */
-	private void renderMain() {
+	void renderMain() {
 
 		// dispose composite children
 		ViewTools.disposeChildren(mainComposite);
@@ -416,6 +275,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 		mainComposite.setLayoutData(gdMainComposite);
 		GridLayout layoutMainComp = new GridLayout(3, true);
 		mainComposite.setLayout(layoutMainComp);
+
+		Map<String, PCMMElement> elements = getViewController().getElements();
 
 		// draw the content
 		if (elements == null || elements.isEmpty()) {
@@ -438,12 +299,12 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			progressBarComposite.setLayoutData(gdProgressBar);
 			progressBarComposite.setLayout(new GridLayout());
 			Label progressionLabel = new Label(progressBarComposite, SWT.NONE);
-			progressionLabel.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			progressionLabel.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			progressionLabel.setText(RscTools.getString(RscConst.MSG_PCMMHOME_LBL_PROGRESS));
-			FontTools.setSubtitleFont(getViewManager().getRscMgr(), progressionLabel);
-			new PCMMProgressBarPart(getViewManager(), progressBarComposite, new ArrayList<>(elements.values()),
-					SWT.NONE);
+			FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), progressionLabel);
+			new PCMMProgressBarPart(getViewController().getViewManager(), progressBarComposite,
+					new ArrayList<>(elements.values()), SWT.NONE);
 
 			/* Left Composite - Tag Bar */
 			Composite tagBarComposite = new Composite(leftComposite, SWT.NONE);
@@ -451,12 +312,12 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			tagBarComposite.setLayoutData(gdTagBar);
 			tagBarComposite.setLayout(new GridLayout());
 			Label tagTitle = new Label(tagBarComposite, SWT.NONE);
-			tagTitle.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			tagTitle.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			tagTitle.setText(RscTools.getString(RscConst.MSG_TAG_PART_TITLE));
-			FontTools.setSubtitleFont(getViewManager().getRscMgr(), tagTitle);
-			pcmmTagPart = new PCMMTagPart(getViewManager(), tagBarComposite, this, tagList,
-					getViewManager().getSelectedTag(), SWT.NONE);
+			FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), tagTitle);
+			pcmmTagPart = new PCMMTagPart(getViewController(), tagBarComposite, getViewController(),
+					getViewController().getTagList(), getViewController().getViewManager().getSelectedTag(), SWT.NONE);
 
 			/* Main Composite - Pie Chart */
 			// Chart main composite to contain chartComposite
@@ -489,6 +350,9 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 	 * @return the chart composite
 	 */
 	private Composite createChartComposite(Composite parent) {
+
+		// get data
+		PCMMSpecification pcmmConfiguration = getViewController().getPCMMConfiguration();
 
 		// Create Pie Chart
 		ChartComposite chartComposite = PCMMChartFactory.createPCMMWheelChart(parent, pcmmConfiguration);
@@ -527,28 +391,29 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 						if (null != pcmmConfiguration) {
 
 							List<PCMMPhase> enabledAndActivatedChartMenuPhases = chartMenuPhases.stream()
-									.filter(phaseEnabled::contains).filter(pcmmConfiguration.getPhases()::contains)
-									.collect(Collectors.toList());
+									.filter(getViewController().getPhaseEnabled()::contains)
+									.filter(pcmmConfiguration.getPhases()::contains).collect(Collectors.toList());
 
 							if (enabledAndActivatedChartMenuPhases != null
 									&& enabledAndActivatedChartMenuPhases.size() > 1) {
 
 								// enable chart composite context menu on right click
 								chartComposite.getMenu().setVisible(true);
-								chartComposite.getMenu().setData(PIE_SECTION_ATTRIBUTE, pieSectionEntity);
+								chartComposite.getMenu().setData(PCMMHomeViewController.PIE_SECTION_ATTRIBUTE,
+										pieSectionEntity);
 
 							} else if (enabledAndActivatedChartMenuPhases != null) {
 								// Get element selected
-								PCMMElement pcmmElementSelected = elements
+								PCMMElement pcmmElementSelected = getViewController().getElements()
 										.get(pieSectionEntity.getSectionKey().toString());
 
 								// Open activated phase
 								if (enabledAndActivatedChartMenuPhases.contains(PCMMPhase.EVIDENCE)) {
-									getViewManager().openPCMMEvidenceView(pcmmElementSelected);
+									getViewController().getViewManager().openPCMMEvidenceView(pcmmElementSelected);
 								} else if (enabledAndActivatedChartMenuPhases.contains(PCMMPhase.ASSESS)) {
-									getViewManager().openPCMMAssessView(pcmmElementSelected);
+									getViewController().getViewManager().openPCMMAssessView(pcmmElementSelected);
 								} else if (enabledAndActivatedChartMenuPhases.contains(PCMMPhase.PLANNING)) {
-									getViewManager().openPCMMPlanningView(pcmmElementSelected);
+									getViewController().getViewManager().openPCMMPlanningView(pcmmElementSelected);
 								}
 							}
 						}
@@ -559,7 +424,7 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 				} else {
 
 					// deactivate click outside the chart
-					chartComposite.getMenu().setData(PIE_SECTION_ATTRIBUTE, null);
+					chartComposite.getMenu().setData(PCMMHomeViewController.PIE_SECTION_ATTRIBUTE, null);
 					chartComposite.getMenu().setVisible(false);
 				}
 			}
@@ -575,7 +440,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 					PieSectionEntity pieSectionEntity = (PieSectionEntity) event.getEntity();
 
 					// Get element selected
-					PCMMElement pcmmElementSelected = elements.get(pieSectionEntity.getSectionKey().toString());
+					PCMMElement pcmmElementSelected = getViewController().getElements()
+							.get(pieSectionEntity.getSectionKey().toString());
 
 					if (pcmmElementSelected != null && pcmmElementSelected.getName() != null) {
 						// paint section
@@ -637,6 +503,10 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 
 		logger.debug("Creating chart contextual menu"); //$NON-NLS-1$
 
+		// get data
+		PCMMSpecification pcmmConfiguration = getViewController().getPCMMConfiguration();
+		List<PCMMPhase> phaseEnabled = getViewController().getPhaseEnabled();
+
 		// Create context menu
 		Menu menu = new Menu(this);
 		if (pcmmConfiguration != null && pcmmConfiguration.getPhases() != null) {
@@ -645,8 +515,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			if (phaseEnabled.contains(PCMMPhase.PLANNING) && pcmmConfiguration.isPcmmPlanningEnabled()) {
 				MenuItem evidenceItem = new MenuItem(menu, SWT.PUSH);
 				evidenceItem.setText(PCMMPhase.PLANNING.getName());
-				evidenceItem.setData(PLANNING_COMMAND);
-				evidenceItem.addSelectionListener(this);
+				evidenceItem.setData(PCMMHomeViewController.PLANNING_COMMAND);
+				evidenceItem.addSelectionListener(getViewController());
 				evidenceItem.setEnabled(true);
 			}
 
@@ -654,8 +524,8 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			if (phaseEnabled.contains(PCMMPhase.EVIDENCE) && pcmmConfiguration.isPcmmEvidenceEnabled()) {
 				MenuItem evidenceItem = new MenuItem(menu, SWT.PUSH);
 				evidenceItem.setText(PCMMPhase.EVIDENCE.getName());
-				evidenceItem.setData(EVIDENCE_COMMAND);
-				evidenceItem.addSelectionListener(this);
+				evidenceItem.setData(PCMMHomeViewController.EVIDENCE_COMMAND);
+				evidenceItem.addSelectionListener(getViewController());
 				evidenceItem.setEnabled(true);
 			}
 
@@ -663,106 +533,12 @@ public class PCMMHomeView extends ACredibilityPCMMView implements SelectionListe
 			if (phaseEnabled.contains(PCMMPhase.ASSESS) && pcmmConfiguration.isPcmmAssessEnabled()) {
 				MenuItem assessItem = new MenuItem(menu, SWT.PUSH);
 				assessItem.setText(PCMMPhase.ASSESS.getName());
-				assessItem.setData(ASSESS_COMMAND);
+				assessItem.setData(PCMMHomeViewController.ASSESS_COMMAND);
 				assessItem.setEnabled(true);
-				assessItem.addSelectionListener(this);
+				assessItem.addSelectionListener(getViewController());
 			}
 		}
 
 		return menu;
-	}
-
-	/**
-	 * Tag the current PCMM, and prompt the user to enter the tag parameters
-	 */
-	public void tagCurrentPCMM() {
-
-		boolean canTag = checkEditorSaveNeed();
-
-		if (canTag) {
-			// create new tag dialog
-			NewTagDialog tagDialog = new NewTagDialog(getViewManager(), getShell());
-			Tag newTag = tagDialog.openDialog();
-
-			// if the user entered a tag
-			if (newTag != null) {
-				newTag.setUserCreation(getViewManager().getCache().getUser());
-				try {
-					// tag
-					getViewManager().getAppManager().getService(IPCMMApplication.class).tagCurrent(newTag);
-
-					// save the credibility process
-					getViewManager().viewChanged();
-
-					// alert the user
-					MessageDialog.openInformation(getShell(), RscTools.getString(RscConst.MSG_TAG_DIALOG_VIEWTITLE),
-							RscTools.getString(RscConst.MSG_TAG_PART_TAG_SUCCESS));
-
-					// reload the view
-					tagList = getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
-					pcmmTagPart.setTagList(tagList);
-
-				} catch (CredibilityException e) {
-					MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMHOME_DIALOG_TITLE),
-							RscTools.getString(RscConst.ERR_TAG_DIALOG_TAGGING_MSG));
-					logger.warn("An error has occurred while tagging the current PCMM state:\n{}", e.getMessage(), e); //$NON-NLS-1$
-				}
-			}
-		}
-	}
-
-	/**
-	 * Open a dialog to manage the tags
-	 */
-	public void manageTags() {
-
-		boolean canTag = checkEditorSaveNeed();
-
-		if (canTag) {
-			// open the tag manager dialog
-			PCMMManageTagDialog tagDialog = new PCMMManageTagDialog(getViewManager(), getShell());
-			tagDialog.open();
-
-			// reload the view
-			tagList = getViewManager().getAppManager().getService(IPCMMApplication.class).getTags();
-			pcmmTagPart.setTagList(tagList);
-		}
-	}
-
-	/**
-	 * The tag selection changed
-	 */
-	public void tagSelectionChanged(Tag newTag) {
-		// change the view behavior and reload data
-		getViewManager().setSelectedTag(newTag);
-	}
-
-	/**
-	 * If the editor is in a dirty state, this methods asks the user to save it.
-	 * 
-	 * @return true if the editor is clean to be tagged, otherwise false
-	 */
-	private boolean checkEditorSaveNeed() {
-
-		boolean canContinue = true;
-
-		// if the editor needs to be saved
-		if (getViewManager().getCredibilityEditor().isDirty()) {
-
-			canContinue = false;
-
-			// ask to save before tagging
-			boolean confirmSave = MessageDialog.openQuestion(getShell(),
-					RscTools.getString(RscConst.MSG_TAG_DIALOG_VIEWTITLE),
-					RscTools.getString(RscConst.MSG_EDITOR_SAVE_BEFORE));
-
-			// save the credibility process
-			if (confirmSave) {
-				getViewManager().doSave();
-				canContinue = true;
-			}
-		}
-
-		return canContinue;
 	}
 }

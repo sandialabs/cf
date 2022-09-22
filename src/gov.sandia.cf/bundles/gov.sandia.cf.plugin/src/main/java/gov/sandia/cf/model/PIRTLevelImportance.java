@@ -27,8 +27,8 @@ import gov.sandia.cf.tools.StringTools;
  */
 @Entity
 @Table(name = "PIRT_LEVEL_IMPORTANCE")
-public class PIRTLevelImportance
-		implements Serializable, IEntity<PIRTLevelImportance, Integer>, IImportable<PIRTLevelImportance>, ISelectValue {
+public class PIRTLevelImportance implements Serializable, IEntity<PIRTLevelImportance, Integer>,
+		IImportable<PIRTLevelImportance>, ISelectValue, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -163,6 +163,16 @@ public class PIRTLevelImportance
 	@SuppressWarnings("javadoc")
 	public void setIdLabel(String idLabel) {
 		this.idLabel = idLabel;
+	}
+
+	@Override
+	public String getGeneratedId() {
+		return getIdLabel();
+	}
+
+	@Override
+	public void setGeneratedId(String generatedId) {
+		setIdLabel(generatedId);
 	}
 
 	@SuppressWarnings("javadoc")

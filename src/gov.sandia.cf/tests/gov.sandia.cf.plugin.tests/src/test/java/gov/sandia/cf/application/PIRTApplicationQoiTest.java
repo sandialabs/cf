@@ -19,8 +19,6 @@ import java.util.List;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +51,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the PIRT Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class PIRTApplicationQoiTest extends AbstractTestApplication {
 
 	/**
@@ -215,7 +212,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		// Delete QoI with tag
 		// **********
 		try {
-			getPIRTApp().deleteQoI(qoiWithHeader);
+			getPIRTApp().deleteQoI(qoiWithHeader, null);
 			assertNull(getPIRTApp().getQoIById(qoiWithHeader.getId()));
 			assertNull(getPIRTApp().getQoIById(taggedQoI.getId()));
 		} catch (CredibilityException e) {
@@ -226,7 +223,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		// Delete QoI and Tag
 		// **********
 		try {
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -270,7 +267,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 			qoi = getPIRTApp().addQoI(qoi, newUser);
 			assertNotNull(qoi);
 			// Remove it
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, newUser);
 
 			// ****************************************
 			// With PIRTDescriptionHeader null
@@ -278,7 +275,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 			qoi = getPIRTApp().addQoI(qoi, newUser);
 			assertNotNull(qoi);
 			// remove it
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, newUser);
 
 			// *****************************************
 			// With PIRTDescriptionHeader empty
@@ -286,7 +283,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 			qoi = getPIRTApp().addQoI(qoi, newUser, new ArrayList<>());
 			assertNotNull(qoi);
 			// remove it
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, newUser);
 
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
@@ -436,7 +433,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		}
 
 		try {
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -469,7 +466,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		}
 
 		try {
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -523,11 +520,23 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		}
 
 		try {
-			getPIRTApp().deleteQoI(taggedQoI);
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(taggedQoI, null);
+			getPIRTApp().deleteQoI(qoi, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
+	}
+
+	@Test
+	void testUpdateQoITag_WithOtherTags_Working() throws CredibilityException {
+
+		QuantityOfInterest parent = TestEntityFactory.getNewQoI(getDaoManager(), null);
+		QuantityOfInterest tag = TestEntityFactory.getNewQoIWithParent(getDaoManager(), parent);
+		TestEntityFactory.getNewQoIWithParent(getDaoManager(), parent);
+
+		// test update a tag to pass identical name check
+		QuantityOfInterest updatedTag = getPIRTApp().updateQoI(tag, TestEntityFactory.getNewUser(getDaoManager()));
+		assertEquals(tag, updatedTag);
 	}
 
 	@Test
@@ -601,7 +610,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IPIRTApplication.class).deleteQoI(newQoIToDelete);
+			getAppManager().getService(IPIRTApplication.class).deleteQoI(newQoIToDelete, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -646,7 +655,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		// With null
 		// **********
 		try {
-			getPIRTApp().deleteQoI(null);
+			getPIRTApp().deleteQoI(null, null);
 			fail("Can launch deleteQoI with null and description header null"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(e.getMessage(), RscTools.getString(RscConst.EX_PIRT_DELETEQOI_QOINULL));
@@ -668,7 +677,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 			qoi.setPhenomenonGroupList(null);
 			qoi.setQoiHeaderList(null);
 
-			getPIRTApp().deleteQoI(qoi);
+			getPIRTApp().deleteQoI(qoi, null);
 			assertNull(getPIRTApp().getQoIById(qoi.getId()));
 		} catch (CredibilityException e) {
 			fail("Can't launch deleteQoI with empty list of header and phenomenon"); //$NON-NLS-1$
@@ -690,7 +699,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		TestEntityFactory.getNewPhenomenon(getDaoManager(), newPhenomenonGroup2);
 
 		try {
-			qoi = getPIRTApp().resetQoI(qoi);
+			qoi = getPIRTApp().resetQoI(qoi, null);
 		} catch (CredibilityException e) {
 			fail("Can't launch resestQoI with null and description header null"); //$NON-NLS-1$
 		}
@@ -706,7 +715,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		// With null
 		// **********
 		try {
-			getPIRTApp().resetQoI(null);
+			getPIRTApp().resetQoI(null, null);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_UPDATEQOI_QOINULL), e.getMessage());
 		}
@@ -715,7 +724,7 @@ class PIRTApplicationQoiTest extends AbstractTestApplication {
 		// With no data
 		// ************
 		try {
-			getPIRTApp().resetQoI(new QuantityOfInterest());
+			getPIRTApp().resetQoI(new QuantityOfInterest(), null);
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_UPDATEQOI_IDNULL), e.getMessage());
 		}

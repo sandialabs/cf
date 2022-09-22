@@ -119,8 +119,8 @@ public class PCMMAssessViewerCellModifier implements ICellModifier {
 		// update only the selected pcmm element
 		boolean isSelectedPCMMElement = false;
 		if (isValidElement)
-			isSelectedPCMMElement = viewCtrl.getPcmmElement() != null
-					&& viewCtrl.getPcmmElement().equals(((PCMMSubelement) element).getElement());
+			isSelectedPCMMElement = viewCtrl.getElementSelected() != null
+					&& viewCtrl.getElementSelected().equals(((PCMMSubelement) element).getElement());
 
 		return isNotTagMode && isValidElement && isEditableColumn && isSelectedPCMMElement;
 	}

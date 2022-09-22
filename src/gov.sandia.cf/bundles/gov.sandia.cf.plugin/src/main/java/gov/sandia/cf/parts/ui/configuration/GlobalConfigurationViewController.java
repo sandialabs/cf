@@ -3,8 +3,9 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.configuration;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import gov.sandia.cf.application.global.IGlobalApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GlobalConfiguration;
 import gov.sandia.cf.model.OpenLinkBrowserOption;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -22,7 +24,8 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class GlobalConfigurationViewController {
+public class GlobalConfigurationViewController
+		extends AViewController<ConfigurationViewManager, GlobalConfigurationView> {
 
 	/**
 	 * the logger
@@ -30,22 +33,30 @@ public class GlobalConfigurationViewController {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalConfigurationViewController.class);
 
 	/**
-	 * The view
-	 */
-	private GlobalConfigurationView view;
-
-	/**
 	 * The global configuration data
 	 */
 	private GlobalConfiguration configuration;
 
-	GlobalConfigurationViewController(GlobalConfigurationView view) {
-		Assert.isNotNull(view);
-		this.view = view;
-		this.configuration = view.getViewManager().getCache().getGlobalConfiguration();
+	/**
+	 * Instantiates a new global configuration view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param parent      the parent
+	 */
+	GlobalConfigurationViewController(ConfigurationViewManager viewManager, Composite parent) {
+		super(viewManager);
+		super.setView(new GlobalConfigurationView(this, parent, SWT.NONE));
+		this.configuration = getViewManager().getCache().getGlobalConfiguration();
 
 		// Refresh data and Save state
-		this.view.refresh();
+		refresh();
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+		getView().reloadOpenLinkBrowserOptions();
 	}
 
 	/**
@@ -56,7 +67,7 @@ public class GlobalConfigurationViewController {
 	void updateGlobalConfigurationAction(OpenLinkBrowserOption openLinkOption) {
 
 		if (configuration == null) {
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_TITLE),
 					RscTools.getString(RscConst.CARRIAGE_RETURN)
 							+ RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_CONFNULL));
 			return;
@@ -78,20 +89,20 @@ public class GlobalConfigurationViewController {
 			configuration.setOpenLinkBrowserOpts(optionToUpdate.name());
 
 			// Create
-			view.getViewManager().getAppManager().getService(IGlobalApplication.class)
+			getViewManager().getAppManager().getService(IGlobalApplication.class)
 					.updateGlobalConfiguration(configuration);
 
 			// Fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 			// Refresh
-			view.getViewManager().getCache().refreshGlobalConfiguration();
-			view.refresh();
+			getViewManager().getCache().refreshGlobalConfiguration();
+			getView().refresh();
 
 		} catch (CredibilityException e) {
 			logger.error(RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_TITLE),
 					RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_CONF_GLOBALVIEW_TITLE),
 					RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
 	}
@@ -100,5 +111,4 @@ public class GlobalConfigurationViewController {
 	public GlobalConfiguration getConfiguration() {
 		return configuration;
 	}
-
 }

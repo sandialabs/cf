@@ -3,6 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application.imports;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,24 +30,29 @@ public class YmlReaderGenericSchema {
 	}
 
 	/**
-	 * Create the list of generic parameters
-	 * 
+	 * Create the list of generic parameters.
+	 *
 	 * @param <G>              the generic parameter class
 	 * @param <S>              the generic parameter select value class
 	 * @param <C>              the generic parameter constraint class
-	 * 
 	 * @param paramClass       the generic parameter class
 	 * @param selectValueClass the generic parameter select value class
 	 * @param constraintClass  the generic parameter constraint class
 	 * @param ymlParameters    the yml data to parse
 	 * @return the list of parameters populated
-	 * @throws IllegalAccessException if an error occurs while accessing methods
-	 *                                using reflection
-	 * @throws InstantiationException if an error occurs during object instantiation
+	 * @throws InstantiationException    if an error occurs during object
+	 *                                   instantiation
+	 * @throws IllegalAccessException    if an error occurs while accessing methods
+	 *                                   using reflection
+	 * @throws IllegalArgumentException  the illegal argument exception
+	 * @throws InvocationTargetException the invocation target exception
+	 * @throws NoSuchMethodException     the no such method exception
+	 * @throws SecurityException         the security exception
 	 */
 	public static <G extends GenericParameter<G>, S extends GenericParameterSelectValue<G>, C extends GenericParameterConstraint<G>> List<G> createParameters(
 			Class<G> paramClass, Class<S> selectValueClass, Class<C> constraintClass,
-			Map<String, Map<String, Object>> ymlParameters) throws InstantiationException, IllegalAccessException {
+			Map<String, Map<String, Object>> ymlParameters) throws InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		// Initialize list
 		List<G> listParameters = new ArrayList<>();
 		if (ymlParameters != null) {
@@ -63,25 +69,30 @@ public class YmlReaderGenericSchema {
 	}
 
 	/**
-	 * Create a new generic parameter
-	 * 
+	 * Create a new generic parameter.
+	 *
 	 * @param <G>              the generic parameter class
 	 * @param <S>              the generic parameter select value class
 	 * @param <C>              the generic parameter constraint class
-	 * 
 	 * @param paramClass       the generic parameter class
 	 * @param selectValueClass the generic parameter select value class
 	 * @param constraintClass  the generic parameter constraint class
 	 * @param entry            the yml entry to parse
 	 * @return the new parameter populated
-	 * @throws IllegalAccessException if an error occurs while accessing methods
-	 *                                using reflection
-	 * @throws InstantiationException if an error occurs during object instantiation
+	 * @throws InstantiationException    if an error occurs during object
+	 *                                   instantiation
+	 * @throws IllegalAccessException    if an error occurs while accessing methods
+	 *                                   using reflection
+	 * @throws IllegalArgumentException  the illegal argument exception
+	 * @throws InvocationTargetException the invocation target exception
+	 * @throws NoSuchMethodException     the no such method exception
+	 * @throws SecurityException         the security exception
 	 */
 	@SuppressWarnings("unchecked")
 	public static <G extends GenericParameter<G>, S extends GenericParameterSelectValue<G>, C extends GenericParameterConstraint<G>> G createGenericParameter(
 			Class<G> paramClass, Class<S> selectValueClass, Class<C> constraintClass,
-			Entry<String, Map<String, Object>> entry) throws InstantiationException, IllegalAccessException {
+			Entry<String, Map<String, Object>> entry) throws InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		G genParameter = null;
 		if (entry != null) {
@@ -89,7 +100,7 @@ public class YmlReaderGenericSchema {
 			String level = (String) entry.getValue().get(YmlGenericSchema.CONF_GENERIC_LEVEL);
 
 			// Create genParameter
-			genParameter = paramClass.newInstance();
+			genParameter = paramClass.getDeclaredConstructor().newInstance();
 			genParameter.setName(entry.getKey());
 			genParameter.setLevel((level != null) ? level : YmlGenericSchema.DEFAULT_LEVEL);
 			genParameter.setType((String) entry.getValue().get(YmlGenericSchema.CONF_GENERIC_TYPE));
@@ -123,27 +134,32 @@ public class YmlReaderGenericSchema {
 	}
 
 	/**
-	 * Create the list of generic parameter select values
-	 * 
+	 * Create the list of generic parameter select values.
+	 *
 	 * @param <G>              the generic parameter class
 	 * @param <S>              the generic parameter select value class
-	 * 
 	 * @param selectValueClass the generic parameter select value class
 	 * @param values           the yml data to parse
 	 * @return the list of parameters populated
-	 * @throws IllegalAccessException if an error occurs while accessing methods
-	 *                                using reflection
-	 * @throws InstantiationException if an error occurs during object instantiation
+	 * @throws InstantiationException    if an error occurs during object
+	 *                                   instantiation
+	 * @throws IllegalAccessException    if an error occurs while accessing methods
+	 *                                   using reflection
+	 * @throws IllegalArgumentException  the illegal argument exception
+	 * @throws InvocationTargetException the invocation target exception
+	 * @throws NoSuchMethodException     the no such method exception
+	 * @throws SecurityException         the security exception
 	 */
 	public static <G extends GenericParameter<G>, S extends GenericParameterSelectValue<G>> List<GenericParameterSelectValue<G>> createParameterSelectValues(
-			Class<S> selectValueClass, List<String> values) throws InstantiationException, IllegalAccessException {
+			Class<S> selectValueClass, List<String> values) throws InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		// Create GenericParameterValueList and add it to GenericParameter
 		List<GenericParameterSelectValue<G>> listParameterValue = new ArrayList<>();
 		if (values != null) {
 			for (Object value : values) {
 				String val = (value.toString());
-				S parameterValue = selectValueClass.newInstance();
+				S parameterValue = selectValueClass.getDeclaredConstructor().newInstance();
 				parameterValue.setName(val);
 				listParameterValue.add(parameterValue);
 			}
@@ -153,26 +169,31 @@ public class YmlReaderGenericSchema {
 	}
 
 	/**
-	 * Create the list of generic parameter constraints
-	 * 
+	 * Create the list of generic parameter constraints.
+	 *
 	 * @param <G>             the generic parameter class
 	 * @param <C>             the generic parameter constraint class
-	 * 
 	 * @param constraintClass the generic parameter constraint class
 	 * @param values          the yml data to parse
 	 * @return the list of parameters populated
-	 * @throws IllegalAccessException if an error occurs while accessing methods
-	 *                                using reflection
-	 * @throws InstantiationException if an error occurs during object instantiation
+	 * @throws InstantiationException    if an error occurs during object
+	 *                                   instantiation
+	 * @throws IllegalAccessException    if an error occurs while accessing methods
+	 *                                   using reflection
+	 * @throws IllegalArgumentException  the illegal argument exception
+	 * @throws InvocationTargetException the invocation target exception
+	 * @throws NoSuchMethodException     the no such method exception
+	 * @throws SecurityException         the security exception
 	 */
 	public static <G extends GenericParameter<G>, C extends GenericParameterConstraint<G>> List<GenericParameterConstraint<G>> createParameterConstraints(
-			Class<C> constraintClass, List<String> values) throws InstantiationException, IllegalAccessException {
+			Class<C> constraintClass, List<String> values) throws InstantiationException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		// Create GenericParameterConstraint list and add it to GenericParameter
 		List<GenericParameterConstraint<G>> listParameterValue = new ArrayList<>();
 		if (values != null) {
 			for (String rule : values) {
-				C constraint = constraintClass.newInstance();
+				C constraint = constraintClass.getDeclaredConstructor().newInstance();
 				constraint.setRule(rule);
 				listParameterValue.add(constraint);
 			}

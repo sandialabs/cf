@@ -7,8 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +25,10 @@ import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_002_RichTextContentTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_002_RichTextContentTest extends AbstractTestDao {
 
 	/**
@@ -40,7 +38,7 @@ class Task_002_RichTextContentTest extends AbstractTestDao {
 
 	@Test
 	void test_MigrationTask_NotMigrated() {
-		
+
 		// Needed to execute a migration task
 		TestEntityFactory.getNewModel(getDaoManager());
 

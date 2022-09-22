@@ -9,10 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class PrefToolsTest.
+ * 
+ * @author Didier Verstraete
+ */
 class PrefToolsTest {
 
 	@Test

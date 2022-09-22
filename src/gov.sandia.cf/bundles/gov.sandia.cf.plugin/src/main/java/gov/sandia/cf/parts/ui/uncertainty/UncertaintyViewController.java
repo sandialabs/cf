@@ -3,16 +3,21 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.uncertainty;
 
-import org.eclipse.core.runtime.Assert;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Uncertainty;
 import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.services.genericparam.IGenericParameterService;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -22,7 +27,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class UncertaintyViewController {
+public class UncertaintyViewController extends AViewController<UncertaintyViewManager, UncertaintyView> {
 
 	/**
 	 * the logger
@@ -30,13 +35,52 @@ public class UncertaintyViewController {
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyViewController.class);
 
 	/**
-	 * The decision view
+	 * Instantiates a new uncertainty view controller.
+	 *
+	 * @param viewManager the view manager
 	 */
-	private UncertaintyView view;
+	UncertaintyViewController(UncertaintyViewManager viewManager) {
+		super(viewManager);
+		super.setView(new UncertaintyView(this, SWT.NONE));
 
-	UncertaintyViewController(UncertaintyView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+		// Refresh
+		refresh();
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+
+		logger.debug("Reload Uncertainty view"); //$NON-NLS-1$
+
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		List<Uncertainty> uncertaintyGroupList = new ArrayList<>();
+
+		// Get data
+		if (model != null) {
+			uncertaintyGroupList = getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+					.getUncertaintyGroupByModel(model);
+
+			// reload system requirement spec
+			getViewManager().getCache().reloadUncertaintySpecification();
+		}
+
+		/**
+		 * Refresh the table
+		 */
+		// Get expanded elements
+		Object[] elements = getView().getTreeExpandedElements();
+
+		// Refresh the table
+		getView().refreshMainTable();
+
+		// Set input
+		getView().setTreeData(uncertaintyGroupList);
+
+		// Set expanded elements
+		getView().setTreeExpandedElements(elements);
 	}
 
 	/**
@@ -55,39 +99,38 @@ public class UncertaintyViewController {
 	void addUncertainty(Uncertainty groupSelected) {
 
 		// Open dialog in View Mode
-		UncertaintyDialog dialog = new UncertaintyDialog(view.getViewManager(), view.getShell(), null, groupSelected,
+		UncertaintyDialog dialog = new UncertaintyDialog(getViewManager(), getView().getShell(), null, groupSelected,
 				ViewMode.CREATE);
 		Uncertainty uncertainty = dialog.openDialog();
 
 		if (uncertainty != null) {
 			try {
 				// Set Id
-				uncertainty.setGeneratedId(view.getIdColumnText(uncertainty));
+				uncertainty.setGeneratedId(getView().getIdColumnText(uncertainty));
 
 				// Create
-				view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).addUncertainty(
-						uncertainty, view.getViewManager().getCache().getModel(),
-						view.getViewManager().getCache().getUser());
+				getViewManager().getAppManager().getService(IUncertaintyApplication.class).addUncertainty(uncertainty,
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser());
 
 				// Refresh parent
 				if (groupSelected != null) {
-					this.view.getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+					getViewManager().getAppManager().getService(IUncertaintyApplication.class)
 							.refresh(uncertainty.getParent());
 
 					// Expand parent
-					view.expandElements(uncertainty.getParent());
+					getView().expandElements(uncertainty.getParent());
 				}
 
 				// refresh view
-				view.reload();
+				getView().reload();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while adding uncertainty: {}", RscTools.carriageReturn() //$NON-NLS-1$
 						+ e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
 						e.getMessage());
 			}
 		}
@@ -100,8 +143,8 @@ public class UncertaintyViewController {
 	 */
 	void openAllUncertaintyValues(Uncertainty uncertainty) {
 		if (uncertainty != null && uncertainty.getValues() != null) {
-			uncertainty.getValues().forEach(u -> view.getViewManager().getClientService(IGenericParameterService.class)
-					.openLinkValue(u, view.getViewManager().getCache().getOpenLinkBrowserOpts()));
+			uncertainty.getValues().forEach(u -> getViewManager().getClientService(IGenericParameterService.class)
+					.openLinkValue(u, getViewManager().getCache().getOpenLinkBrowserOpts()));
 		}
 	}
 
@@ -129,7 +172,7 @@ public class UncertaintyViewController {
 			logger.warn("The uncertainty to view is null"); //$NON-NLS-1$
 		} else {
 			// Open dialog in View Mode
-			UncertaintyDialog dialog = new UncertaintyDialog(view.getViewManager(), view.getShell(), uncertainty,
+			UncertaintyDialog dialog = new UncertaintyDialog(getViewManager(), getView().getShell(), uncertainty,
 					uncertainty.getParent(), ViewMode.VIEW);
 			dialog.openDialog();
 		}
@@ -158,7 +201,7 @@ public class UncertaintyViewController {
 		Uncertainty previousGroup = uncertainty.getParent();
 
 		// Open dialog in View Mode
-		UncertaintyDialog dialog = new UncertaintyDialog(view.getViewManager(), view.getShell(), uncertainty,
+		UncertaintyDialog dialog = new UncertaintyDialog(getViewManager(), getView().getShell(), uncertainty,
 				previousGroup, ViewMode.UPDATE);
 		Uncertainty uncertaintyToUpdate = dialog.openDialog();
 
@@ -168,12 +211,12 @@ public class UncertaintyViewController {
 		} catch (CredibilityException e) {
 			logger.error("An error occured while updating uncertainty: {}", RscTools.carriageReturn() //$NON-NLS-1$
 					+ e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
 					e.getMessage());
 		}
 
 		if (previousGroup != null && !previousGroup.equals(uncertainty.getParent())) {
-			view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(previousGroup);
+			getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(previousGroup);
 		}
 
 		refreshIfChanged();
@@ -183,6 +226,7 @@ public class UncertaintyViewController {
 	 * Update Uncertainty.
 	 *
 	 * @param uncertainty the uncertainty to update
+	 * @return the uncertainty
 	 * @throws CredibilityException the credibility exception
 	 */
 	Uncertainty updateUncertainty(Uncertainty uncertainty) throws CredibilityException {
@@ -192,17 +236,17 @@ public class UncertaintyViewController {
 		}
 
 		// Update
-		Uncertainty uncertaintyUpdated = view.getViewManager().getAppManager().getService(IUncertaintyApplication.class)
-				.updateUncertainty(uncertainty, view.getViewManager().getCache().getUser());
+		Uncertainty uncertaintyUpdated = getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+				.updateUncertainty(uncertainty, getViewManager().getCache().getUser());
 
 		// Refresh parent
 		Uncertainty newGroup = uncertaintyUpdated.getParent();
 		if (newGroup != null) {
-			view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(newGroup);
+			getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(newGroup);
 		}
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 
 		return uncertaintyUpdated;
 	}
@@ -239,7 +283,7 @@ public class UncertaintyViewController {
 		}
 
 		// confirm dialog
-		boolean confirm = MessageDialog.openConfirm(view.getShell(),
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_UNCERTAINTY_DELETECONFIRM_TITLE, title), message);
 
 		if (confirm) {
@@ -249,24 +293,24 @@ public class UncertaintyViewController {
 				Uncertainty parent = uncertainty.getParent();
 
 				// delete
-				view.getViewManager().getAppManager().getService(IUncertaintyApplication.class)
-						.deleteUncertainty(uncertainty);
+				getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+						.deleteUncertainty(uncertainty, getViewManager().getCache().getUser());
 
 				// Refresh parent's children list
 				if (parent != null) {
-					view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(parent);
+					getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(parent);
 				}
 
 				// Set view has changed
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while deleting uncertainty: {}", uncertainty //$NON-NLS-1$
 						+ RscTools.carriageReturn() + e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_DIALOG_UNCERTAINTY_TITLE),
 						e.getMessage());
 			}
 		}
@@ -281,11 +325,11 @@ public class UncertaintyViewController {
 		try {
 
 			// reorder
-			view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).reorderAll(
-					view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser());
+			getViewManager().getAppManager().getService(IUncertaintyApplication.class)
+					.reorderAll(getViewManager().getCache().getModel(), getViewManager().getCache().getUser());
 
 			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 		} catch (CredibilityException e) {
 			logger.error("Impossible to reorder all uncertainties: {}", e.getMessage(), e);//$NON-NLS-1$
@@ -304,11 +348,11 @@ public class UncertaintyViewController {
 	 */
 	void reorder(Uncertainty uncertainty, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).reorderUncertainty(uncertainty,
-				newIndex, view.getViewManager().getCache().getUser());
+		getViewManager().getAppManager().getService(IUncertaintyApplication.class).reorderUncertainty(uncertainty,
+				newIndex, getViewManager().getCache().getUser());
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -317,7 +361,7 @@ public class UncertaintyViewController {
 	 * @param uncertainty the uncertainty
 	 */
 	void refreshUncertainty(Uncertainty uncertainty) {
-		view.getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(uncertainty);
+		getViewManager().getAppManager().getService(IUncertaintyApplication.class).refresh(uncertainty);
 	}
 
 	/**
@@ -326,8 +370,8 @@ public class UncertaintyViewController {
 	public void refreshIfChanged() {
 
 		// Refresh
-		if (view.getViewManager().isDirty()) {
-			view.refresh();
+		if (getViewManager().isDirty()) {
+			getView().refresh();
 		}
 	}
 }

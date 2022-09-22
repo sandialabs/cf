@@ -311,7 +311,9 @@ public class NewCFProcessWebSetupPage extends WizardPage implements INewCFProces
 	}
 
 	/**
-	 * Update the error messages of wizard and the page complete field
+	 * Update the error messages of wizard and the page complete field.
+	 *
+	 * @param error the error
 	 */
 	private void updateMessages(boolean error) {
 

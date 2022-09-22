@@ -5,7 +5,6 @@ package gov.sandia.cf.parts.ui.pirt;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -41,18 +39,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Criterion;
 import gov.sandia.cf.model.PIRTAdequacyColumn;
 import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.QuantityOfInterest;
-import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ButtonTheme;
@@ -91,21 +84,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
-	/**
-	 * the logger
-	 */
-	private static final Logger logger = LoggerFactory.getLogger(PIRTPhenomenaView.class);
-
-	/**
-	 * Controller
-	 */
-	private PIRTPhenomenaViewController viewCtrl;
-
-	/**
-	 * PIRT Configuration
-	 */
-	private PIRTSpecification pirtConfiguration;
+public class PIRTPhenomenaView extends ACredibilitySubView<PIRTPhenomenaViewController> {
 
 	/**
 	 * the description table viewer
@@ -116,11 +95,6 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	 * the tree viewer
 	 */
 	private TreeViewerID treeViewer;
-
-	/**
-	 * the current quantity of interest
-	 */
-	private QuantityOfInterest qoiSelected;
 
 	/**
 	 * Table buttons
@@ -148,24 +122,18 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	public static final String BTN_EVENT_PIRT_PHEN_CLOSE = "PIRT_CLOSE"; //$NON-NLS-1$
 
 	/**
-	 * @param parent      the parent composite
-	 * @param viewManager the parent view
-	 * @param style       the view style
-	 * @param qoi         the qoi to associate
+	 * @param parent         the parent composite
+	 * @param viewController the parent view
+	 * @param style          the view style
 	 */
-	public PIRTPhenomenaView(PIRTViewManager viewManager, PIRTTabFolder parent, int style, QuantityOfInterest qoi) {
-		super(viewManager, parent, style);
-
-		this.viewCtrl = new PIRTPhenomenaViewController(this);
+	public PIRTPhenomenaView(PIRTPhenomenaViewController viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		addEditors = new HashMap<>();
 		viewEditors = new HashMap<>();
 		editEditors = new HashMap<>();
 		deleteEditors = new HashMap<>();
-
-		// Set Quantity of Interest
-		this.qoiSelected = qoi;
 
 		// Override title
 		this.setTitle(this.getTitle());
@@ -177,10 +145,11 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	/** {@inheritDoc} */
 	@Override
 	public String getTitle() {
+		QuantityOfInterest qoiSelected = getViewController().getQoISelected();
 		if (null != qoiSelected) {
 			if (null != qoiSelected.getTagDate()) {
-				this.lblTitle.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_TAG,
-						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
+				this.lblTitle.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+						IconTheme.ICON_NAME_TAG, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
 			}
 			return RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TITLE, qoiSelected.getSymbol());
 		} else {
@@ -202,14 +171,11 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	 */
 	private void renderPage() {
 
-		// Configuration
-		pirtConfiguration = getViewManager().getCache().getPIRTSpecification();
-
 		// Renders
 		renderHeaderTable();
 
 		// Render header buttons
-		if (null == qoiSelected.getTagDate()) {
+		if (!getViewController().isTagged()) {
 			renderHeaderButtons();
 		}
 
@@ -218,21 +184,22 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh
-		refresh();
-
 	}
 
 	/**
 	 * Render header table
 	 */
 	private void renderHeaderTable() {
+
+		QuantityOfInterest qoiSelected = getViewController().getQoISelected();
+
 		// Table Header - Create
-		String tableHeaderBarName = qoiSelected.getSymbol();
-		tableHeaderBar = new TableHeaderBar(getViewManager(), this, tableHeaderBarName);
-		tableHeaderBar.setContentProvider(new PIRTPhenTableHeaderContentProvider(this));
-		tableHeaderBar.setCellModifier(new PIRTPhenTableHeaderCellModifier(viewCtrl));
+		if (qoiSelected != null) {
+			String tableHeaderBarName = qoiSelected.getSymbol();
+			tableHeaderBar = new TableHeaderBar(getViewController().getViewManager(), this, tableHeaderBarName);
+			tableHeaderBar.setContentProvider(new PIRTPhenTableHeaderContentProvider(getViewController()));
+			tableHeaderBar.setCellModifier(new PIRTPhenTableHeaderCellModifier(getViewController()));
+		}
 	}
 
 	/**
@@ -267,9 +234,9 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnAddPhenomenonGroupOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddPhenomenonGroupOptions.put(ButtonTheme.OPTION_DATA, btnAddPhenomenonGroupData);
 		btnAddPhenomenonGroupOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> viewCtrl.addPhenomenonGroupAction());
-		btnAddPhenomenonGroupOptions.put(ButtonTheme.OPTION_ENABLED, qoiSelected.getTagDate() == null);
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.RIGHT,
+				(Listener) event -> getViewController().addPhenomenonGroupAction());
+		btnAddPhenomenonGroupOptions.put(ButtonTheme.OPTION_ENABLED, !getViewController().isTagged());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.RIGHT,
 				btnAddPhenomenonGroupOptions);
 
 		// button Reset
@@ -281,9 +248,10 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnResetOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_RESET);
 		btnResetOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_RED);
 		btnResetOptions.put(ButtonTheme.OPTION_DATA, btnResetData);
-		btnResetOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.resetAction());
-		btnResetOptions.put(ButtonTheme.OPTION_ENABLED, qoiSelected.getTagDate() == null);
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderLeft, SWT.RIGHT, btnResetOptions);
+		btnResetOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().resetAction());
+		btnResetOptions.put(ButtonTheme.OPTION_ENABLED, !getViewController().isTagged());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderLeft, SWT.RIGHT,
+				btnResetOptions);
 	}
 
 	/**
@@ -354,17 +322,18 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		// Columns - Importance (Level type)
 		TreeViewerColumn importanceColumn = new TreeViewerColumn(treeViewer, SWT.CENTER);
 		importanceColumn.getColumn().setText(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
-		importanceColumn
-				.setEditingSupport(new PIRTPhenomenonImportanceCellEditor(importanceColumn.getViewer(), viewCtrl));
-		importanceColumn.setLabelProvider(
-				new PIRTImportanceColumnLabelProvider(pirtConfiguration, getViewManager().getRscMgr()));
+		importanceColumn.setEditingSupport(
+				new PIRTPhenomenonImportanceCellEditor(importanceColumn.getViewer(), getViewController()));
+		importanceColumn.setLabelProvider(new PIRTImportanceColumnLabelProvider(
+				getViewController().getPirtConfiguration(), getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.PHEN_VIEW_TREEPHEN_LVL_COLUMN_COEFF, true));
 		columnProperties.add(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
 
 		// Columns - construct generated tree columns from PIRT configuration
-		if (getViewManager().getCache().getPIRTSpecification() != null) {
-			for (PIRTAdequacyColumn column : getViewManager().getCache().getPIRTSpecification().getColumns()) {
+		if (getViewController().getViewManager().getCache().getPIRTSpecification() != null) {
+			for (PIRTAdequacyColumn column : getViewController().getViewManager().getCache().getPIRTSpecification()
+					.getColumns()) {
 
 				TreeViewerColumn tempColumn = null;
 
@@ -393,11 +362,11 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 					tempColumn = new TreeViewerColumn(treeViewer, SWT.CENTER);
 					tempColumn.getColumn().setText(column.getName());
 					tempColumn.setEditingSupport(
-							new PIRTPhenomenonLevelCellEditor(tempColumn.getViewer(), viewCtrl, column));
+							new PIRTPhenomenonLevelCellEditor(tempColumn.getViewer(), getViewController(), column));
 					treeViewerLayout.addColumnData(
 							new ColumnWeightData(PartsResourceConstants.PHEN_VIEW_TREEPHEN_LVL_COLUMN_COEFF, true));
-					tempColumn.setLabelProvider(
-							new PIRTAdequacyColumnLabelProvider(pirtConfiguration, column, getViewManager()));
+					tempColumn.setLabelProvider(new PIRTAdequacyColumnLabelProvider(
+							getViewController().getPirtConfiguration(), column, getViewController().getViewManager()));
 				}
 
 				if (null != tempColumn) {
@@ -456,9 +425,9 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		FancyToolTipSupport.enableFor(treeViewer, ToolTip.NO_RECREATE);
 
 		// Customize table
-		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Layout
@@ -467,7 +436,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Set height and width
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x - 2 * getLayout().horizontalSpacing;
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x - 2 * getLayout().horizontalSpacing;
 	}
 
 	/**
@@ -482,7 +451,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		AutoResizeViewerLayout treeViewerLayout = (AutoResizeViewerLayout) tree.getLayout();
 
 		// Tree - Column - Action Add
-		if (null == qoiSelected.getTagDate()) {
+		if (!getViewController().isTagged()) {
 			TreeViewerColumn addColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 			addColumn.getColumn().setText(RscTools.getString(RscConst.MSG_BTN_ADD));
 			addColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -498,10 +467,10 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 					if (element instanceof PhenomenonGroup && !addEditors.containsKey(item)) {
 
 						// Button
-						ButtonTheme btnAddItem = TableFactory.createAddButtonColumnAction(getViewManager().getRscMgr(),
-								cell);
+						ButtonTheme btnAddItem = TableFactory
+								.createAddButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 						btnAddItem.addListener(SWT.Selection, event -> {
-							viewCtrl.addPhenomenonAction((PhenomenonGroup) element);
+							getViewController().addPhenomenonAction((PhenomenonGroup) element);
 							treeViewer.refresh(item);
 						});
 
@@ -536,9 +505,9 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 				if (!viewEditors.containsKey(element)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createViewButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.viewElement(data));
+					ButtonTheme btnViewItem = TableFactory
+							.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnViewItem.addListener(SWT.Selection, event -> getViewController().viewElement(data));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -555,7 +524,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		columnProperties.add(PIRTPhenomenaTreePhenomena.getColumnActionViewProperty());
 
 		// Actions edit
-		if (null == qoiSelected.getTagDate()) {
+		if (!getViewController().isTagged()) {
 			TreeViewerColumn actionEditColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 			actionEditColumn.getColumn().setText(PIRTPhenomenaTreePhenomena.getColumnActionEditProperty());
 			actionEditColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -573,8 +542,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 						// Button
 						ButtonTheme btnEditItem = TableFactory
-								.createEditButtonColumnAction(getViewManager().getRscMgr(), cell);
-						btnEditItem.addListener(SWT.Selection, event -> viewCtrl.updateElement(data));
+								.createEditButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+						btnEditItem.addListener(SWT.Selection, event -> getViewController().updateElement(data));
 
 						// Draw cell
 						editor = new TreeEditor(item.getParent());
@@ -592,7 +561,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		}
 
 		// Actions delete
-		if (null == qoiSelected.getTagDate()) {
+		if (!getViewController().isTagged()) {
 			TreeViewerColumn actionDeleteColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 			actionDeleteColumn.getColumn().setText(PIRTQoITableQoI.getColumnActionDeleteProperty());
 			actionDeleteColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -609,8 +578,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 						// Button
 						ButtonTheme btnDeleteItem = TableFactory
-								.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
-						btnDeleteItem.addListener(SWT.Selection, event -> viewCtrl.deleteElement(element));
+								.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+						btnDeleteItem.addListener(SWT.Selection, event -> getViewController().deleteElement(element));
 
 						// Draw cell
 						editor = new TreeEditor(item.getParent());
@@ -655,7 +624,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 		// Listener - Selection change
 		treeViewer.addSelectionChangedListener(event -> {
-			if (qoiSelected == null) {
+			if (getViewController().getQoISelected() == null) {
 				disableTreeSelection(treeViewer);
 			}
 		});
@@ -667,8 +636,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 			if (selection != null && !selection.isEmpty()) {
 				// Get element
 				Object firstObjectSelected = ((IStructuredSelection) selection).getFirstElement();
-				if (qoiSelected != null && firstObjectSelected != null) {
-					viewCtrl.viewElement(firstObjectSelected);
+				if (getViewController().getQoISelected() != null && firstObjectSelected != null) {
+					getViewController().viewElement(firstObjectSelected);
 				}
 			}
 		});
@@ -709,9 +678,10 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().openHomePage());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().openHomePage());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnBackOptions);
 
 		// button Close
 		Map<String, Object> btnCloseOptions = new HashMap<>();
@@ -719,9 +689,10 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnCloseOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnCloseOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CLOSE);
 		btnCloseOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnCloseOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().closePage(qoiSelected));
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnCloseOptions);
+		btnCloseOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().getViewManager()
+				.closePage(getViewController().getQoISelected()));
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnCloseOptions);
 
 		// Button - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -730,9 +701,9 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> getViewManager().openPIRTHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnHelpLevelOptions);
+				(Listener) event -> getViewController().getViewManager().openPIRTHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -740,7 +711,8 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PIRT_PHENOMENA_VIEW);
 
 		// Button - Tag
@@ -749,14 +721,14 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		btnTagOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnTagOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_TAG);
 		btnTagOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BROWN);
-		btnTagOptions.put(ButtonTheme.OPTION_ENABLED, qoiSelected.getTagDate() == null);
-		btnTagOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.doTagAction());
-		ButtonTheme btnTag = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterRight,
-				SWT.PUSH | SWT.CENTER, btnTagOptions);
+		btnTagOptions.put(ButtonTheme.OPTION_ENABLED, !getViewController().isTagged());
+		btnTagOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().doTagAction());
+		ButtonTheme btnTag = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterRight, SWT.PUSH | SWT.CENTER, btnTagOptions);
 		btnTag.setToolTipText(RscTools.getString(RscConst.MSG_PHENOMENAVIEW_BTN_ADDTAG_TOOLTIP));
 
 		// Hide right footer on tagged qoi
-		if (null != qoiSelected.getTagDate()) {
+		if (getViewController().isTagged()) {
 			compositeButtonsFooterRight.setVisible(false);
 		}
 
@@ -788,13 +760,13 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
-				new PIRTPhenomenonDropSupport(viewCtrl, treeViewer));
+				new PIRTPhenomenonDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 
 		// dispose the table components
 		if (treeViewer != null && treeViewer.getTree() != null && !treeViewer.getTree().isDisposed()) {
@@ -831,49 +803,7 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	/** {@inheritDoc} */
 	@Override
 	public void reload() {
-
-		// retrieve qoi from database
-		try {
-			qoiSelected = getViewManager().getAppManager().getService(IPIRTApplication.class)
-					.getQoIById(qoiSelected.getId());
-		} catch (CredibilityException e) {
-			logger.error("An error occured while reloading qoi data and PIRT tree", e); //$NON-NLS-1$
-			MessageDialog.openError(getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
-					RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
-		}
-
-		tableHeaderBar.setInput(qoiSelected);
-
-		List<PhenomenonGroup> phenomenaGroups = new ArrayList<>();
-		if (qoiSelected != null) {
-			phenomenaGroups = qoiSelected.getPhenomenonGroupList();
-			phenomenaGroups.sort(Comparator.comparing(PhenomenonGroup::getIdLabel));
-		}
-
-		/**
-		 * Refresh the table
-		 */
-		// Get expanded elements
-		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
-		if (treeViewer != null) {
-			initialization = false;
-			elements = treeViewer.getExpandedElements();
-		}
-
-		// Refresh the table
-		refreshMainTable();
-
-		// Set input
-		treeViewer.setInput(phenomenaGroups);
-
-		// Set expanded elements
-		if (initialization) {
-			treeViewer.expandAll();
-		} else {
-			treeViewer.setExpandedElements(elements);
-		}
-		treeViewer.refresh();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -899,54 +829,19 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 
 		@Override
 		public Color getBackground(Object element) {
-			return (element instanceof PhenomenonGroup) ? ColorTools.toColor(getViewManager().getRscMgr(),
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)) : null;
+			return (element instanceof PhenomenonGroup)
+					? ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT))
+					: null;
 		}
 
 		@Override
 		public Color getForeground(Object element) {
 			return (element instanceof PhenomenonGroup)
-					? ColorTools.toColor(getViewManager().getRscMgr(),
+					? ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE))
 					: null;
 		}
-	}
-
-	/**
-	 *
-	 * Get pirt configuration
-	 * <p>
-	 * TODO: TO BE REMOVED. Controller has to know the PIRT specification instead of
-	 * the view.
-	 * 
-	 * @return the pirt specification
-	 */
-	public PIRTSpecification getPirtConfiguration() {
-		return this.pirtConfiguration;
-	}
-
-	/**
-	 *
-	 * Get the qoi selected
-	 * <p>
-	 * TODO: TO BE REMOVED. Controller has to know the qoi selected instead of the
-	 * view.
-	 * 
-	 * @return the qoi selected
-	 */
-	QuantityOfInterest getQoISelected() {
-		return this.qoiSelected;
-	}
-
-	/**
-	 * TODO: TO BE REMOVED. Controller has to know the PIRT configuration, not the
-	 * view.
-	 * 
-	 * @return the PIRT description headers from the PIRT configuration
-	 */
-	@SuppressWarnings("unchecked")
-	List<PhenomenonGroup> getPhenomenonGroups() {
-		return (List<PhenomenonGroup>) treeViewer.getInput();
 	}
 
 	/**
@@ -992,6 +887,64 @@ public class PIRTPhenomenaView extends ACredibilitySubView<PIRTViewManager> {
 	 */
 	void updateTableHeaderBarName(String name) {
 		tableHeaderBar.updateHeaderBarName(name);
+	}
+
+	/**
+	 * Sets the table header data.
+	 *
+	 * @param data the new table header data
+	 */
+	void setTableHeaderData(Object data) {
+		if (tableHeaderBar != null) {
+			tableHeaderBar.setInput(data);
+		}
+	}
+
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		if (treeViewer != null) {
+			elements = treeViewer.getExpandedElements();
+		}
+		return elements;
+	}
+
+	/**
+	 * Sets the tree expanded elements.
+	 *
+	 * @param elements the new tree expanded elements
+	 */
+	void setTreeExpandedElements(Object[] elements) {
+		if (elements == null || elements.length == 0) {
+			treeViewer.expandAll();
+		} else {
+			treeViewer.setExpandedElements(elements);
+		}
+		treeViewer.refresh();
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
+	}
+
+	/**
+	 * Gets the tree data.
+	 *
+	 * @return the tree data
+	 */
+	Object getTreeData() {
+		return treeViewer != null ? treeViewer.getInput() : null;
 	}
 
 }

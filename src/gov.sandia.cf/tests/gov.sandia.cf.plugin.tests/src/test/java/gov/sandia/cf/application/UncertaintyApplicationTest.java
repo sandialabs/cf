@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Maxime N.
  *
  */
-@RunWith(JUnitPlatform.class)
 class UncertaintyApplicationTest extends AbstractTestApplication {
 
 	/**
@@ -366,7 +363,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertainty2);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertainty2, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -389,7 +386,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(null);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(null, null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_NULL), e.getMessage());
@@ -401,7 +398,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(new Uncertainty());
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(new Uncertainty(), null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_IDNULL), e.getMessage());
@@ -420,7 +417,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -450,7 +447,7 @@ class UncertaintyApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2);
+			getAppManager().getService(IUncertaintyApplication.class).deleteUncertainty(newUncertaintyGroup2, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}

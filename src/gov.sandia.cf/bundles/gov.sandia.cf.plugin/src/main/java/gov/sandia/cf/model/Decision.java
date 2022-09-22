@@ -37,7 +37,7 @@ import gov.sandia.cf.tools.RscTools;
  */
 @Entity
 @Table(name = "DECISION")
-public class Decision implements Serializable, IGenericTableItem, IEntity<Decision, Integer> {
+public class Decision implements Serializable, IGenericTableItem, IEntity<Decision, Integer>, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -223,12 +223,12 @@ public class Decision implements Serializable, IGenericTableItem, IEntity<Decisi
 		return level;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public String getGeneratedId() {
 		return generatedId;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public void setGeneratedId(String generatedId) {
 		this.generatedId = generatedId;
 	}

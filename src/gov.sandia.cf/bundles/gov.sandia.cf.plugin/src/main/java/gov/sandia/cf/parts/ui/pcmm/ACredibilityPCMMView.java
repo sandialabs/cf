@@ -29,47 +29,41 @@ import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.ACredibilitySubView;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
 /**
- * Qn abstract class to force the credibility views to implement methods needed
- * for the view managers
- * 
- * @author Didier Verstraete
+ * An abstract class to force the credibility views to implement methods needed
+ * for the view managers.
  *
+ * @author Didier Verstraete
+ * @param <C> the view controller extending PCMM view manager
  */
-public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewManager> {
+public abstract class ACredibilityPCMMView<C extends AViewController<PCMMViewManager, ?>>
+		extends ACredibilitySubView<C> {
 
-	/**
-	 * the logger
-	 */
+	/** the logger. */
 	private static final Logger logger = LoggerFactory.getLogger(ACredibilityPCMMView.class);
 
-	/**
-	 * Form role composite
-	 */
+	/** Form role composite. */
 	private Composite formRoleContainer;
 
-	/**
-	 * the label for the role description
-	 */
+	/** the label for the role description. */
 	private Label lblRole;
 
-	/**
-	 * The Role combo-box
-	 */
+	/** The Role combo-box. */
 	private ComboViewer cbxRole;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the style
+	 * The constructor.
+	 *
+	 * @param viewController the view manager
+	 * @param parent         the parent composite
+	 * @param style          the style
 	 */
-	protected ACredibilityPCMMView(PCMMViewManager viewManager, Composite parent, int style) {
-		super(viewManager, parent, style);
+	protected ACredibilityPCMMView(C viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// Composite for right items
 		Composite compositeButtonsHeaderRight = new Composite(this, SWT.NONE);
@@ -87,14 +81,15 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 
 		// label role
 		lblRole = new Label(formRoleContainer, SWT.RIGHT);
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblRole);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblRole);
 		lblRole.setText(RscTools.getString(RscConst.MSG_PCMMSELECTROLE_ROLE_LABEL));
 		GridData lblSubtitleGridData = new GridData();
 		lblRole.setLayoutData(lblSubtitleGridData);
 
 		// Get roles and the selected one
-		List<Role> roles = getViewManager().getAppManager().getService(IPCMMApplication.class).getRoles();
-		Role roleSelected = getViewManager().getCache().getCurrentPCMMRole();
+		List<Role> roles = getViewController().getViewManager().getAppManager().getService(IPCMMApplication.class)
+				.getRoles();
+		Role roleSelected = getViewController().getViewManager().getCache().getCurrentPCMMRole();
 
 		// Combo-box role
 		cbxRole = new ComboViewer(formRoleContainer, SWT.LEFT | SWT.READ_ONLY);
@@ -121,9 +116,9 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 		cbxRole.addSelectionChangedListener(this::roleSelectionChanged);
 
 		// set title label tag icone
-		if (getViewManager().getSelectedTag() != null) {
-			this.lblTitle.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_TAG,
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
+		if (getViewController().getViewManager().getSelectedTag() != null) {
+			this.lblTitle.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+					IconTheme.ICON_NAME_TAG, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
 		} else {
 			this.lblTitle.setImage(null);
 		}
@@ -131,16 +126,16 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 	}
 
 	/**
-	 * Change the role selection
-	 * 
-	 * @param element
+	 * Change the role selection.
+	 *
+	 * @param element the element
 	 */
 	private void roleSelectionChanged(SelectionChangedEvent element) {
 
 		// Initialize
 		IStructuredSelection selection = (IStructuredSelection) element.getSelection();
 		Role roleSelected = (Role) selection.getFirstElement();
-		Role roleInCache = getViewManager().getCache().getCurrentPCMMRole();
+		Role roleInCache = getViewController().getViewManager().getCache().getCurrentPCMMRole();
 
 		// Check has changed
 		boolean hasChanged = true;
@@ -151,13 +146,13 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 		if (hasChanged) {
 			try {
 				// update database
-				getViewManager().getCache().updatePCMMRole(roleSelected);
+				getViewController().getViewManager().getCache().updatePCMMRole(roleSelected);
 
 				// refresh views
-				getViewManager().refreshRole();
+				getViewController().getViewManager().fireRefreshPCMMRole();
 
 				// trigger a change to save
-				getViewManager().viewChanged();
+				getViewController().getViewManager().viewChanged();
 
 				// fire role changed in the views
 				roleChanged();
@@ -172,24 +167,24 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 	}
 
 	/**
-	 * Refresh the role
+	 * Refresh the role.
 	 */
 	public void refreshRole() {
 		// set the role selected
-		Role roleSelected = getViewManager().getCache().getCurrentPCMMRole();
+		Role roleSelected = getViewController().getViewManager().getCache().getCurrentPCMMRole();
 		if (roleSelected != null) {
 			cbxRole.setSelection(new StructuredSelection(roleSelected));
 		}
 	}
 
 	/**
-	 * Refresh the tag icon
+	 * Refresh the tag icon.
 	 */
 	public void refreshTag() {
 		// set title label tag icone
-		if (getViewManager().getSelectedTag() != null) {
-			this.lblTitle.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_TAG,
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
+		if (getViewController().getViewManager().getSelectedTag() != null) {
+			this.lblTitle.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+					IconTheme.ICON_NAME_TAG, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN), 30));
 		} else {
 			this.lblTitle.setImage(null);
 		}
@@ -197,7 +192,7 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 	}
 
 	/**
-	 * Refresh the role
+	 * Refresh the role.
 	 */
 	public void hideRoleSelection() {
 		formRoleContainer.setVisible(false);
@@ -205,7 +200,7 @@ public abstract class ACredibilityPCMMView extends ACredibilitySubView<PCMMViewM
 	}
 
 	/**
-	 * Refresh the role
+	 * Refresh the role.
 	 */
 	public void showRoleSelection() {
 		formRoleContainer.setVisible(true);

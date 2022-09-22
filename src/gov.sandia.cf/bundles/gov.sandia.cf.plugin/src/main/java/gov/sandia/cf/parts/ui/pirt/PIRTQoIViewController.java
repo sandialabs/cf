@@ -6,9 +6,10 @@ package gov.sandia.cf.parts.ui.pirt;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +17,11 @@ import gov.sandia.cf.application.global.IGlobalApplication;
 import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
+import gov.sandia.cf.model.PIRTDescriptionHeader;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.dto.configuration.PIRTQuery;
 import gov.sandia.cf.parts.constants.ViewMode;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTQueryCriteriaDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoIDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoITagDialog;
@@ -31,7 +34,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTQoIViewController implements IQoIViewController {
+public class PIRTQoIViewController extends AViewController<PIRTViewManager, PIRTQoIView> implements IQoIViewController {
 
 	/**
 	 * the logger
@@ -39,13 +42,47 @@ public class PIRTQoIViewController implements IQoIViewController {
 	private static final Logger logger = LoggerFactory.getLogger(PIRTQoIViewController.class);
 
 	/**
-	 * The view
+	 * Instantiates a new PIRT qo I view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param parent      the parent
 	 */
-	private PIRTQoIView view;
+	PIRTQoIViewController(PIRTViewManager viewManager, Composite parent) {
+		super(viewManager);
+		super.setView(new PIRTQoIView(this, parent, SWT.NONE));
 
-	PIRTQoIViewController(PIRTQoIView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+		// Refresh data and Save state
+		refresh();
+	}
+
+	/**
+	 * Reload data.
+	 */
+	void reloadData() {
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		List<QuantityOfInterest> qoiList = new ArrayList<>();
+
+		if (model != null) {
+			// set model to table header
+			getView().setTableHeaderData(model);
+
+			getView().refreshTableHeader();
+
+			// qoi list
+			qoiList = getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
+		}
+
+		// Get expanded elements
+		Object[] elements = getView().getTreeExpandedElements();
+
+		getView().refreshMainTable();
+
+		getView().setTreeData(qoiList);
+
+		// Set expanded elements
+		getView().setTreeExpandedElements(elements);
+
 	}
 
 	/**
@@ -55,32 +92,32 @@ public class PIRTQoIViewController implements IQoIViewController {
 	void addQuantityOfInterest() {
 
 		// open qoi dialog
-		QoIDialog addQoIDialog = new QoIDialog(view.getViewManager(), view.getShell(), ViewMode.CREATE);
+		QoIDialog addQoIDialog = new QoIDialog(getViewManager(), getView().getShell(), ViewMode.CREATE);
 		QuantityOfInterest newQoi = addQoIDialog.openDialog();
 
 		if (newQoi != null) {
-			newQoi.setModel(view.getViewManager().getCache().getModel());
+			newQoi.setModel(getViewManager().getCache().getModel());
 
 			try {
 				// add the qoi
-				QuantityOfInterest createdQoI = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-						.addQoI(newQoi, view.getViewManager().getCache().getUser(), view.getPIRTDescriptionHeaders());
+				QuantityOfInterest createdQoI = getViewManager().getAppManager().getService(IPIRTApplication.class)
+						.addQoI(newQoi, getViewManager().getCache().getUser(), getPIRTDescriptionHeaders());
 
 				// open the new qoi in a new tab
-				view.getViewManager().addPage(createdQoI);
-				view.getViewManager().openPage(createdQoI);
+				getViewManager().addPage(createdQoI);
+				getViewManager().openPage(createdQoI);
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 				// Refresh
-				view.refreshViewer();
+				getView().refreshViewer();
 
 			} catch (CredibilityException e) {
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
 						e.getMessage());
 				logger.error("An error occured while creating new QoI: {}\n{}", newQoi, e.getMessage(), e); //$NON-NLS-1$
 			}
@@ -108,35 +145,36 @@ public class PIRTQoIViewController implements IQoIViewController {
 			}
 
 			// confirm delete qoi
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_TITLE),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_MSG, qoi.getSymbol(), additionalInfo));
 
 			if (confirm) {
 				try {
 					// close qoi to delete page before deletion
-					view.getViewManager().close(qoi);
+					getViewManager().close(qoi);
 
 					// delete qoi
-					view.getViewManager().getAppManager().getService(IPIRTApplication.class).deleteQoI(qoi);
+					getViewManager().getAppManager().getService(IPIRTApplication.class).deleteQoI(qoi,
+							getViewManager().getCache().getUser());
 
 				} catch (CredibilityException e) {
 					// Log
 					logger.error("An error occured while deleting qoi: {}\n{}", qoi.getSymbol(), e.getMessage(), e); //$NON-NLS-1$
 
 					// Display to user
-					MessageDialog.openError(view.getShell(),
+					MessageDialog.openError(getView().getShell(),
 							RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_TITLE), e.getMessage());
 				}
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 				// Refresh
-				view.refreshViewer();
+				getView().refreshViewer();
 			}
 		}
 	}
@@ -148,8 +186,8 @@ public class PIRTQoIViewController implements IQoIViewController {
 	 */
 	void openQuantityOfInterest(Object element) {
 		if (element instanceof QuantityOfInterest) {
-			view.getViewManager().addPage((QuantityOfInterest) element);
-			view.getViewManager().openPage((QuantityOfInterest) element);
+			getViewManager().addPage((QuantityOfInterest) element);
+			getViewManager().openPage((QuantityOfInterest) element);
 		}
 	}
 
@@ -165,14 +203,14 @@ public class PIRTQoIViewController implements IQoIViewController {
 			QuantityOfInterest qoiSelected = (QuantityOfInterest) element;
 
 			// confirm tag dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_TITLE),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_MSG, qoiSelected.getSymbol()));
 
 			if (confirm) {
 				try {
 
-					QoIDialog qoiDialog = new QoIDialog(view.getViewManager(), view.getShell(), ViewMode.COPY,
+					QoIDialog qoiDialog = new QoIDialog(getViewManager(), getView().getShell(), ViewMode.COPY,
 							qoiSelected);
 					QuantityOfInterest duplicatedQoi = qoiDialog.openDialog();
 
@@ -180,28 +218,28 @@ public class PIRTQoIViewController implements IQoIViewController {
 					if (null != duplicatedQoi) {
 
 						// Duplicate qoi in database
-						view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-								.duplicateQoI(qoiSelected, duplicatedQoi, view.getViewManager().getCache().getUser());
+						getViewManager().getAppManager().getService(IPIRTApplication.class).duplicateQoI(qoiSelected,
+								duplicatedQoi, getViewManager().getCache().getUser());
 
 						// confirm tag success
-						MessageDialog.openInformation(view.getShell(),
+						MessageDialog.openInformation(getView().getShell(),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_TITLE),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_SUCCESS));
 
 						// Refresh
-						view.refresh();
+						getView().refresh();
 
 						// fire view change to save credibility file
-						view.getViewManager().viewChanged();
+						getViewManager().viewChanged();
 
 						// Refresh
-						view.refreshViewer();
+						getView().refreshViewer();
 					}
 
 				} catch (CredibilityException e) {
 					logger.error("An error occured while duplicating qoi: {}\n{}", qoiSelected, e.getMessage(), e); //$NON-NLS-1$
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_DUPLICATING),
-							e.getMessage());
+					MessageDialog.openError(getView().getShell(),
+							RscTools.getString(RscConst.ERR_QOIHOMEVIEW_DUPLICATING), e.getMessage());
 				}
 			}
 		}
@@ -212,7 +250,7 @@ public class PIRTQoIViewController implements IQoIViewController {
 	 */
 	void queryPIRT() {
 
-		PIRTQuery pirtQuery = view.getPIRTQuerySelected();
+		PIRTQuery pirtQuery = getView().getPIRTQuerySelected();
 
 		if (pirtQuery != null) {
 
@@ -220,24 +258,24 @@ public class PIRTQoIViewController implements IQoIViewController {
 
 			// open query criteria dialog (if there is criteria)
 			if (pirtQuery.getCriteriaList() != null && !pirtQuery.getCriteriaList().isEmpty()) {
-				PIRTQueryCriteriaDialog queryCriteriaDialog = new PIRTQueryCriteriaDialog(view.getViewManager(),
-						view.getShell(), pirtQuery.getCriteriaList());
+				PIRTQueryCriteriaDialog queryCriteriaDialog = new PIRTQueryCriteriaDialog(getViewManager(),
+						getView().getShell(), pirtQuery.getCriteriaList());
 				criteriaInputList = queryCriteriaDialog.openDialog();
 			}
 
 			// execute query and open result view
 			try {
-				List<Object> result = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
+				List<Object> result = getViewManager().getAppManager().getService(IPIRTApplication.class)
 						.executeQuery(pirtQuery, criteriaInputList);
 				if (result == null || result.isEmpty()) {
-					MessageDialog.openInformation(view.getShell(),
+					MessageDialog.openInformation(getView().getShell(),
 							RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DLG_QUERY_TITLE),
 							RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DLG_QUERY_EMPTY));
 				} else {
 					openQueryResult(pirtQuery, result);
 				}
 			} catch (CredibilityException e) {
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_QOIHOMEVIEW_EXECUTING_QUERY) + e.getMessage());
 				logger.error(RscTools.getString(RscConst.ERR_QOIHOMEVIEW_EXECUTING_QUERY), e);
 			}
@@ -251,9 +289,9 @@ public class PIRTQoIViewController implements IQoIViewController {
 	 * @param result
 	 */
 	void openQueryResult(PIRTQuery pirtQuery, List<Object> result) {
-		view.getViewManager().close(pirtQuery);
-		view.getViewManager().addPage(pirtQuery, result);
-		view.getViewManager().openPage(pirtQuery);
+		getViewManager().close(pirtQuery);
+		getViewManager().addPage(pirtQuery, result);
+		getViewManager().openPage(pirtQuery);
 	}
 
 	/**
@@ -265,51 +303,52 @@ public class PIRTQoIViewController implements IQoIViewController {
 	void doTagAction(Object element) {
 
 		if (element == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TITLE),
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TAGGING_QOINULL));
 		} else if (!(element instanceof QuantityOfInterest)) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
+			MessageDialog.openWarning(getView().getShell(),
+					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 					RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TAGGING_NOTQOI));
 		} else {
 
 			QuantityOfInterest qoiSelected = (QuantityOfInterest) element;
 
 			// confirm tag dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_QUESTION, qoiSelected.getSymbol()));
 
 			if (confirm) {
 				try {
 					// tag dialog
-					QoITagDialog tagQoIDialog = new QoITagDialog(view.getViewManager(), view.getShell(), qoiSelected);
+					QoITagDialog tagQoIDialog = new QoITagDialog(getViewManager(), getView().getShell(), qoiSelected);
 					String tagDescription = tagQoIDialog.openDialog();
 
 					if (tagQoIDialog.getReturnCode() == Window.OK) {
 
 						// tag qoi in database
-						view.getViewManager().getAppManager().getService(IPIRTApplication.class).tagQoI(qoiSelected,
-								tagDescription, view.getViewManager().getCache().getUser());
+						getViewManager().getAppManager().getService(IPIRTApplication.class).tagQoI(qoiSelected,
+								tagDescription, getViewManager().getCache().getUser());
 
 						// fire view change to save credibility file
-						view.getViewManager().viewChanged();
+						getViewManager().viewChanged();
 
 						// refresh view
-						view.refresh();
+						getView().refresh();
 
 						// Refresh
-						view.refreshViewer();
+						getView().refreshViewer();
 
 						// confirm tag success
-						MessageDialog.openInformation(view.getShell(),
+						MessageDialog.openInformation(getView().getShell(),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_SUCCESS));
 					}
 
 				} catch (CredibilityException e) {
 					logger.error("An error occured while tagging qoi: {}\n{}", qoiSelected, e.getMessage(), e); //$NON-NLS-1$
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING),
-							e.getMessage());
+					MessageDialog.openError(getView().getShell(),
+							RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING), e.getMessage());
 				}
 			}
 		}
@@ -324,17 +363,17 @@ public class PIRTQoIViewController implements IQoIViewController {
 	public void updateModelHeaders(Model model, String property) {
 		try {
 			// persist modifications in database
-			view.getViewManager().getAppManager().getService(IGlobalApplication.class).updateModel(model);
+			getViewManager().getAppManager().getService(IGlobalApplication.class).updateModel(model);
 
 			// fire view chnage to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 
 		} catch (CredibilityException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_QOIHOMEVIEW_UPDATING_HEADER) + property
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -346,11 +385,11 @@ public class PIRTQoIViewController implements IQoIViewController {
 	@Override
 	public void reorder(QuantityOfInterest qoi, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderQuantityOfInterest(qoi,
-				newIndex, null);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).reorderQuantityOfInterest(qoi, newIndex,
+				null);
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -360,8 +399,17 @@ public class PIRTQoIViewController implements IQoIViewController {
 	public void refreshIfChanged() {
 
 		// Refresh
-		if (view.getViewManager().isDirty()) {
-			view.refresh();
+		if (getViewManager().isDirty()) {
+			getView().refresh();
 		}
+	}
+
+	/**
+	 * @return the PIRT description headers from the PIRT configuration
+	 */
+	private List<PIRTDescriptionHeader> getPIRTDescriptionHeaders() {
+		return getViewManager().getCache().getPIRTSpecification() != null
+				? getViewManager().getCache().getPIRTSpecification().getHeaders()
+				: List.of();
 	}
 }

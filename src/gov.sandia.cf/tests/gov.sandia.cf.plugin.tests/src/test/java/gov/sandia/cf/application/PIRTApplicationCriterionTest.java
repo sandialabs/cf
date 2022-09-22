@@ -17,8 +17,6 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.swt.graphics.RGB;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +37,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the PIRT Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 	/**
@@ -121,7 +118,7 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 
 		try {
 			// delete tag
-			getAppManager().getService(IPIRTApplication.class).deleteCriterion(getted);
+			getAppManager().getService(IPIRTApplication.class).deleteCriterion(getted, null);
 
 			list = getAppManager().getService(IPIRTApplication.class).getCriterion();
 			assertEquals(0, list.size());
@@ -372,7 +369,7 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 	@Test
 	void testDeleteCriterion_ErrorCriterionNull() {
 		try {
-			getAppManager().getService(IPIRTApplication.class).deleteCriterion(null);
+			getAppManager().getService(IPIRTApplication.class).deleteCriterion(null, null);
 			fail("Deleting a criterion null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETECRITERION_CRITERIONNULL), e.getMessage());
@@ -385,7 +382,7 @@ class PIRTApplicationCriterionTest extends AbstractTestApplication {
 			Criterion criterion = new Criterion();
 			criterion.setType("type"); //$NON-NLS-1$
 			criterion.setPhenomenon(new Phenomenon());
-			getAppManager().getService(IPIRTApplication.class).deleteCriterion(criterion);
+			getAppManager().getService(IPIRTApplication.class).deleteCriterion(criterion, null);
 			fail("Deleting a criterion with an id null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETECRITERION_IDNULL), e.getMessage());

@@ -14,22 +14,29 @@ import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException;
 import gov.sandia.cf.exceptions.CredibilityServiceRuntimeException.CredibilityServiceRuntimeMessage;
 
 /**
+ * Abstract DAO JUnit test class
+ * 
  * @author Didier Verstraete
  *
- *         Abstract DAO JUnit test class
  */
 class DaoManagerTest extends AbstractTestDao {
 
 	@Test
-	void test_getRepository() {
+	void test_getRepository_PIRT() {
 		assertNotNull(getDaoManager().getRepository(ICriterionRepository.class));
 		assertNotNull(getDaoManager().getRepository(ICriterionRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IDocumentRepository.class));
-		assertNotNull(getDaoManager().getRepository(IDocumentRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IModelRepository.class));
-		assertNotNull(getDaoManager().getRepository(IModelRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getNativeQueryRepository());
-		assertNotNull(getDaoManager().getNativeQueryRepository().getEntityManager());
+		assertNotNull(getDaoManager().getRepository(IPhenomenonGroupRepository.class));
+		assertNotNull(getDaoManager().getRepository(IPhenomenonGroupRepository.class).getEntityManager());
+		assertNotNull(getDaoManager().getRepository(IPhenomenonRepository.class));
+		assertNotNull(getDaoManager().getRepository(IPhenomenonRepository.class).getEntityManager());
+		assertNotNull(getDaoManager().getRepository(IQoIHeaderRepository.class));
+		assertNotNull(getDaoManager().getRepository(IQoIHeaderRepository.class).getEntityManager());
+		assertNotNull(getDaoManager().getRepository(IQuantityOfInterestRepository.class));
+		assertNotNull(getDaoManager().getRepository(IQuantityOfInterestRepository.class).getEntityManager());
+	}
+
+	@Test
+	void test_getRepository_PCMM() {
 		assertNotNull(getDaoManager().getRepository(IPCMMAssessmentRepository.class));
 		assertNotNull(getDaoManager().getRepository(IPCMMAssessmentRepository.class).getEntityManager());
 		assertNotNull(getDaoManager().getRepository(IPCMMElementRepository.class));
@@ -42,14 +49,16 @@ class DaoManagerTest extends AbstractTestDao {
 		assertNotNull(getDaoManager().getRepository(IPCMMLevelRepository.class).getEntityManager());
 		assertNotNull(getDaoManager().getRepository(IPCMMSubelementRepository.class));
 		assertNotNull(getDaoManager().getRepository(IPCMMSubelementRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IPhenomenonGroupRepository.class));
-		assertNotNull(getDaoManager().getRepository(IPhenomenonGroupRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IPhenomenonRepository.class));
-		assertNotNull(getDaoManager().getRepository(IPhenomenonRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IQoIHeaderRepository.class));
-		assertNotNull(getDaoManager().getRepository(IQoIHeaderRepository.class).getEntityManager());
-		assertNotNull(getDaoManager().getRepository(IQuantityOfInterestRepository.class));
-		assertNotNull(getDaoManager().getRepository(IQuantityOfInterestRepository.class).getEntityManager());
+	}
+
+	@Test
+	void test_getRepository_Others() {
+		assertNotNull(getDaoManager().getRepository(IDocumentRepository.class));
+		assertNotNull(getDaoManager().getRepository(IDocumentRepository.class).getEntityManager());
+		assertNotNull(getDaoManager().getRepository(IModelRepository.class));
+		assertNotNull(getDaoManager().getRepository(IModelRepository.class).getEntityManager());
+		assertNotNull(getDaoManager().getNativeQueryRepository());
+		assertNotNull(getDaoManager().getNativeQueryRepository().getEntityManager());
 		assertNotNull(getDaoManager().getRepository(IRoleRepository.class));
 		assertNotNull(getDaoManager().getRepository(IRoleRepository.class).getEntityManager());
 		assertNotNull(getDaoManager().getRepository(ITagRepository.class));

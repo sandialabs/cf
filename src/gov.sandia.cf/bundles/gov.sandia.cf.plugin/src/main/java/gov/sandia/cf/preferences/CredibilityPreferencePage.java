@@ -62,7 +62,7 @@ public class CredibilityPreferencePage extends org.eclipse.jface.preference.Fiel
 		// add select open link browser option
 		addField(new ComboFieldEditor(PrefTools.GLOBAL_OPEN_LINK_BROWSER_OPTION_KEY,
 				RscTools.getString(RscConst.PREFS_GLOBAL_OPEN_LINK_BROWSER_OPTION),
-				OpenLinkBrowserOption.getNameValueArray(OpenLinkBrowserOption.EXERTNAL_BROWSER,
+				OpenLinkBrowserOption.getNameValueArray(OpenLinkBrowserOption.EXTERNAL_BROWSER,
 						OpenLinkBrowserOption.INTERNAL_BROWSER, OpenLinkBrowserOption.ECLIPSE_PREFERENCE),
 				getFieldEditorParent()));
 

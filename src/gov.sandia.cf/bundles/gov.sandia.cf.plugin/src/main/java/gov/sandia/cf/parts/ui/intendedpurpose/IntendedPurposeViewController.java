@@ -3,10 +3,8 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.intendedpurpose;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +12,9 @@ import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.IntendedPurpose;
 import gov.sandia.cf.parts.ui.AViewController;
-import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.StringTools;
-import gov.sandia.cf.web.WebEvent;
 
 /**
  * Intended Purpose view controller: Used to control the Intended Purpose view
@@ -26,7 +22,7 @@ import gov.sandia.cf.web.WebEvent;
  * @author Didier Verstraete
  *
  */
-public class IntendedPurposeViewController extends AViewController<IntendedPurposeViewManager>
+public class IntendedPurposeViewController extends AViewController<IntendedPurposeViewManager, IntendedPurposeView>
 		implements IIntendedPurposeViewController {
 
 	/**
@@ -35,33 +31,36 @@ public class IntendedPurposeViewController extends AViewController<IntendedPurpo
 	private static final Logger logger = LoggerFactory.getLogger(IntendedPurposeViewController.class);
 
 	/**
-	 * The Intended Purpose view
-	 */
-	private IntendedPurposeView view;
-
-	/**
 	 * The object to manage
 	 */
 	private IntendedPurpose intendedPurpose;
 
+	/**
+	 * Instantiates a new intended purpose view controller.
+	 *
+	 * @param viewMgr the view mgr
+	 */
 	IntendedPurposeViewController(IntendedPurposeViewManager viewMgr) {
 		super(viewMgr);
-		Assert.isNotNull(viewMgr);
-		this.view = new IntendedPurposeView(viewMgr, this, SWT.NONE);
+		super.setView(new IntendedPurposeView(this, SWT.NONE));
 	}
 
 	/**
-	 * @return the intended purpose reloaded
+	 * Reload data.
 	 */
-	IntendedPurpose reloadIntendedPurpose() {
+	void reloadData() {
+		logger.debug("Reload Intended Purpose view"); //$NON-NLS-1$
+
 		try {
-			intendedPurpose = view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
-					.get(view.getViewManager().getCache().getModel());
+			intendedPurpose = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
+					.get(getViewManager().getCache().getModel());
 		} catch (CredibilityException e) {
 			logger.error("An error occured while loading the intended purpose", e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE), e.getMessage());
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+					e.getMessage());
 		}
-		return intendedPurpose;
+
+		getView().refreshContent();
 	}
 
 	/**
@@ -73,6 +72,8 @@ public class IntendedPurposeViewController extends AViewController<IntendedPurpo
 
 	/**
 	 * update if the new value changed and set description, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedDescription(String value) {
 
@@ -87,6 +88,8 @@ public class IntendedPurposeViewController extends AViewController<IntendedPurpo
 
 	/**
 	 * update if the new value changed and set reference, otherwise do nothing.
+	 *
+	 * @param value the value
 	 */
 	void changedReference(String value) {
 
@@ -107,39 +110,18 @@ public class IntendedPurposeViewController extends AViewController<IntendedPurpo
 		if (intendedPurpose != null) {
 			try {
 				// update
-				intendedPurpose = view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
-						.updateIntendedPurpose(view.getViewManager().getCache().getModel(), null, intendedPurpose,
-								view.getViewManager().getCache().getUser());
+				intendedPurpose = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
+						.updateIntendedPurpose(getViewManager().getCache().getModel(), null, intendedPurpose,
+								getViewManager().getCache().getUser());
 
 				// set save state
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating the intended purpose", e); //$NON-NLS-1$
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_REPORTVIEW_TITLE),
 						e.getMessage());
 			}
 		}
 	}
-
-	@Override
-	public ICredibilityView getView() {
-		return view;
-	}
-
-	@Override
-	public Control getViewControl() {
-		return view;
-	}
-
-	@Override
-	public void quit() {
-		// do nothing
-	}
-
-	@Override
-	public void handleWebEvent(WebEvent e) {
-		// do nothing
-	}
-
 }

@@ -8,12 +8,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.constants.CFVariable;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class SystemToolsTest.
+ *
+ * @author Didier Verstraete
+ */
 class SystemToolsTest {
 
 	@Test

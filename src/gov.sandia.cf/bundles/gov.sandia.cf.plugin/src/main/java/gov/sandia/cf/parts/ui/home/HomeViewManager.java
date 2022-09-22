@@ -29,9 +29,9 @@ import gov.sandia.cf.parts.ui.MainViewManager;
  */
 public class HomeViewManager extends AViewManager implements IViewManager {
 	/**
-	 * the home view
+	 * the home view controller
 	 */
-	private HomeView homeView;
+	private HomeViewController homeViewController;
 
 	/**
 	 * the last control opened
@@ -54,6 +54,14 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 		super(parentView, parent, style);
 		this.lastControl = null;
 
+		// set layout
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.stackLayout = new StackLayout();
+		this.setLayout(stackLayout);
+
+		// load home view
+		this.homeViewController = new HomeViewController(this);
+
 		// create the view
 		createPartControl(parent);
 	}
@@ -65,17 +73,9 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 	 */
 	public void createPartControl(Composite parent) {
 
-		// set layout
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		this.stackLayout = new StackLayout();
-		this.setLayout(stackLayout);
-
-		// load home view
-		this.homeView = new HomeView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = homeView;
-		this.lastControl = homeView;
+		this.stackLayout.topControl = homeViewController.getViewControl();
+		this.lastControl = homeViewController.getViewControl();
 
 		this.layout();
 	}
@@ -97,13 +97,12 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 		// save the last opened view
 		saveLastView();
 
-		if (this.homeView == null) {
-			this.homeView = new HomeView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = homeView;
-		homeView.refresh();
+		this.stackLayout.topControl = homeViewController.getViewControl();
+
+		if (homeViewController.getView() != null) {
+			homeViewController.getView().refresh();
+		}
 
 		this.layout();
 	}
@@ -166,10 +165,10 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 
 		// create the breadcrumb
 		BreadcrumbItemParts bcItemPart = new BreadcrumbItemParts();
-		if (homeView == null) { // if the home view is being constructed
+		if (homeViewController.getView() == null) { // if the home view is being constructed
 			bcItemPart.setName(view.getItemTitle());
 		} else {
-			bcItemPart.setName(homeView.getItemTitle());
+			bcItemPart.setName(homeViewController.getView().getItemTitle());
 		}
 		bcItemPart.setListener(this);
 		breadcrumbItems.add(bcItemPart);
@@ -182,8 +181,8 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 	 */
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
-		if (item != null && item.getListener().equals(this) && homeView != null
-				&& item.getName().equals(homeView.getItemTitle())) {
+		if (item != null && item.getListener().equals(this) && homeViewController.getView() != null
+				&& item.getName().equals(homeViewController.getView().getItemTitle())) {
 			viewManager.openHome();
 		}
 	}
@@ -192,8 +191,8 @@ public class HomeViewManager extends AViewManager implements IViewManager {
 	public void reload() {
 
 		// reload views
-		if (homeView != null) {
-			homeView.reload();
+		if (homeViewController.getView() != null) {
+			homeViewController.getView().reload();
 		}
 	}
 

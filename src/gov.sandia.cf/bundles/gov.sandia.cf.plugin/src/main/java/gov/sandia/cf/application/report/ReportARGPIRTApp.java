@@ -3,10 +3,10 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application.report;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -84,7 +84,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 			return;
 		}
 
-		List<Map<String, Object>> sections = new ArrayList<>();
+		List<Map<String, Object>> sections = new LinkedList<>();
 
 		// Generate model headers
 		Model model = (Model) options.get(ExportOptions.MODEL);
@@ -102,7 +102,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		if (qois != null) {
 
 			// sort keys
-			List<QuantityOfInterest> qoiKeys = new ArrayList<>(qois.keySet());
+			List<QuantityOfInterest> qoiKeys = new LinkedList<>(qois.keySet());
 			Collections.sort(qoiKeys, Comparator.comparing(QuantityOfInterest::getGeneratedId,
 					new StringWithNumberAndNullableComparator()));
 
@@ -137,7 +137,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		}
 
 		// Items
-		List<Map<String, Object>> items = new ArrayList<>();
+		List<Map<String, Object>> items = new LinkedList<>();
 
 		// Model application
 		if (!StringUtils.isBlank(model.getApplication())) {
@@ -169,10 +169,11 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT QoI sections
-	 * 
-	 * @param The      QoI data
-	 * @param sections The sections list
+	 * Generate PIRT QoI sections.
+	 *
+	 * @param qoiData   the qoi data
+	 * @param pirtSpecs the pirt specs
+	 * @param sections  The sections list
 	 */
 	private void generateStructureSectionsPIRTQoI(Map<ExportOptions, Object> qoiData, PIRTSpecification pirtSpecs,
 			List<Map<String, Object>> sections) {
@@ -195,7 +196,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		// If selected we create the section
 		if (isSelected && tag != null) {
 			// Add sub-sections (group phenomenon)
-			List<Map<String, Object>> subsections = new ArrayList<>();
+			List<Map<String, Object>> subsections = new LinkedList<>();
 
 			// add description
 			if (!StringUtils.isEmpty(tag.getDescription())) {
@@ -210,12 +211,12 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 			generatePIRTTable(tag, pirtSpecs, subsections);
 
 			// generate PIRT Phenomenon, for each phenomenon group
-			List<PhenomenonGroup> phenomenonGroupList = tag.getPhenomenonGroupList();
-			if (phenomenonGroupList != null && !phenomenonGroupList.isEmpty()) {
+			if (tag.getPhenomenonGroupList() != null && !tag.getPhenomenonGroupList().isEmpty()) {
+				List<PhenomenonGroup> phenomenonGroupList = new LinkedList<>(tag.getPhenomenonGroupList());
 
 				// sort
-				Collections.sort(phenomenonGroupList,
-						Comparator.comparing(PhenomenonGroup::getIdLabel, new StringWithNumberAndNullableComparator()));
+				Collections.sort(phenomenonGroupList, Comparator.comparing(PhenomenonGroup::getGeneratedId,
+						new StringWithNumberAndNullableComparator()));
 
 				phenomenonGroupList
 						.forEach(phenomenonGroup -> generateStructureSectionsPIRTPhenomenonGroup(phenomenonGroup,
@@ -276,15 +277,15 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		}
 
 		// Add subsection sections (phenomenon)
-		List<Map<String, Object>> subsectionsSections = new ArrayList<>();
+		List<Map<String, Object>> subsectionsSections = new LinkedList<>();
 
 		// For each phenomenon
-		List<Phenomenon> phenomenonList = phenomenonGroup.getPhenomenonList();
-		if (phenomenonList != null && !phenomenonList.isEmpty()) {
+		if (phenomenonGroup.getPhenomenonList() != null && !phenomenonGroup.getPhenomenonList().isEmpty()) {
+			List<Phenomenon> phenomenonList = new LinkedList<>(phenomenonGroup.getPhenomenonList());
 
 			// sort
 			Collections.sort(phenomenonList,
-					Comparator.comparing(Phenomenon::getIdLabel, new StringWithNumberAndNullableComparator()));
+					Comparator.comparing(Phenomenon::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
 			for (Phenomenon phenomenon : phenomenonList) {
 				generateStructureSectionsPIRTPhenomenon(phenomenon, pirtSpecs, subsectionsSections);
@@ -314,7 +315,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		}
 
 		// Add items (parameters)
-		List<Map<String, Object>> items = new ArrayList<>();
+		List<Map<String, Object>> items = new LinkedList<>();
 
 		// PIRT Table for this Phenomenon
 		generatePIRTTableForPhenomenon(phenomenon, pirtSpecs, items);
@@ -345,7 +346,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 			Map<String, Object> parameterItems = new LinkedHashMap<>();
 			parameterItems.put(YmlARGStructure.ARG_STRUCTURE_STRING_KEY, output.toString());
 
-			List<Map<String, Object>> l1 = new ArrayList<>();
+			List<Map<String, Object>> l1 = new LinkedList<>();
 			l1.add(parameterItems);
 
 			// Add data to question section
@@ -383,7 +384,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 			List<List<Map<String, Object>>> tableRows = generatePIRTTableRows(qoi, pirtSpecs);
 
 			// add to the main map
-			List<Map<String, Object>> subsubSections = new ArrayList<>();
+			List<Map<String, Object>> subsubSections = new LinkedList<>();
 
 			Map<String, Object> tableSection = new LinkedHashMap<>();
 			tableSection.put(YmlARGStructure.ARG_STRUCTURE_N_KEY, YmlARGStructure.ARG_STRUCTURE_N_TABLE);
@@ -406,9 +407,9 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table for a particular phenomenon
-	 * 
-	 * @param qoi         the phenomenon to display
+	 * Generate PIRT Table for a particular phenomenon.
+	 *
+	 * @param phenomenon  the phenomenon
 	 * @param pirtSpecs   the PIRT specification
 	 * @param subsections the existing subsections
 	 */
@@ -423,7 +424,7 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 		List<Map<String, Object>> subsectionsHeaders = generatePIRTTableHeader(pirtSpecs.getColumns());
 
 		// generate PIRT table rows
-		List<List<Map<String, Object>>> subsectionsRows = new ArrayList<>();
+		List<List<Map<String, Object>>> subsectionsRows = new LinkedList<>();
 		subsectionsRows.add(generatePIRTTablePhenomenonRow(phenomenon, pirtSpecs));
 
 		// add to the main map
@@ -435,15 +436,16 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table Header row
-	 * 
+	 * Generate PIRT Table Header row.
+	 *
 	 * @param criterionColumns the criterion columns
+	 * @return the list
 	 */
 	private List<Map<String, Object>> generatePIRTTableHeader(List<PIRTAdequacyColumn> criterionColumns) {
 
-		List<Map<String, Object>> subsectionsHeaders = new ArrayList<>();
+		List<Map<String, Object>> subsectionsHeaders = new LinkedList<>();
 
-		List<String> columns = new ArrayList<>();
+		List<String> columns = new LinkedList<>();
 		columns.add(PIRTPhenomenaTreePhenomena.getColumnIdProperty());
 		columns.add(PIRTPhenomenaTreePhenomena.getColumnPhenomenaProperty());
 		columns.add(PIRTPhenomenaTreePhenomena.getColumnImportanceProperty());
@@ -477,29 +479,41 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table data rows
-	 * 
+	 * Generate PIRT Table data rows.
+	 *
 	 * @param qoi       the qoi to display
 	 * @param pirtSpecs the PIRT specification
+	 * @return the list
 	 */
 	private List<List<Map<String, Object>>> generatePIRTTableRows(QuantityOfInterest qoi, PIRTSpecification pirtSpecs) {
 
-		List<List<Map<String, Object>>> subsectionsRows = new ArrayList<>();
+		List<List<Map<String, Object>>> subsectionsRows = new LinkedList<>();
 
 		if (pirtSpecs == null || qoi == null || qoi.getPhenomenonGroupList() == null
 				|| qoi.getPhenomenonGroupList().isEmpty()) {
 			return subsectionsRows;
 		}
 
+		// sort
+		List<PhenomenonGroup> phenomenonGroupList = new LinkedList<>(qoi.getPhenomenonGroupList());
+		Collections.sort(phenomenonGroupList,
+				Comparator.comparing(PhenomenonGroup::getGeneratedId, new StringWithNumberAndNullableComparator()));
+
 		// For each phenomenon group
-		for (PhenomenonGroup phenomenonGroup : qoi.getPhenomenonGroupList()) {
+		for (PhenomenonGroup phenomenonGroup : phenomenonGroupList) {
 
 			// generate group row
 			subsectionsRows.add(generatePIRTTableGroupRow(phenomenonGroup, pirtSpecs));
 
 			// For each phenomenon
 			if (phenomenonGroup.getPhenomenonList() != null && !phenomenonGroup.getPhenomenonList().isEmpty()) {
-				for (Phenomenon phenomenon : phenomenonGroup.getPhenomenonList()) {
+
+				// sort
+				List<Phenomenon> phenomenonList = new LinkedList<>(phenomenonGroup.getPhenomenonList());
+				Collections.sort(phenomenonList,
+						Comparator.comparing(Phenomenon::getGeneratedId, new StringWithNumberAndNullableComparator()));
+
+				for (Phenomenon phenomenon : phenomenonList) {
 					subsectionsRows.add(generatePIRTTablePhenomenonRow(phenomenon, pirtSpecs));
 				}
 			}
@@ -510,15 +524,16 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table phenomenon group row
-	 * 
+	 * Generate PIRT Table phenomenon group row.
+	 *
 	 * @param phenomenonGroup the phenomenon Group to display
 	 * @param pirtSpecs       the PIRT specification
+	 * @return the list
 	 */
 	private List<Map<String, Object>> generatePIRTTableGroupRow(PhenomenonGroup phenomenonGroup,
 			PIRTSpecification pirtSpecs) {
 
-		List<Map<String, Object>> subsectionsRowGroup = new ArrayList<>();
+		List<Map<String, Object>> subsectionsRowGroup = new LinkedList<>();
 
 		if (phenomenonGroup == null || pirtSpecs == null) {
 			return subsectionsRowGroup;
@@ -567,15 +582,16 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table phenomenon row
-	 * 
+	 * Generate PIRT Table phenomenon row.
+	 *
 	 * @param phenomenon the phenomenon to display
 	 * @param pirtSpecs  the PIRT specification
+	 * @return the list
 	 */
 	private List<Map<String, Object>> generatePIRTTablePhenomenonRow(Phenomenon phenomenon,
 			PIRTSpecification pirtSpecs) {
 
-		List<Map<String, Object>> subsectionsRowPhenomenon = new ArrayList<>();
+		List<Map<String, Object>> subsectionsRowPhenomenon = new LinkedList<>();
 
 		if (phenomenon == null || pirtSpecs == null) {
 			return subsectionsRowPhenomenon;
@@ -630,11 +646,12 @@ public class ReportARGPIRTApp extends AApplication implements IReportARGPIRTApp 
 	}
 
 	/**
-	 * Generate PIRT Table criterion cell
-	 * 
+	 * Generate PIRT Table criterion cell.
+	 *
 	 * @param criterionFound the criterion to display
 	 * @param phenomenon     the phenomenon associated
 	 * @param pirtSpecs      the PIRT specification
+	 * @return the map
 	 */
 	private Map<String, Object> generatePIRTTableCriterionCell(Criterion criterionFound, Phenomenon phenomenon,
 			PIRTSpecification pirtSpecs) {

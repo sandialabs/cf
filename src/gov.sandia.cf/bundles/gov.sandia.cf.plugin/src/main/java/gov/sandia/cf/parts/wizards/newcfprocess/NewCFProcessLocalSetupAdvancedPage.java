@@ -5,7 +5,6 @@ package gov.sandia.cf.parts.wizards.newcfprocess;
 
 import java.io.File;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,9 +34,6 @@ import gov.sandia.cf.application.configuration.ConfigurationFileValidator;
 import gov.sandia.cf.constants.configuration.ConfigurationFileType;
 import gov.sandia.cf.model.dto.configuration.ConfigurationSchema;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.theme.ButtonTheme;
-import gov.sandia.cf.parts.theme.IconTheme;
-import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.preferences.PrefTools;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.RscConst;
@@ -203,9 +199,9 @@ public class NewCFProcessLocalSetupAdvancedPage extends WizardPage implements IN
 	/** {@inheritDoc} */
 	@Override
 	public void createControl(Composite parent) {
-		
+
 		container = new Composite(parent, SWT.NONE);
-		
+
 		GridLayout layout = new GridLayout();
 		container.setLayout(layout);
 		layout.numColumns = PartsResourceConstants.CREDCONFWIZARD_NUM_COLUMNS;
@@ -272,6 +268,11 @@ public class NewCFProcessLocalSetupAdvancedPage extends WizardPage implements IN
 
 	/**
 	 * Render schema file content.
+	 *
+	 * @param title        the title
+	 * @param defaultValue the default value
+	 * @param type         the type
+	 * @return the text
 	 */
 	private Text renderSchemaFileContent(String title, String defaultValue, ConfigurationFileType type) {
 
@@ -358,7 +359,9 @@ public class NewCFProcessLocalSetupAdvancedPage extends WizardPage implements IN
 	}
 
 	/**
-	 * Checks the schema file
+	 * Checks the schema file.
+	 *
+	 * @param type the type
 	 */
 	private void checkSchemaFile(ConfigurationFileType type) {
 		// Remove all the error messages before checking
@@ -447,7 +450,9 @@ public class NewCFProcessLocalSetupAdvancedPage extends WizardPage implements IN
 	}
 
 	/**
-	 * Update the error messages of wizard and the page complete field
+	 * Update the error messages of wizard and the page complete field.
+	 *
+	 * @param error the error
 	 */
 	private void updateMessages(boolean error) {
 

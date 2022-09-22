@@ -12,17 +12,15 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.constants.CFVariable;
 import gov.sandia.cf.exceptions.CredibilityException;
 
 /**
- * @author Didier Verstraete
+ * The Class CFVariableResolverTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class CFVariableResolverTest {
 
 	@Test

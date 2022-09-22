@@ -17,9 +17,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,25 +116,22 @@ public class PCMMProgressBarPart extends Composite {
 				mapElementLabel.put(element, label);
 
 				// set the element name depending of the composite size
-				this.addListener(SWT.Resize, new Listener() {
-					@Override
-					public void handleEvent(Event event) {
+				this.addListener(SWT.Resize, event -> {
 
-						int currentSize = (PCMMProgressBarPart.this.getSize().x - (gridLayout.marginWidth * 4));
+					int currentSize = (PCMMProgressBarPart.this.getSize().x - (gridLayout.marginWidth * 4));
 
-						// compute element name size
-						GC gc = new GC(label);
-						int x = gc.textExtent(element.getName()).x;
-						gc.dispose();
+					// compute element name size
+					GC gc = new GC(label);
+					int x = gc.textExtent(element.getName()).x;
+					gc.dispose();
 
-						if (currentSize < x + progressMinWidth) {
-							overridedElementLabel.add(element);
-						} else {
-							overridedElementLabel.remove(element);
-						}
-
-						refreshElementNames();
+					if (currentSize < x + progressMinWidth) {
+						overridedElementLabel.add(element);
+					} else {
+						overridedElementLabel.remove(element);
 					}
+
+					refreshElementNames();
 				});
 
 				// compute progress

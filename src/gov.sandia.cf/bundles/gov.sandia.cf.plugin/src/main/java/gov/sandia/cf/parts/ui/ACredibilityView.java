@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.nebula.widgets.opal.breadcrumb.Breadcrumb;
@@ -39,9 +40,9 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  *
- * @param <V> the view manager
+ * @param <C> the view controller
  */
-public abstract class ACredibilityView<V extends IViewManager> extends Composite implements ICredibilityView {
+public abstract class ACredibilityView<C extends IViewController> extends Composite implements ICredibilityView {
 
 	/**
 	 * the logger
@@ -51,7 +52,10 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	/**
 	 * The view manager
 	 */
-	private V viewManager;
+	private IViewManager viewManager;
+
+	/** The view controller. */
+	private C viewController;
 
 	/**
 	 * the breadcrumb
@@ -75,16 +79,19 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	/**
 	 * The constructor
 	 * 
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the style
+	 * @param viewController the view controller
+	 * @param parent         the parent composite
+	 * @param style          the style
 	 */
-	protected ACredibilityView(V viewManager, Composite parent, int style) {
+	protected ACredibilityView(C viewController, Composite parent, int style) {
 
 		// Initialize
 		super(parent, style);
 		logger.debug("Create view"); //$NON-NLS-1$
-		this.viewManager = viewManager;
+		Assert.isNotNull(viewController);
+		Assert.isNotNull(viewController.getViewManager());
+		this.viewController = viewController;
+		this.viewManager = viewController.getViewManager();
 
 		// Main composite (this)
 		GridLayout gridLayout = new GridLayout(1, false);
@@ -112,8 +119,8 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		lblTitle = new CLabel(headerComposite, SWT.CENTER);
 		FontTools.setTitleFont(viewManager.getRscMgr(), lblTitle);
 		lblTitle.setText(getTitle());
-		lblTitle.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		lblTitle.setForeground(
+				ColorTools.toColor(viewManager.getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData gdTitle = new GridData(SWT.CENTER, SWT.NONE, true, true);
 		lblTitle.setLayoutData(gdTitle);
 
@@ -124,7 +131,7 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		btnManageTagOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CONFIG);
 		btnManageTagOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnConfig = new ButtonTheme(viewManager.getRscMgr(), headerComposite, SWT.CENTER, btnManageTagOptions);
-		getViewManager().plugConfigurationButton(btnConfig);
+		viewManager.plugConfigurationButton(btnConfig);
 		refreshConfigurationButton();
 
 		// initialize lbl information variables
@@ -179,7 +186,7 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		btnStateOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnStateOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> {
 			if (event != null) {
-				getViewManager().getCredibilityEditor().doSave(new NullProgressMonitor());
+				viewManager.getCredibilityEditor().doSave(new NullProgressMonitor());
 				refresh();
 			}
 		});
@@ -193,14 +200,14 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	 */
 	private void refreshConfigurationButton() {
 		// TODO to implement with web
-		btnConfig.setEnabled(!getViewManager().isWebConnection());
+		btnConfig.setEnabled(!viewManager.isWebConnection());
 	}
 
 	/**
-	 * @return the view manager
+	 * @return the view controller
 	 */
-	public V getViewManager() {
-		return viewManager;
+	public C getViewController() {
+		return viewController;
 	}
 
 	/**
@@ -214,15 +221,15 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 			breadCrumb = new Breadcrumb(parent, SWT.NONE);
 			FontTools.setButtonFont(viewManager.getRscMgr(), breadCrumb);
 
-			Queue<BreadcrumbItemParts> items = getViewManager().getBreadcrumbItems(this);
+			Queue<BreadcrumbItemParts> items = viewManager.getBreadcrumbItems(this);
 
 			for (BreadcrumbItemParts itemPart : items) {
 				if (itemPart != null) {
 					final BreadcrumbItem item = new BreadcrumbItem(breadCrumb, SWT.PUSH);
 					item.setText(itemPart.getName());
-					item.setTextColor(ColorTools.toColor(getViewManager().getRscMgr(),
+					item.setTextColor(ColorTools.toColor(viewManager.getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
-					item.setTextColorSelected(ColorTools.toColor(getViewManager().getRscMgr(),
+					item.setTextColorSelected(ColorTools.toColor(viewManager.getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 					item.setWidth(item.getWidth() + 15);
 					item.setAlignment(SWT.CENTER);
@@ -301,7 +308,7 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	 */
 	public void refreshStatusComposite() {
 
-		if (getViewManager().isWebConnection()) {
+		if (viewManager.isWebConnection()) {
 			refreshWebStatus();
 		} else {
 			refreshLocalStatus();
@@ -315,25 +322,25 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	 * Refresh web status.
 	 */
 	private void refreshWebStatus() {
-		if (getViewManager().getCredibilityEditor().isConnected()) {
+		if (viewManager.getCredibilityEditor().isConnected()) {
 
 			// Connected
 			lblState.setText(RscTools.getString(RscConst.MSG_CONNECTED));
-			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_CONNECT,
+			lblState.setImage(IconTheme.getIconImage(viewManager.getRscMgr(), IconTheme.ICON_NAME_CONNECT,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
-			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setForeground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
-			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
-					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE)));
+			lblState.setBackground(
+					ColorTools.toColor(viewManager.getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLUE)));
 		} else {
 
 			// Disconnected
 			lblState.setText(RscTools.getString(RscConst.MSG_NOT_CONNECTED));
-			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_DISCONNECT,
+			lblState.setImage(IconTheme.getIconImage(viewManager.getRscMgr(), IconTheme.ICON_NAME_DISCONNECT,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK)));
-			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setForeground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK)));
-			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setBackground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
 		}
 	}
@@ -342,14 +349,14 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 	 * Refresh local status.
 	 */
 	private void refreshLocalStatus() {
-		if (!getViewManager().getCredibilityEditor().isDirty()) {
+		if (!viewManager.getCredibilityEditor().isDirty()) {
 			// Saved
 			lblState.setText(RscTools.getString(RscConst.MSG_SAVED));
-			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_UPTODATE,
+			lblState.setImage(IconTheme.getIconImage(viewManager.getRscMgr(), IconTheme.ICON_NAME_UPTODATE,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
-			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setForeground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
-			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setBackground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREEN)));
 
 			// Hide save button
@@ -357,11 +364,11 @@ public abstract class ACredibilityView<V extends IViewManager> extends Composite
 		} else {
 			// Not saved
 			lblState.setText(RscTools.getString(RscConst.MSG_NOT_SAVED));
-			lblState.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_CLOSE,
+			lblState.setImage(IconTheme.getIconImage(viewManager.getRscMgr(), IconTheme.ICON_NAME_CLOSE,
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
-			lblState.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setForeground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)));
-			lblState.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+			lblState.setBackground(ColorTools.toColor(viewManager.getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW)));
 
 			// Show save button

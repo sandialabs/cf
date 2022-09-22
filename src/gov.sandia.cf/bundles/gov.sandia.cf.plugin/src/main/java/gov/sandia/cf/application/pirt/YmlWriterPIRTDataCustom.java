@@ -201,7 +201,9 @@ public class YmlWriterPIRTDataCustom {
 	}
 
 	/**
-	 * @param phenGroupList the phenomenon groups to export
+	 * To map phenomenon group options.
+	 *
+	 * @param options the options
 	 * @return a map of PIRT Quantities of Interest headers
 	 */
 	private Map<String, Object> toMapPhenomenonGroupOptions(final Map<ExportOptions, Object> options) {
@@ -245,7 +247,9 @@ public class YmlWriterPIRTDataCustom {
 	}
 
 	/**
-	 * @param phenGroupList the phenomenon groups to export
+	 * To map phenomenon group.
+	 *
+	 * @param phenGroup the phen group
 	 * @return a map of Phenomenon Groups
 	 */
 	private Map<String, Object> toMapPhenomenonGroup(final PhenomenonGroup phenGroup) {
@@ -334,7 +338,9 @@ public class YmlWriterPIRTDataCustom {
 	}
 
 	/**
-	 * @param criterionList the criterion to export
+	 * To map criterion.
+	 *
+	 * @param criterion the criterion
 	 * @return a map of Criterion data
 	 */
 	private Map<String, Object> toMapCriterion(final Criterion criterion) {

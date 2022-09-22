@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.File;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the Global Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class GlobalApplicationTest extends AbstractTestApplication {
 
 	/**
@@ -195,16 +192,16 @@ class GlobalApplicationTest extends AbstractTestApplication {
 				.loadGlobalConfiguration();
 
 		String oldOpenLinkBrowserOpts = loadGlobalConfiguration.getOpenLinkBrowserOpts();
-		assertNotEquals(OpenLinkBrowserOption.EXERTNAL_BROWSER.name(), oldOpenLinkBrowserOpts);
+		assertNotEquals(OpenLinkBrowserOption.EXTERNAL_BROWSER.name(), oldOpenLinkBrowserOpts);
 
-		loadGlobalConfiguration.setOpenLinkBrowserOpts(OpenLinkBrowserOption.EXERTNAL_BROWSER.name());
+		loadGlobalConfiguration.setOpenLinkBrowserOpts(OpenLinkBrowserOption.EXTERNAL_BROWSER.name());
 
 		GlobalConfiguration updatedGlobalConfiguration = getAppManager().getService(IGlobalApplication.class)
 				.updateGlobalConfiguration(loadGlobalConfiguration);
 
 		assertNotNull(updatedGlobalConfiguration);
 		assertNotNull(updatedGlobalConfiguration.getId());
-		assertEquals(OpenLinkBrowserOption.EXERTNAL_BROWSER.name(),
+		assertEquals(OpenLinkBrowserOption.EXTERNAL_BROWSER.name(),
 				updatedGlobalConfiguration.getOpenLinkBrowserOpts());
 	}
 

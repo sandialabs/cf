@@ -59,6 +59,9 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 	/** PIRT OPEN QOI button event name */
 	public static final String BTN_EVENT_PIRT_QOI_OPEN_QOI = "PIRT_QOI_OPEN_QOI"; //$NON-NLS-1$
 
+	/** The Constant PIRT_VIEW_CONTROLLER. */
+	public static final String PIRT_VIEW_CONTROLLER = "PIRT_VIEW_CONTROLLER"; //$NON-NLS-1$
+
 	/**
 	 * QoI Home view id in mapQoIItem items map
 	 */
@@ -107,7 +110,9 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 		tab.setText(RscTools.getString(RscConst.MSG_QOITABBEDVIEW_QOIHOME));
 
 		if (viewManager.getCache().getPIRTSpecification() != null) {
-			tab.setControl(new PIRTQoIView(this, folder, SWT.NONE));
+			PIRTQoIViewController pirtQoIViewController = new PIRTQoIViewController(this, folder);
+			tab.setData(PIRT_VIEW_CONTROLLER, pirtQoIViewController);
+			tab.setControl(pirtQoIViewController.getViewControl());
 		}
 
 		// add the home page tab
@@ -138,11 +143,15 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 		if (qoi == null) {
 			logger.error("Can not add tab item for null qoi"); //$NON-NLS-1$
 		} else if (!containsPage(qoi)) {
+
+			PIRTPhenomenaViewController pirtQoIViewController = new PIRTPhenomenaViewController(this, folder, qoi);
+
 			// create new qoi tab
 			CTabItem tab = new CTabItem(folder, SWT.NONE | SWT.CLOSE);
 			tab.setText(getQoiTabName(qoi));
 			tab.setData(qoi);
-			tab.setControl(new PIRTPhenomenaView(this, folder, SWT.NONE, qoi));
+			tab.setData(PIRT_VIEW_CONTROLLER, pirtQoIViewController);
+			tab.setControl(pirtQoIViewController.getViewControl());
 
 			// add tab to mapQoIItem to link item to qoi id
 			addPage(qoi, tab);
@@ -163,11 +172,16 @@ public class PIRTViewManager extends AViewManager implements IViewManager {
 		} else if (result == null || result.isEmpty()) {
 			logger.error("Can not add tab item for null result"); //$NON-NLS-1$
 		} else if (!containsPage(pirtQuery)) {
+
+			PIRTQueryResultViewController<Object> queryResultViewController = new PIRTQueryResultViewController<>(this,
+					folder, pirtQuery, result);
+
 			// create new result tab
 			CTabItem tab = new CTabItem(folder, SWT.NONE | SWT.CLOSE);
 			tab.setText(getQueryResultTabName(pirtQuery));
 			tab.setData(pirtQuery);
-			tab.setControl(new PIRTQueryResultView<Object>(this, folder, pirtQuery, result, SWT.NONE));
+			tab.setData(PIRT_VIEW_CONTROLLER, queryResultViewController);
+			tab.setControl(queryResultViewController.getViewControl());
 
 			// add tab to mapQoIItem to link item to qoi id
 			addPage(pirtQuery, tab);

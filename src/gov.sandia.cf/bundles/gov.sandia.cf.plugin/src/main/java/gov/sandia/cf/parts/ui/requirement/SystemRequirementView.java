@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.requirement.ISystemRequirementApplication;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
@@ -73,16 +71,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Maxime N.
  *
  */
-public class SystemRequirementView extends ACredibilitySubView<SystemRequirementViewManager> {
+public class SystemRequirementView extends ACredibilitySubView<SystemRequirementViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(SystemRequirementView.class);
-
-	/**
-	 * Controller
-	 */
-	private SystemRequirementViewController viewCtrl;
 
 	/**
 	 * The main table composite
@@ -104,15 +97,13 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 	private Map<TreeItem, TreeEditor> deleteEditors;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param viewManager The view manager
-	 * @param style       The view style
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
+	 * @param style          The view style
 	 */
-	public SystemRequirementView(SystemRequirementViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
-
-		this.viewCtrl = new SystemRequirementViewController(this);
+	public SystemRequirementView(SystemRequirementViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		this.openEditors = new HashMap<>();
@@ -146,44 +137,7 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 	 */
 	@Override
 	public void reload() {
-
-		logger.debug("Reload System requirement view"); //$NON-NLS-1$
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		List<SystemRequirement> requirementList = new ArrayList<>();
-
-		// Get data
-		if (model != null) {
-			// Get list of system requirements
-			requirementList = this.getViewManager().getAppManager().getService(ISystemRequirementApplication.class)
-					.getRequirementRootByModel(model);
-
-			// reload system requirement spec
-			getViewManager().getCache().reloadSystemRequirementSpecification();
-		}
-
-		// Get expanded elements
-		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
-		if (treeViewer != null) {
-			initialization = false;
-			elements = treeViewer.getExpandedElements();
-		}
-
-		// Refresh the table
-		refreshMainTable();
-
-		// Set input
-		treeViewer.setInput(requirementList);
-
-		// Set expanded elements
-		if (initialization) {
-			treeViewer.expandAll();
-		} else {
-			treeViewer.setExpandedElements(elements);
-		}
-		treeViewer.refresh();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -239,8 +193,9 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		btnAddRequirementOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_ADD);
 		btnAddRequirementOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddRequirementOptions.put(ButtonTheme.OPTION_DATA, btnAddRequirementData);
-		btnAddRequirementOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.addRequirement());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
+		btnAddRequirementOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().addRequirement());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
 				btnAddRequirementOptions);
 	}
 
@@ -262,8 +217,8 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -272,14 +227,14 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.SYSTEM_REQUIREMENT);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();
@@ -349,11 +304,11 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		columnProperties.add(RscTools.getString(RscConst.MSG_SYSREQUIREMENT_STATEMENT));
 
 		// Columns - Parameters
-		if (getViewManager().getCache().getSystemRequirementSpecification() != null) {
-			for (SystemRequirementParam parameter : getViewManager().getCache().getSystemRequirementSpecification()
-					.getParameters()) {
+		if (getViewController().getViewManager().getCache().getSystemRequirementSpecification() != null) {
+			for (SystemRequirementParam parameter : getViewController().getViewManager().getCache()
+					.getSystemRequirementSpecification().getParameters()) {
 				TreeViewerColumn treeCol = TableFactory.createGenericParamTreeColumn(parameter, treeViewer,
-						new GenericTableLabelProvider(parameter, getViewManager()) {
+						new GenericTableLabelProvider(parameter, getViewController().getViewManager()) {
 
 							@Override
 							public Color getBackground(Object element) {
@@ -424,13 +379,13 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 
 		// Tree - Hint
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
@@ -460,10 +415,10 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 				if (!addEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnAddItem = TableFactory.createAddButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnAddItem = TableFactory
+							.createAddButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 					btnAddItem.addListener(SWT.Selection, event -> {
-						viewCtrl.addRequirement((SystemRequirement) element);
+						getViewController().addRequirement((SystemRequirement) element);
 						treeViewer.refresh(item);
 					});
 
@@ -501,11 +456,12 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 				if (element instanceof SystemRequirement && !openEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createOpenButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnViewItem = TableFactory
+							.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// Open - Listener
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.openAll((SystemRequirement) element));
+					btnViewItem.addListener(SWT.Selection,
+							event -> getViewController().openAll((SystemRequirement) element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -540,9 +496,9 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 				if (!viewEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createViewButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.viewElement(element));
+					ButtonTheme btnViewItem = TableFactory
+							.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnViewItem.addListener(SWT.Selection, event -> getViewController().viewElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -576,9 +532,9 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 				if (!editEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnEditItem = TableFactory.createEditButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnEditItem.addListener(SWT.Selection, event -> viewCtrl.updateElement(element));
+					ButtonTheme btnEditItem = TableFactory
+							.createEditButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnEditItem.addListener(SWT.Selection, event -> getViewController().updateElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -613,8 +569,8 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 
 					// Button
 					ButtonTheme btnDeleteItem = TableFactory
-							.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
-					btnDeleteItem.addListener(SWT.Selection, event -> viewCtrl.deleteElement(element));
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDeleteItem.addListener(SWT.Selection, event -> getViewController().deleteElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -657,7 +613,7 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		// Tree - Listener - Double Click
 		tree.addListener(SWT.MouseDoubleClick, event -> {
 			if (event.type == SWT.MouseDoubleClick) {
-				viewCtrl.viewElement(getSelected());
+				getViewController().viewElement(getSelected());
 			}
 		});
 
@@ -696,13 +652,13 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
-				new SystemRequirementDropSupport(viewCtrl, treeViewer));
+				new SystemRequirementDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 		// Dispose the table components
 		if (treeViewer != null && treeViewer.getTree() != null && !treeViewer.getTree().isDisposed()) {
 			treeViewer.getTree().removeAll();
@@ -783,13 +739,13 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 			SystemRequirement req = (SystemRequirement) element;
 
 			if (req.getParent() != null && req.getChildren() != null && !req.getChildren().isEmpty()) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			} else if (req.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
@@ -808,11 +764,11 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 		if (element instanceof SystemRequirement) {
 			SystemRequirement req = (SystemRequirement) element;
 			if (req.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 
@@ -842,5 +798,45 @@ public class SystemRequirementView extends ACredibilitySubView<SystemRequirement
 			return null;
 		}
 		return treeViewer.getIdColumnText(requirement);
+	}
+
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		if (treeViewer != null) {
+			elements = treeViewer.getExpandedElements();
+		}
+		return elements;
+	}
+
+	/**
+	 * Sets the tree expanded elements.
+	 *
+	 * @param elements the new tree expanded elements
+	 */
+	void setTreeExpandedElements(Object[] elements) {
+		if (treeViewer != null) {
+			if (elements == null || elements.length == 0) {
+				treeViewer.expandAll();
+			} else {
+				treeViewer.setExpandedElements(elements);
+			}
+			treeViewer.refresh();
+		}
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
 	}
 }

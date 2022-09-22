@@ -6,6 +6,7 @@ package gov.sandia.cf.application.requirement;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -72,8 +73,9 @@ public class YmlReaderSystemRequirementSchema implements IYmlReader<SystemRequir
 	}
 
 	/**
-	 * @param reader         the reader
-	 * @param specifications the credibility project specifications
+	 * Read.
+	 *
+	 * @param ymlSchema the yml schema
 	 * @return a CredibilityProjectSpecification class loaded with @param reader.
 	 * @throws CredibilityException if an error occurred while processing the
 	 *                              queries
@@ -109,7 +111,8 @@ public class YmlReaderSystemRequirementSchema implements IYmlReader<SystemRequir
 						specifications.setParameters(YmlReaderGenericSchema.createParameters(
 								SystemRequirementParam.class, SystemRequirementSelectValue.class,
 								SystemRequirementConstraint.class, yamlParameters));
-					} catch (InstantiationException | IllegalAccessException e) {
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						logger.warn(e.getMessage(), e);
 					}
 				} else {

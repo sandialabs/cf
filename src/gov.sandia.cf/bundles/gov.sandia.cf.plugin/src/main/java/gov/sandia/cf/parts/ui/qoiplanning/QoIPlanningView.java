@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pirt.IPIRTApplication;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QoIPlanningParam;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.User;
@@ -79,16 +77,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager> {
+public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(QoIPlanningView.class);
-
-	/**
-	 * The view controller
-	 */
-	private QoIPlanningViewController viewCtrl;
 
 	/**
 	 * The main table composite
@@ -112,13 +105,11 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 	/**
 	 * The constructor
 	 * 
-	 * @param viewManager The view manager
-	 * @param style       The view style
+	 * @param viewController The view manager
+	 * @param style          The view style
 	 */
-	public QoIPlanningView(QoIPlanningViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
-
-		this.viewCtrl = new QoIPlanningViewController(this);
+	public QoIPlanningView(QoIPlanningViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		this.viewEditors = new HashMap<>();
@@ -162,9 +153,6 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh
-		refresh();
 	}
 
 	/**
@@ -202,8 +190,10 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		btnAddQoIOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_ADD);
 		btnAddQoIOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddQoIOptions.put(ButtonTheme.OPTION_DATA, btnAddQoIData);
-		btnAddQoIOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.addQuantityOfInterest());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER, btnAddQoIOptions);
+		btnAddQoIOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().addQuantityOfInterest());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
+				btnAddQoIOptions);
 	}
 
 	/**
@@ -224,8 +214,8 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -234,14 +224,14 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.QOIPLANNING);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();
@@ -277,23 +267,24 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 		// Columns - Id
 		columnProperties.add(treeViewer.getIdColumn().getColumn().getText());
-		treeViewer.getIdColumn().setLabelProvider(new QoILabelProvider(getViewManager().getRscMgr()) {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof QuantityOfInterest) {
-					if (StringUtils.isBlank(((QuantityOfInterest) element).getGeneratedId())) {
-						((QuantityOfInterest) element).setGeneratedId(treeViewer.getIdColumnText(element));
+		treeViewer.getIdColumn()
+				.setLabelProvider(new QoILabelProvider(getViewController().getViewManager().getRscMgr()) {
+					@Override
+					public String getText(Object element) {
+						if (element instanceof QuantityOfInterest) {
+							if (StringUtils.isBlank(((QuantityOfInterest) element).getGeneratedId())) {
+								((QuantityOfInterest) element).setGeneratedId(treeViewer.getIdColumnText(element));
+							}
+							return ((QuantityOfInterest) element).getGeneratedId();
+						}
+						return treeViewer.getIdColumnText(element);
 					}
-					return ((QuantityOfInterest) element).getGeneratedId();
-				}
-				return treeViewer.getIdColumnText(element);
-			}
-		});
+				});
 
 		// Columns - Symbol
 		TreeViewerColumn symbolColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		symbolColumn.getColumn().setText(PIRTQoITableQoI.getColumnSymbolProperty());
-		symbolColumn.setLabelProvider(new QoINameLabelProvider(getViewManager().getRscMgr()));
+		symbolColumn.setLabelProvider(new QoINameLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.GENPARAM_TABLE_TEXT_COLUMN_COEFF, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnSymbolProperty());
@@ -301,23 +292,25 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		// Columns - Description
 		TreeViewerColumn descriptionColumn = new TreeViewerColumn(treeViewer, SWT.LEFT);
 		descriptionColumn.getColumn().setText(PIRTQoITableQoI.getColumnDescriptionProperty());
-		descriptionColumn.setLabelProvider(new QoIDescriptionLabelProvider(getViewManager().getRscMgr()));
+		descriptionColumn
+				.setLabelProvider(new QoIDescriptionLabelProvider(getViewController().getViewManager().getRscMgr()));
 		treeViewerLayout
 				.addColumnData(new ColumnWeightData(PartsResourceConstants.GENPARAM_TABLE_TEXT_COLUMN_COEFF, true));
 		columnProperties.add(PIRTQoITableQoI.getColumnDescriptionProperty());
 
 		// Columns - Parameters
-		if (getViewManager().getCache().getQoIPlanningSpecification() != null) {
-			for (QoIPlanningParam parameter : getViewManager().getCache().getQoIPlanningSpecification()
-					.getParameters()) {
+		if (getViewController().getViewManager().getCache().getQoIPlanningSpecification() != null) {
+			for (QoIPlanningParam parameter : getViewController().getViewManager().getCache()
+					.getQoIPlanningSpecification().getParameters()) {
 				TreeViewerColumn treeCol = TableFactory.createGenericParamTreeColumn(parameter, treeViewer,
-						new GenericTableLabelProvider(parameter, getViewManager()) {
+						new GenericTableLabelProvider(parameter, getViewController().getViewManager()) {
 
 							private QoILabelProvider labelprovider;
 
 							private QoILabelProvider getPIRTQoILabelProvider() {
 								if (labelprovider == null) {
-									labelprovider = new QoILabelProvider(getViewManager().getRscMgr());
+									labelprovider = new QoILabelProvider(
+											getViewController().getViewManager().getRscMgr());
 								}
 								return labelprovider;
 							}
@@ -391,13 +384,13 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 		// Tree - Hint
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
@@ -429,9 +422,9 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 				if (!viewEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createViewButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.viewElement(element));
+					ButtonTheme btnViewItem = TableFactory
+							.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnViewItem.addListener(SWT.Selection, event -> getViewController().viewElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -467,9 +460,9 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 						&& null == ((QuantityOfInterest) element).getTagDate()) {
 
 					// Button
-					ButtonTheme btnEditItem = TableFactory.createEditButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnEditItem.addListener(SWT.Selection, event -> viewCtrl.updateElement(element));
+					ButtonTheme btnEditItem = TableFactory
+							.createEditButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnEditItem.addListener(SWT.Selection, event -> getViewController().updateElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -507,8 +500,9 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 					// Button
 					ButtonTheme btnDuplicateQoI = TableFactory
-							.createCopyButtonColumnAction(getViewManager().getRscMgr(), cell);
-					btnDuplicateQoI.addListener(SWT.Selection, event -> viewCtrl.duplicateQuantityOfInterest(element));
+							.createCopyButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDuplicateQoI.addListener(SWT.Selection,
+							event -> getViewController().duplicateQuantityOfInterest(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -545,9 +539,9 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 						&& null == ((QuantityOfInterest) element).getTagDate()) {
 
 					// Button
-					ButtonTheme btnTagQoI = TableFactory.createTagButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnTagQoI.addListener(SWT.Selection, event -> viewCtrl.doTagAction(element));
+					ButtonTheme btnTagQoI = TableFactory
+							.createTagButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnTagQoI.addListener(SWT.Selection, event -> getViewController().doTagAction(element));
 					btnTagQoI.setToolTipText(RscTools.getString(RscConst.MSG_PHENOMENAVIEW_BTN_ADDTAG_TOOLTIP));
 
 					// Draw cell
@@ -584,7 +578,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 					QuantityOfInterest qoi = (QuantityOfInterest) element;
 
 					// Get current user
-					User currentUser = getViewManager().getCache().getUser();
+					User currentUser = getViewController().getViewManager().getCache().getUser();
 
 					// Can delete - not tagged
 					canDelete = (null == qoi.getTagDate());
@@ -604,8 +598,8 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 					// Button
 					ButtonTheme btnDeleteItem = TableFactory
-							.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
-					btnDeleteItem.addListener(SWT.Selection, event -> viewCtrl.deleteElement(element));
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDeleteItem.addListener(SWT.Selection, event -> getViewController().deleteElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -651,7 +645,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 		// Tree - Listener - Double Click
 		tree.addListener(SWT.MouseDoubleClick, event -> {
 			if (event.type == SWT.MouseDoubleClick) {
-				viewCtrl.viewElement(getSelected());
+				getViewController().viewElement(getSelected());
 			}
 		});
 
@@ -689,7 +683,8 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
-		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new QoIDropSupport(viewCtrl, treeViewer));
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
+				new QoIDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
@@ -714,7 +709,7 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 		// Dispose the table components
 		if (treeViewer != null && treeViewer.getTree() != null && !treeViewer.getTree().isDisposed()) {
 			treeViewer.getTree().removeAll();
@@ -754,43 +749,45 @@ public class QoIPlanningView extends ACredibilitySubView<QoIPlanningViewManager>
 	 */
 	@Override
 	public void reload() {
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		List<QuantityOfInterest> qoiList = new ArrayList<>();
+		getViewController().reloadData();
+	}
 
-		// Get data
-		if (model != null) {
-			// Get list of qoi
-			qoiList = this.getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
-
-			// reload qoi planning specification
-			getViewManager().getCache().reloadQoIPlanningSpecification();
-		}
-
-		/**
-		 * Refresh the table
-		 */
-		// Get expanded elements
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
 		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
 		if (treeViewer != null) {
-			initialization = false;
 			elements = treeViewer.getExpandedElements();
 		}
+		return elements;
+	}
 
-		// Refresh the table
-		refreshMainTable();
-
-		// Set input
-		treeViewer.setInput(qoiList);
-
-		// Set expanded elements
-		if (initialization) {
+	/**
+	 * Sets the expanded elements.
+	 *
+	 * @param elements the new expanded elements
+	 */
+	void setExpandedElements(Object[] elements) {
+		if (elements == null || elements.length == 0) {
 			treeViewer.expandAll();
 		} else {
 			treeViewer.setExpandedElements(elements);
 		}
 		treeViewer.refresh();
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
 	}
 
 	/**

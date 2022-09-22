@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.decision.IDecisionApplication;
-import gov.sandia.cf.application.global.IGlobalApplication;
 import gov.sandia.cf.application.intendedpurpose.IIntendedPurposeApp;
 import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
@@ -75,7 +74,6 @@ import gov.sandia.cf.tools.HelpTools;
 import gov.sandia.cf.tools.HelpTools.ContextualHelpId;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
-import gov.sandia.cf.web.services.global.IModelWebClient;
 
 /**
  * Home view of the credibility framework plugin
@@ -83,7 +81,7 @@ import gov.sandia.cf.web.services.global.IModelWebClient;
  * @author Didier Verstraete
  *
  */
-public class HomeView extends ACredibilityView<HomeViewManager> {
+public class HomeView extends ACredibilityView<HomeViewController> {
 
 	/**
 	 * the logger
@@ -120,8 +118,6 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 	private CustomProgressBar pcmmProgressBar;
 	/** The btn open PCMM. */
 	private ButtonTheme btnOpenPCMM;
-	/** The pcmm chart mouse listener. */
-	private ChartMouseListener pcmmChartMouseListener;
 
 	/**
 	 * Global components.
@@ -138,14 +134,14 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 	/**
 	 * Constructor
 	 * 
-	 * @param viewManager the view manager
-	 * @param style       the SWT style
+	 * @param viewController the view manager
+	 * @param style          the SWT style
 	 */
-	public HomeView(HomeViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
+	public HomeView(HomeViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// render home page
-		renderPage(viewManager);
+		renderPage(getParent());
 	}
 
 	/**
@@ -196,68 +192,73 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		GridData gdLblTitleCommunicate = new GridData(SWT.CENTER, SWT.CENTER, true, false);
 		lblTitlePlanning.setLayoutData(gdLblTitleCommunicate);
 		lblTitlePlanning.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PLANNING));
-		lblTitlePlanning.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_PLANNING,
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY), 25));
+		lblTitlePlanning.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+				IconTheme.ICON_NAME_PLANNING, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY), 25));
 		lblTitlePlanning.setMargins(PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN, PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), lblTitlePlanning);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), lblTitlePlanning);
 
 		/////////////////////////////
 		// Planning tiles
 		/////////////////////////////
-		Launcher launcher = LauncherFactory.createLauncher(getViewManager(), planningComposite);
+		Launcher launcher = LauncherFactory.createLauncher(getViewController().getViewManager(), planningComposite);
 		planningTiles = new EnumMap<>(CFFeature.class);
 
 		// Intended Purpose
 		LauncherTile tileIntendedPurpose = launcher.addTile(
 				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_INTENDEDPURPOSE),
 				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_INTENDEDPURPOSE), IconTheme.ICON_NAME_OPEN,
-				ColorTools.toColor(getViewManager().getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PINK)),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PINK)),
 				false);
 		planningTiles.put(CFFeature.INTENDED_PURPOSE, tileIntendedPurpose);
-		getViewManager().plugIntendedPurposeButton(tileIntendedPurpose);
+		getViewController().getViewManager().plugIntendedPurposeButton(tileIntendedPurpose);
 
 		// System Requirements
 		LauncherTile tileRequirement = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_REQUIREMENT),
 				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_REQUIREMENT), IconTheme.ICON_NAME_OPEN,
-				ColorTools.toColor(getViewManager().getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED)),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED)),
 				false);
 		planningTiles.put(CFFeature.SYSTEM_REQUIREMENTS, tileRequirement);
-		getViewManager().plugSystemRequirementsButton(tileRequirement);
+		getViewController().getViewManager().plugSystemRequirementsButton(tileRequirement);
 
 		// QoI Planner
 		LauncherTile qoiPlannerTile = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_QOIPLANNER),
 				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_QOIPLANNER), IconTheme.ICON_NAME_OPEN,
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BROWN_LIGHT)),
 				false);
 		planningTiles.put(CFFeature.QOI_PLANNER, qoiPlannerTile);
-		getViewManager().plugQoIPlanningButton(qoiPlannerTile);
+		getViewController().getViewManager().plugQoIPlanningButton(qoiPlannerTile);
 
 		// Uncertainty
 		LauncherTile tileUncertainty = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_UNCERTAINTY),
-				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_UNCERTAINTY), IconTheme.ICON_NAME_OPEN, ColorTools.toColor(
-						getViewManager().getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW)),
+				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_UNCERTAINTY), IconTheme.ICON_NAME_OPEN,
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW)),
 				false);
 		planningTiles.put(CFFeature.UNCERTAINTY, tileUncertainty);
-		getViewManager().plugUncertaintyButton(tileUncertainty);
+		getViewController().getViewManager().plugUncertaintyButton(tileUncertainty);
 
 		// PCMM Planning
 		LauncherTile pcmmPlanningTile = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMMPLANNING),
-				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMMPLANNING), IconTheme.ICON_NAME_OPEN, ColorTools
-						.toColor(getViewManager().getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PURPLE)),
+				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMMPLANNING), IconTheme.ICON_NAME_OPEN,
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PURPLE)),
 				false);
 		planningTiles.put(CFFeature.PCMM_PLANNING, pcmmPlanningTile);
-		getViewManager().plugPCMMPlanningButton(pcmmPlanningTile);
+		getViewController().getViewManager().plugPCMMPlanningButton(pcmmPlanningTile);
 
 		// Analyst Decision
 		LauncherTile decisionTile = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DECISION),
-				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DECISION), IconTheme.ICON_NAME_OPEN, ColorTools.toColor(
-						getViewManager().getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE)),
+				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DECISION), IconTheme.ICON_NAME_OPEN,
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_ORANGE)),
 				false);
 		planningTiles.put(CFFeature.DECISION, decisionTile);
-		getViewManager().plugDecisionButton(decisionTile);
+		getViewController().getViewManager().plugDecisionButton(decisionTile);
 
 		/////////////////////////////
 		// Composite for buttons
@@ -287,7 +288,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		refOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		refOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_REFERENCE);
 		refOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		ButtonTheme btnRef = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsLeft, SWT.PUSH, refOptions);
+		ButtonTheme btnRef = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsLeft,
+				SWT.PUSH, refOptions);
 		btnRef.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMM_REF));
 		// Hide Planning reference button
 		btnRef.setVisible(false);
@@ -297,8 +299,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		helpOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		helpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		helpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
-				helpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight,
+				SWT.PUSH, helpOptions);
 
 		// Planning - Button Help - Listener
 		btnHelp.addListener(SWT.Selection, event -> HelpTools.openContextualHelp());
@@ -351,20 +353,20 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		GridData gdLblTitlePIRT = new GridData(SWT.CENTER, SWT.CENTER, true, false, 2, 1);
 		lblTitlePirt.setLayoutData(gdLblTitlePIRT);
 		lblTitlePirt.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PIRT));
-		lblTitlePirt.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_PIRT,
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
+		lblTitlePirt.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+				IconTheme.ICON_NAME_PIRT, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				PartsResourceConstants.HOME_VIEW_CARD_ICON_SIZE));
 		lblTitlePirt.setMargins(PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN, PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), lblTitlePirt);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), lblTitlePirt);
 
 		// PIRT- Description text
 		StyledText txtPIRT = new StyledText(pirtComposite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 		txtPIRT.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_TXT_PIRT));
 		GridData txtPIRTGridData = new GridData(SWT.CENTER, SWT.NONE, true, false);
 		txtPIRT.setLayoutData(txtPIRTGridData);
-		FontTools.setImportantTextFont(getViewManager().getRscMgr(), txtPIRT);
+		FontTools.setImportantTextFont(getViewController().getViewManager().getRscMgr(), txtPIRT);
 
 		/////////////////////////////
 		// PIRT - Composite for PIRT Table sample
@@ -403,14 +405,15 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		CLabel labelQoI = new CLabel(pirtCompositeProgress, SWT.NONE);
 		labelQoI.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		labelQoI.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_PIRT_PROGRESS_LABEL));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), labelQoI);
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), labelQoI);
 
 		// PIRT- rounded badge
-		Color background = ColorTools.toColor(getViewManager().getRscMgr(),
+		Color background = ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				PartsResourceConstants.INACTIVE_BADGET_COLOR);
 		Color foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 		pirtProgressBadget = new CLabel(pirtCompositeProgress, SWT.NONE);
-		Image decoratedIcon = ImageBadget.createBadget(getViewManager().getRscMgr(), 0, background, foreground);
+		Image decoratedIcon = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(), 0, background,
+				foreground);
 		pirtProgressBadget.setImage(decoratedIcon);
 
 		/////////////////////////////
@@ -441,7 +444,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		refOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		refOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_REFERENCE);
 		refOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		ButtonTheme btnRef = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsLeft, SWT.PUSH, refOptions);
+		ButtonTheme btnRef = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsLeft,
+				SWT.PUSH, refOptions);
 
 		// PIRT- Button Reference - Listener
 		btnRef.addListener(SWT.Selection, event -> {
@@ -465,10 +469,11 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		options.put(ButtonTheme.OPTION_OUTLINE, false);
 		options.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_OPEN);
 		options.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		btnOpenPIRT = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH, options);
+		btnOpenPIRT = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
+				options);
 
 		// PIRT- Button Open - Plug
-		getViewManager().plugPIRTButton(btnOpenPIRT);
+		getViewController().getViewManager().plugPIRTButton(btnOpenPIRT);
 
 		// PIRT- Button Help - Create
 		Map<String, Object> helpOptions = new HashMap<>();
@@ -476,8 +481,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		helpOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		helpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		helpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
-				helpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight,
+				SWT.PUSH, helpOptions);
 
 		// PIRT - Button Help - Listener
 		btnHelp.addListener(SWT.Selection, event -> HelpTools.openContextualHelp());
@@ -527,20 +532,20 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		GridData gdLblTitlePcmm = new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1);
 		lblTitlePcmm.setLayoutData(gdLblTitlePcmm);
 		lblTitlePcmm.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMM));
-		lblTitlePcmm.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(), IconTheme.ICON_NAME_PCMM,
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
+		lblTitlePcmm.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
+				IconTheme.ICON_NAME_PCMM, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY),
 				PartsResourceConstants.HOME_VIEW_CARD_ICON_SIZE));
 		lblTitlePcmm.setMargins(PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN, PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), lblTitlePcmm);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), lblTitlePcmm);
 
 		// PCMM - Description text
 		StyledText txtPCMM = new StyledText(pcmmComposite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY);
 		txtPCMM.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_TXT_PCMM));
 		GridData txtPCMMGridData = new GridData(SWT.CENTER, SWT.NONE, true, false);
 		txtPCMM.setLayoutData(txtPCMMGridData);
-		FontTools.setImportantTextFont(getViewManager().getRscMgr(), txtPCMM);
+		FontTools.setImportantTextFont(getViewController().getViewManager().getRscMgr(), txtPCMM);
 
 		/////////////////////////////
 		// PCMM - Composite for Description chart
@@ -565,15 +570,15 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		CLabel labelPcmmErrors = new CLabel(pcmmCompositeErrors, SWT.NONE);
 		labelPcmmErrors.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		labelPcmmErrors.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_PCMM_ERROR_LABEL));
-		labelPcmmErrors.setImage(FormFactory.getErrorIcon(getViewManager().getRscMgr()));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), labelPcmmErrors);
+		labelPcmmErrors.setImage(FormFactory.getErrorIcon(getViewController().getViewManager().getRscMgr()));
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), labelPcmmErrors);
 
-		Color backgroundError = ColorTools.toColor(getViewManager().getRscMgr(),
+		Color backgroundError = ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				PartsResourceConstants.INACTIVE_BADGET_COLOR);
 		Color foregroundError = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 		pcmmErrorsBadge = new CLabel(pcmmCompositeErrors, SWT.NONE);
-		Image decoratedErrorIcon = ImageBadget.createBadget(getViewManager().getRscMgr(), 0, backgroundError,
-				foregroundError);
+		Image decoratedErrorIcon = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(), 0,
+				backgroundError, foregroundError);
 		pcmmErrorsBadge.setImage(decoratedErrorIcon);
 
 		pcmmCompositeWarnings = new Composite(pcmmComposite, SWT.NONE);
@@ -585,14 +590,15 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		CLabel labelPcmmWarnings = new CLabel(pcmmCompositeWarnings, SWT.NONE);
 		labelPcmmWarnings.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		labelPcmmWarnings.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_PCMM_WARNING_LABEL));
-		labelPcmmWarnings.setImage(FormFactory.getWarningIcon(getViewManager().getRscMgr()));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), labelPcmmWarnings);
+		labelPcmmWarnings.setImage(FormFactory.getWarningIcon(getViewController().getViewManager().getRscMgr()));
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), labelPcmmWarnings);
 
-		Color background = ColorTools.toColor(getViewManager().getRscMgr(),
+		Color background = ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				PartsResourceConstants.INACTIVE_BADGET_COLOR);
 		Color foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 		pcmmWarningsBadge = new CLabel(pcmmCompositeWarnings, SWT.NONE);
-		Image decoratedIcon = ImageBadget.createBadget(getViewManager().getRscMgr(), 0, background, foreground);
+		Image decoratedIcon = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(), 0, background,
+				foreground);
 		pcmmWarningsBadge.setImage(decoratedIcon);
 
 		/////////////////////////////////
@@ -605,10 +611,11 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		CLabel labelPcmmProgress = new CLabel(pcmmCompositeProgress, SWT.NONE);
 		labelPcmmProgress.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		labelPcmmProgress.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_PCMM_PROGRESS_LABEL));
-		FontTools.setButtonFont(getViewManager().getRscMgr(), labelPcmmProgress);
+		FontTools.setButtonFont(getViewController().getViewManager().getRscMgr(), labelPcmmProgress);
 
 		// PCMM - progress bar
-		pcmmProgressBar = new CustomProgressBar(getViewManager(), pcmmCompositeProgress, SWT.NONE, false);
+		pcmmProgressBar = new CustomProgressBar(getViewController().getViewManager(), pcmmCompositeProgress, SWT.NONE,
+				false);
 
 		/////////////////////////////
 		// PCMM - Composite for buttons
@@ -638,8 +645,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		refOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		refOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_REFERENCE);
 		refOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		ButtonTheme btnRefPCMM = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsLeft, SWT.PUSH,
-				refOptions);
+		ButtonTheme btnRefPCMM = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsLeft,
+				SWT.PUSH, refOptions);
 
 		// PCMM- Button Reference - Listener
 		btnRefPCMM.addListener(SWT.Selection, event -> {
@@ -663,18 +670,19 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		options.put(ButtonTheme.OPTION_OUTLINE, false);
 		options.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_OPEN);
 		options.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		btnOpenPCMM = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH, options);
+		btnOpenPCMM = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
+				options);
 
 		// PCMM - Button Open - Plug
-		getViewManager().plugPCMMButton(btnOpenPCMM);
+		getViewController().getViewManager().plugPCMMButton(btnOpenPCMM);
 
 		// PCMM- Button Help - Create
 		Map<String, Object> helpOptions = new HashMap<>();
 		helpOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		helpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		helpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
-				helpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight,
+				SWT.PUSH, helpOptions);
 
 		// PCMM- Button Help - Listener
 		btnHelp.addListener(SWT.Selection, event -> HelpTools.openContextualHelp());
@@ -722,51 +730,51 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		GridData gdLblTitleCommunicate = new GridData(SWT.CENTER, SWT.CENTER, true, false);
 		lblTitleCommunicate.setLayoutData(gdLblTitleCommunicate);
 		lblTitleCommunicate.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_COMMUNICATE));
-		lblTitleCommunicate.setImage(IconTheme.getIconImage(getViewManager().getRscMgr(),
+		lblTitleCommunicate.setImage(IconTheme.getIconImage(getViewController().getViewManager().getRscMgr(),
 				IconTheme.ICON_NAME_COMMUNICATE, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY), 25));
 		lblTitleCommunicate.setMargins(PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN, PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN,
 				PartsResourceConstants.HOME_VIEW_CARD_TITLE_MARGIN);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), lblTitleCommunicate);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), lblTitleCommunicate);
 
 		/////////////////////////////
 		// Communicate tiles
 		/////////////////////////////
-		Launcher launcher = LauncherFactory.createLauncher(getViewManager(), communicateComposite);
+		Launcher launcher = LauncherFactory.createLauncher(getViewController().getViewManager(), communicateComposite);
 		communicateTiles = new EnumMap<>(CFFeature.class);
 
 		// Generate Report
 		LauncherTile genReportTile = launcher.addTile(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_GEN_REPORT),
 				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_GEN_REPORT), IconTheme.ICON_NAME_GEN_CF_REPORT,
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GRAY_DARK)),
 				false);
 		communicateTiles.put(CFFeature.GEN_REPORT, genReportTile);
-		getViewManager().plugReportButton(genReportTile);
+		getViewController().getViewManager().plugReportButton(genReportTile);
 
 		// fake tiles - see #431
 		LauncherTile fakeTile1 = launcher.addTile("Fake 1", RscTools.empty(), IconTheme.ICON_NAME_EMPTY, //$NON-NLS-1$
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)),
 				false);
 		fakeTile1.setGrayedInactive(false);
 		LauncherTile fakeTile2 = launcher.addTile("Fake 2", RscTools.empty(), IconTheme.ICON_NAME_EMPTY, //$NON-NLS-1$
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)),
 				false);
 		fakeTile2.setGrayedInactive(false);
 		LauncherTile fakeTile3 = launcher.addTile("Fake 3", RscTools.empty(), IconTheme.ICON_NAME_EMPTY, //$NON-NLS-1$
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)),
 				false);
 		fakeTile3.setGrayedInactive(false);
 		LauncherTile fakeTile4 = launcher.addTile("Fake 4", RscTools.empty(), IconTheme.ICON_NAME_EMPTY, //$NON-NLS-1$
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)),
 				false);
 		fakeTile4.setGrayedInactive(false);
 		LauncherTile fakeTile5 = launcher.addTile("Fake 5", RscTools.empty(), IconTheme.ICON_NAME_EMPTY, //$NON-NLS-1$
-				ColorTools.toColor(getViewManager().getRscMgr(),
+				ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)),
 				false);
 		fakeTile5.setGrayedInactive(false);
@@ -799,7 +807,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		refOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		refOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_REFERENCE);
 		refOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
-		ButtonTheme btnRef = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsLeft, SWT.PUSH, refOptions);
+		ButtonTheme btnRef = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsLeft,
+				SWT.PUSH, refOptions);
 		btnRef.setText(RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_PCMM_REF));
 		// Hide communicate reference button
 		btnRef.setVisible(false);
@@ -809,8 +818,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		helpOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		helpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		helpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsRight, SWT.PUSH,
-				helpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsRight,
+				SWT.PUSH, helpOptions);
 
 		// Communicate - Button Help - Listener
 		btnHelp.addListener(SWT.Selection, event -> HelpTools.openContextualHelp());
@@ -896,34 +905,38 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		 * Search for feature activation
 		 */
 		// Intended Purpose
-		boolean isIntendedPurposeAvailable = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
-				.isIntendedPurposeEnabled(getViewManager().getCache().getModel());
+		boolean isIntendedPurposeAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IIntendedPurposeApp.class)
+				.isIntendedPurposeEnabled(getViewController().getViewManager().getCache().getModel());
 		planningTiles.get(CFFeature.INTENDED_PURPOSE).setEnabled(isIntendedPurposeAvailable);
 
 		// System Requirements
-		boolean isRequirementAvailable = getViewManager().getAppManager()
+		boolean isRequirementAvailable = getViewController().getViewManager().getAppManager()
 				.getService(ISystemRequirementApplication.class)
-				.isRequirementEnabled(getViewManager().getCache().getModel());
+				.isRequirementEnabled(getViewController().getViewManager().getCache().getModel());
 		planningTiles.get(CFFeature.SYSTEM_REQUIREMENTS).setEnabled(isRequirementAvailable);
 
 		// QoI Planner
-		boolean isQoIPlannerAvailable = getViewManager().getAppManager().getService(IQoIPlanningApplication.class)
-				.isQoIPlanningEnabled(getViewManager().getCache().getModel());
+		boolean isQoIPlannerAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IQoIPlanningApplication.class)
+				.isQoIPlanningEnabled(getViewController().getViewManager().getCache().getModel());
 		planningTiles.get(CFFeature.QOI_PLANNER).setEnabled(isQoIPlannerAvailable);
 
 		// Uncertainty
-		boolean isUncertaintyAvailable = getViewManager().getAppManager().getService(IUncertaintyApplication.class)
-				.isUncertaintyEnabled(getViewManager().getCache().getModel());
+		boolean isUncertaintyAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IUncertaintyApplication.class)
+				.isUncertaintyEnabled(getViewController().getViewManager().getCache().getModel());
 		planningTiles.get(CFFeature.UNCERTAINTY).setEnabled(isUncertaintyAvailable);
 
 		// PCMM Planning
-		boolean isPCMMPlanningAvailable = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-				.isPCMMPlanningEnabled();
+		boolean isPCMMPlanningAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IPCMMPlanningApplication.class).isPCMMPlanningEnabled();
 		planningTiles.get(CFFeature.PCMM_PLANNING).setEnabled(isPCMMPlanningAvailable);
 
 		// Decision
-		boolean isDecisionAvailable = getViewManager().getAppManager().getService(IDecisionApplication.class)
-				.isDecisionEnabled(getViewManager().getCache().getModel());
+		boolean isDecisionAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IDecisionApplication.class)
+				.isDecisionEnabled(getViewController().getViewManager().getCache().getModel());
 		planningTiles.get(CFFeature.DECISION).setEnabled(isDecisionAvailable);
 
 	}
@@ -933,39 +946,43 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 	 */
 	private void reloadPIRTCard() {
 
-		Model model = getViewManager().getCache().getModel();
+		Model model = getViewController().getViewManager().getCache().getModel();
 
-		btnOpenPIRT.setEnabled(getViewManager().getAppManager().getService(IPIRTApplication.class).isPIRTEnabled());
+		btnOpenPIRT.setEnabled(getViewController().getViewManager().getAppManager().getService(IPIRTApplication.class)
+				.isPIRTEnabled());
 
 		// compute PIRT progress
 		int nbQoI = 0;
-		List<QuantityOfInterest> qoIList = getViewManager().getAppManager().getService(IPIRTApplication.class)
-				.getRootQoI(model);
+		List<QuantityOfInterest> qoIList = getViewController().getViewManager().getAppManager()
+				.getService(IPIRTApplication.class).getRootQoI(model);
 		if (qoIList != null) {
 			nbQoI = qoIList.size();
 		}
-		Color background = ColorTools.toColor(getViewManager().getRscMgr(),
+		Color background = ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				(nbQoI > 0) ? PartsResourceConstants.ACTIVE_BADGET_COLOR
 						: PartsResourceConstants.INACTIVE_BADGET_COLOR);
 		Color foreground = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
-		Image decoratedIcon = ImageBadget.createBadget(getViewManager().getRscMgr(), nbQoI, background, foreground);
+		Image decoratedIcon = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(), nbQoI,
+				background, foreground);
 		pirtProgressBadget.setImage(decoratedIcon);
 
 		// reload PIRT sample table
 		ViewTools.disposeChildren(pirtSampleComposite);
 
 		TableViewerHideSelection pirtTable = PIRTComponentFactory.createPIRTTable(pirtSampleComposite,
-				getViewManager().getCache().getPIRTSpecification(), getViewManager());
+				getViewController().getViewManager().getCache().getPIRTSpecification(),
+				getViewController().getViewManager());
 
 		// make the PIRT table clickable - redirect listener to SWT.Selection
 		if (pirtTable != null) {
 			pirtTable.getTable().addListener(SWT.MouseUp,
 					event -> pirtTable.getTable().notifyListeners(SWT.Selection, event));
 
-			CursorTools.setCursor(getViewManager().getRscMgr(), pirtTable.getTable(), SWT.CURSOR_HAND);
+			CursorTools.setCursor(getViewController().getViewManager().getRscMgr(), pirtTable.getTable(),
+					SWT.CURSOR_HAND);
 
 			// plug table to PIRT action
-			getViewManager().plugPIRTButton(pirtTable.getTable());
+			getViewController().getViewManager().plugPIRTButton(pirtTable.getTable());
 		}
 
 		pirtSampleComposite.layout();
@@ -979,8 +996,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		// enable/disable
 		boolean isPCMMAvailable = false;
 		try {
-			isPCMMAvailable = getViewManager().getAppManager().getService(IPCMMApplication.class)
-					.isPCMMEnabled(getViewManager().getCache().getModel());
+			isPCMMAvailable = getViewController().getViewManager().getAppManager().getService(IPCMMApplication.class)
+					.isPCMMEnabled(getViewController().getViewManager().getCache().getModel());
 		} catch (CredibilityException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -990,14 +1007,15 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 			ViewTools.disposeChildren(pcmmChartComposite);
 
 			// Parameters
-			PCMMSpecification pcmmConfiguration = getViewManager().getCache().getPCMMSpecification();
+			PCMMSpecification pcmmConfiguration = getViewController().getViewManager().getCache()
+					.getPCMMSpecification();
 
 			// PCMM - Description chart
 			ChartComposite pcmmWheel = PCMMChartFactory.createPCMMWheelChart(pcmmChartComposite, pcmmConfiguration);
 
 			// make the chart clickable - redirect listener to SWT.Selection
-			CursorTools.setCursor(getViewManager().getRscMgr(), pcmmWheel, SWT.CURSOR_HAND);
-			pcmmChartMouseListener = new ChartMouseListener() {
+			CursorTools.setCursor(getViewController().getViewManager().getRscMgr(), pcmmWheel, SWT.CURSOR_HAND);
+			ChartMouseListener pcmmChartMouseListener = new ChartMouseListener() {
 				@Override
 				public void chartMouseClicked(final ChartMouseEvent event) {
 					pcmmChartComposite.notifyListeners(SWT.Selection, new Event());
@@ -1011,7 +1029,7 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 			pcmmWheel.addChartMouseListener(pcmmChartMouseListener);
 
 			// make the chart clickable - plug to the action
-			getViewManager().plugPCMMButton(pcmmChartComposite);
+			getViewController().getViewManager().plugPCMMButton(pcmmChartComposite);
 
 			// display the table or not depending of the height of the card
 			refreshPCMMWheel(pcmmWheel);
@@ -1028,20 +1046,20 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 
 		// Compute PCMM errors
 		try {
-			int nbPcmmErrors = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+			int nbPcmmErrors = getViewController().getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 					.findEvidenceErrorNotification();
 			Color bgErrorsBadge = (nbPcmmErrors > 0)
-					? ColorTools.toColor(getViewManager().getRscMgr(),
+					? ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_RED))
-					: ColorTools.toColor(getViewManager().getRscMgr(),
+					: ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			Color fgErrorsBadge = (nbPcmmErrors > 0)
-					? ColorTools.toColor(getViewManager().getRscMgr(),
+					? ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE))
-					: ColorTools.toColor(getViewManager().getRscMgr(),
+					: ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
-			Image errorsBadget = ImageBadget.createBadget(getViewManager().getRscMgr(), nbPcmmErrors, bgErrorsBadge,
-					fgErrorsBadge);
+			Image errorsBadget = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(),
+					nbPcmmErrors, bgErrorsBadge, fgErrorsBadge);
 			pcmmErrorsBadge.setImage(errorsBadget);
 
 			// Toggle visibility
@@ -1063,16 +1081,16 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		// Compute PCMM warning
 		int nbPcmmWarnings;
 		try {
-			nbPcmmWarnings = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
+			nbPcmmWarnings = getViewController().getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
 					.findEvidenceWarningNotification();
 			Color bgWarningBadge = (nbPcmmWarnings > 0)
-					? ColorTools.toColor(getViewManager().getRscMgr(),
+					? ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_YELLOW))
-					: ColorTools.toColor(getViewManager().getRscMgr(),
+					: ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			Color fgWarningBadge = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
-			Image warningBadget = ImageBadget.createBadget(getViewManager().getRscMgr(), nbPcmmWarnings, bgWarningBadge,
-					fgWarningBadge);
+			Image warningBadget = ImageBadget.createBadget(getViewController().getViewManager().getRscMgr(),
+					nbPcmmWarnings, bgWarningBadge, fgWarningBadge);
 			pcmmWarningsBadge.setImage(warningBadget);
 
 			// Toggle visibility
@@ -1091,14 +1109,14 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		}
 
 		// compute PCMM progress
-		Model model = getViewManager().getCache().getModel();
-		PCMMSpecification configuration = getViewManager().getCache().getPCMMSpecification();
+		Model model = getViewController().getViewManager().getCache().getModel();
+		PCMMSpecification configuration = getViewController().getViewManager().getCache().getPCMMSpecification();
 		int currentPCMMProgress = 0;
-		int maxPCMMProgress = getViewManager().getAppManager().getService(IPCMMApplication.class)
+		int maxPCMMProgress = getViewController().getViewManager().getAppManager().getService(IPCMMApplication.class)
 				.computeMaxProgress(configuration);
 		try {
-			currentPCMMProgress = getViewManager().getAppManager().getService(IPCMMApplication.class)
-					.computeCurrentProgress(model, configuration);
+			currentPCMMProgress = getViewController().getViewManager().getAppManager()
+					.getService(IPCMMApplication.class).computeCurrentProgress(model, configuration);
 		} catch (CredibilityException e) {
 			logger.error(RscTools.getString(RscConst.ERR_HOMEVIEW_PCMM_PROGRESS_ERROR), e);
 			MessageDialog.openError(getShell(), RscTools.getString(RscConst.MSG_HOMEVIEW_DIALOG_TITLE),
@@ -1154,8 +1172,8 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		 * Search for feature activation
 		 */
 		// ARG Report
-		boolean isReportingAvailable = getViewManager().getAppManager().getService(IReportARGExecutionApp.class)
-				.isEnabled();
+		boolean isReportingAvailable = getViewController().getViewManager().getAppManager()
+				.getService(IReportARGExecutionApp.class).isEnabled();
 		communicateTiles.get(CFFeature.GEN_REPORT).setEnabled(isReportingAvailable);
 	}
 
@@ -1190,19 +1208,20 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		}
 
 		// label created with version
-		if (!getViewManager().isWebConnection()
+		if (!getViewController().getViewManager().isWebConnection()
 				&& Boolean.TRUE.equals(PrefTools.getGlobalDisplayVersionOriginNumber())) {
 			Label lblVersionOrigin = new Label(compositeButtonsRight, SWT.RIGHT);
-			lblVersionOrigin.setText(RscTools.getString(RscConst.MSG_VERSION_ORIGIN_LABEL, getVersionOrigin()));
+			lblVersionOrigin.setText(
+					RscTools.getString(RscConst.MSG_VERSION_ORIGIN_LABEL, getViewController().getVersionOrigin()));
 		}
 
 		// CONCURRENCY SUPPORT: delete project button
-		if (getViewManager().isWebConnection()) {
-			ButtonTheme deleteButton = FormFactory.createButton(getViewManager().getRscMgr(), compositeButtonsRight,
-					null, RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DELETE_PROJECT), IconTheme.ICON_NAME_DELETE,
-					IconTheme.ICON_SIZE_SMALL, ConstantTheme.COLOR_NAME_RED);
-			deleteButton.addListener(SWT.Selection, e -> deleteProject());
-			deleteButton.setEnabled(getViewManager().getCredibilityEditor().isConnected());
+		if (getViewController().getViewManager().isWebConnection()) {
+			ButtonTheme deleteButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+					compositeButtonsRight, null, RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DELETE_PROJECT),
+					IconTheme.ICON_NAME_DELETE, IconTheme.ICON_SIZE_SMALL, ConstantTheme.COLOR_NAME_RED);
+			deleteButton.addListener(SWT.Selection, e -> getViewController().deleteProject());
+			deleteButton.setEnabled(getViewController().getViewManager().getCredibilityEditor().isConnected());
 		}
 
 		compositeFooter.requestLayout();
@@ -1224,56 +1243,4 @@ public class HomeView extends ACredibilityView<HomeViewManager> {
 		return RscTools.getString(RscConst.MSG_CREDIBILITYVIEW_ITEMTITLE);
 	}
 
-	/**
-	 * WEB only.
-	 * 
-	 * Delete project.
-	 */
-	private void deleteProject() {
-		boolean toDelete = displayQuestion(RscTools.getString(RscConst.MSG_HOMEVIEW_DIALOG_TITLE),
-				RscTools.getString(RscConst.MSG_HOMEVIEW_BTN_DELETE_PROJECT_CONFIRM));
-
-		if (toDelete) {
-			try {
-				// delete remote project
-				getViewManager().getWebClient().getService(IModelWebClient.class)
-						.delete(getViewManager().getCache().getCFClientSetup().getModelId());
-
-				// delete and close current CF file
-				getViewManager().getCredibilityEditor().deleteAndCloseFile();
-
-			} catch (CredibilityException e) {
-				logger.error("An error occurs during model deletion", e); //$NON-NLS-1$
-				MessageDialog.openError(getShell(), RscTools.getString(RscConst.MSG_HOMEVIEW_DIALOG_TITLE),
-						e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * @return the origin (creation) version of the cf file.
-	 */
-	private String getVersionOrigin() {
-
-		// Load or create model
-		Model model = null;
-
-		// Retrieve the model's version
-		try {
-			model = getViewManager().getAppManager().getService(IGlobalApplication.class).loadModel();
-		} catch (CredibilityException e) {
-			logger.error("An error occured while retrieving the version number: {}", e.getMessage(), e); //$NON-NLS-1$
-		}
-
-		// get version origin
-		String versionOrigin = RscTools.getString(RscConst.MSG_VERSION_ORIGIN_UNDEFINED);
-		if (model != null) {
-			versionOrigin = RscTools.getString(RscConst.MSG_VERSION_ORIGIN_BEFORE_0_2_0);
-			if (null != model.getVersionOrigin()) {
-				versionOrigin = model.getVersionOrigin();
-			}
-		}
-
-		return versionOrigin;
-	}
 }

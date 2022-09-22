@@ -218,7 +218,9 @@ public class PIRTPhenomenonGroupDialog extends GenericCFSmallDialog<PIRTViewMana
 	protected void createButtonsForButtonBar(Composite parent) {
 		String okButtonName = (buttonName != null && !buttonName.isEmpty()) ? buttonName : IDialogConstants.OK_LABEL;
 		createButton(parent, IDialogConstants.OK_ID, okButtonName, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		if (!ViewMode.VIEW.equals(this.mode)) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
 	}
 
 	/**

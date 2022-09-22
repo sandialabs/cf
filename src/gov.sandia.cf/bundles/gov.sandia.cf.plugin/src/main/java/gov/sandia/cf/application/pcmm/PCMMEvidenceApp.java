@@ -184,11 +184,11 @@ public class PCMMEvidenceApp extends AApplication implements IPCMMEvidenceApp {
 	}
 
 	/**
-	 * Check if the evidence does not already exist
-	 * 
+	 * Check if the evidence does not already exist.
+	 *
 	 * @param url      the url to find
 	 * @param section  the section to find
-	 * @param evidence the assessable to check
+	 * @param assessable the assessable
 	 * @throws CredibilityException if the evidence already exists
 	 */
 	private void checkEvidenceURLWithSamePathInAssessable(String url, String section, IAssessable assessable)
@@ -205,11 +205,11 @@ public class PCMMEvidenceApp extends AApplication implements IPCMMEvidenceApp {
 	}
 
 	/**
-	 * Check if the evidence does not already exist
-	 * 
+	 * Check if the evidence does not already exist.
+	 *
 	 * @param filepath the filepath to find
 	 * @param section  the section to find
-	 * @param evidence the assessable to check
+	 * @param assessable the assessable
 	 * @throws CredibilityException if the evidence already exists
 	 */
 	private void checkEvidenceFilepathWithSamePathInAssessable(String filepath, String section, IAssessable assessable)

@@ -208,7 +208,7 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteDecision(Decision decision) throws CredibilityException {
+	public void deleteDecision(Decision decision, User user) throws CredibilityException {
 
 		if (decision == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_DECISION_DELETE_DECISIONROW_NULL));
@@ -219,9 +219,18 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 		// Refresh Decision
 		getAppMgr().getDaoManager().getRepository(IDecisionRepository.class).refresh(decision);
 
+		Decision parent = decision.getParent();
+		Model model = decision.getModel();
+
 		// Remove Decision - children and values associated will be automatically
 		// deleted by cascade REMOVE
 		getAppMgr().getDaoManager().getRepository(IDecisionRepository.class).delete(decision);
+
+		if (parent == null) {
+			reorderAll(model, user);
+		} else {
+			reorderDecisionAtSameLevel(decision, user);
+		}
 	}
 
 	/**
@@ -405,18 +414,18 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 
 		// set id for parents
 		int index = 1;
-		for (Decision uncertainty : sameGroupDecisionList) {
+		for (Decision decision : sameGroupDecisionList) {
 
 			String elementId = IDTools.generateAlphabeticId(index - 1);
-			uncertainty.setGeneratedId(elementId);
-			updateDecision(uncertainty, user);
+			decision.setGeneratedId(elementId);
+			updateDecision(decision, user);
 
-			if (uncertainty.getChildren() != null && !uncertainty.getChildren().isEmpty()) {
-				reorderDecisionAtSameLevel(uncertainty.getChildren().get(0), user);
+			if (decision.getChildren() != null && !decision.getChildren().isEmpty()) {
+				reorderDecisionAtSameLevel(decision.getChildren().get(0), user);
 			}
 
 			// refresh group
-			refresh(uncertainty);
+			refresh(decision);
 
 			index++;
 		}
@@ -442,32 +451,8 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 		sameGroupDecisionList
 				.sort(Comparator.comparing(Decision::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
-		// set id for parents
-		int index = 1;
-		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (Decision uncertainty : sameGroupDecisionList) {
-
-			String elementId = null;
-			if (toMove.getParent() == null) {
-				elementId = IDTools.generateAlphabeticId(index - 1);
-			} else if (toMove.getLevel() % 2 == 0) {
-				elementId = groupIdLabel + IDTools.generateAlphabeticId(index - 1);
-			} else {
-				elementId = groupIdLabel + index;
-			}
-
-			uncertainty.setGeneratedId(elementId);
-			updateDecision(uncertainty, user);
-
-			if (uncertainty.getChildren() != null && !uncertainty.getChildren().isEmpty()) {
-				reorderDecisionAtSameLevel(uncertainty.getChildren().get(0), user);
-			}
-
-			index++;
-		}
-
-		// refresh group
-		refresh(toMove.getParent());
+		// apply reordering
+		applyReorderFromList(sameGroupDecisionList, toMove, user);
 	}
 
 	/**
@@ -499,10 +484,25 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 		// reorder
 		List<Decision> reorderedList = IDTools.reorderList(sameGroupDecisionList, toMove, newIndex);
 
+		// apply reordering
+		applyReorderFromList(reorderedList, toMove, user);
+	}
+
+	/**
+	 * Reorder list elements.
+	 *
+	 * @param orderedList the ordered list
+	 * @param toMove      the to move
+	 * @param user        the user
+	 * @throws CredibilityException the credibility exception
+	 */
+	private void applyReorderFromList(List<Decision> orderedList, Decision toMove, User user)
+			throws CredibilityException {
+
 		// set id for parents
 		int index = 1;
 		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (Decision uncertainty : reorderedList) {
+		for (Decision decision : orderedList) {
 			String elementId = null;
 			if (toMove.getParent() == null) {
 				elementId = IDTools.generateAlphabeticId(index - 1);
@@ -511,8 +511,13 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 			} else {
 				elementId = groupIdLabel + index;
 			}
-			uncertainty.setGeneratedId(elementId);
-			updateDecision(uncertainty, user);
+			decision.setGeneratedId(elementId);
+			updateDecision(decision, user);
+
+			if (decision.getChildren() != null && !decision.getChildren().isEmpty()) {
+				reorderDecisionAtSameLevel(decision.getChildren().get(0), user);
+			}
+
 			index++;
 		}
 

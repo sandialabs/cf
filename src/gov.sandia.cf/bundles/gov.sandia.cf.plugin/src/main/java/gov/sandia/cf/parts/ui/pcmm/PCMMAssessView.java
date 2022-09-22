@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -40,12 +39,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMApplication;
-import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
-import gov.sandia.cf.constants.CredibilityFrameworkConstants;
-import gov.sandia.cf.exceptions.CredibilityException;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
@@ -80,32 +74,11 @@ import gov.sandia.cf.tools.StringTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMAssessView extends ACredibilityPCMMView {
+public class PCMMAssessView extends ACredibilityPCMMView<PCMMAssessViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PCMMAssessView.class);
-
-	/**
-	 * Controller
-	 */
-	private PCMMAssessViewController viewCtrl;
-
-	/**
-	 * PCMMSpecification
-	 */
-	private PCMMSpecification pcmmConfiguration;
-
-	/**
-	 * the pcmm element
-	 */
-	private PCMMElement elementSelected;
-
-	/**
-	 * the pcmm elements
-	 */
-	private List<PCMMElement> elements;
-
 	/**
 	 * the viewer
 	 */
@@ -122,17 +95,6 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	private PCMMLevelAchievedEditingSupport levelAchievedEditingSupport;
 
 	/**
-	 * the map of pcmm assessments indexed by element for the current user and role
-	 */
-	private Map<PCMMElement, PCMMAssessment> assessmentsByElt;
-
-	/**
-	 * the map of pcmm assessments indexed by subelement for the current user and
-	 * role
-	 */
-	private Map<PCMMSubelement, PCMMAssessment> assessmentsBySubelt;
-
-	/**
 	 * Table buttons
 	 */
 	private Map<TreeItem, TreeEditor> openEvidenceEditors;
@@ -145,35 +107,22 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	private Composite compositeTable;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param parentView      the parent composite
-	 * @param elementSelected the pcmm element selected
-	 * @param style           the view style
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
+	 * @param style          the view style
 	 */
-	public PCMMAssessView(PCMMViewManager parentView, PCMMElement elementSelected, int style) {
-		// Call super
-		super(parentView, parentView, style);
-
-		this.viewCtrl = new PCMMAssessViewController(this);
+	public PCMMAssessView(PCMMAssessViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Initialize
-		elements = new ArrayList<>();
-		assessmentsByElt = new HashMap<>();
-		assessmentsBySubelt = new HashMap<>();
 		columnProperties = new ArrayList<>();
 
 		deleteEditors = new HashMap<>();
 
-		// Set PCMM configuration
-		pcmmConfiguration = getViewManager().getPCMMConfiguration();
-
 		// Make sure you dispose these buttons when viewer input changes
 		openEvidenceEditors = new HashMap<>();
 		assessEditors = new HashMap<>();
-
-		// Set element
-		this.elementSelected = elementSelected;
 
 		// create the view
 		renderPage();
@@ -203,18 +152,17 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	private void renderPage() {
 		logger.debug("Creating PCMM view components"); //$NON-NLS-1$
 
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		// Header
 		setTitle(RscTools.getString(RscConst.MSG_PCMMASSESS_TITLE,
-				this.elementSelected != null ? this.elementSelected.getName() : RscTools.empty()));
+				elementSelected != null ? elementSelected.getName() : RscTools.empty()));
 
 		// Render tree
 		renderMainTableComposite();
 
 		// Render footer
 		renderFooter();
-
-		// Refresh
-		refresh();
 
 		// Layout
 		this.layout();
@@ -235,7 +183,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 
 		if (treeViewerPCMM != null) {
 			// dispose the table components
@@ -270,6 +218,10 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	 */
 	private void renderMainTable() {
 
+		// get data
+		PCMMSpecification pcmmConfiguration = getViewController().getPcmmConfiguration();
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		// Tree - Create
 		treeViewerPCMM = new TreeViewerHideSelection(compositeTable,
 				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
@@ -282,7 +234,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		final AutoResizeViewerLayout viewerLayout = new AutoResizeViewerLayout(treeViewerPCMM);
 		treeViewerPCMM.getTree().setLayout(viewerLayout);
 		gdViewerPCMM.heightHint = treeViewerPCMM.getTree().getItemHeight();
-		gdViewerPCMM.widthHint = getViewManager().getSize().x
+		gdViewerPCMM.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Columns - Id
@@ -290,10 +242,11 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
+				if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode()) && element instanceof PCMMElement) {
 					// Get PCMMElement abbreviation
 					return ((PCMMElement) element).getAbbreviation();
-				} else if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode()) && element instanceof PCMMSubelement) {
+				} else if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())
+						&& element instanceof PCMMSubelement) {
 					// Get PCMMSubelement Code
 					return ((PCMMSubelement) element).getCode();
 				}
@@ -321,12 +274,12 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		elementColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
+				if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())) {
 					if (element instanceof PCMMElement) {
 						// Get PCMMElement Name
 						return ((PCMMElement) element).getName();
 					}
-				} else if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+				} else if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 					if (element instanceof PCMMElement) {
 						// Get PCMMElement Name
 						return ((PCMMElement) element).getName();
@@ -358,12 +311,12 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		levelAchievedColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
+				if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode()) && element instanceof PCMMElement) {
 					// Get PCMMElement
 					PCMMElement elt = (PCMMElement) element;
 
 					// Get Assessment
-					PCMMAssessment assessment = getAssessmentsByElt().get(elt);
+					PCMMAssessment assessment = getViewController().getAssessmentsByElt().get(elt);
 
 					// Get PCMMLevel name
 					String levelSelectedName = RscTools.empty();
@@ -374,12 +327,13 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 						}
 					}
 					return levelSelectedName;
-				} else if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode()) && element instanceof PCMMSubelement) {
+				} else if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())
+						&& element instanceof PCMMSubelement) {
 					// Get PCMMSubelement
 					PCMMSubelement subelt = (PCMMSubelement) element;
 
 					// Get PCMMAssessment
-					PCMMAssessment assessment = getAssessmentsBySubelt().get(subelt);
+					PCMMAssessment assessment = getViewController().getAssessmentsBySubelt().get(subelt);
 
 					// Get PCMMLevel name
 					String levelSelectedName = RscTools.empty();
@@ -397,14 +351,14 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 			@Override
 			public Color getBackground(Object element) {
 				if (pcmmConfiguration != null) {
-					if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+					if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 						if (element instanceof PCMMSubelement) {
 							PCMMSubelement subelt = (PCMMSubelement) element;
-							if (!isFromCurrentPCMMElement(subelt.getElement())) {
+							if (!getViewController().isFromCurrentPCMMElement(subelt.getElement())) {
 								return getTreeCellBackgroud(element);
 							} else {
 								// Get PCMMAssessment
-								PCMMAssessment assessment = getAssessmentsBySubelt().get(subelt);
+								PCMMAssessment assessment = getViewController().getAssessmentsBySubelt().get(subelt);
 								if (assessment != null && assessment.getLevel() != null
 										&& assessment.getLevel().getCode() != null
 										&& pcmmConfiguration.getLevelColors() != null && pcmmConfiguration
@@ -416,12 +370,12 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 						} else {
 							return getTreeCellBackgroud(element);
 						}
-					} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
+					} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())) {
 						// PCMM Element in gray
 						if (element instanceof PCMMElement) {
 
 							// retrieve the pcmm assessment for this element
-							PCMMAssessment assessment = getAssessmentsByElt().get(element);
+							PCMMAssessment assessment = getViewController().getAssessmentsByElt().get(element);
 							if (assessment != null && assessment.getLevel() != null
 									&& assessment.getLevel().getCode() != null
 									&& pcmmConfiguration.getLevelColors() != null && pcmmConfiguration.getLevelColors()
@@ -451,7 +405,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 			@Override
 			public String getText(Object element) {
 				// Check mode
-				if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())
+				if (PCMMMode.DEFAULT.equals(getViewController().getViewManager().getPCMMConfiguration().getMode())
 						&& element instanceof PCMMSubelement) {
 					// Initialize filters
 					Map<EntityFilter, Object> filters = new HashMap<>();
@@ -460,11 +414,11 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					filters.put(PCMMEvidence.Filter.SUBELEMENT, element);
 
 					// Tag
-					filters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
+					filters.put(PCMMEvidence.Filter.TAG, getViewController().getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
-							.getEvidenceBy(filters);
+					List<PCMMEvidence> evidences = getViewController().getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceBy(filters);
 
 					// Get number of PCMMEvidence
 					int nbEvidence = evidences.size();
@@ -474,7 +428,8 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 								: RscTools.getString(RscConst.MSG_PCMMASSESS_TABLE_COL_EVID_LABEL_PLUR, nbEvidence);
 					}
 					return value;
-				} else if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())
+				} else if (PCMMMode.SIMPLIFIED
+						.equals(getViewController().getViewManager().getPCMMConfiguration().getMode())
 						&& element instanceof PCMMElement) {
 					// Initialize filters
 					Map<EntityFilter, Object> filters = new HashMap<>();
@@ -483,11 +438,11 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					filters.put(PCMMEvidence.Filter.ELEMENT, element);
 
 					// Tag
-					filters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
+					filters.put(PCMMEvidence.Filter.TAG, getViewController().getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
-							.getEvidenceBy(filters);
+					List<PCMMEvidence> evidences = getViewController().getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceBy(filters);
 
 					// Get number of PCMMEvidence
 					int nbEvidence = evidences.size();
@@ -526,9 +481,10 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 				Object element = cell.getElement();
 
 				// Button Open for PCMM Assess
-				if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == pcmmConfiguration.getMode()
-						&& (elementSelected.getSubElementList().contains(element)))
-						|| (element instanceof PCMMElement && PCMMMode.SIMPLIFIED == pcmmConfiguration.getMode())
+				if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == getViewController().getPCMMMode()
+						&& elementSelected != null && (elementSelected.getSubElementList().contains(element)))
+						|| (element instanceof PCMMElement && elementSelected != null
+								&& PCMMMode.SIMPLIFIED == getViewController().getPCMMMode())
 								&& elementSelected.equals(element)) {
 
 					// Open editor
@@ -537,24 +493,26 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 
 						// button
 						ButtonTheme btnOpenItem = TableFactory
-								.createOpenButtonColumnAction(getViewManager().getRscMgr(), cell);
+								.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 						// Listener
 						btnOpenItem.addListener(SWT.Selection, event -> {
 							/**
 							 * Check the PCMM mode
 							 */
-							if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())
+							if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())
 									&& element instanceof PCMMSubelement) {
 								// get the selected sub-element to associate the subelement with
-								PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(getViewManager(),
-										getShell(), (PCMMSubelement) element, getViewManager().getSelectedTag());
+								PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(
+										getViewController().getViewManager(), getShell(), (PCMMSubelement) element,
+										getViewController().getViewManager().getSelectedTag());
 								evidencesDialog.openDialog();
-							} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())
+							} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())
 									&& element instanceof PCMMElement) {
 								// get the selected element to associate the element with
-								PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(getViewManager(),
-										getShell(), (PCMMElement) element, getViewManager().getSelectedTag());
+								PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(
+										getViewController().getViewManager(), getShell(), (PCMMElement) element,
+										getViewController().getViewManager().getSelectedTag());
 								evidencesDialog.openDialog();
 							}
 						});
@@ -593,20 +551,21 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		commentColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
+				if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode()) && element instanceof PCMMElement) {
 					// retrieve pcmm assessment from subelement
 					PCMMElement elt = (PCMMElement) element;
-					PCMMAssessment assessment = getAssessmentsByElt().get(elt);
+					PCMMAssessment assessment = getViewController().getAssessmentsByElt().get(elt);
 
 					return assessment != null && assessment.getComment() != null
 							? StringTools.clearHtml(assessment.getComment(), true)
 							: RscTools.empty();
-				} else if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode()) && element instanceof PCMMSubelement) {
+				} else if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())
+						&& element instanceof PCMMSubelement) {
 					// Get PCMMSubelement
 					PCMMSubelement subelt = (PCMMSubelement) element;
 
 					// Get PCMMAssessment
-					PCMMAssessment assessment = getAssessmentsBySubelt().get(subelt);
+					PCMMAssessment assessment = getViewController().getAssessmentsBySubelt().get(subelt);
 
 					// Get Comment
 					return assessment != null && assessment.getComment() != null
@@ -631,7 +590,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		columnProperties.add(commentColumn.getColumn().getText());
 
 		// Tree - Column - Action Assess PCMMAssessView
-		if (!getViewManager().isTagMode()) {
+		if (!getViewController().getViewManager().isTagMode()) {
 			TreeViewerColumn actionAssessColumn = new TreeViewerColumn(treeViewerPCMM, SWT.CENTER);
 			actionAssessColumn.getColumn().setText(RscTools.getString(RscConst.MSG_PCMMASSESS_BTN_ASSESS));
 			actionAssessColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -642,9 +601,10 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					Object element = cell.getElement();
 
 					// Button Assess for PCMM Assess
-					if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == pcmmConfiguration.getMode()
-							&& (elementSelected.getSubElementList().contains(element)))
-							|| (element instanceof PCMMElement && PCMMMode.SIMPLIFIED == pcmmConfiguration.getMode())
+					if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == getViewController().getPCMMMode()
+							&& elementSelected != null && (elementSelected.getSubElementList().contains(element)))
+							|| (element instanceof PCMMElement && elementSelected != null
+									&& PCMMMode.SIMPLIFIED == getViewController().getPCMMMode())
 									&& elementSelected.equals(element)) {
 
 						// Assess editor
@@ -655,10 +615,12 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 							// Initialize
 							int iconSize = PartsResourceConstants.TABLE_ACTION_ICON_SIZE;
 							String iconName = IconTheme.ICON_NAME_ADD;
-							if (element instanceof PCMMElement && null != getAssessmentsByElt().get(element)) {
+							if (element instanceof PCMMElement
+									&& null != getViewController().getAssessmentsByElt().get(element)) {
 								iconName = IconTheme.ICON_NAME_EDIT;
 							}
-							if (element instanceof PCMMSubelement && null != getAssessmentsBySubelt().get(element)) {
+							if (element instanceof PCMMSubelement
+									&& null != getViewController().getAssessmentsBySubelt().get(element)) {
 								iconName = IconTheme.ICON_NAME_EDIT;
 							}
 
@@ -669,7 +631,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 							btnAssessItemOptions.put(ButtonTheme.OPTION_ICON, iconName);
 							btnAssessItemOptions.put(ButtonTheme.OPTION_ICON_SIZE, iconSize);
 							btnAssessItemOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
-							ButtonTheme assessButton = new ButtonTheme(getViewManager().getRscMgr(),
+							ButtonTheme assessButton = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
 									(Composite) cell.getViewerRow().getControl(), SWT.CENTER, btnAssessItemOptions);
 
 							// Listener
@@ -677,14 +639,14 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 								/**
 								 * Check the PCMM mode
 								 */
-								if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())
+								if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())
 										&& element instanceof PCMMSubelement) {
 									// get the selected sub-element to associate the element with
-									viewCtrl.openAssessDialog((PCMMSubelement) element);
-								} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())
+									getViewController().openAssessDialog((PCMMSubelement) element);
+								} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())
 										&& element instanceof PCMMElement) {
 									// get the selected element to associate the element with
-									viewCtrl.openAssessDialog((PCMMElement) element);
+									getViewController().openAssessDialog((PCMMElement) element);
 								}
 							});
 
@@ -718,7 +680,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 			columnProperties.add(RscTools.getString(RscConst.MSG_PCMMASSESS_BTN_ASSESS));
 		}
 		// Tree - Column - Action Delete PCMMAssessView
-		if (!getViewManager().isTagMode()) {
+		if (!getViewController().getViewManager().isTagMode()) {
 			TreeViewerColumn actionDeleteColumn = new TreeViewerColumn(treeViewerPCMM, SWT.CENTER);
 			actionDeleteColumn.getColumn().setText(RscTools.getString(RscConst.MSG_BTN_DELETE));
 			actionDeleteColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -729,38 +691,27 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 					Object element = cell.getElement();
 
 					// Button Delete for PCMM Assess
-					if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == pcmmConfiguration.getMode()
-							&& (elementSelected.getSubElementList().contains(element)))
-							|| (element instanceof PCMMElement && PCMMMode.SIMPLIFIED == pcmmConfiguration.getMode())
+					if ((element instanceof PCMMSubelement && PCMMMode.DEFAULT == getViewController().getPCMMMode()
+							&& elementSelected != null && (elementSelected.getSubElementList().contains(element)))
+							|| (element instanceof PCMMElement && elementSelected != null
+									&& PCMMMode.SIMPLIFIED == getViewController().getPCMMMode())
 									&& elementSelected.equals(element)) {
 
 						// Delete editor
 						TreeEditor deleteEditor = null;
 						// if the assessment already exists
 						if (!deleteEditors.containsKey(item)
-								&& (element instanceof PCMMElement && null != getAssessmentsByElt().get(element))
+								&& (element instanceof PCMMElement
+										&& null != getViewController().getAssessmentsByElt().get(element))
 								|| (element instanceof PCMMSubelement
-										&& null != getAssessmentsBySubelt().get(element))) {
+										&& null != getViewController().getAssessmentsBySubelt().get(element))) {
 
 							// Button
-							ButtonTheme btnDeleteItem = TableFactory
-									.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
+							ButtonTheme btnDeleteItem = TableFactory.createDeleteButtonColumnAction(
+									getViewController().getViewManager().getRscMgr(), cell);
 
 							// Listener
-							btnDeleteItem.addListener(SWT.Selection, event -> {
-								/**
-								 * Check the PCMM mode
-								 */
-								if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())
-										&& element instanceof PCMMSubelement) {
-									// get the selected sub-element to delete the assessment with
-									viewCtrl.delete(assessmentsBySubelt.get(element));
-								} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())
-										&& element instanceof PCMMElement) {
-									// get the selected element to delete the assessment with
-									viewCtrl.delete(assessmentsByElt.get(element));
-								}
-							});
+							btnDeleteItem.addListener(SWT.Selection, event -> getViewController().delete(element));
 
 							// Draw cell
 							deleteEditor = new TreeEditor(item.getParent());
@@ -795,24 +746,26 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		/**
 		 * Check the PCMM Mode
 		 */
-		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+		if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 			treeViewerPCMM.setContentProvider(new PCMMAssessTreeContentProvider());
-			levelAchievedEditingSupport = new PCMMLevelAchievedEditingSupport(this, treeViewerPCMM,
+			levelAchievedEditingSupport = new PCMMLevelAchievedEditingSupport(getViewController(), treeViewerPCMM,
 					levelAchievedColumn.getColumn().getText());
-		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
+		} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())) {
 			treeViewerPCMM.setContentProvider(new PCMMAssessTreeSimplifiedContentProvider());
-			levelAchievedEditingSupport = new PCMMLevelAchievedSimplifiedEditingSupport(this, treeViewerPCMM,
-					levelAchievedColumn.getColumn().getText());
+			levelAchievedEditingSupport = new PCMMLevelAchievedSimplifiedEditingSupport(getViewController(),
+					treeViewerPCMM, levelAchievedColumn.getColumn().getText());
 		}
 
 		// level achieved column specific cell editor
 		levelAchievedColumn.setEditingSupport(levelAchievedEditingSupport);
 
 		// cells modifier
-		treeViewerPCMM.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		treeViewerPCMM.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+		treeViewerPCMM.getTree()
+				.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewerPCMM.getTree()
+				.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		treeViewerPCMM.getTree().addListener(SWT.MeasureItem, new Listener() {
 
 			private TreeItem previousItem = null;
@@ -831,25 +784,26 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		// viewer modifications on double click on viewer columns
 		treeViewerPCMM.getTree().addListener(SWT.MouseDoubleClick, event -> {
 			if (event.type == SWT.MouseDoubleClick) {
-				if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+				if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 					// if it is the evidence column, open the evidence view for the selected
 					// subelement
 					PCMMSubelement firstSubelementSelected = getFirstSubelementSelected();
 
 					// assess only for editable rows
-					if (!getViewManager().isTagMode() && elementSelected != null && firstSubelementSelected != null
+					if (!getViewController().getViewManager().isTagMode() && elementSelected != null
+							&& firstSubelementSelected != null
 							&& elementSelected.equals(firstSubelementSelected.getElement())) {
-						viewCtrl.openAssessDialog(firstSubelementSelected);
+						getViewController().openAssessDialog(firstSubelementSelected);
 					}
-				} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
+				} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode())) {
 					// if it is the evidence column, open the evidence view for the selected
 					// element
 					PCMMElement firstElementSelected = getFirstElementSelected();
 
 					// assess only for editable rows
-					if (!getViewManager().isTagMode() && elementSelected != null && firstElementSelected != null
-							&& elementSelected.equals(firstElementSelected)) {
-						viewCtrl.openAssessDialog(firstElementSelected);
+					if (!getViewController().getViewManager().isTagMode() && elementSelected != null
+							&& firstElementSelected != null && elementSelected.equals(firstElementSelected)) {
+						getViewController().openAssessDialog(firstElementSelected);
 					}
 				}
 			}
@@ -921,8 +875,10 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().openHome());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().openHome());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnBackOptions);
 
 		// Button - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -931,9 +887,9 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> getViewManager().openPCMMHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnHelpLevelOptions);
+				(Listener) event -> getViewController().getViewManager().openPCMMHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -941,7 +897,8 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PCMM_ASSESS);
 
 		// layout view
@@ -958,15 +915,31 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	/**
 	 * Refreshes the view
 	 */
-	public void refreshViewer() {
+	void refreshViewer() {
 		treeViewerPCMM.refresh();
+
+		PCMMElement elementSelected = getViewController().getElementSelected();
 
 		// resets the header controls
 		setTitle(RscTools.getString(RscConst.MSG_PCMMASSESS_TITLE,
-				this.elementSelected != null ? this.elementSelected.getName() : RscTools.empty()));
+				elementSelected != null ? elementSelected.getName() : RscTools.empty()));
 
 		// layout view
 		this.layout();
+
+		// refresh the level editor
+		levelAchievedEditingSupport.refreshData();
+	}
+
+	/**
+	 * Sets the tree elements.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewerPCMM != null) {
+			treeViewerPCMM.setInput(data);
+		}
 	}
 
 	/**
@@ -985,119 +958,16 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void reload() {
-		// Trigger GuidanceLevel View
-		getViewManager().getCredibilityEditor().setPartProperty(
-				CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
-				elementSelected.getAbbreviation());
-
-		// Show role selection
-		showRoleSelection();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-
-			try {
-				/**
-				 * Load pcmm elements from database
-				 */
-				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
-
-				assessmentsBySubelt.clear();
-
-				if (elements != null) {
-
-					/**
-					 * Load assessments for the current viewer
-					 */
-					loadAssessments();
-
-					/**
-					 * Refresh the table
-					 */
-					refreshMainTable();
-
-					// set pcmm elements
-					// WARNING: this instruction must be done after populating
-					// assessmentsBySubeltId because it is used to display some column labels
-					treeViewerPCMM.setInput(elements);
-
-					// expand and select the selected element in the viewer input
-					expandSelectedElement();
-				}
-
-			} catch (CredibilityException e) {
-				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMASSESS_DIALOG_LOADING_MSG));
-				logger.error("An error has occurred while loading assessment data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			}
-		}
-
-		// refresh the viewer
-		refreshViewer();
-
-		// refresh the level editor
-		levelAchievedEditingSupport.refreshData();
-	}
-
-	/**
-	 * Load assessments for the current viewer
-	 */
-	private void loadAssessments() {
-		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
-			loadAssessmentsDefault();
-		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
-			loadAssessmentsSimplified();
-		}
-	}
-
-	/**
-	 * Load assessments for the current viewer in default mode (assessments on a
-	 * PCMM subelement)
-	 */
-	private void loadAssessmentsDefault() {
-		if (elements != null) {
-			elements.forEach(elt -> elt.getSubElementList().forEach(sub -> {
-				List<PCMMAssessment> assessments = null;
-				try {
-					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-							.getAssessmentByRoleAndUserAndSubeltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
-									getViewManager().getCache().getUser(), sub, getViewManager().getSelectedTag());
-				} catch (CredibilityException e) {
-					logger.error("Failed to load the PCMM assessments for: {}", sub, e); //$NON-NLS-1$
-				}
-				assessmentsBySubelt.put(sub,
-						(assessments != null && !assessments.isEmpty()) ? assessments.get(0) : null);
-			}));
-		}
-	}
-
-	/**
-	 * Load assessments for the current viewer in simplified mode (assessments on a
-	 * PCMM element)
-	 */
-	private void loadAssessmentsSimplified() {
-		if (elements != null) {
-			elements.forEach(elt -> {
-				List<PCMMAssessment> assessments = null;
-				try {
-					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-							.getAssessmentByRoleAndUserAndEltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
-									getViewManager().getCache().getUser(), elt, getViewManager().getSelectedTag());
-				} catch (CredibilityException e) {
-					logger.error("Failed to load the PCMM assessments for: {}", elt, e); //$NON-NLS-1$
-				}
-				assessmentsByElt.put(elt, (assessments != null && !assessments.isEmpty()) ? assessments.get(0) : null);
-			});
-		}
+		getViewController().reloadData();
 	}
 
 	/**
 	 * Expand the tree with elementSelected value if it not null and in default mode
 	 */
-	private void expandSelectedElement() {
+	void expandSelectedElement() {
+		PCMMElement elementSelected = getViewController().getElementSelected();
 		if (elementSelected != null) {
-			if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+			if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 				treeViewerPCMM.setExpandedState(elementSelected, true);
 				for (PCMMSubelement sub : elementSelected.getSubElementList()) {
 					treeViewerPCMM.setExpandedState(sub, true);
@@ -1112,26 +982,7 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void roleChanged() {
-		refresh();
-	}
-
-	/**
-	 * @return the pcmm element
-	 */
-	public PCMMElement getPcmmElement() {
-		return elementSelected;
-	}
-
-	/**
-	 * Resets the pcmm element selected
-	 * 
-	 * @param pcmmElement the element to set
-	 */
-	public void setPcmmElement(PCMMElement pcmmElement) {
-		this.elementSelected = pcmmElement;
-
-		// Refresh
-		refresh();
+		refreshRole();
 	}
 
 	/**
@@ -1165,38 +1016,29 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * @param element the element
-	 * @return true if the element in parameter is contained in the current selected
-	 *         element of the parent view
-	 */
-	protected boolean isFromCurrentPCMMElement(PCMMElement element) {
-		return getPcmmElement() != null && (getPcmmElement().equals(element));
-	}
-
-	/**
 	 * Get cell background color
 	 * 
 	 * @param element the element
 	 * @return Color the color
 	 */
 	private Color getTreeCellBackgroud(Object element) {
-		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+		if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 			// PCMM Element in gray
 			if (element instanceof PCMMElement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
-						isFromCurrentPCMMElement(((PCMMElement) element))
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						getViewController().isFromCurrentPCMMElement(((PCMMElement) element))
 								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT)
 								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else if (element instanceof PCMMSubelement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
-						isFromCurrentPCMMElement(((PCMMSubelement) element).getElement())
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						getViewController().isFromCurrentPCMMElement(((PCMMSubelement) element).getElement())
 								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
 								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			}
-		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
+		} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode()) && element instanceof PCMMElement) {
 			// PCMM Element in gray
-			return ColorTools.toColor(getViewManager().getRscMgr(),
-					isFromCurrentPCMMElement(((PCMMElement) element))
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+					getViewController().isFromCurrentPCMMElement(((PCMMElement) element))
 							? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)
 							: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 		}
@@ -1211,50 +1053,23 @@ public class PCMMAssessView extends ACredibilityPCMMView {
 	 * @return Color the color
 	 */
 	public Color getTreeCellForeground(Object element) {
-		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
+		if (PCMMMode.DEFAULT.equals(getViewController().getPCMMMode())) {
 			if (element instanceof PCMMElement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			} else if (element instanceof PCMMSubelement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
-						isFromCurrentPCMMElement((((PCMMSubelement) element).getElement()))
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						getViewController().isFromCurrentPCMMElement((((PCMMSubelement) element).getElement()))
 								? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
 								: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			}
-		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
-			return ColorTools.toColor(getViewManager().getRscMgr(),
-					isFromCurrentPCMMElement(((PCMMElement) element))
+		} else if (PCMMMode.SIMPLIFIED.equals(getViewController().getPCMMMode()) && element instanceof PCMMElement) {
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+					getViewController().isFromCurrentPCMMElement(((PCMMElement) element))
 							? ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK)
 							: ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 		}
 		return null;
-	}
-
-	/**
-	 * TODO: TO BE MOVED. Controller has to know the PCMM mode, not the view.
-	 * 
-	 * @return the current PCMM Mode
-	 */
-	PCMMMode getPCMMMode() {
-		return pcmmConfiguration.getMode();
-	}
-
-	/**
-	 * TODO: TO BE MOVED. Controller has to know the assessements, not the view.
-	 * 
-	 * @return a map of assessements indexed by subelement
-	 */
-	public Map<PCMMSubelement, PCMMAssessment> getAssessmentsBySubelt() {
-		return assessmentsBySubelt;
-	}
-
-	/**
-	 * TODO: TO BE MOVED. Controller has to know the assessements, not the view.
-	 * 
-	 * @return a map of assessements indexed by element
-	 */
-	public Map<PCMMElement, PCMMAssessment> getAssessmentsByElt() {
-		return assessmentsByElt;
 	}
 
 	/**

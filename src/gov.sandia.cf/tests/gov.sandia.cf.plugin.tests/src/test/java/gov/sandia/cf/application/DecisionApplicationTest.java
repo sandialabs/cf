@@ -15,8 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the Global Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class DecisionApplicationTest extends AbstractTestApplication {
 
 	/**
@@ -424,7 +421,7 @@ class DecisionApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IDecisionApplication.class).deleteDecision(newDecision2);
+			getAppManager().getService(IDecisionApplication.class).deleteDecision(newDecision2, null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -446,7 +443,7 @@ class DecisionApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IDecisionApplication.class).deleteDecision(null);
+			getAppManager().getService(IDecisionApplication.class).deleteDecision(null, null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_DECISION_DELETE_DECISIONROW_NULL), e.getMessage());
@@ -458,7 +455,7 @@ class DecisionApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(IDecisionApplication.class).deleteDecision(new Decision());
+			getAppManager().getService(IDecisionApplication.class).deleteDecision(new Decision(), null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_DECISION_DELETE_DECISIONROW_IDNULL), e.getMessage());

@@ -13,10 +13,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class DateToolsTest.
+ *
+ * @author Didier Verstraete
+ */
 class DateToolsTest {
 
 	@Test

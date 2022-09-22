@@ -641,6 +641,17 @@ public class MainViewManager extends ViewPart implements IManager, IViewManager,
 		}
 	}
 
+	/**
+	 * Refresh PCMM role.
+	 */
+	public void refreshPCMMRole() {
+		for (AViewManager viewMgr : viewManagers.values()) {
+			if (viewMgr instanceof IPCMMViewManager) {
+				((IPCMMViewManager) viewMgr).refreshPCMMRole();
+			}
+		}
+	}
+
 	/** {@inheritDoc} */
 	@Override
 	public void dispose() {

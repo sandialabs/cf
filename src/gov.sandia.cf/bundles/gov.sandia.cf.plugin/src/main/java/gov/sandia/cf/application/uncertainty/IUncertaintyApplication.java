@@ -106,20 +106,22 @@ public interface IUncertaintyApplication extends IApplication {
 	public Uncertainty updateUncertainty(Uncertainty uncertainty, User userUpdate) throws CredibilityException;
 
 	/**
-	 * Delete Uncertainty
-	 * 
+	 * Delete Uncertainty.
+	 *
 	 * @param uncertainty the uncertainty to delete
+	 * @param user the user
 	 * @throws CredibilityException if an error occurs during deletion
 	 */
-	public void deleteUncertainty(Uncertainty uncertainty) throws CredibilityException;
+	public void deleteUncertainty(Uncertainty uncertainty, User user) throws CredibilityException;
 
 	/**
 	 * Delete all uncertainties.
 	 *
 	 * @param uncertaintyList the uncertainty list
+	 * @param user the user
 	 * @throws CredibilityException the credibility exception
 	 */
-	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList) throws CredibilityException;
+	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList, User user) throws CredibilityException;
 
 	/**
 	 * Delete All Uncertainty values

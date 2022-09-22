@@ -3,6 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.application.imports;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,8 +91,9 @@ public class YmlCFImportConstructor extends Constructor {
 				Class<?> typeToInstantiate = getTypeToInstantiate(node);
 				if (typeToInstantiate != null) {
 					try {
-						return typeToInstantiate.newInstance();
-					} catch (InstantiationException | IllegalAccessException e) {
+						return typeToInstantiate.getDeclaredConstructor().newInstance();
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					}
 				}
 

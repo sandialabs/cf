@@ -6,12 +6,14 @@ package gov.sandia.cf.tools;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class MathToolsTest.
+ *
+ * @author Didier Verstraete
+ */
 class MathToolsTest {
 	/**
 	 * the logger

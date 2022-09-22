@@ -4,36 +4,42 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.ui;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.swt.widgets.Control;
+
+import gov.sandia.cf.web.WebEvent;
 
 /**
  * The Class AViewController.
  *
- * @param <V> the view manager
- * 
  * @author Didier Verstraete
+ * @param <M> the generic type
+ * @param <V> the view manager
  */
-public abstract class AViewController<V extends IViewManager> implements IViewController {
+public abstract class AViewController<M extends IViewManager, V extends ICredibilityView> implements IViewController {
 
-	/**
-	 * The view manager
-	 */
-	private V viewManager;
+	/** The view manager. */
+	private M viewManager;
+
+	/** The view. */
+	private V view;
 
 	/**
 	 * Instantiates a new a view controller.
 	 *
 	 * @param viewManager the view manager
 	 */
-	protected AViewController(V viewManager) {
+	protected AViewController(M viewManager) {
 		Assert.isNotNull(viewManager);
 		this.viewManager = viewManager;
 	}
 
 	/**
+	 * Gets the view manager.
+	 *
 	 * @return the view manager
 	 */
 	@Override
-	public V getViewManager() {
+	public M getViewManager() {
 		return viewManager;
 	}
 
@@ -90,4 +96,45 @@ public abstract class AViewController<V extends IViewManager> implements IViewCo
 	public void refreshSaveState() {
 		getView().refreshStatusComposite();
 	}
+
+	/**
+	 * View changed.
+	 */
+	public void viewChanged() {
+		getViewManager().viewChanged();
+	}
+
+	/**
+	 * Sets the view.
+	 *
+	 * @param view the new view
+	 */
+	protected void setView(V view) {
+		this.view = view;
+	}
+
+	/**
+	 * Gets the view.
+	 *
+	 * @return the view
+	 */
+	public V getView() {
+		return view;
+	}
+
+	@Override
+	public Control getViewControl() {
+		return (Control) getView();
+	}
+
+	@Override
+	public void quit() {
+		// default implement is doing nothing. To override.
+	}
+
+	@Override
+	public void handleWebEvent(WebEvent e) {
+		// default implement is doing nothing. To override.
+	}
+
 }

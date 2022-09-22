@@ -6,7 +6,6 @@ package gov.sandia.cf.parts.ui.intendedpurpose;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.nebula.widgets.richtext.RichTextEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -41,16 +40,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeViewManager> {
+public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(IntendedPurposeView.class);
-
-	/**
-	 * Controller
-	 */
-	private IntendedPurposeViewController viewCtrl;
 
 	/**
 	 * Composites
@@ -64,17 +58,11 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 	/**
 	 * The constructor.
 	 *
-	 * @param viewManager The view manager
-	 * @param viewCtrl the view ctrl
-	 * @param style       The view style
+	 * @param viewController The view controller
+	 * @param style          The view style
 	 */
-	public IntendedPurposeView(IntendedPurposeViewManager viewManager, IntendedPurposeViewController viewCtrl,
-			int style) {
-		super(viewManager, viewManager, style);
-
-		Assert.isNotNull(viewCtrl);
-
-		this.viewCtrl = viewCtrl;
+	public IntendedPurposeView(IntendedPurposeViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// create the view
 		renderPage();
@@ -95,12 +83,7 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 	/** {@inheritDoc} */
 	@Override
 	public void reload() {
-
-		logger.debug("Reload Intended Purpose view"); //$NON-NLS-1$
-
-		// reload
-		viewCtrl.reloadIntendedPurpose();
-		refreshContent();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -108,13 +91,17 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 	 */
 	void refreshContent() {
 
-		IntendedPurpose intendedPurpose = viewCtrl.getIntendedPurpose();
+		IntendedPurpose intendedPurpose = getViewController().getIntendedPurpose();
+
+		if (intendedPurpose == null) {
+			return;
+		}
 
 		// set values
-		if (richTextDescription != null) {
+		if (richTextDescription != null && intendedPurpose.getDescription() != null) {
 			richTextDescription.setText(intendedPurpose.getDescription());
 		}
-		if (linkReference != null) {
+		if (linkReference != null && intendedPurpose.getReference() != null) {
 			linkReference.setValue(intendedPurpose.getReference());
 		}
 	}
@@ -140,7 +127,7 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		mainComposite = new Composite(this, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Render sub-composites
@@ -171,7 +158,7 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		Label label = FormFactory.createLabel(headerComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_HEADER_LBL));
 		label.setBackground(label.getParent().getBackground());
-		label.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		label.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData dataLabel = (GridData) label.getLayoutData();
 		dataLabel.horizontalAlignment = GridData.FILL;
@@ -179,30 +166,34 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		dataLabel.grabExcessHorizontalSpace = true;
 		dataLabel.heightHint = dataLabel.heightHint + 10;
 		label.setLayoutData(dataLabel);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), label);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// Intended Purpose field
 		Label lblIntendedPurpose = FormFactory.createLabel(formComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_DESCRIPTION));
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblIntendedPurpose);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblIntendedPurpose);
 		richTextDescription = FormFactory.createRichText(formComposite, null);
 		richTextDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		richTextDescription.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				viewCtrl.changedDescription(richTextDescription.getText());
+				getViewController().changedDescription(richTextDescription.getText());
 			}
 		});
-		richTextDescription.addModifyListener(e -> viewCtrl.changedDescription(richTextDescription.getText()));
+		richTextDescription
+				.addModifyListener(e -> getViewController().changedDescription(richTextDescription.getText()));
 
 		// References
 		Label lblReferences = FormFactory.createLabel(formComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_REFERENCE));
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblReferences);
-		linkReference = FormFactory.createLinkWidget(formComposite, getViewManager(), null, true);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblReferences);
+		linkReference = FormFactory.createLinkWidget(formComposite, getViewController().getViewManager(), null, true);
+		linkReference.setOnlyWarning(true);
 		linkReference.addChangedListener(e -> {
-			viewCtrl.changedReference(linkReference.getGSONValue());
-			linkReference.clearHelper();
+			getViewController().changedReference(linkReference.getGSONValue());
+			if (linkReference.isValid()) {
+				linkReference.clearHelper();
+			}
 		});
 	}
 
@@ -224,8 +215,8 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -234,14 +225,14 @@ public class IntendedPurposeView extends ACredibilitySubView<IntendedPurposeView
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.INTENDED_PURPOSE);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();

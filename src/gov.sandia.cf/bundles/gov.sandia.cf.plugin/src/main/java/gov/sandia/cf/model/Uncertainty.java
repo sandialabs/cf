@@ -38,7 +38,7 @@ import gov.sandia.cf.tools.StringTools;
 @Entity
 @Table(name = "UNCERTAINTY")
 public class Uncertainty implements Serializable, IGenericTableItem, IEntity<Uncertainty, Integer>, ISelectValue,
-		IImportable<Uncertainty> {
+		IImportable<Uncertainty>, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -194,12 +194,12 @@ public class Uncertainty implements Serializable, IGenericTableItem, IEntity<Unc
 		this.parent = parent;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public String getGeneratedId() {
 		return generatedId;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public void setGeneratedId(String generatedId) {
 		this.generatedId = generatedId;
 	}

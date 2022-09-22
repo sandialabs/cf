@@ -15,8 +15,6 @@ import java.util.List;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,11 +26,11 @@ import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PhenomenonGroupRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PhenomenonGroupRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class PhenomenonGroupRepositoryTest
 		extends AbstractTestRepository<PhenomenonGroup, Integer, PhenomenonGroupRepository> {
 

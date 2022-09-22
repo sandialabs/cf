@@ -233,7 +233,9 @@ public class YmlWriterUncertaintyDataCustom {
 	}
 
 	/**
-	 * @param uncertaintyItemList the uncertainty items to export
+	 * To map uncertainty item list.
+	 *
+	 * @param uncertaintyList the uncertainty list
 	 * @return a map of uncertainty items
 	 */
 	private Map<String, Object> toMapUncertaintyItemList(final List<Uncertainty> uncertaintyList) {
@@ -274,7 +276,9 @@ public class YmlWriterUncertaintyDataCustom {
 	}
 
 	/**
-	 * @param uncertaintyItemList the uncertainty items to export
+	 * To map uncertainty value list.
+	 *
+	 * @param uncertaintyList the uncertainty list
 	 * @return a map of uncertainty items
 	 */
 	private Map<String, Object> toMapUncertaintyValueList(final List<IGenericTableValue> uncertaintyList) {

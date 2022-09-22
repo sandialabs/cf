@@ -18,8 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.hsqldb.cmdline.SqlToolError;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +28,6 @@ import gov.sandia.cf.dao.IUncertaintySelectValueRepository;
 import gov.sandia.cf.dao.migration.tasks.Task_013_UncertaintyGroup_Deletion;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.exceptions.CredibilityMigrationException;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Uncertainty;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.model.UncertaintySelectValue;
@@ -38,10 +35,10 @@ import gov.sandia.cf.model.User;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_013_UncertaintyGroup_DeletionTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_013_UncertaintyGroup_DeletionTest extends AbstractTestDao {
 
 	private final static String CREATE_UNCERTAINTYGROUP_SCRIPT = "530-create_uncertaintygroup_to-migrate.sql"; //$NON-NLS-1$

@@ -34,7 +34,7 @@ import gov.sandia.cf.parts.model.BreadcrumbItemParts;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
 import gov.sandia.cf.parts.ui.ICredibilityView;
-import gov.sandia.cf.parts.ui.IViewManager;
+import gov.sandia.cf.parts.ui.IPCMMViewManager;
 import gov.sandia.cf.parts.ui.MainViewManager;
 import gov.sandia.cf.tools.NetTools;
 import gov.sandia.cf.tools.RscConst;
@@ -48,7 +48,7 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMViewManager extends AViewManager implements Listener, IViewManager {
+public class PCMMViewManager extends AViewManager implements Listener, IPCMMViewManager {
 
 	/**
 	 * the logger
@@ -89,31 +89,6 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	private Tag selectedTag;
 
 	/**
-	 * the PCMM home view
-	 */
-	private PCMMHomeView pcmmHomeView;
-	/**
-	 * the PCMM planning view
-	 */
-	private PCMMPlanningView pcmmPlanningView;
-	/**
-	 * the PCMM evidence view
-	 */
-	private PCMMEvidenceView pcmmEvidenceView;
-	/**
-	 * the PCMM assessment view
-	 */
-	private PCMMAssessView pcmmAssessView;
-	/**
-	 * the PCMM aggregation view
-	 */
-	private PCMMAggregateView pcmmAggregateView;
-	/**
-	 * the PCMM stamp view
-	 */
-	private PCMMStampView pcmmStampView;
-
-	/**
 	 * the last control opened
 	 */
 	private Control lastControl;
@@ -122,10 +97,17 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	 */
 	private StackLayout stackLayout;
 
-	/**
-	 * The pcmm phases enabled
-	 */
-	private List<PCMMPhase> phaseEnabled;
+	private PCMMHomeViewController homeController;
+
+	private PCMMAggregateViewController aggregateController;
+
+	private PCMMAssessViewController assessController;
+
+	private PCMMEvidenceViewController evidenceController;
+
+	private PCMMPlanningViewController planningController;
+
+	private PCMMStampViewController stampController;
 
 	/**
 	 * CrediblityView constructor
@@ -140,11 +122,14 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		super(parentView, parent, style);
 		this.lastControl = null;
 		this.selectedTag = null;
-		if (phaseEnabled == null) {
-			this.phaseEnabled = new ArrayList<>();
-		} else {
-			this.phaseEnabled = phaseEnabled;
-		}
+
+		// create controllers
+		this.homeController = new PCMMHomeViewController(this, phaseEnabled != null ? phaseEnabled : new ArrayList<>());
+		this.aggregateController = new PCMMAggregateViewController(this);
+		this.assessController = new PCMMAssessViewController(this);
+		this.evidenceController = new PCMMEvidenceViewController(this);
+		this.planningController = new PCMMPlanningViewController(this);
+		this.stampController = new PCMMStampViewController(this);
 
 		// create the view
 		createPartControl(parent);
@@ -163,12 +148,9 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		this.setLayout(stackLayout);
 
 		if (viewManager.getCache().getPCMMSpecification() != null) {
-			// load pcmm home view
-			this.pcmmHomeView = new PCMMHomeView(this, SWT.NONE, phaseEnabled);
-
 			// display homeView first
-			this.stackLayout.topControl = pcmmHomeView;
-			this.lastControl = pcmmHomeView;
+			this.stackLayout.topControl = this.homeController.getViewControl();
+			this.lastControl = this.homeController.getViewControl();
 		}
 		this.layout();
 	}
@@ -277,13 +259,9 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		// save the last opened view
 		saveLastView();
 
-		if (this.pcmmHomeView == null) {
-			this.pcmmHomeView = new PCMMHomeView(this, SWT.NONE, phaseEnabled);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = pcmmHomeView;
-		pcmmHomeView.refresh();
+		this.stackLayout.topControl = this.homeController.getViewControl();
+		this.homeController.getView().refresh();
 
 		this.layout();
 	}
@@ -311,17 +289,13 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 			saveLastView();
 
 			// open or set the new PCMM element
-			if (this.pcmmPlanningView == null) {
-				this.pcmmPlanningView = new PCMMPlanningView(this, element, SWT.NONE);
-			} else {
-				this.pcmmPlanningView.setPcmmElement(element);
-			}
+			planningController.setElementSelected(element);
 
 			// It is not necessary to reload the evidence view because it is done at the
 			// creation and when setting new pcmm elements
 
 			// show the view
-			this.stackLayout.topControl = pcmmPlanningView;
+			this.stackLayout.topControl = planningController.getViewControl();
 			this.layout();
 
 		} else {
@@ -344,17 +318,13 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 			saveLastView();
 
 			// open or set the new PCMM element
-			if (this.pcmmEvidenceView == null) {
-				this.pcmmEvidenceView = new PCMMEvidenceView(this, element, SWT.NONE);
-			} else {
-				this.pcmmEvidenceView.setPcmmElement(element);
-			}
+			evidenceController.setElementSelected(element);
 
 			// It is not necessary to reload the evidence view because it is done at the
 			// creation and when setting new pcmm elements
 
 			// show the view
-			this.stackLayout.topControl = pcmmEvidenceView;
+			this.stackLayout.topControl = evidenceController.getViewControl();
 			this.layout();
 
 		} else {
@@ -384,20 +354,16 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 			saveLastView();
 
 			// get the view
-			if (this.pcmmAssessView == null) {
-				this.pcmmAssessView = new PCMMAssessView(this, element, SWT.NONE);
-			} else {
-				if (this.pcmmAssessView.getPcmmElement() == null
-						|| !this.pcmmAssessView.getPcmmElement().equals(element)) {
-					this.pcmmAssessView.setPcmmElement(element);
-				}
+			if (this.assessController.getElementSelected() == null
+					|| !this.assessController.getElementSelected().equals(element)) {
+				this.assessController.setElementSelected(element);
 			}
 
 			// Refresh
-			pcmmAssessView.refresh();
+			assessController.refresh();
 
 			// show the view
-			this.stackLayout.topControl = pcmmAssessView;
+			this.stackLayout.topControl = assessController.getViewControl();
 			this.layout();
 
 		} else {
@@ -457,27 +423,35 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		}
 
 		// refresh the role in all the views
-		refreshRole();
+		super.refreshPCMMRole();
 
 		return changed;
 	}
 
 	/**
+	 * Refresh all PCMM role.
+	 */
+	public void fireRefreshPCMMRole() {
+		super.refreshPCMMRole();
+	}
+
+	/**
 	 * Refresh the role in the views
 	 */
-	public void refreshRole() {
-		if (this.pcmmHomeView != null)
-			this.pcmmHomeView.refreshRole();
-		if (this.pcmmAggregateView != null)
-			this.pcmmAggregateView.refreshRole();
-		if (this.pcmmAssessView != null)
-			this.pcmmAssessView.refreshRole();
-		if (this.pcmmEvidenceView != null)
-			this.pcmmEvidenceView.refreshRole();
-		if (this.pcmmPlanningView != null)
-			this.pcmmPlanningView.refreshRole();
-		if (this.pcmmStampView != null)
-			this.pcmmStampView.refreshRole();
+	@Override
+	public void refreshPCMMRole() {
+		if (this.homeController.getView() != null)
+			this.homeController.getView().refreshRole();
+		if (this.aggregateController.getView() != null)
+			this.aggregateController.getView().refreshRole();
+		if (this.assessController.getView() != null)
+			this.assessController.getView().refreshRole();
+		if (this.evidenceController.getView() != null)
+			this.evidenceController.getView().refreshRole();
+		if (this.planningController.getView() != null)
+			this.planningController.getView().refreshRole();
+		if (this.stampController.getView() != null)
+			this.stampController.getView().refreshRole();
 	}
 
 	/**
@@ -497,18 +471,18 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		// Refresh
 		((ACredibilityView<?>) this.stackLayout.topControl).refresh();
 
-		if (this.pcmmHomeView != null)
-			this.pcmmHomeView.refreshTag();
-		if (this.pcmmAggregateView != null)
-			this.pcmmAggregateView.refreshTag();
-		if (this.pcmmAssessView != null)
-			this.pcmmAssessView.refreshTag();
-		if (this.pcmmEvidenceView != null)
-			this.pcmmEvidenceView.refreshTag();
-		if (this.pcmmPlanningView != null)
-			this.pcmmPlanningView.refreshTag();
-		if (this.pcmmStampView != null)
-			this.pcmmStampView.refreshTag();
+		if (this.homeController.getView() != null)
+			this.homeController.getView().refreshTag();
+		if (this.aggregateController.getView() != null)
+			this.aggregateController.getView().refreshTag();
+		if (this.assessController.getView() != null)
+			this.assessController.getView().refreshTag();
+		if (this.evidenceController.getView() != null)
+			this.evidenceController.getView().refreshTag();
+		if (this.planningController.getView() != null)
+			this.planningController.getView().refreshTag();
+		if (this.stampController.getView() != null)
+			this.stampController.getView().refreshTag();
 	}
 
 	/**
@@ -526,15 +500,11 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		// save the last opened view
 		saveLastView();
 
-		if (this.pcmmAggregateView == null) {
-			this.pcmmAggregateView = new PCMMAggregateView(this, SWT.NONE);
-		}
-
 		// Refresh
-		pcmmAggregateView.refresh();
+		aggregateController.getView().refresh();
 
 		// show the view
-		this.stackLayout.topControl = pcmmAggregateView;
+		this.stackLayout.topControl = aggregateController.getViewControl();
 		this.layout();
 	}
 
@@ -546,12 +516,9 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 		// save the last opened view
 		saveLastView();
 
-		if (this.pcmmStampView == null) {
-			this.pcmmStampView = new PCMMStampView(this, SWT.NONE);
-		}
 		// Refresh
-		pcmmStampView.refresh();
-		this.stackLayout.topControl = pcmmStampView;
+		stampController.getView().refresh();
+		this.stackLayout.topControl = stampController.getViewControl();
 
 		this.layout();
 	}
@@ -587,9 +554,9 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	/**
 	 * @return the active view in PCMM context.
 	 */
-	public ACredibilityPCMMView getActiveView() {
+	public ACredibilityPCMMView<?> getActiveView() {
 		if (stackLayout.topControl instanceof ACredibilityPCMMView) {
-			return (ACredibilityPCMMView) stackLayout.topControl;
+			return (ACredibilityPCMMView<?>) stackLayout.topControl;
 		}
 		return null;
 	}
@@ -614,8 +581,8 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (pcmmHomeView != null) {
-			bcHomeItemPart.setName(pcmmHomeView.getItemTitle());
+		if (homeController != null) {
+			bcHomeItemPart.setName(homeController.getView().getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -637,7 +604,8 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	 */
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
-		if (item != null && item.getListener().equals(this) && item.getName().equals((pcmmHomeView).getItemTitle())) {
+		if (item != null && item.getListener().equals(this)
+				&& item.getName().equals(homeController.getView().getItemTitle())) {
 			openHome();
 		}
 	}
@@ -675,23 +643,23 @@ public class PCMMViewManager extends AViewManager implements Listener, IViewMana
 	public void reload() {
 
 		// reload views
-		if (pcmmHomeView != null) {
-			pcmmHomeView.reload();
+		if (homeController.getView() != null) {
+			homeController.getView().reload();
 		}
-		if (pcmmPlanningView != null) {
-			pcmmPlanningView.reload();
+		if (planningController.getView() != null) {
+			planningController.getView().reload();
 		}
-		if (pcmmEvidenceView != null) {
-			pcmmEvidenceView.reload();
+		if (evidenceController.getView() != null) {
+			evidenceController.getView().reload();
 		}
-		if (pcmmAssessView != null) {
-			pcmmAssessView.reload();
+		if (assessController.getView() != null) {
+			assessController.getView().reload();
 		}
-		if (pcmmAggregateView != null) {
-			pcmmAggregateView.reload();
+		if (aggregateController.getView() != null) {
+			aggregateController.getView().reload();
 		}
-		if (pcmmStampView != null) {
-			pcmmStampView.reload();
+		if (stampController.getView() != null) {
+			stampController.getView().reload();
 		}
 	}
 

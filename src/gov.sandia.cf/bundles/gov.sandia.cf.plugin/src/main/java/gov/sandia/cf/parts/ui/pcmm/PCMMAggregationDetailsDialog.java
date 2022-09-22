@@ -244,8 +244,7 @@ public class PCMMAggregationDetailsDialog extends GenericCFDialog<PCMMViewManage
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		String okButtonName = IDialogConstants.OK_LABEL;
-		createButton(parent, IDialogConstants.OK_ID, okButtonName, true);
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 	}
 
 	/**
