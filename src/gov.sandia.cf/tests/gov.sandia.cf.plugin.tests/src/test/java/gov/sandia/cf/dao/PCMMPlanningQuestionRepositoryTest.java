@@ -10,8 +10,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +21,11 @@ import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PCMMPlanningQuestionRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PCMMPlanningQuestionRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class PCMMPlanningQuestionRepositoryTest
 		extends AbstractTestRepository<PCMMPlanningQuestion, Integer, PCMMPlanningQuestionRepository> {
 

@@ -3,18 +3,22 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.qoiplanning;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.application.pirt.IPIRTApplication;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.parts.constants.ViewMode;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.parts.ui.pirt.IQoIViewController;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoIDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoITagDialog;
@@ -27,7 +31,8 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class QoIPlanningViewController implements IQoIViewController {
+public class QoIPlanningViewController extends AViewController<QoIPlanningViewManager, QoIPlanningView>
+		implements IQoIViewController {
 
 	/**
 	 * the logger
@@ -35,13 +40,43 @@ public class QoIPlanningViewController implements IQoIViewController {
 	private static final Logger logger = LoggerFactory.getLogger(QoIPlanningViewController.class);
 
 	/**
-	 * The view
+	 * Instantiates a new qo I planning view controller.
+	 *
+	 * @param viewManager the view manager
 	 */
-	private QoIPlanningView view;
+	QoIPlanningViewController(QoIPlanningViewManager viewManager) {
+		super(viewManager);
+		super.setView(new QoIPlanningView(this, SWT.NONE));
 
-	QoIPlanningViewController(QoIPlanningView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+		// Refresh
+		refresh();
+	}
+
+	void reloadData() {
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		List<QuantityOfInterest> qoiList = new ArrayList<>();
+
+		// Get data
+		if (model != null) {
+			// Get list of qoi
+			qoiList = this.getViewManager().getAppManager().getService(IPIRTApplication.class).getRootQoI(model);
+
+			// reload qoi planning specification
+			getViewManager().getCache().reloadQoIPlanningSpecification();
+		}
+
+		// Get expanded elements
+		Object[] elements = getView().getTreeExpandedElements();
+
+		// Refresh the table
+		getView().refreshMainTable();
+
+		// Set input
+		getView().setTreeData(qoiList);
+
+		// Set expanded elements
+		getView().setExpandedElements(elements);
 	}
 
 	/**
@@ -49,30 +84,30 @@ public class QoIPlanningViewController implements IQoIViewController {
 	 */
 	void addQuantityOfInterest() {
 		// Open dialog in View Mode
-		QoIPlanningDialog dialog = new QoIPlanningDialog(view.getViewManager(), view.getShell(), null, ViewMode.CREATE);
+		QoIPlanningDialog dialog = new QoIPlanningDialog(getViewManager(), getView().getShell(), null, ViewMode.CREATE);
 		QuantityOfInterest qoi = dialog.openDialog();
 
 		if (qoi != null) {
 			try {
 				// Set User
-				qoi.setModel(view.getViewManager().getCache().getModel());
+				qoi.setModel(getViewManager().getCache().getModel());
 				qoi.setCreationDate(new Date());
 
 				// Create
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).addQoI(qoi,
-						view.getViewManager().getCache().getUser());
+				getViewManager().getAppManager().getService(IPIRTApplication.class).addQoI(qoi,
+						getViewManager().getCache().getUser());
 
 				// Associate to existing group and refresh view
-				view.reload();
+				getView().reload();
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_TITLE),
 						RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_ADD)
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
@@ -102,7 +137,7 @@ public class QoIPlanningViewController implements IQoIViewController {
 			logger.warn("The qoi to view is null"); //$NON-NLS-1$
 		} else {
 			// Open dialog in View Mode
-			QoIPlanningDialog dialog = new QoIPlanningDialog(view.getViewManager(), view.getShell(), qoi,
+			QoIPlanningDialog dialog = new QoIPlanningDialog(getViewManager(), getView().getShell(), qoi,
 					ViewMode.VIEW);
 			dialog.openDialog();
 		}
@@ -116,14 +151,14 @@ public class QoIPlanningViewController implements IQoIViewController {
 	void updateQoIAction(QuantityOfInterest qoi) {
 
 		// Open dialog in View Mode
-		QoIPlanningDialog dialog = new QoIPlanningDialog(view.getViewManager(), view.getShell(), qoi, ViewMode.UPDATE);
+		QoIPlanningDialog dialog = new QoIPlanningDialog(getViewManager(), getView().getShell(), qoi, ViewMode.UPDATE);
 		QuantityOfInterest qoiToUpdate = dialog.openDialog();
 
 		// Update
 		try {
 			updateQoI(qoiToUpdate);
 		} catch (CredibilityException e) {
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_TITLE),
 					RscTools.getString(RscConst.ERR_QOIPLANNING_DIALOG_UPDATE)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -135,6 +170,7 @@ public class QoIPlanningViewController implements IQoIViewController {
 	 * Update qoi.
 	 *
 	 * @param qoi the qoi to update
+	 * @return the quantity of interest
 	 * @throws CredibilityException the credibility exception
 	 */
 	QuantityOfInterest updateQoI(QuantityOfInterest qoi) throws CredibilityException {
@@ -144,17 +180,17 @@ public class QoIPlanningViewController implements IQoIViewController {
 		}
 
 		// Update
-		QuantityOfInterest qoiUpdated = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-				.updateQoI(qoi, view.getViewManager().getCache().getUser());
+		QuantityOfInterest qoiUpdated = getViewManager().getAppManager().getService(IPIRTApplication.class)
+				.updateQoI(qoi, getViewManager().getCache().getUser());
 
 		// Refresh parent
 		QuantityOfInterest newGroup = qoiUpdated.getParent();
 		if (newGroup != null) {
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(newGroup);
+			getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(newGroup);
 		}
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 
 		return qoiUpdated;
 	}
@@ -198,28 +234,29 @@ public class QoIPlanningViewController implements IQoIViewController {
 		}
 
 		// confirm delete qoi
-		boolean confirm = MessageDialog.openConfirm(view.getShell(),
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_TITLE),
 				RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_MSG, qoi.getSymbol(), additionalInfo));
 
 		if (confirm) {
 			try {
 				// Remove
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).deleteQoI(qoi);
+				getViewManager().getAppManager().getService(IPIRTApplication.class).deleteQoI(qoi,
+						getViewManager().getCache().getUser());
 
 				// Refresh
-				view.refresh();
-				view.refreshViewer();
+				getView().refresh();
+				getView().refreshViewer();
 
 				// Set view has changed
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				// Log
 				logger.error("An error occured while deleting qoi: {}", qoi //$NON-NLS-1$
 						+ RscTools.carriageReturn() + e.getMessage(), e);
 				// Display to user
-				MessageDialog.openError(view.getShell(),
+				MessageDialog.openError(getView().getShell(),
 						RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DELETECONFIRM_TITLE), e.getMessage());
 			}
 		}
@@ -237,14 +274,14 @@ public class QoIPlanningViewController implements IQoIViewController {
 			QuantityOfInterest qoiSelected = (QuantityOfInterest) element;
 
 			// confirm tag dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_TITLE),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_MSG, qoiSelected.getSymbol()));
 
 			if (confirm) {
 				try {
 
-					QoIDialog qoiDialog = new QoIDialog(view.getViewManager(), view.getShell(), ViewMode.COPY,
+					QoIDialog qoiDialog = new QoIDialog(getViewManager(), getView().getShell(), ViewMode.COPY,
 							qoiSelected);
 					QuantityOfInterest duplicatedQoi = qoiDialog.openDialog();
 
@@ -252,28 +289,28 @@ public class QoIPlanningViewController implements IQoIViewController {
 					if (null != duplicatedQoi) {
 
 						// Duplicate qoi in database
-						view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-								.duplicateQoI(qoiSelected, duplicatedQoi, view.getViewManager().getCache().getUser());
+						getViewManager().getAppManager().getService(IPIRTApplication.class).duplicateQoI(qoiSelected,
+								duplicatedQoi, getViewManager().getCache().getUser());
 
 						// confirm tag success
-						MessageDialog.openInformation(view.getShell(),
+						MessageDialog.openInformation(getView().getShell(),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_TITLE),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_DUPLICATECONFIRM_SUCCESS));
 
 						// Refresh
-						view.refresh();
+						getView().refresh();
 
 						// fire view change to save credibility file
-						view.getViewManager().viewChanged();
+						getViewManager().viewChanged();
 
 						// Refresh
-						view.refreshViewer();
+						getView().refreshViewer();
 					}
 
 				} catch (CredibilityException e) {
 					logger.error("An error occured while duplicating qoi: {}\n{}", qoiSelected, e.getMessage(), e); //$NON-NLS-1$
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_QOIHOMEVIEW_DUPLICATING),
-							e.getMessage());
+					MessageDialog.openError(getView().getShell(),
+							RscTools.getString(RscConst.ERR_QOIHOMEVIEW_DUPLICATING), e.getMessage());
 				}
 			}
 		}
@@ -288,51 +325,52 @@ public class QoIPlanningViewController implements IQoIViewController {
 	void doTagAction(Object element) {
 
 		if (element == null) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TITLE),
+			MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TAGGING_QOINULL));
 		} else if (!(element instanceof QuantityOfInterest)) {
-			MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
+			MessageDialog.openWarning(getView().getShell(),
+					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 					RscTools.getString(RscConst.ERR_QOIHOMEVIEW_TAGGING_NOTQOI));
 		} else {
 
 			QuantityOfInterest qoiSelected = (QuantityOfInterest) element;
 
 			// confirm tag dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(),
+			boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 					RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_QUESTION, qoiSelected.getSymbol()));
 
 			if (confirm) {
 				try {
 					// tag dialog
-					QoITagDialog tagQoIDialog = new QoITagDialog(view.getViewManager(), view.getShell(), qoiSelected);
+					QoITagDialog tagQoIDialog = new QoITagDialog(getViewManager(), getView().getShell(), qoiSelected);
 					String tagDescription = tagQoIDialog.openDialog();
 
 					if (tagQoIDialog.getReturnCode() == Window.OK) {
 
 						// tag qoi in database
-						view.getViewManager().getAppManager().getService(IPIRTApplication.class).tagQoI(qoiSelected,
-								tagDescription, view.getViewManager().getCache().getUser());
+						getViewManager().getAppManager().getService(IPIRTApplication.class).tagQoI(qoiSelected,
+								tagDescription, getViewManager().getCache().getUser());
 
 						// fire view change to save credibility file
-						view.getViewManager().viewChanged();
+						getViewManager().viewChanged();
 
 						// refresh view
-						view.refresh();
+						getView().refresh();
 
 						// Refresh
-						view.refreshViewer();
+						getView().refreshViewer();
 
 						// confirm tag success
-						MessageDialog.openInformation(view.getShell(),
+						MessageDialog.openInformation(getView().getShell(),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_TITLE),
 								RscTools.getString(RscConst.MSG_QOIHOMEVIEW_TAGCONFIRM_SUCCESS));
 					}
 
 				} catch (CredibilityException e) {
 					logger.error("An error occured while tagging qoi: {}\n{}", qoiSelected, e.getMessage(), e); //$NON-NLS-1$
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING),
-							e.getMessage());
+					MessageDialog.openError(getView().getShell(),
+							RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING), e.getMessage());
 				}
 			}
 		}
@@ -347,11 +385,11 @@ public class QoIPlanningViewController implements IQoIViewController {
 		try {
 
 			// reorder
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderAllQuantityOfInterest(
-					view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser());
+			getViewManager().getAppManager().getService(IPIRTApplication.class).reorderAllQuantityOfInterest(
+					getViewManager().getCache().getModel(), getViewManager().getCache().getUser());
 
 			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 		} catch (CredibilityException e) {
 			logger.error("Impossible to reorder all qois: {}", e.getMessage(), e);//$NON-NLS-1$
@@ -367,11 +405,11 @@ public class QoIPlanningViewController implements IQoIViewController {
 	@Override
 	public void reorder(QuantityOfInterest qoi, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderQuantityOfInterest(qoi,
-				newIndex, null);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).reorderQuantityOfInterest(qoi, newIndex,
+				null);
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -381,8 +419,8 @@ public class QoIPlanningViewController implements IQoIViewController {
 	public void refreshIfChanged() {
 
 		// Refresh
-		if (view.getViewManager().isDirty()) {
-			view.refresh();
+		if (getViewManager().isDirty()) {
+			getView().refresh();
 		}
 	}
 }

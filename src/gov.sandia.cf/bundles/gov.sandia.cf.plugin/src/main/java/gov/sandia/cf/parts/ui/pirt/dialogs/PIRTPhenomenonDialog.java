@@ -11,14 +11,10 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
@@ -32,9 +28,8 @@ import gov.sandia.cf.model.PIRTTreeAdequacyColumnType;
 import gov.sandia.cf.model.Phenomenon;
 import gov.sandia.cf.model.PhenomenonGroup;
 import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
-import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.constants.ViewMode;
-import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.dialogs.GenericCFScrolledDialog;
 import gov.sandia.cf.parts.listeners.ComboDropDownKeyListener;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.pirt.PIRTViewManager;
@@ -59,7 +54,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> {
+public class PIRTPhenomenonDialog extends GenericCFScrolledDialog<PIRTViewManager> {
 	/**
 	 * the logger
 	 */
@@ -166,67 +161,30 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Control createDialogArea(Composite parent) {
-		Composite container = (Composite) super.createDialogArea(parent);
-
-		// vertical scroll container
-		ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.V_SCROLL);
-		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		scrolledComposite.setLayoutData(scData);
-		scrolledComposite.setLayout(new GridLayout());
-
-		// form container
-		Composite formContainer = new Composite(scrolledComposite, SWT.NONE);
-		formContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		GridLayout gridLayout = new GridLayout(2, false);
-		formContainer.setLayout(gridLayout);
-
-		renderContent(formContainer);
-
-		scrolledComposite.setExpandVertical(true);
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setContent(formContainer);
-
-		// autoresize sub containers
-		scrolledComposite.addListener(SWT.Resize, event -> {
-			int width = scrolledComposite.getClientArea().width;
-			Point computeSize = formContainer.computeSize(width, SWT.DEFAULT);
-			scrolledComposite.setMinSize(computeSize);
-			formContainer.setSize(computeSize);
-		});
-
-		return container;
-	}
-
-	/**
-	 * Render the dialog content in editable mode
-	 * 
-	 * @param parent
-	 */
-	private void renderContent(Composite parent) {
+	protected Composite createDialogScrolledContent(Composite parent) {
 
 		logger.debug("Render PIRT Phenomenon dialog content"); //$NON-NLS-1$
+
+		Composite content = createDefaultDialogScrolledContent(parent);
 
 		PIRTSpecification configuration = getViewManager().getCache().getPIRTSpecification();
 		boolean editable = (mode != ViewMode.VIEW);
 
 		// label Phenomenon Group
-		FormFactory.createLabel(parent, RscTools.getString(RscConst.MSG_DIALOG_PHEN_GROUP));
+		FormFactory.createLabel(content, RscTools.getString(RscConst.MSG_DIALOG_PHEN_GROUP));
 
 		// combo Phenomenon Group
-		cbxPhenomenonGroup = FormFactory.createSelectWidget(getViewManager().getRscMgr(), parent, editable, null,
+		cbxPhenomenonGroup = FormFactory.createSelectWidget(getViewManager().getRscMgr(), content, editable, null,
 				existingGroups);
 		cbxPhenomenonGroup.addKeyListener(new ComboDropDownKeyListener());
 		cbxPhenomenonGroup.addListener(SWT.Modify, event -> isValid());
 		cbxPhenomenonGroup.setEnabled(mode.equals(ViewMode.UPDATE));
 
 		// label Text
-		FormFactory.createLabel(parent, RscTools.getString(RscConst.MSG_DIALOG_PHEN_LABEL));
+		FormFactory.createLabel(content, RscTools.getString(RscConst.MSG_DIALOG_PHEN_LABEL));
 
 		// text Text
-		txtLabel = FormFactory.createTextWidget(getViewManager().getRscMgr(), parent, editable, null);
+		txtLabel = FormFactory.createTextWidget(getViewManager().getRscMgr(), content, editable, null);
 		txtLabel.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -235,10 +193,10 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 		});
 
 		// label Importance
-		FormFactory.createLabel(parent, RscTools.getString(RscConst.MSG_DIALOG_PHEN_IMPORTANCE));
+		FormFactory.createLabel(content, RscTools.getString(RscConst.MSG_DIALOG_PHEN_IMPORTANCE));
 
 		// combobox Importance
-		cbxImportance = FormFactory.createSelectWidget(getViewManager().getRscMgr(), parent, editable, null);
+		cbxImportance = FormFactory.createSelectWidget(getViewManager().getRscMgr(), content, editable, null);
 		cbxImportance.addKeyListener(new ComboDropDownKeyListener());
 
 		if (configuration != null) {
@@ -249,14 +207,14 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 			if (configuration.getColumns() != null) {
 
 				// Create a horizontal separator
-				FormFactory.createLabelHorizontalSeparator(parent);
+				FormFactory.createLabelHorizontalSeparator(content);
 
 				// label
 				GridData dataAdequacyGroup = new GridData();
 				dataAdequacyGroup.horizontalSpan = 2;
 				dataAdequacyGroup.grabExcessHorizontalSpace = true;
 				dataAdequacyGroup.horizontalAlignment = GridData.CENTER;
-				Label labelAdequacy = FormFactory.createLabel(parent,
+				Label labelAdequacy = FormFactory.createLabel(content,
 						RscTools.getString(RscConst.MSG_DIALOG_PHEN_ADEQUACY), dataAdequacyGroup);
 				FontTools.setBoldFont(getViewManager().getRscMgr(), labelAdequacy);
 				FontTools.setImportantTextFont(getViewManager().getRscMgr(), labelAdequacy);
@@ -270,11 +228,11 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 						.collect(Collectors.toList())) {
 
 					// label
-					FormFactory.createLabel(parent, column.getName());
+					FormFactory.createLabel(content, column.getName());
 
 					// combobox level
 					SelectWidget<PIRTLevelImportance> combobox = FormFactory
-							.createSelectWidget(getViewManager().getRscMgr(), parent, editable, null);
+							.createSelectWidget(getViewManager().getRscMgr(), content, editable, null);
 					combobox.setSelectValues(configuration.getLevelsListSortedByLevelDescending());
 					combobox.addKeyListener(new ComboDropDownKeyListener());
 					combobox.setData(COLUMN_NAME_PROPERTY, column.getName());
@@ -282,7 +240,7 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 				}
 
 				// Create a horizontal separator
-				FormFactory.createLabelHorizontalSeparator(parent);
+				FormFactory.createLabelHorizontalSeparator(content);
 
 				// other text columns
 				for (PIRTAdequacyColumn column : configuration.getColumns().stream()
@@ -291,14 +249,14 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 					if (PIRTTreeAdequacyColumnType.TEXT.getType().equals(column.getType())) {
 
 						// label
-						Label createLabel = FormFactory.createLabel(parent, column.getName());
+						Label createLabel = FormFactory.createLabel(content, column.getName());
 						GridData dataLabel = new GridData();
 						dataLabel.grabExcessVerticalSpace = true;
 						dataLabel.verticalAlignment = GridData.FILL;
 						createLabel.setLayoutData(dataLabel);
 
 						// text
-						TextWidget text = FormFactory.createTextWidget(getViewManager().getRscMgr(), parent, editable,
+						TextWidget text = FormFactory.createTextWidget(getViewManager().getRscMgr(), content, editable,
 								null, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.V_SCROLL | SWT.BORDER);
 						GridData dataComments = new GridData();
 						dataComments.heightHint = 100;
@@ -311,11 +269,11 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 						adequacyViewers.add(text);
 					} else if (PIRTTreeAdequacyColumnType.RICH_TEXT.getType().equals(column.getType())) {
 						// label
-						Label label = new Label(parent, SWT.NONE);
+						Label label = new Label(content, SWT.NONE);
 						label.setText(column.getName() + RscTools.COLON);
 
 						// text
-						RichTextWidget text = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), parent,
+						RichTextWidget text = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), content,
 								true, editable);
 						text.setData(COLUMN_NAME_PROPERTY, column.getName());
 						adequacyViewers.add(text);
@@ -324,20 +282,13 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 			}
 		}
 
-		/**
-		 * Load preset data
-		 */
-		loadPresetData();
-
-		// dialog behavior
-		cbxPhenomenonGroup.setFocus();
+		return content;
 	}
 
-	/**
-	 * Load preset data from phenomenon
-	 */
+	/** {@inheritDoc} */
 	@SuppressWarnings("unchecked")
-	private void loadPresetData() {
+	@Override
+	protected void loadDataAfterCreation() {
 
 		PIRTSpecification configuration = getViewManager().getCache().getPIRTSpecification();
 
@@ -384,6 +335,9 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 				((RichTextWidget) viewer).setValue(criterionToUpdate.getValue());
 			}
 		}
+
+		// dialog behavior
+		cbxPhenomenonGroup.setFocus();
 	}
 
 	/**
@@ -547,7 +501,9 @@ public class PIRTPhenomenonDialog extends GenericCFSmallDialog<PIRTViewManager> 
 	protected void createButtonsForButtonBar(Composite parent) {
 		String okButtonName = (buttonName != null && !buttonName.isEmpty()) ? buttonName : IDialogConstants.OK_LABEL;
 		createButton(parent, IDialogConstants.OK_ID, okButtonName, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		if (!ViewMode.VIEW.equals(this.mode)) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
 	}
 
 	/**

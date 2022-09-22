@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.launcher.CredibilityEditor;
 import gov.sandia.cf.parts.model.BreadcrumbItemParts;
-import gov.sandia.cf.parts.ui.ACredibilitySubView;
 import gov.sandia.cf.parts.ui.ACredibilityView;
 import gov.sandia.cf.parts.ui.AViewManager;
 import gov.sandia.cf.parts.ui.ICredibilityView;
@@ -38,23 +37,17 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(ConfigurationViewManager.class);
 
-	/**
-	 * the import configuration view
-	 */
-	private ImportConfigurationView importConfigurationView;
-
-	/**
-	 * the export configuration view
-	 */
-	private ExportConfigurationView exportConfigurationView;
-
-	/**
-	 * the global configuration view
-	 */
-	private GlobalConfigurationView globalConfigurationView;
-
 	/** The folder. */
 	private CTabFolder folder;
+
+	/** The export configuration view controller. */
+	private ExportConfigurationViewController exportConfigurationViewController;
+
+	/** The global configuration view controller. */
+	private GlobalConfigurationViewController globalConfigurationViewController;
+
+	/** The import configuration view controller. */
+	private ImportConfigurationViewController importConfigurationViewController;
 
 	/**
 	 * The constructor
@@ -65,6 +58,16 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 */
 	public ConfigurationViewManager(MainViewManager parentView, Composite parent, int style) {
 		super(parentView, parent, style);
+
+		this.setLayout(new FillLayout());
+
+		// the layout manager to hide/show the different views
+		folder = new CTabFolder(this, SWT.BOTTOM);
+
+		this.exportConfigurationViewController = new ExportConfigurationViewController(this, folder);
+		this.globalConfigurationViewController = new GlobalConfigurationViewController(this, folder);
+		this.importConfigurationViewController = new ImportConfigurationViewController(this, folder);
+
 		createPage();
 	}
 
@@ -78,26 +81,17 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 
 		logger.debug("Creating Configuration view page"); //$NON-NLS-1$
 
-		this.setLayout(new FillLayout());
-
-		// the layout manager to hide/show the different views
-		folder = new CTabFolder(this, SWT.BOTTOM);
-
-		this.globalConfigurationView = new GlobalConfigurationView(this, folder, SWT.NONE);
-		this.importConfigurationView = new ImportConfigurationView(this, folder, SWT.NONE);
-		this.exportConfigurationView = new ExportConfigurationView(this, folder, SWT.NONE);
-
 		CTabItem tabGlobal = new CTabItem(folder, SWT.NONE);
 		tabGlobal.setText(RscTools.getString(RscConst.MSG_CONF_VIEW_TAB_GLOBAL));
-		tabGlobal.setControl(globalConfigurationView);
+		tabGlobal.setControl(globalConfigurationViewController.getViewControl());
 
 		CTabItem tabImport = new CTabItem(folder, SWT.NONE);
 		tabImport.setText(RscTools.getString(RscConst.MSG_CONF_VIEW_TAB_IMPORT));
-		tabImport.setControl(importConfigurationView);
+		tabImport.setControl(importConfigurationViewController.getViewControl());
 
 		CTabItem tabExport = new CTabItem(folder, SWT.NONE);
 		tabExport.setText(RscTools.getString(RscConst.MSG_CONF_VIEW_TAB_EXPORT));
-		tabExport.setControl(exportConfigurationView);
+		tabExport.setControl(exportConfigurationViewController.getViewControl());
 
 		folder.setSelection(tabGlobal);
 
@@ -115,9 +109,9 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 * Refresh save state
 	 */
 	public void refreshSaveState() {
-		importConfigurationView.refreshStatusComposite();
-		exportConfigurationView.refreshStatusComposite();
-		globalConfigurationView.refreshStatusComposite();
+		importConfigurationViewController.getView().refreshStatusComposite();
+		exportConfigurationViewController.getView().refreshStatusComposite();
+		globalConfigurationViewController.getView().refreshStatusComposite();
 	}
 
 	/**
@@ -156,14 +150,14 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
 		if (item != null && item.getListener().equals(this)) {
-			openConfigurationHomeView(globalConfigurationView);
+			openConfigurationHomeView(globalConfigurationViewController.getView());
 		}
 	}
 
 	/** {@inheritDoc} */
 	@Override
 	public void openHome() {
-		openConfigurationHomeView(globalConfigurationView);
+		openConfigurationHomeView(globalConfigurationViewController.getView());
 	}
 
 	/**
@@ -171,7 +165,7 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	 * 
 	 * @param view the credibility view
 	 */
-	public void openConfigurationHomeView(ACredibilitySubView<ConfigurationViewManager> view) {
+	public void openConfigurationHomeView(ICredibilityView view) {
 
 		// Refresh
 		if (view != null) {
@@ -186,14 +180,14 @@ public class ConfigurationViewManager extends AViewManager implements IViewManag
 	@Override
 	public void reload() {
 		// reload views
-		if (importConfigurationView != null) {
-			importConfigurationView.reload();
+		if (importConfigurationViewController.getView() != null) {
+			importConfigurationViewController.getView().reload();
 		}
-		if (exportConfigurationView != null) {
-			exportConfigurationView.reload();
+		if (exportConfigurationViewController.getView() != null) {
+			exportConfigurationViewController.getView().reload();
 		}
-		if (globalConfigurationView != null) {
-			globalConfigurationView.reload();
+		if (globalConfigurationViewController.getView() != null) {
+			globalConfigurationViewController.getView().reload();
 		}
 	}
 

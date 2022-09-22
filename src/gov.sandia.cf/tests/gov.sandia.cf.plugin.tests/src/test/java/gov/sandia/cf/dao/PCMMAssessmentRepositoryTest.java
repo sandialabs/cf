@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +33,11 @@ import gov.sandia.cf.model.query.EntityFilter;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the PCMMAssessmentRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the PCMMAssessmentRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class PCMMAssessmentRepositoryTest extends AbstractTestRepository<PCMMAssessment, Integer, PCMMAssessmentRepository> {
 
 	/**

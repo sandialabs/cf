@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ import gov.sandia.cf.model.IImportable;
 import gov.sandia.cf.model.ImportActionType;
 import gov.sandia.cf.model.ImportSchema;
 import gov.sandia.cf.parts.dialogs.importation.ImportDialog;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
@@ -37,7 +39,8 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class ImportConfigurationViewController {
+public class ImportConfigurationViewController
+		extends AViewController<ConfigurationViewManager, ImportConfigurationView> {
 
 	/**
 	 * the logger
@@ -45,20 +48,24 @@ public class ImportConfigurationViewController {
 	private static final Logger logger = LoggerFactory.getLogger(ImportConfigurationViewController.class);
 
 	/**
-	 * The view
+	 * Instantiates a new import configuration view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param parent      the parent
 	 */
-	private ImportConfigurationView view;
-
-	ImportConfigurationViewController(ImportConfigurationView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	ImportConfigurationViewController(ConfigurationViewManager viewManager, Composite parent) {
+		super(viewManager);
+		super.setView(new ImportConfigurationView(this, parent, SWT.NONE));
 	}
 
 	/**
 	 * Ask the user for the changes to apply and import the approved changes for the
 	 * new schema.
-	 * 
-	 * @throws CredibilityException
+	 *
+	 * @param analysis     the analysis
+	 * @param importSchema the import schema
+	 * @return true, if successful
+	 * @throws CredibilityException the credibility exception
 	 */
 	boolean importSchema(Map<Class<?>, Map<ImportActionType, List<?>>> analysis, ImportSchema importSchema)
 			throws CredibilityException {
@@ -68,7 +75,7 @@ public class ImportConfigurationViewController {
 		Map<Class<?>, Map<ImportActionType, List<IImportable<?>>>> toChange = null;
 
 		// open import dialog
-		ImportDialog importDlg = new ImportDialog(view.getViewManager(), view.getShell(), analysis, importSchema);
+		ImportDialog importDlg = new ImportDialog(getViewManager(), getView().getShell(), analysis, importSchema);
 		toChange = importDlg.openDialog();
 
 		if (toChange != null) {
@@ -76,26 +83,26 @@ public class ImportConfigurationViewController {
 			if (toChange.isEmpty()) {
 
 				// Inform nothing to change
-				MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
+				MessageDialog.openWarning(getView().getShell(), RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
 						RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_IMPORT_NOTHING));
 
 			} else {
 
 				// import approved changes in the database
-				view.getViewManager().getAppManager().getService(IImportApplication.class).importChanges(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
-						toChange);
+				getViewManager().getAppManager().getService(IImportApplication.class).importChanges(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(), toChange);
 
 				// reload configuration
-				view.getViewManager().getCredibilityEditor().reloadConfiguration();
+				getViewManager().getCredibilityEditor().reloadConfiguration();
 
 				// save changes
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
-				view.getViewManager().reload();
+				getViewManager().reload();
 
 				// Inform success
-				MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
+				MessageDialog.openInformation(getView().getShell(),
+						RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
 						RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_IMPORT_SUCCESS));
 
 				changed = true;
@@ -116,13 +123,13 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextQoIPlanningSchemaPath();
-		File schemaFile = view.getTextQoIPlanningSchemaFile();
+		String schemaPath = getView().getTextQoIPlanningSchemaPath();
+		File schemaFile = getView().getTextQoIPlanningSchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportQoIPlanningApp.class).analyzeUpdateQoIPlanningConfiguration(schemaFile);
 
 			// import schema
@@ -130,13 +137,13 @@ public class ImportConfigurationViewController {
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(),
 						CFFeature.QOI_PLANNER, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -153,29 +160,29 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextPIRTSchemaPath();
-		File schemaFile = view.getTextPIRTSchemaFile();
+		String schemaPath = getView().getTextPIRTSchemaPath();
+		File schemaFile = getView().getTextPIRTSchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportPIRTApp.class)
-					.analyzeUpdatePIRTConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getPIRTConfiguration(), schemaFile);
+					.analyzeUpdatePIRTConfiguration(getViewManager().getCache().getModel(),
+							getViewManager().getPIRTConfiguration(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.PIRT);
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
-						CFFeature.PIRT, schemaPath);
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(), CFFeature.PIRT,
+						schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -192,29 +199,29 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextPCMMSchemaPath();
-		File schemaFile = view.getTextPCMMSchemaFile();
+		String schemaPath = getView().getTextPCMMSchemaPath();
+		File schemaFile = getView().getTextPCMMSchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportPCMMApp.class)
-					.analyzeUpdatePCMMConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getPCMMConfiguration(), schemaFile);
+					.analyzeUpdatePCMMConfiguration(getViewManager().getCache().getModel(),
+							getViewManager().getPCMMConfiguration(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.PCMM);
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
-						CFFeature.PCMM, schemaPath);
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(), CFFeature.PCMM,
+						schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -231,29 +238,29 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextUncertaintySchemaPath();
-		File schemaFile = view.getTextUncertaintySchemaFile();
+		String schemaPath = getView().getTextUncertaintySchemaPath();
+		File schemaFile = getView().getTextUncertaintySchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportUncertaintyApp.class)
-					.analyzeUpdateUncertaintyConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getUncertaintyConfiguration(), schemaFile);
+					.analyzeUpdateUncertaintyConfiguration(getViewManager().getCache().getModel(),
+							getViewManager().getUncertaintyConfiguration(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.UNCERTAINTY);
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(),
 						CFFeature.UNCERTAINTY, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -270,29 +277,29 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextRequirementsSchemaPath();
-		File schemaFile = view.getTextRequirementsSchemaFile();
+		String schemaPath = getView().getTextRequirementsSchemaPath();
+		File schemaFile = getView().getTextRequirementsSchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportSysRequirementApp.class)
-					.analyzeUpdateRequirementsConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getSystemRequirementConfiguration(), schemaFile);
+					.analyzeUpdateRequirementsConfiguration(getViewManager().getCache().getModel(),
+							getViewManager().getSystemRequirementConfiguration(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.SYSTEM_REQUIREMENTS);
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(),
 						CFFeature.SYSTEM_REQUIREMENTS, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -309,29 +316,29 @@ public class ImportConfigurationViewController {
 			return;
 		}
 
-		String schemaPath = view.getTextDecisionSchemaPath();
-		File schemaFile = view.getTextDecisionSchemaFile();
+		String schemaPath = getView().getTextDecisionSchemaPath();
+		File schemaFile = getView().getTextDecisionSchemaFile();
 
 		try {
 
 			// get analysis
-			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = view.getViewManager().getAppManager()
+			Map<Class<?>, Map<ImportActionType, List<?>>> analysis = getViewManager().getAppManager()
 					.getService(IImportDecisionApp.class)
-					.analyzeUpdateDecisionConfiguration(view.getViewManager().getCache().getModel(),
-							view.getViewManager().getCache().getDecisionSpecification(), schemaFile);
+					.analyzeUpdateDecisionConfiguration(getViewManager().getCache().getModel(),
+							getViewManager().getCache().getDecisionSpecification(), schemaFile);
 
 			// import schema
 			boolean changed = importSchema(analysis, ImportSchema.DECISION);
 
 			// add configuration file import history
 			if (changed)
-				view.getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
-						view.getViewManager().getCache().getModel(), view.getViewManager().getCache().getUser(),
+				getViewManager().getAppManager().getService(IGlobalApplication.class).addConfigurationFile(
+						getViewManager().getCache().getModel(), getViewManager().getCache().getUser(),
 						CFFeature.DECISION, schemaPath);
 
 		} catch (CredibilityException | IOException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERROR_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERROR_TITLE),
 					RscTools.getString(RscConst.ERR_CONF_IMPORTVIEW_IMPORT_ERROR_OCCURED)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -354,19 +361,22 @@ public class ImportConfigurationViewController {
 	}
 
 	/**
-	 * Check save need
+	 * Check save need.
+	 *
+	 * @throws CredibilityException the credibility exception
 	 */
 	private void checkSaveNeed() throws CredibilityException {
 
 		// check save need
-		if (view.getViewManager().isDirty()) {
-			boolean openConfirm = MessageDialog.openConfirm(view.getShell(),
+		if (getViewManager().isDirty()) {
+			boolean openConfirm = MessageDialog.openConfirm(getView().getShell(),
 					RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
 					RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_IMPORT_NEEDSAVE));
 			if (openConfirm) {
-				view.getViewManager().doSave();
+				getViewManager().doSave();
 			} else {
-				MessageDialog.openInformation(view.getShell(), RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
+				MessageDialog.openInformation(getView().getShell(),
+						RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_TITLE),
 						RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_IMPORT_CANCELLED));
 				throw new CredibilityException(RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_IMPORT_CANCELLED));
 			}

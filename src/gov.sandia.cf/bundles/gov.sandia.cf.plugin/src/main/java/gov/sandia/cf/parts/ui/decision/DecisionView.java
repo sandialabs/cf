@@ -41,10 +41,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.decision.IDecisionApplication;
 import gov.sandia.cf.model.Decision;
 import gov.sandia.cf.model.DecisionParam;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ButtonTheme;
@@ -73,16 +71,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
+public class DecisionView extends ACredibilitySubView<DecisionViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(DecisionView.class);
-
-	/**
-	 * Controller
-	 */
-	private DecisionViewController viewCtrl;
 
 	/**
 	 * The main table composite
@@ -104,15 +97,13 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 	private Map<TreeItem, TreeEditor> deleteEditors;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param viewManager The view manager
-	 * @param style       The view style
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
+	 * @param style          The view style
 	 */
-	public DecisionView(DecisionViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
-
-		this.viewCtrl = new DecisionViewController(this);
+	public DecisionView(DecisionViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		this.openEditors = new HashMap<>();
@@ -146,44 +137,7 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 	 */
 	@Override
 	public void reload() {
-
-		logger.debug("Reload Decision view"); //$NON-NLS-1$
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		List<Decision> decisionList = new ArrayList<>();
-
-		// Get data
-		if (model != null) {
-			// Get list of decision
-			decisionList = this.getViewManager().getAppManager().getService(IDecisionApplication.class)
-					.getDecisionRootByModel(model);
-
-			// reload decision spec
-			getViewManager().getCache().reloadDecisionSpecification();
-		}
-
-		// Get expanded elements
-		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
-		if (treeViewer != null) {
-			initialization = false;
-			elements = treeViewer.getExpandedElements();
-		}
-
-		// Refresh the table
-		refreshMainTable();
-
-		// Set input
-		treeViewer.setInput(decisionList);
-
-		// Set expanded elements
-		if (initialization) {
-			treeViewer.expandAll();
-		} else {
-			treeViewer.setExpandedElements(elements);
-		}
-		treeViewer.refresh();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -238,8 +192,9 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		btnAddDecisionOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_ADD);
 		btnAddDecisionOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddDecisionOptions.put(ButtonTheme.OPTION_DATA, btnAddDecisionData);
-		btnAddDecisionOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.addDecision());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER, btnAddDecisionOptions);
+		btnAddDecisionOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().addDecision());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
+				btnAddDecisionOptions);
 	}
 
 	/**
@@ -260,8 +215,8 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -270,14 +225,14 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.ANALYST_DECISION);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();
@@ -326,9 +281,10 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		columnProperties.add(RscTools.getString(RscConst.MSG_DECISION_COLUMN_TITLE));
 
 		// Columns - Parameters
-		for (DecisionParam parameter : getViewManager().getCache().getDecisionSpecification().getParameters()) {
+		for (DecisionParam parameter : getViewController().getViewManager().getCache().getDecisionSpecification()
+				.getParameters()) {
 			TreeViewerColumn treeCol = TableFactory.createGenericParamTreeColumn(parameter, treeViewer,
-					new GenericTableLabelProvider(parameter, getViewManager()) {
+					new GenericTableLabelProvider(parameter, getViewController().getViewManager()) {
 
 						@Override
 						public Color getBackground(Object element) {
@@ -398,13 +354,13 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 
 		// Tree - Hint
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		tree.setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		tree.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Set width
@@ -449,12 +405,12 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 				if (!addEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnAddItem = TableFactory.createAddButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnAddItem = TableFactory
+							.createAddButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// Footer buttons - Delete- Listener
 					btnAddItem.addListener(SWT.Selection, event -> {
-						viewCtrl.addDecision((Decision) element);
+						getViewController().addDecision((Decision) element);
 						treeViewer.refresh(item);
 					});
 
@@ -492,11 +448,12 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 				if (element instanceof Decision && !openEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createOpenButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnViewItem = TableFactory
+							.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// Open - Listener
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.openAllDecisionValues((Decision) element));
+					btnViewItem.addListener(SWT.Selection,
+							event -> getViewController().openAllDecisionValues((Decision) element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -532,11 +489,11 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 				if (!viewEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createViewButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnViewItem = TableFactory
+							.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// View - Listener
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.viewElement(element));
+					btnViewItem.addListener(SWT.Selection, event -> getViewController().viewElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -571,11 +528,11 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 				if (!editEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnEditItem = TableFactory.createEditButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnEditItem = TableFactory
+							.createEditButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// Footer buttons - Delete- Listener
-					btnEditItem.addListener(SWT.Selection, event -> viewCtrl.updateElement(element));
+					btnEditItem.addListener(SWT.Selection, event -> getViewController().updateElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -611,10 +568,10 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 
 					// Button
 					ButtonTheme btnDeleteItem = TableFactory
-							.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// Footer buttons - Delete- Listener
-					btnDeleteItem.addListener(SWT.Selection, event -> viewCtrl.deleteElement(element));
+					btnDeleteItem.addListener(SWT.Selection, event -> getViewController().deleteElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -658,7 +615,7 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		// Tree - Listener - Double Click
 		tree.addListener(SWT.MouseDoubleClick, event -> {
 			if (event.type == SWT.MouseDoubleClick) {
-				viewCtrl.viewElement(getSelected());
+				getViewController().viewElement(getSelected());
 			}
 		});
 
@@ -696,13 +653,14 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
-		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new DecisionDropSupport(viewCtrl, treeViewer));
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
+				new DecisionDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 
 		logger.debug("Refresh Decision main table"); //$NON-NLS-1$
 
@@ -786,13 +744,13 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 			Decision decision = (Decision) element;
 
 			if (decision.getParent() != null && decision.getChildren() != null && !decision.getChildren().isEmpty()) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			} else if (decision.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
@@ -811,11 +769,11 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 		if (element instanceof Decision) {
 			Decision decision = (Decision) element;
 			if (decision.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 
@@ -845,5 +803,45 @@ public class DecisionView extends ACredibilitySubView<DecisionViewManager> {
 			return null;
 		}
 		return treeViewer.getIdColumnText(decision);
+	}
+
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		if (treeViewer != null) {
+			elements = treeViewer.getExpandedElements();
+		}
+		return elements;
+	}
+
+	/**
+	 * Sets the tree expanded elements.
+	 *
+	 * @param elements the new tree expanded elements
+	 */
+	void setTreeExpandedElements(Object[] elements) {
+		if (treeViewer != null) {
+			if (elements == null || elements.length == 0) {
+				treeViewer.expandAll();
+			} else {
+				treeViewer.setExpandedElements(elements);
+			}
+			treeViewer.refresh();
+		}
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
 	}
 }

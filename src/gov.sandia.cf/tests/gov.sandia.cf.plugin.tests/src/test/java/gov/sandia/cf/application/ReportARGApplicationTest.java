@@ -29,8 +29,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -74,7 +72,6 @@ import gov.sandia.cf.tools.WorkspaceTools;
  * 
  * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class ReportARGApplicationTest extends AbstractTestApplication {
 
 	/**
@@ -824,7 +821,7 @@ class ReportARGApplicationTest extends AbstractTestApplication {
 				.generateHtmlParagraph("<h1>My title</h1>\n\nMy content"); //$NON-NLS-1$
 		// Tests
 		assertEquals(YmlARGStructure.ARG_STRUCTURE_N_HTML_KEY, paragraph.get(YmlARGStructure.ARG_STRUCTURE_N_KEY));
-		assertEquals("<h1>My title</h1>\n\nMy content", paragraph.get(YmlARGStructure.ARG_STRUCTURE_HTML_STRING_KEY)); //$NON-NLS-1$
+		assertEquals("<h1>My title</h1>My content", paragraph.get(YmlARGStructure.ARG_STRUCTURE_HTML_STRING_KEY)); //$NON-NLS-1$
 	}
 
 	@Test

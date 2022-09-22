@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +24,10 @@ import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.tools.WorkspaceTools;
 
 /**
- * @author Didier Verstraete
+ * The Class YmlReaderPIRTSchemaTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class YmlReaderPIRTSchemaTest extends AbstractConfigurationTest {
 
 	/**

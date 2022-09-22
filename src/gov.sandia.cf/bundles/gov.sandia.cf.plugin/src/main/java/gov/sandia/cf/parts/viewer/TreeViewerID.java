@@ -19,6 +19,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 
+import gov.sandia.cf.model.ISortableByIdEntity;
+import gov.sandia.cf.model.comparator.StringWithNumberAndNullableComparator;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.tools.IDTools;
 import gov.sandia.cf.tools.RscConst;
@@ -176,9 +178,19 @@ public class TreeViewerID extends TreeViewerHideSelection {
 			}
 
 			if (elements != null && !elements.isEmpty()) {
-				elements = elements.stream().sorted(
-						Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())))
-						.collect(Collectors.toList());
+
+				// sort
+				if (element instanceof ISortableByIdEntity) {
+					elements = elements.stream().map(ISortableByIdEntity.class::cast)
+							.sorted(Comparator.comparing(ISortableByIdEntity::getGeneratedId,
+									new StringWithNumberAndNullableComparator()))
+							.collect(Collectors.toList());
+				} else {
+					elements = elements.stream().sorted(
+							Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())))
+							.collect(Collectors.toList());
+				}
+
 				int index = elements.indexOf(element);
 				if (index < 0) {
 					index = elements.size();
@@ -218,8 +230,19 @@ public class TreeViewerID extends TreeViewerHideSelection {
 				}
 
 				if (elements != null && !elements.isEmpty()) {
-					elements.sort(
-							Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())));
+					
+					// sort
+					if (element instanceof ISortableByIdEntity) {
+						elements = elements.stream().map(ISortableByIdEntity.class::cast)
+								.sorted(Comparator.comparing(ISortableByIdEntity::getGeneratedId,
+										new StringWithNumberAndNullableComparator()))
+								.collect(Collectors.toList());
+					} else {
+						elements = elements.stream().sorted(
+								Comparator.comparing(Objects::toString, Comparator.nullsFirst(Comparator.naturalOrder())))
+								.collect(Collectors.toList());
+					}
+					
 					int index = elements.indexOf(element);
 					if (index >= 0) {
 						id = index + 1;

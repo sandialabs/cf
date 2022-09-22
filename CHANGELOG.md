@@ -1,6 +1,50 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.2]
+
+### Added
+- Logs: add logs into the Eclipse "Error Log" view + add preference to set Log level
+- Extension point: add cfPropertiesDefinition extension point to fill ARG setup
+- References: add "Open" button to view the link content
+- Reporting: add asynchronous loading of ARG data in Report View
+- Reporting: add generate report into an Eclipse job
+- Reporting: add the possibility to cancel the report generation job
+
+### Changed
+- add support for ARG 1.2.3
+
+### Fixed
+- FIX: latency in Report view and Report generation:
+- FIX: Report view collapsed/expanded elements not resizing the global view
+- FIX: resizing rich text editors horizontally cut off content
+- FIX: Rich text formatting not working in report
+- FIX: PCMM planning "Add Action Items" fails with unhandled Exception
+- FIX: analyst decision wrong ID generation
+- FIX: Richtext headings doesn't render break lines 
+- FIX: bug in all trees order if one element is deleted
+- FIX: Report view does not match PIRT view items
+- FIX: Reordering of the sub-sub-elements is not working
+- FIX: Open references button is always enabled even if there is no reference
+- FIX: Report is missing Uncertainty Inventory and PCMM Planning content
+- FIX: PCMM Role is not the same in PCMM Planning and PCMM (if changed)
+- FIX: bug in Uncertainty import (fixed for System Requirements and Analyst Decisions)
+- FIX: handle "param role is empty or null" for PCMM assessments
+- FIX: Open Reference with External browser option
+- FIX: Uncertainty Reference invalid path was not mandatory
+- FIX: only warn intended purpose link
+- FIX: PCMM evidence path empty did not display an error message
+- FIX: only display once PCMM warning for aggregation and stamp
+- FIX: put only one button to "Close" view dialogs
+- FIX: get invalid path in Eclipse Workspace
+- FIX: NullPointerException on set richtext text null
+- FIX: intended purpose helper not displayed in Intended Purpose view
+- FIX: ARG version is always null
+
+### Security
+- Compatibility with java 11
+
+
 ## [1.0.1]
 
 ### Added

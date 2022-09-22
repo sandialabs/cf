@@ -12,14 +12,12 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
 import org.eclipse.swt.graphics.Image;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 /**
- * @author Didier Verstraete
+ * The Class IconThemeTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class IconThemeTest {
 
 	@Test

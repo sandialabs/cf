@@ -14,14 +14,16 @@ import java.lang.reflect.InvocationTargetException;
 import javax.persistence.Id;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gov.sandia.cf.model.Model;
 
-@RunWith(JUnitPlatform.class)
+/**
+ * The Class ReflectionTest.
+ *
+ * @author Didier Verstraete
+ */
 class ReflectionTest {
 
 	/**

@@ -9,11 +9,12 @@
 	<parent>
 		<groupId>gov.sandia.cf</groupId>
 		<artifactId>gov.sandia.cf.root</artifactId>
-		<version>1.0.1</version>
+		<version>1.0.2</version>
 	</parent>
 
 	<modules>
 		<module>gov.sandia.cf.plugin</module>
 		<module>gov.sandia.cf.plugin.help</module>
+		<module>gov.sandia.cf.extension.predefined_props.test</module>
 	</modules>
 </project>

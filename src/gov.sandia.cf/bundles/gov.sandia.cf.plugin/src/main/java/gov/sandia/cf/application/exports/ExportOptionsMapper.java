@@ -332,6 +332,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the user list
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<User> getUserList(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.USER_LIST)
@@ -349,6 +350,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM role list
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<Role> getRoleList(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PCMM_ROLE_LIST)
@@ -383,6 +385,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the decision parameters
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<DecisionParam> getDecisionParameters(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.DECISION_PARAMETERS)
@@ -400,6 +403,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the decision values
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<Decision> getDecisionValues(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.DECISION_LIST)
@@ -417,6 +421,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the system requirement parameters
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<SystemRequirementParam> getSystemRequirementParameters(
 			final Map<ExportOptions, Object> exportOptions) {
 
@@ -435,6 +440,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the system requirement values
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<SystemRequirement> getSystemRequirementValues(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.SYSTEM_REQUIREMENT_LIST)
@@ -452,6 +458,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the uncertainty parameters
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<UncertaintyParam> getUncertaintyParameters(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.UNCERTAINTY_PARAMETERS)
@@ -469,6 +476,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the uncertainty groups
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<Uncertainty> getUncertaintyGroups(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.UNCERTAINTY_GROUP_LIST)
@@ -486,6 +494,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the qoi list
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<QuantityOfInterest> getQoiList(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PIRT_QOI_LIST)
@@ -503,6 +512,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM element list
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMElement> getPCMMElementList(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PCMM_ELEMENTS)
@@ -554,6 +564,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM planning parameters
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMPlanningParam> getPCMMPlanningParameters(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PCMM_PLANNING_PARAMETERS)
@@ -570,6 +581,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM planning questions
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMPlanningQuestion> getPCMMPlanningQuestions(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PCMM_PLANNING_QUESTIONS)
@@ -683,6 +695,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM planning values
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMPlanningValue> getPCMMPlanningValues(final Map<ExportOptions, Object> exportOptions) {
 
 		if (exportOptions != null && exportOptions.containsKey(ExportOptions.PCMM_PLANNING_PARAMETERS_VALUES)
@@ -703,6 +716,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM planning question values
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMPlanningQuestionValue> getPCMMPlanningQuestionValues(
 			final Map<ExportOptions, Object> exportOptions) {
 
@@ -724,6 +738,7 @@ public class ExportOptionsMapper {
 	 * @param exportOptions the export options
 	 * @return the PCMM planning table items
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PCMMPlanningTableItem> getPCMMPlanningTableItems(
 			final Map<ExportOptions, Object> exportOptions) {
 

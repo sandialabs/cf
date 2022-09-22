@@ -224,4 +224,12 @@ public abstract class AHelperWidget extends Composite {
 		}
 	}
 
+	/**
+	 * Gets the notification.
+	 *
+	 * @return the notification
+	 */
+	public Notification getNotification() {
+		return notification;
+	}
 }

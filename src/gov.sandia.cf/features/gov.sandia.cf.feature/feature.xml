@@ -2,7 +2,7 @@
 <feature
       id="gov.sandia.cf.feature"
       label="Credibility Framework"
-      version="1.0.1"
+      version="1.0.2"
       provider-name="SANDIA NATIONAL LABORATORIES">
 
    <description>
@@ -118,14 +118,14 @@ Except as expressly stated in Sections 2(a) and 2(b) above, Recipient receives n
          id="gov.sandia.cf.plugin"
          download-size="0"
          install-size="0"
-         version="1.0.1"
+         version="1.0.2"
          unpack="false"/>
 
    <plugin
          id="gov.sandia.cf.plugin.help"
          download-size="0"
          install-size="0"
-         version="1.0.1"
+         version="1.0.2"
          unpack="false"/>
 
    <plugin

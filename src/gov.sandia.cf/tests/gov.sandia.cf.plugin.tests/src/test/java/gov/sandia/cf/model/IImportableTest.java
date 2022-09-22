@@ -6,6 +6,7 @@ package gov.sandia.cf.model;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,6 +24,9 @@ import org.reflections.Reflections;
 class IImportableTest {
 
 	/**
+	 * Gets the model instance.
+	 *
+	 * @param modelClass the model class
 	 * @return an instance of the MODEL
 	 */
 	IImportable<?> getModelInstance(Class<? extends IImportable> modelClass) {
@@ -30,8 +34,9 @@ class IImportableTest {
 		IImportable<?> instance = null;
 
 		try {
-			instance = modelClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			instance = modelClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail("Failed with " + modelClass + e.getMessage()); //$NON-NLS-1$
 		}
 

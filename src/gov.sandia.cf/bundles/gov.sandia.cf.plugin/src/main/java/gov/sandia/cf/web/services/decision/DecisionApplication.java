@@ -81,7 +81,7 @@ public class DecisionApplication extends AApplication implements IDecisionApplic
 	}
 
 	@Override
-	public void deleteDecision(Decision decision) throws CredibilityException {
+	public void deleteDecision(Decision decision, User user) throws CredibilityException {
 		// TODO Auto-generated method stub
 
 	}

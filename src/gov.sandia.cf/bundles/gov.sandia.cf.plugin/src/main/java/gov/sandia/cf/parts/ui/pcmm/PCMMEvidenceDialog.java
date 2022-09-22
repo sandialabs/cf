@@ -16,14 +16,11 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,9 +33,8 @@ import gov.sandia.cf.model.NotificationType;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMSubelement;
-import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.constants.ViewMode;
-import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.dialogs.GenericCFScrolledDialog;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.parts.widgets.LinkWidget;
 import gov.sandia.cf.parts.widgets.RichTextWidget;
@@ -54,7 +50,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
+public class PCMMEvidenceDialog extends GenericCFScrolledDialog<PCMMViewManager> {
 
 	/**
 	 * the logger
@@ -200,66 +196,38 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 	protected void createButtonsForButtonBar(Composite parent) {
 		String okButtonName = (buttonName != null && !buttonName.isEmpty()) ? buttonName : IDialogConstants.OK_LABEL;
 		createButton(parent, IDialogConstants.OK_ID, okButtonName, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		if (!ViewMode.VIEW.equals(this.mode)) {
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Control createDialogArea(Composite parent) {
-
-		int evidenceDialogWidth = 1200;
+	protected Composite createDialogScrolledContent(Composite parent) {
 
 		logger.debug("Create Evidence dialog area"); //$NON-NLS-1$
 
-		Composite container = (Composite) super.createDialogArea(parent);
+		int evidenceDialogWidth = 1200;
 
-		// scroll container
-		ScrolledComposite scrollContainer = new ScrolledComposite(container, SWT.V_SCROLL);
-		GridData scrollScData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scrollScData.widthHint = evidenceDialogWidth;
-		scrollScData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		scrollContainer.setLayoutData(scrollScData);
-		scrollContainer.setLayout(new GridLayout());
-
-		// form container
-		Composite formContainer = new Composite(scrollContainer, SWT.NONE);
-		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = evidenceDialogWidth;
-		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		formContainer.setLayoutData(scData);
-		GridLayout gridLayout = new GridLayout(2, false);
-		formContainer.setLayout(gridLayout);
+		Composite content = createDefaultDialogScrolledContent(parent);
+		GridData gridData = (GridData) content.getLayoutData();
+		gridData.widthHint = evidenceDialogWidth;
 
 		// Select content type
 		if (ViewMode.VIEW.equals(mode)) {
-			renderNonEditableContent(formContainer);
+			renderNonEditableContent(content);
 		} else {
-			renderEditableContent(formContainer);
+			renderEditableContent(content);
 		}
 
-		// set scroll container size
-		scrollContainer.setContent(formContainer);
-		scrollContainer.setExpandHorizontal(true);
-		scrollContainer.setExpandVertical(true);
-		scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		formContainer.addListener(SWT.Resize,
-				e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-		formContainer
-				.addPaintListener(e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-
-		// Load data
-		loadData();
-
-		// Return Control
-		return container;
+		return content;
 	}
 
-	/**
-	 * Load data
-	 */
-	private void loadData() {
+	/** {@inheritDoc} */
+	@Override
+	protected void loadDataAfterCreation() {
 
 		if (evidence == null) {
 			return;
@@ -461,17 +429,17 @@ public class PCMMEvidenceDialog extends GenericCFSmallDialog<PCMMViewManager> {
 		boolean isValid = true;
 		evidenceLink.clearHelper();
 
-		// Check if evidence value is valid
-		isValid &= evidenceLink.isValid();
-
 		// Check if evidence is not empty
 		if (StringUtils.isBlank(evidenceLink.getValue())) {
 			isValid = false;
 			evidenceLink.setHelper(
 					NotificationFactory.getNewError(RscTools.getString(RscConst.ERR_GENERICPARAM_PARAMETER_REQUIRED,
 							RscTools.getString(RscConst.MSG_PCMMEVID_ITEM_TITLE))));
+		} else {
+			// Check if evidence value is valid
+			evidenceLink.validateLink();
+			isValid &= evidenceLink.isValid();
 		}
-		evidenceLink.validateLink();
 
 		// Check if evidence with the same path were found
 		if (isValid) {

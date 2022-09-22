@@ -12,8 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import gov.sandia.cf.constants.configuration.YmlGenericSchema;
 import gov.sandia.cf.model.FormFieldType;
@@ -33,7 +31,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class GenericParameterServiceTest extends AbstractTestClientService {
 
 	/*******************************
@@ -385,8 +382,7 @@ class GenericParameterServiceTest extends AbstractTestClientService {
 		value.setParameter(parameter1);
 
 		// the generic value to compare with
-		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value,
-				null);
+		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value, null);
 
 		assertNull(returned);
 
@@ -404,8 +400,7 @@ class GenericParameterServiceTest extends AbstractTestClientService {
 		value.setParameter(parameter1);
 
 		// the generic value to compare with
-		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value,
-				null);
+		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value, null);
 
 		assertNotNull(returned);
 		assertTrue(returned.isError());
@@ -425,8 +420,7 @@ class GenericParameterServiceTest extends AbstractTestClientService {
 		GenericValue<TestGenericParam, ?> value = TestEntityFactory.getNewAnonymousGenericValue();
 		value.setParameter(parameter1);
 
-		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value,
-				null);
+		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value, null);
 
 		assertNotNull(returned);
 		assertFalse(returned.isError());
@@ -444,8 +438,7 @@ class GenericParameterServiceTest extends AbstractTestClientService {
 		GenericValue<TestGenericParam, ?> value = TestEntityFactory.getNewAnonymousGenericValue();
 		value.setParameter(parameter1);
 
-		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value,
-				null);
+		Notification returned = getClientSrvMgr().getService(IGenericParameterService.class).checkValid(value, null);
 
 		assertNull(returned);
 

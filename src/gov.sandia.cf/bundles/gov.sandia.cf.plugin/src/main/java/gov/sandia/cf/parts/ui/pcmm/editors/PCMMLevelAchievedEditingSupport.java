@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMLevel;
 import gov.sandia.cf.model.PCMMSubelement;
-import gov.sandia.cf.parts.ui.pcmm.PCMMAssessView;
+import gov.sandia.cf.parts.ui.pcmm.PCMMAssessViewController;
 import gov.sandia.cf.parts.viewer.editors.CFComboBoxCellEditor;
 
 /**
@@ -32,7 +32,7 @@ public class PCMMLevelAchievedEditingSupport extends EditingSupport {
 	/**
 	 * The assessment view
 	 */
-	private PCMMAssessView view;
+	private PCMMAssessViewController viewController;
 	/**
 	 * The property edited by this editor
 	 */
@@ -54,13 +54,14 @@ public class PCMMLevelAchievedEditingSupport extends EditingSupport {
 	/**
 	 * The constructor
 	 * 
-	 * @param assessView   the assess view
-	 * @param viewer       the column viewer
-	 * @param propertyName the property name
+	 * @param assessViewController the assess view controller
+	 * @param viewer               the column viewer
+	 * @param propertyName         the property name
 	 */
-	public PCMMLevelAchievedEditingSupport(PCMMAssessView assessView, ColumnViewer viewer, String propertyName) {
+	public PCMMLevelAchievedEditingSupport(PCMMAssessViewController assessViewController, ColumnViewer viewer,
+			String propertyName) {
 		super(viewer);
-		this.view = assessView;
+		this.viewController = assessViewController;
 		this.propertyName = propertyName;
 		this.viewer = viewer;
 		this.cellEditors = new HashMap<>();
@@ -188,7 +189,7 @@ public class PCMMLevelAchievedEditingSupport extends EditingSupport {
 	 */
 	@Override
 	protected Object getValue(Object element) {
-		PCMMAssessment assessment = this.view.getAssessmentsBySubelt().get(element);
+		PCMMAssessment assessment = this.viewController.getAssessmentsBySubelt().get(element);
 		Integer value = -1;
 		if (assessment != null && comboItems.get(element) != null) {
 			value = comboItems.get(element).get(assessment.getLevel());
@@ -218,8 +219,8 @@ public class PCMMLevelAchievedEditingSupport extends EditingSupport {
 	/**
 	 * @return the assess view
 	 */
-	public PCMMAssessView getView() {
-		return view;
+	public PCMMAssessViewController getViewController() {
+		return viewController;
 	}
 
 	/**

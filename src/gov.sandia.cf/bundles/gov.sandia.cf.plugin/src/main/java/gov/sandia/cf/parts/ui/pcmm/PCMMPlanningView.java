@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -53,17 +52,13 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
-import gov.sandia.cf.constants.CredibilityFrameworkConstants;
-import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.FormFieldType;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.GenericParameterSelectValue;
 import gov.sandia.cf.model.GenericValue;
 import gov.sandia.cf.model.GenericValueTaggable;
 import gov.sandia.cf.model.IAssessable;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMPlanningParam;
@@ -102,37 +97,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMPlanningView extends ACredibilityPCMMView {
+public class PCMMPlanningView extends ACredibilityPCMMView<PCMMPlanningViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PCMMPlanningView.class);
-
-	/**
-	 * Controller
-	 */
-	private PCMMPlanningViewController viewCtrl;
-
-	/**
-	 * the pcmm element
-	 */
-	private PCMMElement elementSelected;
-	/**
-	 * the pcmm subelements expanded by the user
-	 */
-	private Set<PCMMSubelement> expandedSubelements;
-	/**
-	 * the pcmm elements
-	 */
-	private List<PCMMElement> elements;
-	/**
-	 * the pcmm planning parameters
-	 */
-	private List<PCMMPlanningParam> planningParameters;
-	/**
-	 * the pcmm planning questions
-	 */
-	private List<PCMMPlanningQuestion> planningQuestions;
 
 	/**
 	 * The aggregate table composite
@@ -144,27 +113,26 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	private Map<IAssessable, ExpandItem> expandItems;
 
+	/**
+	 * the pcmm subelements expanded by the user
+	 */
+	private Set<PCMMSubelement> expandedSubelements;
+
 	private static final String DATA_SUBELEMENT = "SUBELEMENT"; //$NON-NLS-1$
 
 	private static final String TREE_ACTION_COLUMNS = "TREE_ACTION_COLUMNS"; //$NON-NLS-1$
 
 	/**
-	 * The constructor
-	 * 
-	 * @param parentView      the parent view
-	 * @param elementSelected the element selected
-	 * @param style           the style
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
+	 * @param style          the style
 	 */
-	public PCMMPlanningView(PCMMViewManager parentView, PCMMElement elementSelected, int style) {
-		super(parentView, parentView, style);
-		this.elementSelected = elementSelected;
+	public PCMMPlanningView(PCMMPlanningViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
-		this.viewCtrl = new PCMMPlanningViewController(this);
-
-		// lists and maps instantiation
-		expandedSubelements = new HashSet<>();
-		elements = new ArrayList<>();
 		expandItems = new HashMap<>();
+		expandedSubelements = new HashSet<>();
 
 		// create the view
 		renderPage();
@@ -196,18 +164,17 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		logger.debug("Creating PCMM view components"); //$NON-NLS-1$
 
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		// Reset title
 		setTitle(RscTools.getString(RscConst.MSG_PCMMPLANNING_TITLE,
-				this.elementSelected != null ? this.elementSelected.getName() : RscTools.empty()));
+				elementSelected != null ? elementSelected.getName() : RscTools.empty()));
 
 		// Render main table
 		renderMainWidgetComposite();
 
 		// Render footer
 		renderFooter();
-
-		// load view datas
-		loadDatas();
 	}
 
 	/**
@@ -223,14 +190,14 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		compositeWidget.setLayoutData(gridData);
 		compositeWidget.setLayout(gridLayout);
-		compositeWidget.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		compositeWidget.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainWidget() {
+	void refreshMainWidget() {
 
 		ViewTools.disposeChildren(compositeWidget);
 
@@ -241,6 +208,12 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		// relayout the table composite
 		compositeWidget.layout();
+
+		// expand and select the selected element in the viewer input
+		PCMMElement elementSelected = getViewController().getElementSelected();
+		if (elementSelected != null && expandItems.containsKey(elementSelected)) {
+			expandItems.get(elementSelected).setExpanded(true);
+		}
 	}
 
 	/**
@@ -248,8 +221,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	private void renderMainWidget() {
 
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		if (elementSelected != null) {
-			if (PCMMMode.SIMPLIFIED.equals(getViewManager().getPCMMConfiguration().getMode())) {
+			if (PCMMMode.SIMPLIFIED.equals(getViewController().getViewManager().getPCMMConfiguration().getMode())) {
 
 				// scroll container
 				ScrolledComposite scrollContainer = new ScrolledComposite(compositeWidget, SWT.V_SCROLL);
@@ -262,7 +237,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				GridData gridDataContent = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 				content.setLayoutData(gridDataContent);
 				content.setLayout(new GridLayout());
-				content.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				content.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
 
 				// create content
@@ -287,15 +262,16 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 					content.setSize(computeSize);
 				});
 
-			} else if (PCMMMode.DEFAULT.equals(getViewManager().getPCMMConfiguration().getMode())
+			} else if (PCMMMode.DEFAULT.equals(getViewController().getViewManager().getPCMMConfiguration().getMode())
 					&& elementSelected.getSubElementList() != null) {
 
 				// Sub Expand bar
 				boolean withBorder = false;
 				boolean grabVerticalSpace = true;
-				ExpandBar subBarHeader = ExpandBarTheme.createExpandBar(compositeWidget, getViewManager().getRscMgr(),
-						withBorder, grabVerticalSpace, SWT.V_SCROLL | SWT.FILL);
-				FontTools.setBoldFont(getViewManager().getRscMgr(), subBarHeader);
+				ExpandBar subBarHeader = ExpandBarTheme.createExpandBar(compositeWidget,
+						getViewController().getViewManager().getRscMgr(), withBorder, grabVerticalSpace,
+						SWT.V_SCROLL | SWT.FILL);
+				FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), subBarHeader);
 
 				// create an expand bar item for each subelement
 				int index = 0;
@@ -307,7 +283,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 					GridData gridDataSubItemContent = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 					subItemContent.setLayoutData(gridDataSubItemContent);
 					subItemContent.setLayout(new GridLayout());
-					subItemContent.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+					subItemContent.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 							ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT)));
 
 					// Expand bar item - Title
@@ -403,23 +379,29 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	private void renderPlanningQuestions(Composite parent, IAssessable assessable) {
 
+		List<PCMMPlanningQuestion> planningQuestions = getViewController().getPlanningQuestions();
+
 		// render questions
 		if (planningQuestions != null && parent != null && !parent.isDisposed() && assessable != null) {
 
 			// render content
-			if (isFromCurrentElement(assessable) && !getViewManager().isTagMode()) {
-				if (PCMMMode.SIMPLIFIED.equals(getViewManager().getCache().getPCMMSpecification().getMode())) {
+			if (isFromCurrentElement(assessable) && !getViewController().getViewManager().isTagMode()) {
+				if (PCMMMode.SIMPLIFIED
+						.equals(getViewController().getViewManager().getCache().getPCMMSpecification().getMode())) {
 					planningQuestions.stream().filter(q -> assessable.equals(q.getElement()))
 							.forEach(question -> renderEditableField(parent, question, assessable));
-				} else if (PCMMMode.DEFAULT.equals(getViewManager().getCache().getPCMMSpecification().getMode())) {
+				} else if (PCMMMode.DEFAULT
+						.equals(getViewController().getViewManager().getCache().getPCMMSpecification().getMode())) {
 					planningQuestions.stream().filter(q -> assessable.equals(q.getSubelement()))
 							.forEach(question -> renderEditableField(parent, question, assessable));
 				}
 			} else {
-				if (PCMMMode.SIMPLIFIED.equals(getViewManager().getCache().getPCMMSpecification().getMode())) {
+				if (PCMMMode.SIMPLIFIED
+						.equals(getViewController().getViewManager().getCache().getPCMMSpecification().getMode())) {
 					planningQuestions.stream().filter(q -> assessable.equals(q.getElement()))
 							.forEach(question -> renderNonEditableField(parent, question, assessable));
-				} else if (PCMMMode.DEFAULT.equals(getViewManager().getCache().getPCMMSpecification().getMode())) {
+				} else if (PCMMMode.DEFAULT
+						.equals(getViewController().getViewManager().getCache().getPCMMSpecification().getMode())) {
 					planningQuestions.stream().filter(q -> assessable.equals(q.getSubelement()))
 							.forEach(question -> renderNonEditableField(parent, question, assessable));
 				}
@@ -435,11 +417,13 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	private void renderPlanningFields(Composite parent, IAssessable assessable) {
 
+		List<PCMMPlanningParam> planningParameters = getViewController().getPlanningParameters();
+
 		// render parameters
 		if (planningParameters != null && parent != null && !parent.isDisposed()) {
 
 			// render content
-			if (isFromCurrentElement(assessable) && !getViewManager().isTagMode()) {
+			if (isFromCurrentElement(assessable) && !getViewController().getViewManager().isTagMode()) {
 				planningParameters.stream().forEach(field -> renderEditableField(parent, field, assessable));
 			} else {
 				planningParameters.stream().forEach(field -> renderNonEditableField(parent, field, assessable));
@@ -449,9 +433,9 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 	/**
 	 * Render Non Editable field.
-	 * 
+	 *
 	 * @param parent     the parent composite
-	 * @param column     the field to display
+	 * @param field      the field
 	 * @param assessable the pcmm element or subelement concerned
 	 */
 	private void renderNonEditableField(Composite parent, GenericParameter<?> field, IAssessable assessable) {
@@ -468,8 +452,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 				// value
 				Label text = FormFactory.createNonEditableText(content,
-						viewCtrl.getPlanningValueAsText(field, assessable));
-				text.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+						getViewController().getPlanningValueAsText(field, assessable));
+				text.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 			} else if (FormFieldType.SELECT.getType().equals(field.getType())) {
@@ -483,7 +467,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				FormFactory.createLabel(content, field.getName());
 
 				// get combo value if it exists and set it
-				GenericValue<?, ?> planningValue = viewCtrl.getPlanningValue(field, assessable);
+				GenericValue<?, ?> planningValue = getViewController().getPlanningValue(field, assessable);
 				String stringValue = null;
 				if (planningValue != null && planningValue.getValue() != null && !planningValue.getValue().isEmpty()
 						&& planningValue.getParameter() != null
@@ -495,16 +479,16 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 				// value
 				Label text = FormFactory.createNonEditableText(content, stringValue);
-				text.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				text.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 			} else if (FormFieldType.RICH_TEXT.getType().equals(field.getType())) {
 
 				// text comments
-				RichTextWidget richText = FormFactory.createRichTextCollapsible(getViewManager().getRscMgr(), parent,
-						field.getName(), field, false);
-				richText.setValue(viewCtrl.getPlanningValueAsText(field, assessable));
-				richText.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+				RichTextWidget richText = FormFactory.createRichTextCollapsible(
+						getViewController().getViewManager().getRscMgr(), parent, field.getName(), field, false);
+				richText.setValue(getViewController().getPlanningValueAsText(field, assessable));
+				richText.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 				richText.setEnabled(false);
 
@@ -518,9 +502,9 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 	/**
 	 * Render editable field.
-	 * 
+	 *
 	 * @param parent     the parent composite
-	 * @param column     the field to display
+	 * @param field      the field
 	 * @param assessable the pcmm element or subelement concerned
 	 */
 	private void renderEditableField(Composite parent, GenericParameter<?> field, IAssessable assessable) {
@@ -546,10 +530,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * Render Text field
-	 * 
+	 * Render Text field.
+	 *
 	 * @param parent     the parent composite
-	 * @param column     the field to display
+	 * @param field      the field
 	 * @param assessable the pcmm element or subelement concerned
 	 */
 	private void renderEditableFieldText(Composite parent, GenericParameter<?> field, IAssessable assessable) {
@@ -563,37 +547,37 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		FormFactory.createLabel(content, field.getName());
 
 		// text
-		Text text = FormFactory.createText(content, viewCtrl.getPlanningValue(field, assessable));
-		text.setText(viewCtrl.getPlanningValueAsText(field, assessable));
+		Text text = FormFactory.createText(content, getViewController().getPlanningValue(field, assessable));
+		text.setText(getViewController().getPlanningValueAsText(field, assessable));
 		text.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				viewCtrl.changeParameterValue(field, assessable, text.getText());
+				getViewController().changeParameterValue(field, assessable, text.getText());
 			}
 		});
 	}
 
 	/**
-	 * Render RichText field
-	 * 
+	 * Render RichText field.
+	 *
 	 * @param parent     the parent composite
-	 * @param column     the field to display
+	 * @param field      the field
 	 * @param assessable the pcmm element or subelement concerned
 	 */
 	private void renderEditableFieldRichText(Composite parent, GenericParameter<?> field, IAssessable assessable) {
 
 		// richtext content collapsible
-		RichTextWidget richText = FormFactory.createRichTextCollapsible(getViewManager().getRscMgr(), parent,
-				field.getName(), field, false);
-		richText.setValue(viewCtrl.getPlanningValueAsText(field, assessable));
-		richText.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		RichTextWidget richText = FormFactory.createRichTextCollapsible(
+				getViewController().getViewManager().getRscMgr(), parent, field.getName(), field, false);
+		richText.setValue(getViewController().getPlanningValueAsText(field, assessable));
+		richText.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 		richText.getRichtext().addModifyListener(
-				event -> viewCtrl.changeParameterValue(field, assessable, richText.getRichtext().getText()));
+				event -> getViewController().changeParameterValue(field, assessable, richText.getRichtext().getText()));
 		richText.getRichtext().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
-				viewCtrl.changeParameterValue(field, assessable, richText.getRichtext().getText());
+				getViewController().changeParameterValue(field, assessable, richText.getRichtext().getText());
 			}
 		});
 		richText.addExpandListener(new ExpandListener() {
@@ -616,10 +600,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * Render Select field
-	 * 
+	 * Render Select field.
+	 *
 	 * @param parent     the parent composite
-	 * @param column     the field to display
+	 * @param field      the field
 	 * @param assessable the pcmm element or subelement concerned
 	 */
 	private void renderEditableFieldSelect(Composite parent, GenericParameter<?> field, IAssessable assessable) {
@@ -631,7 +615,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		// label
 		Label label = FormFactory.createLabel(content, field.getName());
-		label.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		label.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 
 		// Combo-box
@@ -645,7 +629,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 				});
 
 		// get combo value if it exists and set it
-		GenericValue<?, ?> planningValue = viewCtrl.getPlanningValue(field, assessable);
+		GenericValue<?, ?> planningValue = getViewController().getPlanningValue(field, assessable);
 		GenericParameterSelectValue<?> genericParameterSelectValue = null;
 		if (planningValue != null && planningValue.getValue() != null && !planningValue.getValue().isEmpty()
 				&& planningValue.getParameter() != null
@@ -667,7 +651,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 			Object firstElement = structuredSelection.getFirstElement();
 			if (firstElement instanceof PCMMPlanningSelectValue
 					&& ((PCMMPlanningSelectValue) firstElement).getId() != null) {
-				viewCtrl.changeParameterValue(field, assessable,
+				getViewController().changeParameterValue(field, assessable,
 						((PCMMPlanningSelectValue) firstElement).getId().toString());
 			}
 		});
@@ -684,7 +668,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		if (planningType instanceof PCMMPlanningParam && planningType.getChildren() != null) {
 
-			boolean enabled = isFromCurrentElement(assessable) && !getViewManager().isTagMode();
+			boolean enabled = isFromCurrentElement(assessable) && !getViewController().getViewManager().isTagMode();
 
 			// main composite
 			Composite mainComposite = new Composite(parent, SWT.NONE);
@@ -693,7 +677,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 			GridLayout gridLayout = new GridLayout();
 			gridLayout.marginWidth = 0;
 			mainComposite.setLayout(gridLayout);
-			mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+			mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_GREY_LIGHT_1)));
 
 			// header composite
@@ -715,8 +699,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 			btnAddParameter.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_ADD);
 			btnAddParameter.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 			btnAddParameter.put(ButtonTheme.OPTION_ENABLED, false);
-			ButtonTheme addButton = FormFactory.createButton(getViewManager().getRscMgr(), headerComposite, null,
-					btnAddParameter);
+			ButtonTheme addButton = FormFactory.createButton(getViewController().getViewManager().getRscMgr(),
+					headerComposite, null, btnAddParameter);
 
 			// Initialize table
 			TreeViewer treeViewer = renderTableInit(mainComposite);
@@ -739,7 +723,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 				// Add button listener
 				addButton.setEnabled(true);
-				addButton.addListener(SWT.Selection, event -> viewCtrl.addPlanningTableItem(treeViewer,
+				addButton.addListener(SWT.Selection, event -> getViewController().addPlanningTableItem(treeViewer,
 						(PCMMPlanningParam) planningType, assessable));
 
 				ColumnViewerSupport.enableDoubleClickEditing(treeViewer);
@@ -755,13 +739,13 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 			// Set input
 			Map<EntityFilter, Object> filters = new HashMap<>();
 			filters.put(GenericValue.Filter.PARAMETER, planningType);
-			filters.put(GenericValueTaggable.Filter.TAG, getViewManager().getSelectedTag());
+			filters.put(GenericValueTaggable.Filter.TAG, getViewController().getViewManager().getSelectedTag());
 			if (assessable instanceof PCMMElement) {
 				filters.put(PCMMPlanningTableItem.Filter.ELEMENT, assessable);
 			} else if (assessable instanceof PCMMSubelement) {
 				filters.put(PCMMPlanningTableItem.Filter.SUBELEMENT, assessable);
 			}
-			List<PCMMPlanningTableItem> items = getViewManager().getAppManager()
+			List<PCMMPlanningTableItem> items = getViewController().getViewManager().getAppManager()
 					.getService(IPCMMPlanningApplication.class).getPlanningTableItemBy(filters);
 			treeViewer.setInput(items);
 
@@ -796,24 +780,24 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		// Tree - Hint
 		gdViewer.minimumHeight = 150;
 		gdViewer.heightHint = treeViewer.getTree().getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
+				- 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		return treeViewer;
 	}
 
 	/**
-	 * Add pcmm planning field column to tree viewer
-	 * 
-	 * @param parent       the parent composite
-	 * @param planningType the planning type
-	 * @param enabled      the column is editable or not
-	 * 
+	 * Add pcmm planning field column to tree viewer.
+	 *
+	 * @param treeViewer the tree viewer
+	 * @param field      the field
+	 * @param enabled    the column is editable or not
 	 * @return the tree viewer column created
 	 */
 	private TreeViewerColumn renderPlanningFieldsColumn(TreeViewer treeViewer, PCMMPlanningParam field,
@@ -821,14 +805,14 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 		// Initialize
 		TreeViewerColumn tempColumn = TableFactory.createGenericParamTreeColumn(field, treeViewer,
-				new GenericTableLabelProvider(field, getViewManager()));
+				new GenericTableLabelProvider(field, getViewController().getViewManager()));
 
 		// Cell editor depending of column type
 		if (enabled) {
 			AGenericTableCellEditor cellEditor = TableFactory.createGenericParamTableCellEditor(field, treeViewer,
 					this);
 			if (cellEditor != null) {
-				cellEditor.addValueChangedListener(viewCtrl::changePlanningTableValue);
+				cellEditor.addValueChangedListener(getViewController()::changePlanningTableValue);
 				tempColumn.setEditingSupport(cellEditor);
 			}
 		}
@@ -837,9 +821,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * Add action column
-	 * 
-	 * @param columnProperties
+	 * Add action column.
+	 *
+	 * @param treeViewer       the tree viewer
+	 * @param columnProperties the column properties
 	 */
 	@SuppressWarnings("unchecked")
 	private void renderMainTableActionColumns(TreeViewer treeViewer, List<String> columnProperties) {
@@ -874,9 +859,9 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 
 					// Button
 					ButtonTheme btnDeleteItem = TableFactory
-							.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 					btnDeleteItem.addListener(SWT.Selection,
-							event -> viewCtrl.deletePlanningTableItem(treeViewer, element));
+							event -> getViewController().deletePlanningTableItem(treeViewer, element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -896,7 +881,9 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * Add tree viewer events
+	 * Add tree viewer events.
+	 *
+	 * @param treeViewer the tree viewer
 	 */
 	private void renderMainTableAddEvents(TreeViewer treeViewer) {
 		// Get tree
@@ -951,8 +938,10 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().openLastView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().openLastView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -960,7 +949,8 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PCMM_PLANNING_ITEM);
 
 		// layout view
@@ -968,20 +958,15 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	}
 
 	/**
-	 * Loads view datas from database.
-	 */
-	private void loadDatas() {
-		setPcmmElement(elementSelected);
-	}
-
-	/**
 	 * Refreshes the view
 	 */
 	public void refreshViewer() {
 
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		// reset the header controls
 		setTitle(RscTools.getString(RscConst.MSG_PCMMPLANNING_TITLE,
-				this.elementSelected != null ? this.elementSelected.getName() : RscTools.empty()));
+				elementSelected != null ? elementSelected.getName() : RscTools.empty()));
 
 		// layout view
 		this.layout();
@@ -992,59 +977,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void reload() {
-		// Trigger GuidanceLevel View
-		getViewManager().getCredibilityEditor().setPartProperty(
-				CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
-				elementSelected.getAbbreviation());
-
-		// Show role selection
-		showRoleSelection();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-			try {
-				/**
-				 * Load pcmm elements from database
-				 */
-				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
-
-				/**
-				 * Load pcmm planning parameters from database
-				 */
-				Map<EntityFilter, Object> filters = new HashMap<>();
-				filters.put(GenericParameter.Filter.MODEL, model);
-				filters.put(GenericParameter.Filter.PARENT, null);
-				planningParameters = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-						.getPlanningFieldsBy(filters);
-
-				/**
-				 * Load pcmm planning questions from database
-				 */
-				planningQuestions = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-						.getPlanningQuestionsByElement(elementSelected,
-								getViewManager().getPCMMConfiguration().getMode());
-				if (elements != null) {
-
-					/**
-					 * Refresh the table
-					 */
-					refreshMainWidget();
-
-					// expand and select the selected element in the viewer input
-					if (elementSelected != null && expandItems.containsKey(elementSelected)) {
-						expandItems.get(elementSelected).setExpanded(true);
-					}
-				}
-			} catch (CredibilityException e) {
-				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMPLANNING_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMPLANNING_DIALOG_LOADING_MSG));
-				logger.warn("An error has occurred while loading the planning data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			}
-		}
-
-		// refresh the viewer
-		refreshViewer();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -1052,26 +985,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void roleChanged() {
-		refresh();
-	}
-
-	/**
-	 * @return the pcmm element
-	 */
-	public PCMMElement getPcmmElement() {
-		return elementSelected;
-	}
-
-	/**
-	 * Resets the pcmm element selected
-	 * 
-	 * @param pcmmElement the element to set
-	 */
-	public void setPcmmElement(PCMMElement pcmmElement) {
-		this.elementSelected = pcmmElement;
-
-		// Refresh
-		refresh();
+		refreshRole();
 	}
 
 	/**
@@ -1079,7 +993,7 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	public void viewChanged() {
 		// Set view changed
-		getViewManager().viewChanged();
+		getViewController().getViewManager().viewChanged();
 
 		// Refresh
 		refresh();
@@ -1091,10 +1005,12 @@ public class PCMMPlanningView extends ACredibilityPCMMView {
 	 */
 	private boolean isFromCurrentElement(IAssessable assessable) {
 
+		PCMMElement elementSelected = getViewController().getElementSelected();
+
 		PCMMElement elementSelectedTmp = assessable instanceof PCMMSubelement
 				? ((PCMMSubelement) assessable).getElement()
 				: (PCMMElement) assessable;
-		return this.elementSelected != null && this.elementSelected.equals(elementSelectedTmp);
+		return elementSelected != null && elementSelected.equals(elementSelectedTmp);
 	}
 
 	@SuppressWarnings("unchecked")

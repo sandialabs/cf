@@ -7,16 +7,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class NetToolsTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class NetToolsTest {
 	/**
 	 * the logger

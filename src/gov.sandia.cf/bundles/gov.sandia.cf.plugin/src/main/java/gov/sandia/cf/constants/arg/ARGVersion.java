@@ -13,7 +13,7 @@ public class ARGVersion {
 	/**
 	 * Constants
 	 */
-	public static final String ARG_VERSION = "1.1.9"; //$NON-NLS-1$
+	public static final String ARG_VERSION = "1.2.3"; //$NON-NLS-1$
 
 	/**
 	 * Construct

@@ -155,7 +155,7 @@ public class PCMMEvidenceDropSupport extends ViewerDropAdapter {
 
 			// only if the target is an element or subelement of the selected PCMM element
 			if (!(assessableTarget != null && ((PCMMSubelement) assessableTarget).getElement() != null
-					&& ((PCMMSubelement) assessableTarget).getElement().equals(viewCtrl.getPcmmElement()))) {
+					&& ((PCMMSubelement) assessableTarget).getElement().equals(viewCtrl.getElementSelected()))) {
 				return null;
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(viewCtrl.getPCMMMode())) {
@@ -169,7 +169,7 @@ public class PCMMEvidenceDropSupport extends ViewerDropAdapter {
 			}
 
 			// only if the target is an element of the selected PCMM element
-			if (!(assessableTarget != null && assessableTarget.equals(viewCtrl.getPcmmElement()))) {
+			if (!(assessableTarget != null && assessableTarget.equals(viewCtrl.getElementSelected()))) {
 				return null;
 			}
 		}
@@ -335,7 +335,7 @@ public class PCMMEvidenceDropSupport extends ViewerDropAdapter {
 		}
 
 		// check the validation
-		validTarget &= element != null && element.equals(viewCtrl.getPcmmElement());
+		validTarget &= element != null && element.equals(viewCtrl.getElementSelected());
 
 		return LocalSelectionTransfer.getTransfer().isSupportedType(transferType) && validTarget;
 	}

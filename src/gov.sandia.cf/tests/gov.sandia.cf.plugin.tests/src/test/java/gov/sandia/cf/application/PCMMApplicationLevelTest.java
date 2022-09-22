@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the PCMM Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class PCMMApplicationLevelTest extends AbstractTestApplication {
 
 	/**

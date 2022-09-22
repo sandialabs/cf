@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Credibility Framework Development Extension for Predefined Properties
+Bundle-SymbolicName: gov.sandia.cf.extension.predefined_props.test;singleton:=true
+Bundle-Version: 1.0.2
+Bundle-ClassPath: .,
+ bin/
+Bundle-Vendor: SANDIA NATIONAL LABORATORIES
+Require-Bundle: gov.sandia.cf.plugin,
+ org.eclipse.core.runtime,
+ org.eclipse.ui
+Automatic-Module-Name: gov.sandia.cf;singleton:=true
+Bundle-RequiredExecutionEnvironment: JavaSE-11

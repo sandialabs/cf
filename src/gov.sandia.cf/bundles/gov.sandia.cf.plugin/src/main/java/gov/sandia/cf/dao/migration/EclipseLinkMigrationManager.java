@@ -5,6 +5,7 @@ package gov.sandia.cf.dao.migration;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -214,8 +215,9 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 				MigrationTask annotation = taskClass.getAnnotation(MigrationTask.class);
 				int id = annotation.id();
 				try {
-					tasks.put(id, (IMigrationTask) taskClass.newInstance());
-				} catch (InstantiationException | IllegalAccessException e1) {
+					tasks.put(id, (IMigrationTask) taskClass.getDeclaredConstructor().newInstance());
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e1) {
 					throw new CredibilityMigrationException(e1);
 				}
 			}
@@ -398,7 +400,8 @@ public class EclipseLinkMigrationManager implements IDBMigrationManager {
 	 * Write the error log into a file in the workspace next to .cf file. The file
 	 * will be name "<cf-file-name>-<current date formatted
 	 * yyyyMMddhhmmss>-err.log".
-	 * 
+	 *
+	 * @param daoManager the dao manager
 	 * @param errorlog the error log
 	 */
 	private static void createErrorLogFileInWorkspace(IDaoManager daoManager, String errorlog) {

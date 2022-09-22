@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +21,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class StringWithNumberAndNullableComparatorTest {
 
 	/**
@@ -31,6 +28,7 @@ class StringWithNumberAndNullableComparatorTest {
 	 */
 	public static Logger logger = LoggerFactory.getLogger(StringWithNumberAndNullableComparatorTest.class);
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_sort_numerical_string() {
 
@@ -47,6 +45,7 @@ class StringWithNumberAndNullableComparatorTest {
 		}
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_sort_string_number() {
 
@@ -75,96 +74,115 @@ class StringWithNumberAndNullableComparatorTest {
 		assertEquals(0, new StringWithNumberAndNullableComparator().compare(RscTools.empty(), RscTools.empty()));
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare_nullvs1() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare(null, "1") > 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare_nullvsA() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare(null, "A") > 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare_1vsnull() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("1", null) < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare_Avsnull() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A", null) < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareAvsA() {
 		assertEquals(0, new StringWithNumberAndNullableComparator().compare("A", "A"));
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare2vs2() {
 		assertEquals(0, new StringWithNumberAndNullableComparator().compare("2", "2"));
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare154vs154() {
 		assertEquals(0, new StringWithNumberAndNullableComparator().compare("154", "154"));
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareAvsB() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A", "B") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareBvsA12() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("B", "A12") > 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA2vsB1() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A2", "B1") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA2vsA1() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A2", "A1") > 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA1vsA1() {
 		assertEquals(0, new StringWithNumberAndNullableComparator().compare("A1", "A1"));
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA2vsA12() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A2", "A12") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareAvsA12() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A", "A12") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA12vsA() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A12", "A") > 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_Compare1vsA() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("1", "A") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA2AvsA12() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A2A", "A12") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA2AvsA2B() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A2A", "A2B") < 0);
 	}
 
+	@SuppressWarnings("nls")
 	@Test
 	void test_compare_CompareA12AvsA2B() {
 		assertTrue(new StringWithNumberAndNullableComparator().compare("A12A", "A2B") > 0);

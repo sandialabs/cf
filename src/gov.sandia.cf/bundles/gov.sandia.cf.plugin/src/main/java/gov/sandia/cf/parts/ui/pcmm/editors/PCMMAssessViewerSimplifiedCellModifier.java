@@ -102,8 +102,8 @@ public class PCMMAssessViewerSimplifiedCellModifier extends PCMMAssessViewerCell
 		// update only the selected pcmm element
 		boolean isSelectedPCMMElement = false;
 		if (isValidElement)
-			isSelectedPCMMElement = getViewCtrl().getPcmmElement() != null
-					&& getViewCtrl().getPcmmElement().equals((element));
+			isSelectedPCMMElement = getViewCtrl().getElementSelected() != null
+					&& getViewCtrl().getElementSelected().equals((element));
 
 		return isNotTagMode && isValidElement && isEditableColumn && isSelectedPCMMElement;
 	}

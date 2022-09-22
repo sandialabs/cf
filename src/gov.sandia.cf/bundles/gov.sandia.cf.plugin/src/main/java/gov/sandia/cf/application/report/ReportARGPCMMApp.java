@@ -139,9 +139,10 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 	}
 
 	/**
-	 * Generate PCMM Planning sections
-	 * 
+	 * Generate PCMM Planning sections.
+	 *
 	 * @param sections the existing sections to complete
+	 * @param options  the options
 	 */
 	@SuppressWarnings({ "unchecked" })
 	private void generateStructureSectionsPCMMPlanning(List<Map<String, Object>> sections,
@@ -349,10 +350,11 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 
 	/**
 	 * Generate sub-element sections evidence (PCMMMode.DEFAULT)
-	 * 
-	 * @param subsections the current report sections
-	 * @param pcmmElement the pcmm element associated
-	 * @param evidence    the evidence to generate
+	 *
+	 * @param subsections   the current report sections
+	 * @param pcmmElement   the pcmm element associated
+	 * @param evidence      the evidence to generate
+	 * @param argParameters the arg parameters
 	 * @throws CredibilityException if an error occurs during CF variable parsing
 	 */
 	private void generateStructureSectionsPCMMEvidenceDefault(List<Map<String, Object>> subsections,
@@ -388,10 +390,11 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 
 	/**
 	 * Generate sub-element sections evidence (PCMMMode.SIMPLIFIED)
-	 * 
-	 * @param subsections the current report sections
-	 * @param pcmmElement the pcmm element associated
-	 * @param evidence    the evidence to generate
+	 *
+	 * @param evidenceSections the evidence sections
+	 * @param pcmmElement      the pcmm element associated
+	 * @param evidence         the evidence to generate
+	 * @param argParameters    the arg parameters
 	 * @throws CredibilityException if an error occurs during CF variable parsing
 	 */
 	private void generateStructureSectionsPCMMEvidenceSimplified(List<Map<String, Object>> evidenceSections,
@@ -497,8 +500,7 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 	/**
 	 * Gets the link caption.
 	 *
-	 * @param value the value
-	 * @param item  the item
+	 * @param pcmmEvidence the pcmm evidence
 	 * @return the link caption
 	 */
 	private String getLinkCaption(PCMMEvidence pcmmEvidence) {
@@ -613,10 +615,10 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 
 	/**
 	 * Generate sub-element sections assessment (PCMMMode.SIMPLIFIED)
-	 * 
-	 * @param subsections
-	 * @param pcmmElement
-	 * @param assessments
+	 *
+	 * @param assessmentSections the assessment sections
+	 * @param pcmmElement        the pcmm element
+	 * @param assessments        the assessments
 	 */
 	private void generateStructureSectionsPCMMAssessmentSimplified(List<Map<String, Object>> assessmentSections,
 			PCMMElement pcmmElement, List<PCMMAssessment> assessments) {
@@ -740,8 +742,10 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 
 			// Set the answer to the question
 			if (questionValue.isPresent() && !StringUtils.isBlank(questionValue.get().getValue())) {
+				String questionTitleHtml = StringTools
+						.toHtmlParagraph(pcmmElementQuestion.getName() + RscTools.COLON);
 				subsectionSections.add(getAppMgr().getService(IReportARGApplication.class)
-						.generateHtmlParagraph(questionValue.get().getValue()));
+						.generateHtmlParagraph(questionTitleHtml + questionValue.get().getValue()));
 			}
 		}
 	}
@@ -803,7 +807,7 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 					.filter(v -> pcmmSubelement.getId().equals(v.getSubelement().getId())
 							&& planningParameter.getId().equals(v.getParameter().getId()))
 					.collect(Collectors.toList())) {
-				parameterValueList.add(getAppMgr().getService(IReportARGApplication.class)
+				parameterValueItemList.add(getAppMgr().getService(IReportARGApplication.class)
 						.generateHtmlParagraph(planningParameterValue.getValue()));
 			}
 
@@ -944,7 +948,7 @@ public class ReportARGPCMMApp extends AApplication implements IReportARGPCMMApp 
 					.filter(v -> pcmmElement.getId().equals(v.getElement().getId())
 							&& planningParameter.getId().equals(v.getParameter().getId()))
 					.collect(Collectors.toList())) {
-				parameterValueList.add(getAppMgr().getService(IReportARGApplication.class)
+				parameterValueItemList.add(getAppMgr().getService(IReportARGApplication.class)
 						.generateHtmlParagraph(planningParameterValue.getValue()));
 			}
 

@@ -125,6 +125,8 @@ public class DecisionDropSupport extends ViewerDropAdapter {
 			viewCtrl.refreshDecision(previousParent);
 
 			logger.debug("The drop of {} was done on {}", decisionDragged, target); //$NON-NLS-1$
+		} else {
+			decisionUpdated = decisionDragged;
 		}
 
 		if (location != LOCATION_ON) {

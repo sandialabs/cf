@@ -23,9 +23,9 @@ import gov.sandia.cf.tools.RscTools;
  * 
  * @author Didier Verstraete
  *
- * @param <V> the view manager
+ * @param <C> the view controller
  */
-public abstract class ACredibilitySubView<V extends Composite & IViewManager> extends ACredibilityView<V> {
+public abstract class ACredibilitySubView<C extends IViewController> extends ACredibilityView<C> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ACredibilitySubView.class);
 
@@ -36,12 +36,12 @@ public abstract class ACredibilitySubView<V extends Composite & IViewManager> ex
 	/**
 	 * The constructor.
 	 *
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the style
+	 * @param viewController the view controller
+	 * @param parent         the parent composite
+	 * @param style          the style
 	 */
-	protected ACredibilitySubView(V viewManager, Composite parent, int style) {
-		super(viewManager, parent, style);
+	protected ACredibilitySubView(C viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// breadcrumb
 		super.createBreadcrumb(this);
@@ -77,17 +77,17 @@ public abstract class ACredibilitySubView<V extends Composite & IViewManager> ex
 		}
 
 		if (notification != null) {
-			notificationComposite.setBackground(
-					NotificationFactory.getNotificationBackgroundColor(getViewManager().getRscMgr(), notification));
+			notificationComposite.setBackground(NotificationFactory
+					.getNotificationBackgroundColor(getViewController().getViewManager().getRscMgr(), notification));
 			notificationLabel.setText(String.join(RscTools.CARRIAGE_RETURN, notification.getMessages()));
 			notificationLabel.setVisible(true);
-			notificationLabel.setForeground(
-					NotificationFactory.getNotificationColor(getViewManager().getRscMgr(), notification));
-			notificationLabel
-					.setImage(NotificationFactory.getNotificationIcon(getViewManager().getRscMgr(), notification));
+			notificationLabel.setForeground(NotificationFactory
+					.getNotificationColor(getViewController().getViewManager().getRscMgr(), notification));
+			notificationLabel.setImage(NotificationFactory
+					.getNotificationIcon(getViewController().getViewManager().getRscMgr(), notification));
 			((GridData) notificationLabel.getLayoutData()).heightHint = notificationLabel.computeSize(SWT.DEFAULT,
 					SWT.DEFAULT).y;
-			FontTools.setBoldFont(getViewManager().getRscMgr(), notificationLabel);
+			FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), notificationLabel);
 
 			notificationLabel.requestLayout();
 			notificationLabel.getParent().requestLayout();

@@ -8,8 +8,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +16,11 @@ import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the ARGParametersRepository
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the ARGParametersRepository
  */
-@RunWith(JUnitPlatform.class)
 class ARGParametersRepositoryTest extends AbstractTestRepository<ARGParameters, Integer, ARGParametersRepository> {
 
 	/**

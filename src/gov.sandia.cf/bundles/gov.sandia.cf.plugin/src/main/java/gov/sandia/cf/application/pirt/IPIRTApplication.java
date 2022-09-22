@@ -53,6 +53,8 @@ public interface IPIRTApplication extends IApplication {
 			PIRTLevelImportance currentLevel) throws CredibilityException;
 
 	/**
+	 * Reset qo I.
+	 *
 	 * @param qoi quantity of interest concerned
 	 * 
 	 *            reset pirt datas:
@@ -66,11 +68,11 @@ public interface IPIRTApplication extends IApplication {
 	 *            - all phenomenon are deleted
 	 * 
 	 *            - all criterion are deleted
-	 * 
+	 * @param user the user
 	 * @return the @param qoi resetted
 	 * @throws CredibilityException if an error occurs while resetting qoi
 	 */
-	QuantityOfInterest resetQoI(QuantityOfInterest qoi) throws CredibilityException;
+	QuantityOfInterest resetQoI(QuantityOfInterest qoi, User user) throws CredibilityException;
 
 	/**
 	 * Makes a copy of @param qoi and marks the copied qoi as tagged. The @param
@@ -163,12 +165,13 @@ public interface IPIRTApplication extends IApplication {
 	QuantityOfInterest updateQoI(QuantityOfInterest qoi, User user) throws CredibilityException;
 
 	/**
-	 * Deletes @param qoi from database
-	 * 
-	 * @param qoi the qoi to delete
+	 * Deletes @param qoi from database.
+	 *
+	 * @param qoi  the qoi to delete
+	 * @param user the user
 	 * @throws CredibilityException if an error occurs while deleting qoi
 	 */
-	void deleteQoI(QuantityOfInterest qoi) throws CredibilityException;
+	void deleteQoI(QuantityOfInterest qoi, User user) throws CredibilityException;
 
 	/**
 	 * @return the list of qoi headers
@@ -222,13 +225,14 @@ public interface IPIRTApplication extends IApplication {
 	PhenomenonGroup updatePhenomenonGroup(PhenomenonGroup group) throws CredibilityException;
 
 	/**
-	 * Deletes @param phenomenon group from database
-	 * 
+	 * Deletes @param phenomenon group from database.
+	 *
 	 * @param group the group to delete
+	 * @param user  the user
 	 * @throws CredibilityException if an error occurs while deleting phenomenon
 	 *                              group
 	 */
-	void deletePhenomenonGroup(PhenomenonGroup group) throws CredibilityException;
+	void deletePhenomenonGroup(PhenomenonGroup group, User user) throws CredibilityException;
 
 	/**
 	 * Change the phenomenon group order
@@ -260,12 +264,13 @@ public interface IPIRTApplication extends IApplication {
 	Phenomenon updatePhenomenon(Phenomenon phenomenon) throws CredibilityException;
 
 	/**
-	 * Deletes @param phenomenon from database
-	 * 
+	 * Deletes @param phenomenon from database.
+	 *
 	 * @param phenomenon the phenomenon to delete
+	 * @param user       the user
 	 * @throws CredibilityException if an error occurs while deleting new phenomenon
 	 */
-	void deletePhenomenon(Phenomenon phenomenon) throws CredibilityException;
+	void deletePhenomenon(Phenomenon phenomenon, User user) throws CredibilityException;
 
 	/**
 	 * Change the phenomenon order
@@ -296,12 +301,13 @@ public interface IPIRTApplication extends IApplication {
 	Criterion updateCriterion(Criterion criterion) throws CredibilityException;
 
 	/**
-	 * Deletes @param criterion from database
-	 * 
+	 * Deletes @param criterion from database.
+	 *
 	 * @param criterion the criterion to delete
+	 * @param user      the user
 	 * @throws CredibilityException if an error occurs while deleting criterion
 	 */
-	void deleteCriterion(Criterion criterion) throws CredibilityException;
+	void deleteCriterion(Criterion criterion, User user) throws CredibilityException;
 
 	/**
 	 * @param query             the pirt query to execute
@@ -593,4 +599,13 @@ public interface IPIRTApplication extends IApplication {
 	 * @throws CredibilityException the credibility exception
 	 */
 	void reorderPhenomenaForGroup(PhenomenonGroup toMove) throws CredibilityException;
+
+	/**
+	 * Reorder groups for quantity of interest.
+	 *
+	 * @param qoi  the qoi
+	 * @param user the user
+	 * @throws CredibilityException the credibility exception
+	 */
+	void reorderGroupsForQuantityOfInterest(QuantityOfInterest qoi, User user) throws CredibilityException;
 }

@@ -15,8 +15,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +42,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the System Requirement Application
  */
-@RunWith(JUnitPlatform.class)
 class SystemRequirementApplicationTest extends AbstractTestApplication {
 
 	/**
@@ -467,7 +464,8 @@ class SystemRequirementApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(newSystemRequirement2);
+			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(newSystemRequirement2,
+					null);
 		} catch (CredibilityException e) {
 			fail(e.getMessage());
 		}
@@ -490,7 +488,7 @@ class SystemRequirementApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(null);
+			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(null, null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_SYSREQUIREMENT_DELETE_REQUIREMENTROW_NULL), e.getMessage());
@@ -502,7 +500,8 @@ class SystemRequirementApplicationTest extends AbstractTestApplication {
 
 		// delete
 		try {
-			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(new SystemRequirement());
+			getAppManager().getService(ISystemRequirementApplication.class).deleteRequirement(new SystemRequirement(),
+					null);
 			fail("This shouldn't work"); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_SYSREQUIREMENT_DELETE_REQUIREMENTROW_IDNULL), e.getMessage());

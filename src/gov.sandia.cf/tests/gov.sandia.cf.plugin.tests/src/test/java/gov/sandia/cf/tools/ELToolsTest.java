@@ -15,14 +15,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 /**
- * @author Didier Verstraete
+ * The Class ELToolsTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class ELToolsTest {
 
 	/* ************** eval *********** */

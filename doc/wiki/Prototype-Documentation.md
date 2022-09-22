@@ -83,7 +83,7 @@ mvn clean package spring-boot:repackage -Dpackaging=war
 
 To enable concurrency support into CF plugin, enable the option into Window > Preferences > Credibility Framework > Developer Options:
 
-![image](uploads/350f56f70b81ced0e151681f28216c0f/image.png)
+![image](uploads/1ff521e677f565d7eb708f2460e1aa3f/image.png)
 
 ### Create a new web project
 
@@ -91,39 +91,39 @@ You will be able to create an existing project with the "New Credibility Process
 
 - Right click the project and select New > Other...:
 
-![image](uploads/bed2e12ed3cad9b7b38ea0cac15faf96/image.png)
+![image](uploads/c327d457f4f2703b31b05fba81d74f2b/image.png)
 
 - Select Credibility Process:
 
-![image](uploads/a2d27ee89ab9e58fbbff47686a150687/image.png)
+![image](uploads/699de2ab9cbefa555d23d06377c7d8c7/image.png)
 
 - Enter the credibility process name:
 
-![image](uploads/cb849f77b306b479c7b55f84d7c99eb8/image.png)
+![image](uploads/1ce50568de127ae066235a48c0258b9d/image.png)
 
 - Select the project type (Web):
 
-![image](uploads/01e1be432f0515c26c0de7ff26dbca5c/image.png)
+![image](uploads/dfa81896ae71cfbb9abebf846c80fd09/image.png)
 
 - Enter the server URL and click "Test Connection":
 
-![image](uploads/46df00614dabfe5d0e0c07f9f4c245ec/image.png)
+![image](uploads/34c3a5cc9636c271529b62295b369e74/image.png)
 
 - Select "New Web Project":
 
-![image](uploads/b74daef28b434be1d93daac2a699e44f/image.png)
+![image](uploads/6e013331356970e6d1159d5676e9ea58/image.png)
 
 - Enter the project information and click "Finish":
 
-![image](uploads/90973975e276ddac46aa7f31fa05f554/image.png)
+![image](uploads/281b6e8000d103d45f85389cd93c9960/image.png)
 
 - The project will be created and will be prompted to enter your credentials, just click "Connect":
 
-![image](uploads/e085af25a6b00a62bfd5e9c2d8a45ce3/image.png)
+![image](uploads/d6d9f473acdf73ead52a48e90da96ed4/image.png)
 
 The web project is open:
 
-![image](uploads/39d835be2aa989c7cdb46fd317220e0f/image.png)
+![image](uploads/b891ba944a4eee9a83e2ed7d1060a558/image.png)
 
 
 ### Connect to an existing web project
@@ -132,36 +132,36 @@ You will be able to connect to an existing project with the "New Credibility Pro
 
 - Right click the project and select New > Other...:
 
-![image](uploads/bed2e12ed3cad9b7b38ea0cac15faf96/image.png)
+![image](uploads/e781d4692904686bb9e84e439e9bd333/image.png)
 
 - Select Credibility Process:
 
-![image](uploads/a2d27ee89ab9e58fbbff47686a150687/image.png)
+![image](uploads/bee4e12552d6ad2f1926232c8821297f/image.png)
 
 - Enter the credibility process name:
 
-![image](uploads/cb849f77b306b479c7b55f84d7c99eb8/image.png)
+![image](uploads/f0ad3e2bd5a40592e64cfafb5a5635a1/image.png)
 
 - Select the project type (Web):
 
-![image](uploads/01e1be432f0515c26c0de7ff26dbca5c/image.png)
+![image](uploads/336a64b7a202e62bee08cd3a3ad0c615/image.png)
 
 - Enter the server URL and click "Test Connection":
 
-![image](uploads/19f1d6e8dc23981823ba85e527175319/image.png)
+![image](uploads/8a37d01b7ec60fcb5d6175ccf69f3d39/image.png)
 
 - Select "Existing Web Project":
 
-![image](uploads/2821a566cefe9f6190b39aad378822ad/image.png)
+![image](uploads/87ac700b8c73337aa006dad8fa428e75/image.png)
 
 - Select the project and click "Finish":
 
-![image](uploads/ea1ae3e90098da83a3c457477b49b159/image.png)
+![image](uploads/5569bbdebfe3b2b048063d8e00ec0d56/image.png)
 
 - The project will open and you will be prompted to enter your credentials, just click "Connect":
 
-![image](uploads/ae83b4b5cc01ff8535ce6fb4f6e98ea7/image.png)
+![image](uploads/49e93b082dd05329210c3ac4a4f5429b/image.png)
 
 The web project is open:
 
-![image](uploads/39d835be2aa989c7cdb46fd317220e0f/image.png)
+![image](uploads/3a9921042692f958ab83b0b89c8f0f96/image.png)

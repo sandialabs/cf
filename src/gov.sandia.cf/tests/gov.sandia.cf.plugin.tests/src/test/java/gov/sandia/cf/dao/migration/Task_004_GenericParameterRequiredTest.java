@@ -9,10 +9,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.text.MessageFormat;
+
 import org.eclipse.persistence.sessions.UnitOfWork;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +31,10 @@ import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_004_GenericParameterRequiredTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_004_GenericParameterRequiredTest extends AbstractTestDao {
 
 	/**

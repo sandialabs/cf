@@ -3,11 +3,14 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pirt;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +23,7 @@ import gov.sandia.cf.model.QuantityOfInterest;
 import gov.sandia.cf.model.dto.configuration.PIRTSpecification;
 import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.model.QoIHeaderParts;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTPhenomenonDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.PIRTPhenomenonGroupDialog;
 import gov.sandia.cf.parts.ui.pirt.dialogs.QoITagDialog;
@@ -34,7 +38,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PIRTPhenomenaViewController {
+public class PIRTPhenomenaViewController extends AViewController<PIRTViewManager, PIRTPhenomenaView> {
 
 	/**
 	 * the logger
@@ -42,36 +46,75 @@ public class PIRTPhenomenaViewController {
 	private static final Logger logger = LoggerFactory.getLogger(PIRTPhenomenaViewController.class);
 
 	/**
-	 * The view
+	 * the current quantity of interest
 	 */
-	private PIRTPhenomenaView view;
+	private QuantityOfInterest qoiSelected;
 
-	PIRTPhenomenaViewController(PIRTPhenomenaView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	/**
+	 * Instantiates a new PIRT phenomena view controller.
+	 *
+	 * @param viewManager the view manager
+	 * @param parent      the parent
+	 * @param qoi         the qoi
+	 */
+	PIRTPhenomenaViewController(PIRTViewManager viewManager, Composite parent, QuantityOfInterest qoi) {
+		super(viewManager);
+		this.qoiSelected = qoi;
+		super.setView(new PIRTPhenomenaView(this, parent, SWT.NONE));
+
+		// Refresh
+		refresh();
 	}
 
 	/**
-	 *
-	 * Get pirt configuration
-	 * <p>
-	 * TODO: TO BE UPDATED. Controller has to store itself the PIRT specification
-	 * instead of getting it from the view.
-	 * 
-	 * @return the pirt specification
+	 * Reload data.
 	 */
-	public PIRTSpecification getPirtConfiguration() {
-		return view.getPirtConfiguration();
+	void reloadData() {
+
+		// retrieve qoi from database
+		try {
+			qoiSelected = getViewManager().getAppManager().getService(IPIRTApplication.class)
+					.getQoIById(qoiSelected.getId());
+		} catch (CredibilityException e) {
+			logger.error("An error occured while reloading qoi data and PIRT tree", e); //$NON-NLS-1$
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+					RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
+		}
+
+		getView().setTableHeaderData(qoiSelected);
+
+		List<PhenomenonGroup> phenomenaGroups = new ArrayList<>();
+		if (qoiSelected != null) {
+			phenomenaGroups = qoiSelected.getPhenomenonGroupList();
+			phenomenaGroups.sort(Comparator.comparing(PhenomenonGroup::getIdLabel));
+		}
+
+		/**
+		 * Refresh the table
+		 */
+		// Get expanded elements
+		Object[] elements = getView().getTreeExpandedElements();
+
+		getView().setTableHeaderData(qoiSelected);
+
+		// Refresh the table
+		getView().refreshMainTable();
+
+		// Set input
+		getView().setTreeData(phenomenaGroups);
+
+		// Set expanded elements
+		getView().setTreeExpandedElements(elements);
 	}
 
 	/**
 	 * Refreshes the parent view to update qoi modifications
 	 */
 	public void refreshQoIView() {
-		view.getViewManager().refreshQOIView();
-		view.getViewManager().reloadTabName(view.getQoISelected());
-		if (view.getQoISelected() != null) {
-			view.updateTableHeaderBarName(view.getQoISelected().getSymbol());
+		getViewManager().refreshQOIView();
+		getViewManager().reloadTabName(qoiSelected);
+		if (qoiSelected != null) {
+			getView().updateTableHeaderBarName(qoiSelected.getSymbol());
 		}
 	}
 
@@ -94,10 +137,10 @@ public class PIRTPhenomenaViewController {
 		// Refresh
 		if (refresh) {
 			// Refresh
-			view.refresh();
+			getView().refresh();
 
 			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 		}
 	}
 
@@ -113,14 +156,14 @@ public class PIRTPhenomenaViewController {
 				phenomenonGroup.getName());
 
 		// confirm dialog
-		boolean confirm = MessageDialog.openConfirm(view.getShell(),
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_DELETECONFIRM_TITLE, title), message);
 
 		if (confirm) {
 			try {
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-						.deletePhenomenonGroup(phenomenonGroup);
-				List<PhenomenonGroup> data = view.getPhenomenonGroups();
+				getViewManager().getAppManager().getService(IPIRTApplication.class)
+						.deletePhenomenonGroup(phenomenonGroup, getViewManager().getCache().getUser());
+				List<PhenomenonGroup> data = getPhenomenonGroups();
 				data.remove(phenomenonGroup);
 
 			} catch (CredibilityException e) {
@@ -131,9 +174,9 @@ public class PIRTPhenomenaViewController {
 	}
 
 	/**
-	 * Delete a Phenomenon
-	 * 
-	 * @param element the element to delete
+	 * Delete a Phenomenon.
+	 *
+	 * @param phenomenon the phenomenon
 	 */
 	void deletePhenomenon(Phenomenon phenomenon) {
 		// constructs confirm message
@@ -142,13 +185,14 @@ public class PIRTPhenomenaViewController {
 				phenomenon.getName());
 
 		// confirm dialog
-		boolean confirm = MessageDialog.openConfirm(view.getShell(),
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_DELETECONFIRM_TITLE, title), message);
 
 		if (confirm) {
 			try {
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).deletePhenomenon(phenomenon);
-				List<PhenomenonGroup> data = (view.getPhenomenonGroups());
+				getViewManager().getAppManager().getService(IPIRTApplication.class).deletePhenomenon(phenomenon,
+						getViewManager().getCache().getUser());
+				List<PhenomenonGroup> data = getPhenomenonGroups();
 				int indexOfPhenomenonGroup = data.indexOf(phenomenon.getPhenomenonGroup());
 				data.get(indexOfPhenomenonGroup).getPhenomenonList().remove(phenomenon);
 			} catch (CredibilityException e) {
@@ -164,11 +208,11 @@ public class PIRTPhenomenaViewController {
 	 */
 	public void addPhenomenonGroupAction() {
 
-		if (view.getQoISelected() != null) {
+		if (qoiSelected != null) {
 
 			// open creation dialog
-			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected(), null, ViewMode.CREATE);
+			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(getViewManager(), getView().getShell(),
+					qoiSelected, null, ViewMode.CREATE);
 			PhenomenonGroup groupToCreate = dialog.openDialog();
 
 			// create group
@@ -176,27 +220,26 @@ public class PIRTPhenomenaViewController {
 				try {
 
 					// Set id
-					groupToCreate.setIdLabel(view.getIdColumnTextPhenomenonGroup(groupToCreate));
+					groupToCreate.setIdLabel(getView().getIdColumnTextPhenomenonGroup(groupToCreate));
 
 					// set qoi
-					groupToCreate.setQoi(view.getQoISelected());
+					groupToCreate.setQoi(qoiSelected);
 
 					// create
-					view.getViewManager().getAppManager().getService(IPIRTApplication.class)
+					getViewManager().getAppManager().getService(IPIRTApplication.class)
 							.addPhenomenonGroup(groupToCreate);
 
 					// refresh qoi
-					view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-							.refresh(view.getQoISelected());
+					getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(qoiSelected);
 
 					// fire view change to save credibility file
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 
 					// reload
-					view.refresh();
+					getView().refresh();
 
 				} catch (CredibilityException e) {
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+					MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 							RscTools.getString(RscConst.ERR_PHENOMENAVIEW_ADDING_PHENGROUP)
 									+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 				}
@@ -214,17 +257,17 @@ public class PIRTPhenomenaViewController {
 	public void addPhenomenonAction(PhenomenonGroup groupSelected) {
 
 		// Get tree data
-		List<PhenomenonGroup> phenGroups = view.getPhenomenonGroups();
+		List<PhenomenonGroup> phenGroups = getPhenomenonGroups();
 
 		if (phenGroups == null) {
-			MessageDialog.openWarning(view.getShell(),
+			MessageDialog.openWarning(getView().getShell(),
 					RscTools.getString(RscConst.WRN_PHENOMENAVIEW_ADDING_PHENOMENON_GROUPNOTPRESENT_TITLE),
 					RscTools.getString(RscConst.WRN_PHENOMENAVIEW_ADDING_PHENOMENON_GROUPNOTPRESENT_DESC));
 			return;
 		}
 
 		// open creation dialog
-		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(), phenGroups, null,
+		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(getViewManager(), getView().getShell(), phenGroups, null,
 				groupSelected, ViewMode.CREATE);
 		Phenomenon phenomenonToCreate = dialog.openDialog();
 
@@ -235,27 +278,27 @@ public class PIRTPhenomenaViewController {
 		// persist phenomenon in database
 		try {
 			// Set id
-			phenomenonToCreate.setIdLabel(view.getIdColumnTextPhenomenon(phenomenonToCreate));
+			phenomenonToCreate.setIdLabel(getView().getIdColumnTextPhenomenon(phenomenonToCreate));
 
 			// create phenomenon
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).addPhenomenon(phenomenonToCreate);
+			getViewManager().getAppManager().getService(IPIRTApplication.class).addPhenomenon(phenomenonToCreate);
 
 			// Refresh parent
 			if (groupSelected != null) {
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(groupSelected);
+				getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(groupSelected);
 
 				// Expand parent
-				view.expandElements(groupSelected);
+				getView().expandElements(groupSelected);
 			}
 
 			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 
 		} catch (CredibilityException e) {
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_PHENOMENAVIEW_ADDING_PHENOMENON)
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -295,8 +338,8 @@ public class PIRTPhenomenaViewController {
 		} else {
 
 			// open update dialog
-			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected(), group, ViewMode.VIEW);
+			PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(getViewManager(), getView().getShell(),
+					qoiSelected, group, ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -313,8 +356,8 @@ public class PIRTPhenomenaViewController {
 		} else {
 
 			// open view dialog
-			PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(),
-					view.getQoISelected().getPhenomenonGroupList(), phenomenon, null, ViewMode.VIEW);
+			PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(getViewManager(), getView().getShell(),
+					qoiSelected.getPhenomenonGroupList(), phenomenon, null, ViewMode.VIEW);
 			dialog.openDialog();
 		}
 	}
@@ -349,25 +392,24 @@ public class PIRTPhenomenaViewController {
 	public void updatePhenomenonGroupAction(PhenomenonGroup group) {
 
 		// open update dialog
-		PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(view.getViewManager(), view.getShell(),
-				view.getQoISelected(), group, ViewMode.UPDATE);
+		PIRTPhenomenonGroupDialog dialog = new PIRTPhenomenonGroupDialog(getViewManager(), getView().getShell(),
+				qoiSelected, group, ViewMode.UPDATE);
 		PhenomenonGroup groupUpdated = dialog.openDialog();
 
 		if (groupUpdated != null) {
 			try {
 				// create
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-						.updatePhenomenonGroup(groupUpdated);
+				getViewManager().getAppManager().getService(IPIRTApplication.class).updatePhenomenonGroup(groupUpdated);
 
 				// Refresh
-				view.refresh();
+				getView().refresh();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating phenomenon group: {}", RscTools.carriageReturn() //$NON-NLS-1$
 						+ e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENGROUP) + e.getMessage());
 			}
 		}
@@ -383,8 +425,8 @@ public class PIRTPhenomenaViewController {
 		// open update dialog
 		Phenomenon phenomenonToUpdate = phenomenon;
 		PhenomenonGroup previousGroup = phenomenonToUpdate.getPhenomenonGroup();
-		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(view.getViewManager(), view.getShell(),
-				view.getQoISelected().getPhenomenonGroupList(), phenomenonToUpdate, null, ViewMode.UPDATE);
+		PIRTPhenomenonDialog dialog = new PIRTPhenomenonDialog(getViewManager(), getView().getShell(),
+				qoiSelected.getPhenomenonGroupList(), phenomenonToUpdate, null, ViewMode.UPDATE);
 		Phenomenon phenomenonUpdated = dialog.openDialog();
 
 		if (phenomenonUpdated != null) {
@@ -400,11 +442,11 @@ public class PIRTPhenomenaViewController {
 				}
 
 				// reload data model
-				view.refresh();
+				getView().refresh();
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating phenomenon: {}", RscTools.carriageReturn() //$NON-NLS-1$
 						+ e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENOMENON) + e.getMessage());
 			}
 
@@ -424,17 +466,17 @@ public class PIRTPhenomenaViewController {
 			return null;
 		}
 
-		Phenomenon updatePhenomenon = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
+		Phenomenon updatePhenomenon = getViewManager().getAppManager().getService(IPIRTApplication.class)
 				.updatePhenomenon(phenomenon);
 
 		// Refresh parent
 		PhenomenonGroup newGroup = updatePhenomenon.getPhenomenonGroup();
 		if (newGroup != null) {
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(newGroup);
+			getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(newGroup);
 		}
 
 		// Refresh view
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 
 		return updatePhenomenon;
 	}
@@ -451,22 +493,21 @@ public class PIRTPhenomenaViewController {
 		}
 
 		try {
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class).updateCriterion(criterion);
+			getViewManager().getAppManager().getService(IPIRTApplication.class).updateCriterion(criterion);
 
 			// Refresh parent
 			if (criterion.getPhenomenon() != null) {
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-						.refresh(criterion.getPhenomenon());
+				getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(criterion.getPhenomenon());
 			}
 
 			// Refresh view
-			view.getViewManager().viewChanged();
-			view.refresh();
+			getViewManager().viewChanged();
+			getView().refresh();
 
 		} catch (CredibilityException e) {
 			logger.error("An error occured while updating criterion: {}", RscTools.carriageReturn() //$NON-NLS-1$
 					+ e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_PHENOMENON) + e.getMessage());
 		}
 	}
@@ -478,39 +519,38 @@ public class PIRTPhenomenaViewController {
 	public void doTagAction() {
 
 		// confirm tag dialog
-		boolean confirm = MessageDialog.openConfirm(view.getShell(),
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TAGCONFIRM_TITLE),
-				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TAGCONFIRM_QUESTION, view.getQoISelected().getSymbol()));
+				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TAGCONFIRM_QUESTION, qoiSelected.getSymbol()));
 
 		if (confirm) {
 			try {
 				// tag dialog
-				QoITagDialog tagQoIDialog = new QoITagDialog(view.getViewManager(), view.getShell(),
-						view.getQoISelected());
+				QoITagDialog tagQoIDialog = new QoITagDialog(getViewManager(), getView().getShell(), qoiSelected);
 				String tagDescription = tagQoIDialog.openDialog();
 
 				if (tagQoIDialog.getReturnCode() == Window.OK) {
 
 					// tag qoi in database
-					view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-							.tagQoI(view.getQoISelected(), tagDescription, view.getViewManager().getCache().getUser());
+					getViewManager().getAppManager().getService(IPIRTApplication.class).tagQoI(qoiSelected,
+							tagDescription, getViewManager().getCache().getUser());
 
 					// refresh view
-					view.getViewManager().reloadQOIView();
+					getViewManager().reloadQOIView();
 
 					// fire view change to save credibility file
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 
 					// confirm tag success
-					MessageDialog.openInformation(view.getShell(),
+					MessageDialog.openInformation(getView().getShell(),
 							RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TAGCONFIRM_TITLE),
 							RscTools.getString(RscConst.MSG_PHENOMENAVIEW_TAGCONFIRM_SUCCESS));
 				}
 
 			} catch (CredibilityException e) {
-				logger.error("An error occured while tagging qoi: {}", view.getQoISelected() + RscTools.carriageReturn() //$NON-NLS-1$
+				logger.error("An error occured while tagging qoi: {}", qoiSelected + RscTools.carriageReturn() //$NON-NLS-1$
 						+ e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TAGGING),
 						e.getMessage());
 			}
 		}
@@ -522,8 +562,6 @@ public class PIRTPhenomenaViewController {
 	 * phenomenon and criterion are deleted
 	 */
 	public void resetAction() {
-
-		QuantityOfInterest qoiSelected = view.getQoISelected();
 
 		if (qoiSelected == null) {
 			return;
@@ -546,29 +584,28 @@ public class PIRTPhenomenaViewController {
 				qoiSelected.getSymbol(), nbGroups, nbPhenomena);
 
 		// confirm reset
-		boolean confirmReset = MessageDialog.openConfirm(view.getShell(),
+		boolean confirmReset = MessageDialog.openConfirm(getView().getShell(),
 				RscTools.getString(RscConst.MSG_PHENOMENAVIEW_RESETCONFIRM_TITLE), resetQuestion);
 
 		if (confirmReset) {
 			// Reset the selected qoi in database
 			try {
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).resetQoI(qoiSelected);
+				getViewManager().getAppManager().getService(IPIRTApplication.class).resetQoI(qoiSelected,
+						getViewManager().getCache().getUser());
 			} catch (CredibilityException e) {
 				logger.error("An error occured while resetting qoi: {}", //$NON-NLS-1$
-						(view.getQoISelected() != null ? view.getQoISelected() : RscTools.empty())
-								+ RscTools.carriageReturn(),
-						e);
+						(qoiSelected != null ? qoiSelected : RscTools.empty()) + RscTools.carriageReturn(), e);
 
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_RESETTING)
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 
 			// Fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 		}
 
 	}
@@ -615,21 +652,21 @@ public class PIRTPhenomenaViewController {
 		if (toUpdate) {
 			try {
 				// persist modifications in database
-				view.getViewManager().getAppManager().getService(IPIRTApplication.class).updateQoI(qoi,
-						view.getViewManager().getCache().getUser());
+				getViewManager().getAppManager().getService(IPIRTApplication.class).updateQoI(qoi,
+						getViewManager().getCache().getUser());
 
 				// refresh parent views and tabs
 				refreshQoIView();
 
 				// refresh the table header
-				view.refresh();
+				getView().refresh();
 
 				// fire view change to save credibility file
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_QOINAME) + property
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
@@ -637,9 +674,11 @@ public class PIRTPhenomenaViewController {
 	}
 
 	/**
-	 * @param qoiHeaderParts the qoi header to update
-	 * @param property       the property updated
-	 * @param value          the value to set
+	 * Sets the qo I name.
+	 *
+	 * @param qoi      the qoi
+	 * @param property the property updated
+	 * @param value    the value to set
 	 * @return true if the qoi name is ready to update, otherwise false
 	 */
 	private boolean setQoIName(QuantityOfInterest qoi, String property, String value) {
@@ -650,10 +689,11 @@ public class PIRTPhenomenaViewController {
 		if (!qoi.getSymbol().equals(value) && value != null && !value.equals(RscTools.empty())) {
 			boolean existsQoISymbol = false;
 			try {
-				existsQoISymbol = view.getViewManager().getAppManager().getService(IPIRTApplication.class)
+				existsQoISymbol = getViewManager().getAppManager().getService(IPIRTApplication.class)
 						.existsQoISymbol(new Integer[] { qoi.getId() }, value);
 				if (existsQoISymbol) {
-					MessageDialog.openWarning(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+					MessageDialog.openWarning(getView().getShell(),
+							RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 							RscTools.getString(RscConst.ERR_COPYQOI_NAME_DUPLICATED, value));
 				} else {
 					qoi.setSymbol(value);
@@ -662,7 +702,7 @@ public class PIRTPhenomenaViewController {
 			} catch (CredibilityException e) {
 				logger.error("An error occured while retrieving the qoi names:\n{}", e.getMessage(), //$NON-NLS-1$
 						e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 						RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_QOINAME) + property
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
@@ -683,18 +723,18 @@ public class PIRTPhenomenaViewController {
 		// qoi variable attributes
 		qoiHeaderParts.setValue(value);
 		try {
-			view.getViewManager().getAppManager().getService(IPIRTApplication.class)
-					.updateQoIHeader(qoiHeaderParts.getQoiHeader(), view.getViewManager().getCache().getUser());
+			getViewManager().getAppManager().getService(IPIRTApplication.class)
+					.updateQoIHeader(qoiHeaderParts.getQoiHeader(), getViewManager().getCache().getUser());
 
 			// refresh the table header
-			view.refresh();
+			getView().refresh();
 
 			// fire view change to save credibility file
-			view.getViewManager().viewChanged();
+			getViewManager().viewChanged();
 
 		} catch (CredibilityException e) {
 			logger.error(e.getMessage(), e);
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PHENOMENAVIEW_TITLE),
 					RscTools.getString(RscConst.ERR_PHENOMENAVIEW_UPDATING_QOIHEADER) + property
 							+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 		}
@@ -709,11 +749,10 @@ public class PIRTPhenomenaViewController {
 	 */
 	public void reorderPhenomenonGroups(PhenomenonGroup group, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenonGroups(group,
-				newIndex);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenonGroups(group, newIndex);
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -724,10 +763,10 @@ public class PIRTPhenomenaViewController {
 	 */
 	public void reorderPhenomenaForGroup(PhenomenonGroup group) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenaForGroup(group);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomenaForGroup(group);
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -739,10 +778,10 @@ public class PIRTPhenomenaViewController {
 	 */
 	public void reorderPhenomenon(Phenomenon phenomenon, int newIndex) throws CredibilityException {
 
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomena(phenomenon, newIndex);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).reorderPhenomena(phenomenon, newIndex);
 
 		// fire view change to save credibility file
-		view.getViewManager().viewChanged();
+		getViewManager().viewChanged();
 	}
 
 	/**
@@ -751,7 +790,7 @@ public class PIRTPhenomenaViewController {
 	 * @param group the group
 	 */
 	public void refreshPhenomenonGroup(PhenomenonGroup group) {
-		view.getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(group);
+		getViewManager().getAppManager().getService(IPIRTApplication.class).refresh(group);
 	}
 
 	/**
@@ -760,8 +799,44 @@ public class PIRTPhenomenaViewController {
 	public void refreshIfChanged() {
 
 		// Refresh
-		if (view.getViewManager().isDirty()) {
-			view.refresh();
+		if (getViewManager().isDirty()) {
+			getView().refresh();
 		}
+	}
+
+	/**
+	 * Get pirt configuration
+	 * 
+	 * @return the pirt specification
+	 */
+	public PIRTSpecification getPirtConfiguration() {
+		return getViewManager().getPIRTConfiguration();
+	}
+
+	/**
+	 *
+	 * Get the qoi selected
+	 * 
+	 * @return the qoi selected
+	 */
+	QuantityOfInterest getQoISelected() {
+		return qoiSelected;
+	}
+
+	/**
+	 * Checks if is tagged.
+	 *
+	 * @return true, if is tagged
+	 */
+	boolean isTagged() {
+		return qoiSelected != null && qoiSelected.getTagDate() != null;
+	}
+
+	/**
+	 * @return the PIRT description headers from the PIRT configuration
+	 */
+	@SuppressWarnings("unchecked")
+	List<PhenomenonGroup> getPhenomenonGroups() {
+		return (List<PhenomenonGroup>) getView().getTreeData();
 	}
 }

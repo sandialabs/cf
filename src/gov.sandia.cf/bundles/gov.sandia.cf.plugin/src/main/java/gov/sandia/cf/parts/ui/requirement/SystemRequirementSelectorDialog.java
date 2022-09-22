@@ -17,14 +17,12 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -38,7 +36,7 @@ import gov.sandia.cf.model.SystemRequirement;
 import gov.sandia.cf.model.SystemRequirementParam;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
 import gov.sandia.cf.parts.constants.ViewMode;
-import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.dialogs.GenericCFScrolledDialog;
 import gov.sandia.cf.parts.listeners.ViewerSelectionKeepBackgroundColor;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.ui.IViewManager;
@@ -58,7 +56,7 @@ import gov.sandia.cf.tools.RscTools;
  * @param <V> the view manager class
  *
  */
-public class SystemRequirementSelectorDialog<V extends IViewManager> extends GenericCFSmallDialog<V> {
+public class SystemRequirementSelectorDialog<V extends IViewManager> extends GenericCFScrolledDialog<V> {
 
 	/**
 	 * the logger
@@ -79,8 +77,6 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 	 * The tree expanded state
 	 */
 	protected HashMap<Integer, Boolean> expandedState = new HashMap<>();
-
-	private Composite formContainer;
 
 	/**
 	 * The constructor
@@ -138,59 +134,30 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Control createDialogArea(Composite parent) {
+	protected Composite createDialogScrolledContent(Composite parent) {
 
 		logger.debug("Create System Requirement dialog area"); //$NON-NLS-1$
 
-		Composite container = (Composite) super.createDialogArea(parent);
-
-		// scroll container
-		ScrolledComposite scrollContainer = new ScrolledComposite(container, SWT.V_SCROLL);
-		GridData scrollScData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scrollScData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scrollScData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		scrollContainer.setLayoutData(scrollScData);
-		scrollContainer.setLayout(new GridLayout());
-
-		// form container
-		formContainer = new Composite(scrollContainer, SWT.NONE);
-		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		formContainer.setLayoutData(scData);
-		GridLayout gridLayout = new GridLayout(2, false);
-		formContainer.setLayout(gridLayout);
+		Composite content = createDefaultDialogScrolledContent(parent);
 
 		// render System Requirements table
-		renderSysRequirementsTable();
-
-		// set scroll container size
-		scrollContainer.setContent(formContainer);
-		scrollContainer.setExpandHorizontal(true);
-		scrollContainer.setExpandVertical(true);
-		scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		formContainer.addListener(SWT.Resize,
-				e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-		formContainer
-				.addPaintListener(e -> scrollContainer.setMinSize(formContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+		renderSysRequirementsTable(content);
 
 		// set ok button to disabled
 		setEnableOkButton(false);
 
-		// Load data
-		loadData();
-
-		// Return Control
-		return container;
+		return content;
 	}
 
 	/**
-	 * Render system requirement tree
+	 * Render system requirement tree.
+	 *
+	 * @param parent the parent
 	 */
-	private void renderSysRequirementsTable() {
+	private void renderSysRequirementsTable(Composite parent) {
 
 		// Initialize table
-		renderMainTableInit();
+		renderMainTableInit(parent);
 
 		// Initialize data
 		List<String> columnProperties = new ArrayList<>();
@@ -282,11 +249,13 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 	}
 
 	/**
-	 * Initialize Main table
+	 * Initialize Main table.
+	 *
+	 * @param parent the parent
 	 */
-	private void renderMainTableInit() {
+	private void renderMainTableInit(Composite parent) {
 		// Tree - Create
-		treeViewer = new TreeViewerID(formContainer, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
+		treeViewer = new TreeViewerID(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		GridData gdViewer = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
 
 		Tree tree = treeViewer.getTree();
@@ -302,7 +271,7 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 
 		// Tree - Hint
 		gdViewer.heightHint = tree.getItemHeight();
-		gdViewer.widthHint = formContainer.getSize().x - 2 * ((GridLayout) formContainer.getLayout()).horizontalSpacing;
+		gdViewer.widthHint = parent.getSize().x - 2 * ((GridLayout) parent.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
 		tree.setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
@@ -334,8 +303,9 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 	}
 
 	/**
-	 * Add parameter column
-	 * 
+	 * Add parameter column.
+	 *
+	 * @param parameter the parameter
 	 * @return the tree column created
 	 */
 	private TreeViewerColumn renderMainTableAddParametersColumns(SystemRequirementParam parameter) {
@@ -442,10 +412,9 @@ public class SystemRequirementSelectorDialog<V extends IViewManager> extends Gen
 		return null;
 	}
 
-	/**
-	 * Load Requirement data
-	 */
-	private void loadData() {
+	/** {@inheritDoc} */
+	@Override
+	protected void loadDataAfterCreation() {
 
 		// Get Model
 		Model model = getViewManager().getCache().getModel();

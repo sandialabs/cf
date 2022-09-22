@@ -42,12 +42,10 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.pcmm.IPCMMAggregateApp;
 import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
 import gov.sandia.cf.application.pcmm.IPCMMEvidenceApp;
 import gov.sandia.cf.exceptions.CredibilityException;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMAggregation;
 import gov.sandia.cf.model.PCMMAggregationLevel;
 import gov.sandia.cf.model.PCMMAssessment;
@@ -85,31 +83,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMAggregateView extends ACredibilityPCMMView {
+public class PCMMAggregateView extends ACredibilityPCMMView<PCMMAggregateViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PCMMAggregateView.class);
-
-	/**
-	 * PCMMSpecification
-	 */
-	private PCMMSpecification pcmmConfiguration;
-
-	/**
-	 * the pcmm elements
-	 */
-	private List<PCMMElement> elements;
-
-	/**
-	 * The aggregation of all assessments
-	 */
-	private Map<PCMMSubelement, PCMMAggregation<PCMMSubelement>> aggregatedSubelementsMap;
-
-	/**
-	 * the aggregation of all sub-elements aggregation
-	 */
-	private Map<PCMMElement, PCMMAggregation<PCMMElement>> aggregatedElementsMap;
 
 	/**
 	 * the viewer
@@ -123,32 +101,22 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	private Map<TreeItem, TreeEditor> viewDetailsEditors;
 
 	/**
-	 * Filters
-	 */
-	private Map<EntityFilter, Object> filters;
-
-	/**
 	 * The assess table composite
 	 */
 	private Composite compositeTable;
 
 	/**
-	 * @param parentView the parent view
-	 * @param style      the view style
+	 * Instantiates a new PCMM aggregate view.
+	 *
+	 * @param viewController the view controller
+	 * @param style          the view style
 	 */
-	public PCMMAggregateView(PCMMViewManager parentView, int style) {
-		super(parentView, parentView, style);
-		elements = new ArrayList<>();
-		filters = new HashMap<>();
-		aggregatedSubelementsMap = new HashMap<>();
-		aggregatedElementsMap = new HashMap<>();
+	public PCMMAggregateView(PCMMAggregateViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		openEvidenceEditors = new HashMap<>();
 		viewDetailsEditors = new HashMap<>();
-
-		// Set PCMM configuration
-		pcmmConfiguration = getViewManager().getPCMMConfiguration();
 
 		// create the view
 		renderPage();
@@ -207,8 +175,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
-
+	void refreshMainTable() {
 		if (treeViewerPCMM != null) {
 			// dispose the table components
 			if (treeViewerPCMM.getTree() != null && !treeViewerPCMM.getTree().isDisposed()) {
@@ -238,6 +205,9 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	 */
 	private void renderMainTable() {
 
+		// get data
+		PCMMSpecification pcmmConfiguration = getViewController().getPcmmConfiguration();
+
 		// viewer general properties initialization
 		treeViewerPCMM = new TreeViewerHideSelection(compositeTable,
 				SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
@@ -248,7 +218,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		final AutoResizeViewerLayout viewerLayout = new AutoResizeViewerLayout(treeViewerPCMM);
 		treeViewerPCMM.getTree().setLayout(viewerLayout);
 		gdTablePCMM.heightHint = treeViewerPCMM.getTree().getItemHeight();
-		gdTablePCMM.widthHint = getViewManager().getSize().x
+		gdTablePCMM.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 		List<String> columnProperties = new ArrayList<>();
 
@@ -332,7 +302,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 						PCMMElement elt = (PCMMElement) element;
 
 						// Get PCMMAggregation
-						PCMMAggregation<PCMMElement> aggregation = getAggregatedElementsMap().get(elt);
+						PCMMAggregation<PCMMElement> aggregation = getViewController().getAggregatedElementsMap()
+								.get(elt);
 
 						// Get PCMMLevel name
 						String levelSelectedName = RscTools.empty();
@@ -348,7 +319,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 						PCMMSubelement subelt = (PCMMSubelement) element;
 
 						// Get PCMMAggregation
-						PCMMAggregation<PCMMSubelement> aggregation = getAggregatedSubelementsMap().get(subelt);
+						PCMMAggregation<PCMMSubelement> aggregation = getViewController().getAggregatedSubelementsMap()
+								.get(subelt);
 
 						// Get PCMMLevel name
 						String levelSelectedName = RscTools.empty();
@@ -375,9 +347,9 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 					// Get PCMMAggregation
 					if (element instanceof PCMMSubelement) {
-						aggregation = getAggregatedSubelementsMap().get(element);
+						aggregation = getViewController().getAggregatedSubelementsMap().get(element);
 					} else if (element instanceof PCMMElement) {
-						aggregation = getAggregatedElementsMap().get(element);
+						aggregation = getViewController().getAggregatedElementsMap().get(element);
 					}
 
 					// get rgb color
@@ -425,11 +397,11 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 					entityFilters.put(PCMMEvidence.Filter.SUBELEMENT, element);
 
 					// Tag
-					entityFilters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
+					entityFilters.put(PCMMEvidence.Filter.TAG, getViewController().getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
-							.getEvidenceBy(entityFilters);
+					List<PCMMEvidence> evidences = getViewController().getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceBy(entityFilters);
 
 					// Get number of PCMMEvidence
 					int nbEvidence = evidences.size();
@@ -448,11 +420,11 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 					entityFilters.put(PCMMEvidence.Filter.ELEMENT, element);
 
 					// Tag
-					entityFilters.put(PCMMEvidence.Filter.TAG, getViewManager().getSelectedTag());
+					entityFilters.put(PCMMEvidence.Filter.TAG, getViewController().getViewManager().getSelectedTag());
 
 					// Get evidences
-					List<PCMMEvidence> evidences = getViewManager().getAppManager().getService(IPCMMEvidenceApp.class)
-							.getEvidenceBy(entityFilters);
+					List<PCMMEvidence> evidences = getViewController().getViewManager().getAppManager()
+							.getService(IPCMMEvidenceApp.class).getEvidenceBy(entityFilters);
 
 					// Get number of PCMMEvidence
 					int nbEvidence = evidences.size();
@@ -502,7 +474,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 						// Button
 						ButtonTheme btnOpenItem = TableFactory
-								.createOpenButtonColumnAction(getViewManager().getRscMgr(), cell);
+								.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 						// Open - Listener
 						btnOpenItem.addListener(SWT.Selection, event -> {
@@ -514,8 +486,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 								PCMMSubelement subelementSelected = (PCMMSubelement) element;
 								if (null != subelementSelected) {
 									PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(
-											getViewManager(), getShell(), subelementSelected,
-											getViewManager().getSelectedTag());
+											getViewController().getViewManager(), getShell(), subelementSelected,
+											getViewController().getViewManager().getSelectedTag());
 									evidencesDialog.openDialog();
 								}
 							} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
@@ -523,8 +495,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 								PCMMElement elementSelected = (PCMMElement) element;
 								if (null != elementSelected) {
 									PCMMEvidenceListDialog evidencesDialog = new PCMMEvidenceListDialog(
-											getViewManager(), getShell(), elementSelected,
-											getViewManager().getSelectedTag());
+											getViewController().getViewManager(), getShell(), elementSelected,
+											getViewController().getViewManager().getSelectedTag());
 									evidencesDialog.openDialog();
 								}
 							}
@@ -570,7 +542,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 						PCMMElement elt = (PCMMElement) element;
 
 						// Get PCMMAggregation
-						PCMMAggregation<PCMMElement> aggregation = getAggregatedElementsMap().get(elt);
+						PCMMAggregation<PCMMElement> aggregation = getViewController().getAggregatedElementsMap()
+								.get(elt);
 
 						String comments = RscTools.empty();
 						if (aggregation != null && aggregation.getCommentList() != null
@@ -588,7 +561,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 						PCMMSubelement subelt = (PCMMSubelement) element;
 
 						// Get PCMMAggregation
-						PCMMAggregation<PCMMSubelement> aggregation = getAggregatedSubelementsMap().get(subelt);
+						PCMMAggregation<PCMMSubelement> aggregation = getViewController().getAggregatedSubelementsMap()
+								.get(subelt);
 
 						String comments = RscTools.empty();
 						if (aggregation != null && aggregation.getCommentList() != null
@@ -640,7 +614,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 						// Button
 						ButtonTheme btnViewItem = TableFactory
-								.createViewButtonColumnAction(getViewManager().getRscMgr(), cell);
+								.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 						// Footer buttons - Delete- Listener
 						btnViewItem.addListener(SWT.Selection, event -> {
@@ -698,10 +672,12 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 			treeViewerPCMM.setContentProvider(new PCMMAssessTreeSimplifiedContentProvider());
 		}
 		// Tree - Customize
-		treeViewerPCMM.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		treeViewerPCMM.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
-				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+		treeViewerPCMM.getTree()
+				.setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+		treeViewerPCMM.getTree()
+				.setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
+						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 		treeViewerPCMM.getTree().addListener(SWT.MeasureItem, new Listener() {
 
 			private TreeItem previousItem = null;
@@ -721,7 +697,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		treeViewerPCMM.setCellEditors(new CellEditor[] { new TextCellEditor(treeViewerPCMM.getTree()),
 				new TextCellEditor(treeViewerPCMM.getTree()), new TextCellEditor(treeViewerPCMM.getTree()),
 				new TextCellEditor(treeViewerPCMM.getTree()), new TextCellEditor(treeViewerPCMM.getTree()) });
-		treeViewerPCMM.setCellModifier(new PCMMAggregateViewerCellModifier(this, columnProperties));
+		treeViewerPCMM.setCellModifier(new PCMMAggregateViewerCellModifier(getViewController(), columnProperties));
 
 		// table modifications on double click
 		ColumnViewerSupport.enableDoubleClickEditing(treeViewerPCMM);
@@ -796,8 +772,10 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBackOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewManager().openHome());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
+		btnBackOptions.put(ButtonTheme.OPTION_LISTENER,
+				(Listener) event -> getViewController().getViewManager().openHome());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnBackOptions);
 
 		// Footer buttons - Guidance Level
 		Map<String, Object> btnHelpLevelOptions = new HashMap<>();
@@ -806,9 +784,9 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_HELP);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLUE);
 		btnHelpLevelOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> getViewManager().openPCMMHelpLevelView());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.PUSH | SWT.CENTER,
-				btnHelpLevelOptions);
+				(Listener) event -> getViewController().getViewManager().openPCMMHelpLevelView());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.PUSH | SWT.CENTER, btnHelpLevelOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -816,7 +794,8 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
+				btnHelpOptions);
 		HelpTools.addContextualHelp(compositeButtonsFooter, ContextualHelpId.PCMM_AGGREGATE);
 
 		// layout view
@@ -855,97 +834,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	 */
 	@Override
 	public void reload() {
-		reload(false);
-	}
-
-	/**
-	 * Reload the view
-	 * 
-	 * @param isFilter activate filters or not
-	 */
-	private void reload(boolean isFilter) {
-		// Hide Role
-		this.hideRoleSelection();
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		if (model != null) {
-
-			// Get expanded elements
-			Object[] expanded = (new ArrayList<Object>()).toArray();
-			boolean initialization = true;
-			if (treeViewerPCMM != null) {
-				initialization = false;
-				expanded = treeViewerPCMM.getExpandedElements();
-			}
-
-			try {
-				// Get elements
-				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
-				if (elements != null) {
-					// Manage "all" role filter
-					if (filters.containsKey(PCMMAssessment.Filter.ROLECREATION)) {
-						Role role = (Role) filters.get(PCMMAssessment.Filter.ROLECREATION);
-						if (null == role.getId()) {
-							filters.remove(PCMMAssessment.Filter.ROLECREATION);
-						}
-					}
-
-					// Add tag filter
-					filters.put(PCMMAssessment.Filter.TAG, getViewManager().getSelectedTag());
-
-					if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
-						// Aggregate sub-elements
-						aggregatedSubelementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-								.aggregateAssessments(pcmmConfiguration, elements, filters);
-
-						// Aggregate elements
-						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-								.aggregateSubelements(pcmmConfiguration, aggregatedSubelementsMap);
-
-						// Check the completeness of the assessments (don't display when filtering)
-						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-								.isCompleteAggregation(model, getViewManager().getSelectedTag())) {
-							MessageDialog.openWarning(getShell(),
-									RscTools.getString(RscConst.MSG_PCMMAGGREG_DIALOG_TITLE),
-									RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_MSG));
-						}
-					} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode())) {
-						aggregatedElementsMap = getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-								.aggregateAssessmentSimplified(pcmmConfiguration, elements, filters);
-
-						// Check the completeness of the assessments (don't display when filtering)
-						if (!isFilter && !getViewManager().getAppManager().getService(IPCMMAggregateApp.class)
-								.isCompleteAggregationSimplified(model, getViewManager().getSelectedTag())) {
-							MessageDialog.openWarning(getShell(),
-									RscTools.getString(RscConst.MSG_PCMMAGGREG_DIALOG_TITLE),
-									RscTools.getString(RscConst.MSG_PCMM_ASSESSMENT_INCOMPLETE_SIMPLIFIED_MSG));
-						}
-					}
-
-					// Refresh the table
-					refreshMainTable();
-
-					// Set tree data
-					treeViewerPCMM.setInput(elements);
-
-					// Set expanded elements
-					if (initialization) {
-						treeViewerPCMM.expandAll();
-					} else {
-						treeViewerPCMM.setExpandedElements(expanded);
-					}
-					treeViewerPCMM.refresh();
-				}
-			} catch (CredibilityException e) {
-				MessageDialog.openWarning(getShell(), RscTools.getString(RscConst.MSG_PCMMAGGREG_DIALOG_TITLE),
-						RscTools.getString(RscConst.ERR_PCMMAGGREG_DIALOG_LOADING_MSG));
-				logger.error("An error has occurred while loading aggregation data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			}
-		}
-
-		// refresh the viewer
-		refreshViewer();
+		getViewController().reloadData(false);
 	}
 
 	/**
@@ -961,11 +850,11 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		// label Filters
 		Label lblFilter = new Label(formFilterContainer, SWT.LEFT);
 		lblFilter.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_LABEL));
-		lblFilter.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		lblFilter.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData lblFilterGridData = new GridData();
 		lblFilter.setLayoutData(lblFilterGridData);
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblFilter);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblFilter);
 
 		// form container
 		Composite formRoleContainer = new Composite(formFilterContainer, SWT.NONE);
@@ -975,13 +864,14 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 
 		// label role
 		Label lblRole = new Label(formRoleContainer, SWT.RIGHT);
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblRole);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblRole);
 		lblRole.setText(RscTools.getString(RscConst.MSG_PCMMAGGREG_FILTER_ROLE_LABEL));
 		GridData lblSubtitleGridData = new GridData();
 		lblRole.setLayoutData(lblSubtitleGridData);
 
 		// Get roles and the selected one
-		List<Role> roles = getViewManager().getAppManager().getService(IPCMMApplication.class).getRoles();
+		List<Role> roles = getViewController().getViewManager().getAppManager().getService(IPCMMApplication.class)
+				.getRoles();
 		Role roleSelected = new Role();
 		roles.add(roleSelected);
 
@@ -1006,10 +896,10 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		cbxRole.addSelectionChangedListener(event -> {
 			// Initialize
 			IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-			filters.put(PCMMAssessment.Filter.ROLECREATION, selection.getFirstElement());
+			getViewController().putFilter(PCMMAssessment.Filter.ROLECREATION, selection.getFirstElement());
 
 			// Reload
-			reload(true);
+			getViewController().reloadData(true);
 		});
 	}
 
@@ -1019,20 +909,6 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	@Override
 	public void roleChanged() {
 		// unused: no role selection for this view
-	}
-
-	/**
-	 * @return the aggregation map of assessments
-	 */
-	public Map<PCMMSubelement, PCMMAggregation<PCMMSubelement>> getAggregatedSubelementsMap() {
-		return aggregatedSubelementsMap;
-	}
-
-	/**
-	 * @return the aggregation map of subelements aggregation
-	 */
-	public Map<PCMMElement, PCMMAggregation<PCMMElement>> getAggregatedElementsMap() {
-		return aggregatedElementsMap;
 	}
 
 	/**
@@ -1054,7 +930,7 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	/**
 	 * @return the first subelement selected of the pcmm table
 	 */
-	public PCMMSubelement getFirstSubelementSelected() {
+	private PCMMSubelement getFirstSubelementSelected() {
 
 		ISelection selection = treeViewerPCMM.getSelection();
 		if (selection != null && !selection.isEmpty()) {
@@ -1067,19 +943,52 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		return null;
 	}
 
+	Object[] getExpandedElements() {
+		if (treeViewerPCMM != null) {
+			return treeViewerPCMM.getExpandedElements();
+		}
+		return new Object[0];
+	}
+
 	/**
-	 * Display a dialog with the element details
-	 * 
-	 * @param subElement
+	 * Sets the tree elements.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewerPCMM != null) {
+			treeViewerPCMM.setInput(data);
+		}
+	}
+
+	/**
+	 * Sets the expanded elements.
+	 *
+	 * @param expanded the new expanded elements
+	 */
+	void setExpandedElements(Object[] expanded) {
+		if (expanded == null || expanded.length == 0) {
+			treeViewerPCMM.expandAll();
+		} else {
+			treeViewerPCMM.setExpandedElements(expanded);
+		}
+		treeViewerPCMM.refresh();
+	}
+
+	/**
+	 * Display a dialog with the element details.
+	 *
+	 * @param element the element
 	 */
 	private void showAggregationDetails(PCMMElement element) {
 
 		List<PCMMAssessment> assessmentByElement;
 		try {
-			assessmentByElement = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-					.getAssessmentByElement(element, filters);
-			PCMMAggregationDetailsDialog dlg = new PCMMAggregationDetailsDialog(getViewManager(), getShell(),
-					assessmentByElement, element);
+			assessmentByElement = getViewController().getViewManager().getAppManager()
+					.getService(IPCMMAssessmentApp.class)
+					.getAssessmentByElement(element, getViewController().getFilters());
+			PCMMAggregationDetailsDialog dlg = new PCMMAggregationDetailsDialog(getViewController().getViewManager(),
+					getShell(), assessmentByElement, element);
 			dlg.openDialog();
 		} catch (CredibilityException e) {
 			MessageDialog.openWarning(getShell(),
@@ -1098,12 +1007,13 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 		List<PCMMAssessment> assessmentBySubelement;
 		try {
 			// Get assessment details
-			assessmentBySubelement = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-					.getAssessmentBySubelement(subElement, filters);
+			assessmentBySubelement = getViewController().getViewManager().getAppManager()
+					.getService(IPCMMAssessmentApp.class)
+					.getAssessmentBySubelement(subElement, getViewController().getFilters());
 
 			// Open dialog
-			PCMMAggregationDetailsDialog dlg = new PCMMAggregationDetailsDialog(getViewManager(), getShell(),
-					assessmentBySubelement, subElement);
+			PCMMAggregationDetailsDialog dlg = new PCMMAggregationDetailsDialog(getViewController().getViewManager(),
+					getShell(), assessmentBySubelement, subElement);
 			dlg.openDialog();
 		} catch (CredibilityException e) {
 			MessageDialog.openWarning(getShell(),
@@ -1119,12 +1029,14 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	 */
 	private boolean hasAssessment(Object element) {
 		boolean hasAssessment = false;
+		PCMMSpecification pcmmConfiguration = getViewController().getPcmmConfiguration();
 
 		if (element instanceof PCMMSubelement && PCMMMode.DEFAULT == pcmmConfiguration.getMode()) {
-			PCMMAggregation<PCMMSubelement> pcmmAggregation = aggregatedSubelementsMap.get(element);
+			PCMMAggregation<PCMMSubelement> pcmmAggregation = getViewController().getAggregatedSubelementsMap()
+					.get(element);
 			hasAssessment = pcmmAggregation != null && pcmmAggregation.getLevel() != null;
 		} else if (element instanceof PCMMElement && PCMMMode.SIMPLIFIED == pcmmConfiguration.getMode()) {
-			PCMMAggregation<PCMMElement> pcmmAggregation = aggregatedElementsMap.get(element);
+			PCMMAggregation<PCMMElement> pcmmAggregation = getViewController().getAggregatedElementsMap().get(element);
 			hasAssessment = pcmmAggregation != null && pcmmAggregation.getLevel() != null;
 		}
 
@@ -1138,18 +1050,21 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	 * @return Color the color
 	 */
 	private Color getTreeCellBackgroud(Object element) {
+
+		PCMMSpecification pcmmConfiguration = getViewController().getPcmmConfiguration();
+
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			// PCMM Element in gray
 			if (element instanceof PCMMElement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			} else if (element instanceof PCMMSubelement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
 			// PCMM Element in gray
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
@@ -1163,17 +1078,20 @@ public class PCMMAggregateView extends ACredibilityPCMMView {
 	 * @return Color the color
 	 */
 	private Color getTreeCellForeground(Object element) {
+
+		PCMMSpecification pcmmConfiguration = getViewController().getPcmmConfiguration();
+
 		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode())) {
 			if (element instanceof PCMMElement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			} else if (element instanceof PCMMSubelement) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 
 			}
 		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 		return null;

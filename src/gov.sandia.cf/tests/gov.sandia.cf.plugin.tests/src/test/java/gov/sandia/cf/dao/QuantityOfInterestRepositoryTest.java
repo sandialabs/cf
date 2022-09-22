@@ -13,8 +13,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +24,11 @@ import gov.sandia.cf.tests.TestEntityFactory;
 import gov.sandia.cf.tools.DateTools;
 
 /**
+ * JUnit class to test the QuantityOfInterestRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the QuantityOfInterestRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class QuantityOfInterestRepositoryTest
 		extends AbstractTestRepository<QuantityOfInterest, Integer, QuantityOfInterestRepository> {
 

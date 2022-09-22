@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,14 +43,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeViewManager> {
+public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeWebViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(IntendedPurposeWebView.class);
-
-	/** The view ctrl. */
-	private IntendedPurposeWebViewController viewCtrl;
 
 	/** The main composite. */
 	private Composite mainComposite;
@@ -83,16 +79,12 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 	/**
 	 * The constructor.
 	 *
-	 * @param viewManager The view manager
-	 * @param viewCtrl    the view ctrl
-	 * @param style       The view style
+	 * @param viewController the view controller
+	 * @param style          The view style
 	 */
-	public IntendedPurposeWebView(IntendedPurposeViewManager viewManager, IntendedPurposeWebViewController viewCtrl,
-			int style) {
-		super(viewManager, viewManager, style);
+	public IntendedPurposeWebView(IntendedPurposeWebViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
-		Assert.isNotNull(viewCtrl);
-		this.viewCtrl = viewCtrl;
 		this.viewMode = ViewMode.VIEW; // default behavior view mode
 
 		// create the view
@@ -125,7 +117,7 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		mainComposite = new Composite(this, SWT.NONE);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 	}
 
@@ -173,12 +165,13 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER, btnBackOptions);
+		btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.CENTER, btnBackOptions);
 		btnBack.setToolTipText(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_BTN_BACK_TOOLTIP));
 		btnBack.setLayoutData(new RowData());
 		btnBack.setVisible(true);
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// Footer button - Cancel - Create
 		Map<String, Object> btnCancelOptions = new HashMap<>();
@@ -186,9 +179,9 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		btnCancelOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnCancelOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_CLOSE);
 		btnCancelOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		btnCancelOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.doCancelEditAction());
-		btnCancel = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnCancelOptions);
+		btnCancelOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().doCancelEditAction());
+		btnCancel = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterLeft,
+				SWT.CENTER, btnCancelOptions);
 		btnCancel.setToolTipText(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_BTN_CANCEL_TOOLTIP));
 		btnCancel.setLayoutData(new RowData());
 		btnCancel.setVisible(false);
@@ -199,8 +192,8 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterLeft, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(),
+				compositeButtonsFooterLeft, SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtonsFooterLeft, ContextualHelpId.INTENDED_PURPOSE);
@@ -213,9 +206,9 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		btnEditOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_EDIT);
 		btnEditOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnEditOptions.put(ButtonTheme.OPTION_ENABLED, ViewMode.VIEW.equals(viewMode));
-		btnEditOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.doEditAction());
-		btnEdit = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterRight, SWT.PUSH | SWT.CENTER,
-				btnEditOptions);
+		btnEditOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().doEditAction());
+		btnEdit = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterRight,
+				SWT.PUSH | SWT.CENTER, btnEditOptions);
 		btnEdit.setToolTipText(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_BTN_EDIT_TOOLTIP));
 		btnEdit.setLayoutData(new RowData());
 		btnEdit.setVisible(true);
@@ -227,9 +220,9 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		btnDoneOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_UPTODATE);
 		btnDoneOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnDoneOptions.put(ButtonTheme.OPTION_ENABLED, ViewMode.VIEW.equals(viewMode));
-		btnDoneOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> viewCtrl.doEditDoneAction());
-		btnDone = new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsFooterRight, SWT.PUSH | SWT.CENTER,
-				btnDoneOptions);
+		btnDoneOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> getViewController().doEditDoneAction());
+		btnDone = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsFooterRight,
+				SWT.PUSH | SWT.CENTER, btnDoneOptions);
 		btnDone.setToolTipText(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_BTN_DONE_TOOLTIP));
 		btnDone.setLayoutData(new RowData());
 		btnDone.setVisible(false);
@@ -283,27 +276,7 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 	/** {@inheritDoc} */
 	@Override
 	public void reload() {
-
-		logger.debug("Reload Intended Purpose view"); //$NON-NLS-1$
-
-		// repaint the form components
-		repaintForm();
-		repaintFooterButtons();
-
-		// refresh the data
-		IntendedPurpose intendedPurpose = viewCtrl.reloadIntendedPurpose();
-
-		if (intendedPurpose == null) {
-			return;
-		}
-
-		// set values
-		if (richTextDescription != null) {
-			richTextDescription.setValue(intendedPurpose.getDescription());
-		}
-		if (linkReference != null) {
-			linkReference.setValue(intendedPurpose.getReference());
-		}
+		getViewController().reloadData();
 	}
 
 	/**
@@ -327,7 +300,7 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 
 		clearFlashMessage();
 
-		EntityLockInfo lockInfo = viewCtrl.getLockInfo();
+		EntityLockInfo lockInfo = getViewController().getLockInfo();
 		if (lockInfo == null || StringUtils.isBlank(lockInfo.getInformation())) {
 			setFlashMessage(NotificationFactory.getNewInfo(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_LOCKED)));
 		} else {
@@ -340,7 +313,7 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 	/**
 	 * Reload Intended Purpose form components
 	 */
-	private void repaintForm() {
+	void repaintForm() {
 
 		// dispose children to repaint the form
 		ViewTools.disposeChildren(formComposite);
@@ -358,7 +331,7 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		Label label = FormFactory.createLabel(headerComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_HEADER_LBL));
 		label.setBackground(label.getParent().getBackground());
-		label.setForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		label.setForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 		GridData dataLabel = (GridData) label.getLayoutData();
 		dataLabel.horizontalAlignment = GridData.FILL;
@@ -366,27 +339,32 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 		dataLabel.grabExcessHorizontalSpace = true;
 		dataLabel.heightHint = dataLabel.heightHint + 10;
 		label.setLayoutData(dataLabel);
-		FontTools.setSubtitleFont(getViewManager().getRscMgr(), label);
+		FontTools.setSubtitleFont(getViewController().getViewManager().getRscMgr(), label);
 
 		// Intended Purpose field
-		richTextDescription = FormFactory.createRichTextWidget(getViewManager().getRscMgr(), formComposite,
-				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_DESCRIPTION), null, true, isEditable, false);
+		richTextDescription = FormFactory.createRichTextWidget(getViewController().getViewManager().getRscMgr(),
+				formComposite, RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_DESCRIPTION), null, true, isEditable,
+				false);
 		richTextDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		// References
 		Label lblReferences = FormFactory.createLabel(formComposite,
 				RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_REFERENCE));
-		FontTools.setBoldFont(getViewManager().getRscMgr(), lblReferences);
-		linkReference = FormFactory.createLinkWidget(formComposite, getViewManager(), null, isEditable);
+		FontTools.setBoldFont(getViewController().getViewManager().getRscMgr(), lblReferences);
+		linkReference = FormFactory.createLinkWidget(formComposite, getViewController().getViewManager(), null,
+				isEditable);
+		linkReference.setOnlyWarning(true);
 		linkReference.addChangedListener(e -> {
-			linkReference.clearHelper();
+			if (linkReference.isValid()) {
+				linkReference.clearHelper();
+			}
 		});
 	}
 
 	/**
 	 * Repaint footer buttons.
 	 */
-	private void repaintFooterButtons() {
+	void repaintFooterButtons() {
 
 		/* VIEW view buttons */
 		// Footer button - Back
@@ -415,6 +393,28 @@ public class IntendedPurposeWebView extends ACredibilitySubView<IntendedPurposeV
 			btnDone.setVisible(updateButtonsVisible);
 			((RowData) btnDone.getLayoutData()).width = updateButtonsVisible ? SWT.DEFAULT : 0;
 			btnDone.requestLayout();
+		}
+	}
+
+	/**
+	 * Sets the description.
+	 *
+	 * @param value the new description
+	 */
+	void setDescription(String value) {
+		if (richTextDescription != null) {
+			richTextDescription.setValue(value);
+		}
+	}
+
+	/**
+	 * Sets the link reference.
+	 *
+	 * @param value the new link reference
+	 */
+	void setLinkReference(String value) {
+		if (linkReference != null) {
+			linkReference.setValue(value);
 		}
 	}
 

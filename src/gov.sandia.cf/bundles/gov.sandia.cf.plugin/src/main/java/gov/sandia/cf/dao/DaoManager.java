@@ -4,6 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.dao;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -242,9 +243,10 @@ public class DaoManager implements IDaoManager {
 			}
 		} else {
 			try {
-				repository = repositoryClass.newInstance();
+				repository = repositoryClass.getDeclaredConstructor().newInstance();
 				mapRepositories.put(repositoryClass, repository);
-			} catch (InstantiationException | IllegalAccessException e) {
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				logger.error("An error occurs while instantiating new DAO Repository: {}", e.getMessage(), e); //$NON-NLS-1$
 			}
 		}

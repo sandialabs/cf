@@ -131,10 +131,11 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	/**
 	 * Close the database connection if it exists, and move the temporary folder to
 	 * the new path from workspace and file system.
-	 * 
-	 * @param res
-	 * @throws CoreException
-	 * @throws IOException
+	 *
+	 * @param oldFile the old file
+	 * @param newFile the new file
+	 * @throws CoreException the core exception
+	 * @throws IOException   Signals that an I/O exception has occurred.
 	 */
 	private void moveCFTemporaryFolder(IFile oldFile, IFile newFile) throws CoreException, IOException {
 
@@ -261,9 +262,9 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 			if (evidences != null && !evidences.isEmpty()) {
 				Composite layoutTop = editor.getViewMgr().getLayoutTop();
 				if (layoutTop instanceof PCMMViewManager) {
-					ACredibilityPCMMView activeView = ((PCMMViewManager) layoutTop).getActiveView();
+					ACredibilityPCMMView<?> activeView = ((PCMMViewManager) layoutTop).getActiveView();
 					if (activeView instanceof PCMMEvidenceView) {
-						viewsToReload.add((PCMMEvidenceView) activeView);
+						viewsToReload.add(activeView);
 					}
 				} else if (layoutTop instanceof HomeView) {
 					viewsToReload.add((HomeView) layoutTop);
@@ -326,7 +327,7 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 					logger.error(e.getMessage(), e);
 					MessageDialog.openError(Display.getCurrent().getActiveShell(),
 							RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_TITLE),
-							RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_MOVE, (IFile) res, newCfFile)
+							RscTools.getString(RscConst.ERR_CREDIBILITYEDITOR_MOVE, res, newCfFile)
 									+ RscTools.carriageReturn() + e.getMessage());
 				}
 
@@ -391,7 +392,10 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	}
 
 	/**
-	 * @param res
+	 * Gets the opened editor for resource in page.
+	 *
+	 * @param activePage the active page
+	 * @param res        the res
 	 * @return the credibility editor opened and associated to the resource in
 	 *         parameter
 	 */
@@ -451,7 +455,9 @@ public class ResourceDeltaModifier implements IResourceDeltaVisitor {
 	}
 
 	/**
-	 * @param res
+	 * Gets the opened CF editors in page.
+	 *
+	 * @param activePage the active page
 	 * @return the credibility editor opened and associated to the resource in
 	 *         parameter
 	 */

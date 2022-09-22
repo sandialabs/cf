@@ -238,8 +238,8 @@ public class RscConst {
 	/* DBMigrationManager */
 	public static final String EX_DBDAOMANAGER_DAOMANAGER_NULL = "ex.dbmigrationmanager.dbmanager_null"; //$NON-NLS-1$
 
-	/* ImageBadget */
-	public static final String EX_IMAGE_BADGET_IMAGENULL = "ex.image_badget.image_null"; //$NON-NLS-1$
+	/* ExtensionTool */
+	public static final String EX_EXTENSIONTOOL_EXECUTE_ERROR = "ex.extensiontool.execute.error"; //$NON-NLS-1$
 
 	/* Filetools */
 	public static final String EX_FILETOOLS_EMPTYNULL = "ex.filetools.empty_or_null"; //$NON-NLS-1$
@@ -249,6 +249,9 @@ public class RscConst {
 	public static final String EX_FILETOOLS_MOVE_SOURCENULL = "ex.filetools.move.source_null"; //$NON-NLS-1$
 	public static final String EX_FILETOOLS_MOVE_DELETEPREVRSCUNSUCCESSFUL = "ex.filetools.move.delete_prev_rsc_unsuccessful"; //$NON-NLS-1$
 	public static final String EX_FILETOOLS_CREATEFILE_UNSUCCESSFUL = "ex.filetools.create_file.unsuccessful"; //$NON-NLS-1$
+
+	/* ImageBadget */
+	public static final String EX_IMAGE_BADGET_IMAGENULL = "ex.image_badget.image_null"; //$NON-NLS-1$
 
 	/* ZipTools */
 	public static final String EX_ZIPTOOLS_FILEOUTSIDE = "ex.ziptools.file_outside"; //$NON-NLS-1$
@@ -591,30 +594,17 @@ public class RscConst {
 	public static final String EX_INTENDEDPURPOSE_UPDATE_USER_NULL = "ex.intended_purpose.update.user.null"; //$NON-NLS-1$
 	public static final String EX_INTENDEDPURPOSE_UPDATE_MODEL_NULL = "ex.intended_purpose.update.model.null"; //$NON-NLS-1$
 
-	/* Uncertainty Application */
+	/* Report ARG Execution App */
 
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_NULL = "ex.uncertainty.add.uncertainty_row.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYROW_USERNULL = "ex.uncertainty.add.uncertainty_row.user_null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_MODELNULL = "ex.uncertainty.add.uncertainty.model_null"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGTYPES_JOB_INIT = "msg.report_arg_exec.get_arg_types.job.init"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGTYPES_JOB_EXECWITHPRESCRIPT = "msg.report_arg_exec.get_arg_types.job.exec_with_prescript"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGTYPES_JOB_EXEC = "msg.report_arg_exec.get_arg_types.job.exec"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGTYPES_JOB_RETRIEVERESULT = "msg.report_arg_exec.get_arg_types.job.retrieve_result"; //$NON-NLS-1$
 
-	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_NULL = "ex.uncertainty.update.uncertainty_row.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.update.uncertainty_row.id_null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_USERNULL = "ex.uncertainty.update.uncertainty_row.user_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_NULL = "ex.uncertainty.delete.uncertainty_row.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.delete.uncertainty_row.id_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYVALUE_NULL = "ex.uncertainty.delete.uncertainty_value.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYVALUE_IDNULL = "ex.uncertainty.delete.uncertainty_value.id_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYPARAM_NULL = "ex.uncertainty.delete.uncertainty_param.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYPARAM_IDNULL = "ex.uncertainty.delete.uncertainty_param.id_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_NULL = "ex.uncertainty.delete.uncertainty_select_value.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_IDNULL = "ex.uncertainty.delete.uncertainty_select_value.id_null"; //$NON-NLS-1$
-
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_NULL = "ex.uncertainty.delete.uncertainty_constraint.null"; //$NON-NLS-1$
-	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_IDNULL = "ex.uncertainty.delete.uncertainty_constraint.id_null"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGVERSION_JOB_INIT = "msg.report_arg_exec.get_arg_version.job.init"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGVERSION_JOB_EXECWITHPRESCRIPT = "msg.report_arg_exec.get_arg_version.job.exec_with_prescript"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGVERSION_JOB_EXEC = "msg.report_arg_exec.get_arg_version.job.exec"; //$NON-NLS-1$
+	public static final String MSG_REPORTARGEXEC_GETARGVERSION_JOB_RETRIEVERESULT = "msg.report_arg_exec.get_arg_version.job.retrieve_result"; //$NON-NLS-1$
 
 	/* System Requirements Application */
 
@@ -646,6 +636,31 @@ public class RscConst {
 
 	public static final String EX_SYSREQUIREMENT_DELETE_REQUIREMENTSELECTVALUE_NULL = "ex.sysrequirement.delete.requirement_select_value.null"; //$NON-NLS-1$
 	public static final String EX_SYSREQUIREMENT_DELETE_REQUIREMENTSELECTVALUE_IDNULL = "ex.sysrequirement.delete.requirement_select_value.id_null"; //$NON-NLS-1$
+
+	/* Uncertainty Application */
+
+	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_NULL = "ex.uncertainty.add.uncertainty_row.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTYROW_USERNULL = "ex.uncertainty.add.uncertainty_row.user_null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_ADD_UNCERTAINTY_MODELNULL = "ex.uncertainty.add.uncertainty.model_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_NULL = "ex.uncertainty.update.uncertainty_row.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.update.uncertainty_row.id_null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_UPDATE_UNCERTAINTYROW_USERNULL = "ex.uncertainty.update.uncertainty_row.user_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_NULL = "ex.uncertainty.delete.uncertainty_row.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_IDNULL = "ex.uncertainty.delete.uncertainty_row.id_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYVALUE_NULL = "ex.uncertainty.delete.uncertainty_value.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYVALUE_IDNULL = "ex.uncertainty.delete.uncertainty_value.id_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYPARAM_NULL = "ex.uncertainty.delete.uncertainty_param.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYPARAM_IDNULL = "ex.uncertainty.delete.uncertainty_param.id_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_NULL = "ex.uncertainty.delete.uncertainty_select_value.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYSELECTVALUE_IDNULL = "ex.uncertainty.delete.uncertainty_select_value.id_null"; //$NON-NLS-1$
+
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_NULL = "ex.uncertainty.delete.uncertainty_constraint.null"; //$NON-NLS-1$
+	public static final String EX_UNCERTAINTY_DELETE_UNCERTAINTYCONSTRAINT_IDNULL = "ex.uncertainty.delete.uncertainty_constraint.id_null"; //$NON-NLS-1$
 
 	/**
 	 * Version Tokenizer
@@ -1159,6 +1174,7 @@ public class RscConst {
 	public static final String PREFS_DEVOPTS_DESCRIPTION = "prefs.devopts.description"; //$NON-NLS-1$
 	public static final String PREFS_DEVOPTS_REPORT_INLINEWORD_KEY = "prefs.devopts.report_inlineword.lbl"; //$NON-NLS-1$
 	public static final String PREFS_DEVOPTS_CONCURRENCY_SUPPORT_KEY = "prefs.devopts.concurrency_support.lbl"; //$NON-NLS-1$
+	public static final String PREFS_DEVOPTS_LOG_LEVEL_KEY = "prefs.devopts.log_level.lbl"; //$NON-NLS-1$
 
 	/* PIRT Query Result View */
 	public static final String MSG_PIRT_QUERYRSVIEW_TITLE = "msg.query_rs_view.title"; //$NON-NLS-1$
@@ -1518,6 +1534,7 @@ public class RscConst {
 	public static final String MSG_REPORTVIEW_CUSTOMENDING_LABEL = "msg.reportview.custom_ending.label"; //$NON-NLS-1$
 
 	public static final String MSG_REPORTVIEW_GENERATE_REPORT_PROCESSING = "msg.reportview.generate_report.processing"; //$NON-NLS-1$
+	public static final String MSG_REPORTVIEW_GENERATE_REPORT_JOB_TITLE = "msg.reportview.generate_report.job_title"; //$NON-NLS-1$
 	public static final String MSG_REPORTVIEW_GENERATE_REPORT_TASK_PARAMETERSFILE = "msg.reportview.generate_report.task_parametersfile"; //$NON-NLS-1$
 	public static final String MSG_REPORTVIEW_GENERATE_REPORT_TASK_PARAMETERSFILE_SUB1 = "msg.reportview.generate_report.task_parametersfile.sub1"; //$NON-NLS-1$
 	public static final String MSG_REPORTVIEW_GENERATE_REPORT_TASK_PARAMETERSFILE_SUB2 = "msg.reportview.generate_report.task_parametersfile.sub2"; //$NON-NLS-1$
@@ -1546,6 +1563,8 @@ public class RscConst {
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_EMPTY = "err.reportview.generate_report.custom_ending_file.empty"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_NOTEXIST = "err.reportview.generate_report.custom_ending_file.not_exists"; //$NON-NLS-1$
 	public static final String ERR_REPORTVIEW_GENERATE_REPORT_ARGPARAM_CUSTOMENDINGFILE_NOTFILE = "err.reportview.generate_report.custom_ending_file.not_file"; //$NON-NLS-1$
+
+	public static final String EX_ARG_COMMAND_EXCEPTION = "ex.arg.command.exception"; //$NON-NLS-1$
 
 	public static final String EX_CONFREPORT_COMMAND_NULL = "ex.confreport.command.null"; //$NON-NLS-1$
 	public static final String EX_CONFREPORT_OPTIONS_NULL = "ex.confreport.options.null"; //$NON-NLS-1$

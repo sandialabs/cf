@@ -261,8 +261,7 @@ public class ReportARGPlanningApp extends AApplication implements IReportARGPlan
 	/**
 	 * Gets the link caption.
 	 *
-	 * @param value the value
-	 * @param item  the item
+	 * @param intendedPurpose the intended purpose
 	 * @return the link caption
 	 */
 	private String getLinkCaption(IntendedPurpose intendedPurpose) {
@@ -452,35 +451,67 @@ public class ReportARGPlanningApp extends AApplication implements IReportARGPlan
 	private void generateStructureSectionsPlanningUncertaintyGroup(List<Map<String, Object>> sections,
 			Map<ExportOptions, Object> options) throws CredibilityException {
 		// Initialize
-		List<Uncertainty> uncertaintyGroupList = null;
+		List<Uncertainty> uncertaintyList = null;
 
 		// Get data
 		if (options.get(ExportOptions.PLANNING_UNCERTAINTIES) instanceof List) {
-			uncertaintyGroupList = (List<Uncertainty>) options.get(ExportOptions.PLANNING_UNCERTAINTIES);
+			uncertaintyList = (List<Uncertainty>) options.get(ExportOptions.PLANNING_UNCERTAINTIES);
 		}
 
 		// Check data not empties
-		if (uncertaintyGroupList != null && !uncertaintyGroupList.isEmpty()) {
+		if (uncertaintyList != null && !uncertaintyList.isEmpty()) {
+			generateStructureSectionsPlanningUncertainty(sections, uncertaintyList,
+					(ARGParameters) options.get(ExportOptions.ARG_PARAMETERS));
+		}
+	}
 
-			// Generate section for each uncertainty group
-			for (Uncertainty uncertaintyGroup : uncertaintyGroupList.stream().sorted(
-					Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()))
-					.collect(Collectors.toList())) {
+	/**
+	 * Generate Planning Uncertainty Inventory sections.
+	 *
+	 * @param sections      the sections
+	 * @param uncertainties the uncertainties to parse
+	 * @param argParameters the arg parameters
+	 * @throws CredibilityException if an error occurs during CF variable parsing
+	 * @praram argParameters the arg parameters
+	 */
+	private void generateStructureSectionsPlanningUncertainty(List<Map<String, Object>> sections,
+			List<Uncertainty> uncertainties, ARGParameters argParameters) throws CredibilityException {
 
-				// Initialize
-				List<Map<String, Object>> subsections = new ArrayList<>();
+		// Check data not empties
+		if (uncertainties == null || uncertainties.isEmpty()) {
+			return;
+		}
 
-				// Generate evidences sections
-				generateStructureSectionsPlanningUncertainty(subsections, uncertaintyGroup.getChildren(),
-						(ARGParameters) options.get(ExportOptions.ARG_PARAMETERS));
+		// Generate section for each Uncertainties
+		for (Uncertainty uncertainty : uncertainties.stream()
+				.sorted(Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()))
+				.collect(Collectors.toList())) {
 
-				// Add subsections
-				Map<String, Object> section = getAppMgr().getService(IReportARGApplication.class)
-						.generateSection(uncertaintyGroup.getName(), null, subsections, null);
+			// Initialize
+			List<Map<String, Object>> subsections = new ArrayList<>();
 
-				// Add section
-				sections.add(section);
+			// Parameters and values
+			List<IGenericTableValue> values = uncertainty.getValueList();
+			if (values != null && !values.isEmpty()) {
+
+				// Generate parameter/value paragraph
+				getAppMgr().getService(IReportARGApplication.class).generateGenericValues(sections, uncertainty, values,
+						argParameters);
 			}
+
+			// recursive call for children
+			if (uncertainty.getChildren() != null && !uncertainty.getChildren().isEmpty()) {
+				generateStructureSectionsPlanningUncertainty(subsections, uncertainty.getChildren(), argParameters);
+			}
+
+			// generate section and title
+			Map<String, Object> section = getAppMgr().getService(IReportARGApplication.class).generateSection(
+					uncertainty.getName(), null, subsections, getAppMgr().getService(IReportARGApplication.class)
+							.getSectionTypeByGenericLevel(uncertainty.getLevel()),
+					null);
+
+			// add to main section
+			sections.add(section);
 		}
 	}
 
@@ -559,33 +590,4 @@ public class ReportARGPlanningApp extends AApplication implements IReportARGPlan
 			sections.add(section);
 		}
 	}
-
-	/**
-	 * Generate Planning Uncertainty Inventory sections
-	 * 
-	 * @param subsections   the current subsection list
-	 * @param uncertainties the uncertainties to parse
-	 * @praram argParameters the arg parameters
-	 * @throws CredibilityException if an error occurs during CF variable parsing
-	 */
-	private void generateStructureSectionsPlanningUncertainty(List<Map<String, Object>> parentSections,
-			List<Uncertainty> uncertainties, ARGParameters argParameters) throws CredibilityException {
-		// Uncertainties
-		if (uncertainties != null && !uncertainties.isEmpty()) {
-			for (Uncertainty uncertainty : uncertainties.stream().sorted(
-					Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()))
-					.collect(Collectors.toList())) {
-
-				// Parameters and values
-				List<IGenericTableValue> values = uncertainty.getValueList();
-				if (values != null && !values.isEmpty()) {
-
-					// Generate parameter/value paragraph
-					getAppMgr().getService(IReportARGApplication.class).generateGenericValues(parentSections,
-							uncertainty, values, argParameters);
-				}
-			}
-		}
-	}
-
 }

@@ -4,6 +4,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.web.services.report;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import gov.sandia.cf.application.AApplication;
 import gov.sandia.cf.application.ApplicationManager;
@@ -55,20 +56,22 @@ public class ReportARGExecutionApp extends AApplication implements IReportARGExe
 	}
 
 	@Override
-	public ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog) {
+	public ARGType getARGTypes(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) {
 		// TODO to implement
 		return null;
 	}
 
 	@Override
-	public String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog) {
+	public String getARGVersion(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor progressMonitor) {
 		// TODO to implement
 		return null;
 	}
 
 	@Override
-	public void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog)
-			throws CredibilityException {
+	public void generateReportARG(ARGParameters argParameters, StringBuilder errorLog, StringBuilder infoLog,
+			IProgressMonitor monitor) throws CredibilityException {
 		// TODO to implement
 
 	}

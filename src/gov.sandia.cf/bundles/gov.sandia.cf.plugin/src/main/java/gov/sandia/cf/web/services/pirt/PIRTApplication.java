@@ -63,7 +63,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	}
 
 	@Override
-	public QuantityOfInterest resetQoI(QuantityOfInterest qoi) throws CredibilityException {
+	public QuantityOfInterest resetQoI(QuantityOfInterest qoi, User user) throws CredibilityException {
 		// TODO to implement
 		return null;
 	}
@@ -126,7 +126,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	}
 
 	@Override
-	public void deleteQoI(QuantityOfInterest qoi) throws CredibilityException {
+	public void deleteQoI(QuantityOfInterest qoi, User user) throws CredibilityException {
 		// TODO to implement
 
 	}
@@ -174,7 +174,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	}
 
 	@Override
-	public void deletePhenomenonGroup(PhenomenonGroup group) throws CredibilityException {
+	public void deletePhenomenonGroup(PhenomenonGroup group, User user) throws CredibilityException {
 		// TODO to implement
 
 	}
@@ -204,7 +204,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	}
 
 	@Override
-	public void deletePhenomenon(Phenomenon phenomenon) throws CredibilityException {
+	public void deletePhenomenon(Phenomenon phenomenon, User user) throws CredibilityException {
 		// TODO to implement
 
 	}
@@ -234,7 +234,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	}
 
 	@Override
-	public void deleteCriterion(Criterion criterion) throws CredibilityException {
+	public void deleteCriterion(Criterion criterion, User user) throws CredibilityException {
 		// TODO to implement
 
 	}
@@ -493,6 +493,12 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	@Override
 	public void reorderPhenomenaForGroup(PhenomenonGroup toMove) throws CredibilityException {
 		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void reorderGroupsForQuantityOfInterest(QuantityOfInterest qoi, User user) throws CredibilityException {
+		// TODO Auto-generated method stub
+
 	}
 }

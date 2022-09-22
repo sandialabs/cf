@@ -7,8 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class VersionComparatorTest {
 
 	/**
@@ -158,7 +155,7 @@ class VersionComparatorTest {
 	void test_compare_ValidScriptSuffixStringVersion_RC1_RC1_point_dev() {
 		assertTrue(comparator.compare("0.5.0.RC1", "0.5.0.RC1.dev") > 0); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	@Test
 	void test_compare_ValidScript_Hyphen() {
 		assertTrue(comparator.compare("0.2.0", "0.2.0-20200601") > 0); //$NON-NLS-1$ //$NON-NLS-2$

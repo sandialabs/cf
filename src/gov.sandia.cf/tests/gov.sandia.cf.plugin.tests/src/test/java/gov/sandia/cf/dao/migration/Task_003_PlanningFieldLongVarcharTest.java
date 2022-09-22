@@ -7,8 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +27,10 @@ import gov.sandia.cf.model.UncertaintySelectValue;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_003_PlanningFieldLongVarcharTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_003_PlanningFieldLongVarcharTest extends AbstractTestDao {
 
 	/**

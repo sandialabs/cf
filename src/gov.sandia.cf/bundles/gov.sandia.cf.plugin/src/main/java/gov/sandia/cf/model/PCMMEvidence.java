@@ -33,7 +33,7 @@ import gov.sandia.cf.tools.RscTools;
  */
 @Entity
 @Table(name = "PCMMEVIDENCE")
-public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer> {
+public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer>, ISortableByIdEntity {
 
 	private static final long serialVersionUID = 1L;
 
@@ -175,12 +175,12 @@ public class PCMMEvidence implements Serializable, IEntity<PCMMEvidence, Integer
 		this.id = id;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public String getGeneratedId() {
 		return generatedId;
 	}
 
-	@SuppressWarnings("javadoc")
+	@Override
 	public void setGeneratedId(String generatedId) {
 		this.generatedId = generatedId;
 	}

@@ -21,8 +21,6 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,6 @@ import gov.sandia.cf.tools.RscTools;
  * @author Maxime N.
  *
  */
-@RunWith(JUnitPlatform.class)
 class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 
 	/**
@@ -71,7 +68,6 @@ class PCMMApplicationAssessmentTest extends AbstractTestApplication {
 
 		// create model
 		Model createdModel = TestEntityFactory.getNewModel(getDaoManager());
-		assertNotNull(createdModel);
 
 		// ************************
 		// Create assessment

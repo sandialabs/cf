@@ -3,6 +3,7 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.preferences;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -15,8 +16,10 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
 import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.model.OpenLinkBrowserOption;
+import gov.sandia.cf.services.extension.impl.PredefinedPropertiesExtensionManager;
 import gov.sandia.cf.tools.RscTools;
 
 /**
@@ -90,9 +93,9 @@ public class PrefTools {
 	public static final String DEVOPTS_REPORT_INLINEWORD_KEY = "devopts_report_inlineword_key"; //$NON-NLS-1$
 	/** The Constant DEVOPTS_CONCURRENCY_SUPPORT_KEY. */
 	public static final String DEVOPTS_CONCURRENCY_SUPPORT_KEY = "devopts_concurrency_support_key"; //$NON-NLS-1$
+	/** The Constant DEVOPTS_DEBUG_LEVEL_KEY. */
+	public static final String DEVOPTS_LOG_LEVEL_KEY = "devopts_log_level_key"; //$NON-NLS-1$
 
-	
-	
 	/**
 	 * Configuration import constants
 	 */
@@ -152,18 +155,28 @@ public class PrefTools {
 		setPreferenceDefault(PIRT_QUERY_FILE_PATH_KEY, RscTools.empty());
 
 		// arg executable path
-		setPreferenceDefault(GLOBAL_ARG_EXECUTABLE_PATH_KEY, RscTools.empty());
+		// get predefined property from extension point
+		File argExecutableFile = PredefinedPropertiesExtensionManager.getArgExecutableFile();
+		if (argExecutableFile != null) {
+			setPreferenceDefault(GLOBAL_ARG_EXECUTABLE_PATH_KEY, argExecutableFile.getAbsolutePath());
+		}
 
 		// arg setenv path
-		setPreferenceDefault(GLOBAL_ARG_SETENV_SCRIPT_PATH_KEY, RscTools.empty());
+		// get predefined property from extension point
+		File argSetEnvironmentFile = PredefinedPropertiesExtensionManager.getArgSetEnvironmentFile();
+		if (argSetEnvironmentFile != null) {
+			setPreferenceDefault(GLOBAL_ARG_SETENV_SCRIPT_PATH_KEY, argSetEnvironmentFile.getAbsolutePath());
+		}
 
 		// Open Link Browser Option
-		setPreferenceDefault(GLOBAL_OPEN_LINK_BROWSER_OPTION_KEY, OpenLinkBrowserOption.EXERTNAL_BROWSER.name());
+		setPreferenceDefault(GLOBAL_OPEN_LINK_BROWSER_OPTION_KEY, OpenLinkBrowserOption.EXTERNAL_BROWSER.name());
 
 		// Developer options
 		// inline word documents
 		setPreferenceDefaultBoolean(DEVOPTS_REPORT_INLINEWORD_KEY, false);
 
+		// log level
+		setPreferenceDefault(DEVOPTS_LOG_LEVEL_KEY, Level.WARN.levelStr);
 	}
 
 	/**

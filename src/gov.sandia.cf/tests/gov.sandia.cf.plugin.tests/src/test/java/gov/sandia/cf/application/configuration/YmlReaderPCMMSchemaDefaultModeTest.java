@@ -16,8 +16,6 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,16 +26,16 @@ import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
 import gov.sandia.cf.tools.WorkspaceTools;
 
 /**
- * @author Didier Verstraete
+ * The Class YmlReaderPCMMSchemaTestDefaultMode.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
-class YmlReaderPCMMSchemaTestSimplifiedMode extends AbstractConfigurationTest {
+class YmlReaderPCMMSchemaDefaultModeTest extends AbstractConfigurationTest {
 
 	/**
 	 * the logger
 	 */
-	public static final Logger logger = LoggerFactory.getLogger(YmlReaderPCMMSchemaTestSimplifiedMode.class);
+	public static final Logger logger = LoggerFactory.getLogger(YmlReaderPCMMSchemaDefaultModeTest.class);
 
 	/* ***************** load ************** */
 
@@ -46,7 +44,7 @@ class YmlReaderPCMMSchemaTestSimplifiedMode extends AbstractConfigurationTest {
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools
-				.getStaticFilePath("configuration/PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.yml")); //$NON-NLS-1$
+				.getStaticFilePath("configuration/PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -54,10 +52,10 @@ class YmlReaderPCMMSchemaTestSimplifiedMode extends AbstractConfigurationTest {
 		assertNotNull(confLoaded);
 		assertNotNull(confLoaded.getElements());
 		assertEquals(6, confLoaded.getElements().size());
-		assertEquals(0, confLoaded.getElements().stream().mapToInt(e -> e.getSubElementList().size()).sum());
+		assertEquals(27, confLoaded.getElements().stream().mapToInt(e -> e.getSubElementList().size()).sum());
 		assertNotNull(confLoaded.getLevelColors());
 		assertEquals(4, confLoaded.getLevelColors().size());
-		assertEquals(PCMMMode.SIMPLIFIED, confLoaded.getMode());
+		assertEquals(PCMMMode.DEFAULT, confLoaded.getMode());
 		assertNotNull(confLoaded.getOptions());
 		assertEquals(5, confLoaded.getOptions().size());
 		assertNotNull(confLoaded.getPhases());
@@ -65,7 +63,7 @@ class YmlReaderPCMMSchemaTestSimplifiedMode extends AbstractConfigurationTest {
 		assertNotNull(confLoaded.getPlanningFields());
 		assertEquals(3, confLoaded.getPlanningFields().size());
 		assertNotNull(confLoaded.getPlanningQuestions());
-		assertEquals(20, confLoaded.getPlanningQuestions().values().stream().mapToInt(List::size).sum());
+		assertEquals(39, confLoaded.getPlanningQuestions().values().stream().mapToInt(List::size).sum());
 		assertNotNull(confLoaded.getRoles());
 		assertEquals(6, confLoaded.getRoles().size());
 
@@ -147,7 +145,7 @@ class YmlReaderPCMMSchemaTestSimplifiedMode extends AbstractConfigurationTest {
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools
-				.getStaticFilePath("configuration/PCMM_schema-No_Subelements_5_Levels-Assessment-v0.7.yml")); //$NON-NLS-1$
+				.getStaticFilePath("configuration/PCMM_schema-With_Subelements_5_Levels-Assessment-v0.7.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test

@@ -14,8 +14,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 /**
  * Test for RscTools class
@@ -23,7 +21,6 @@ import org.junit.runner.RunWith;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class RscToolsTest {
 
 	@Test

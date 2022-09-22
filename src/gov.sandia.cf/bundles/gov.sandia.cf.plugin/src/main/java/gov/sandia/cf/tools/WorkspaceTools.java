@@ -66,6 +66,9 @@ public class WorkspaceTools {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(WorkspaceTools.class);
 
+	/** The Constant IPATH_MINIMUM_FILE_SEGMENT_LENGTH. */
+	public static final int IPATH_MINIMUM_FILE_SEGMENT_LENGTH = 2;
+
 	private WorkspaceTools() {
 		// Do not instantiate
 	}
@@ -257,6 +260,12 @@ public class WorkspaceTools {
 	 */
 	public static IFile getFileInWorkspaceForPath(IPath path) {
 		if (path == null) {
+			return null;
+		}
+
+		if (path.segmentCount() < IPATH_MINIMUM_FILE_SEGMENT_LENGTH) {
+			logger.debug("Impossible to get file with path empty or with size < {}", //$NON-NLS-1$
+					IPATH_MINIMUM_FILE_SEGMENT_LENGTH);
 			return null;
 		}
 
@@ -519,6 +528,11 @@ public class WorkspaceTools {
 	 * @return the ipath to IFile format
 	 */
 	public static IFile toIFile(IPath ipath) {
+		if (ipath == null || ipath.segmentCount() < IPATH_MINIMUM_FILE_SEGMENT_LENGTH) {
+			logger.debug("Impossible to open a file with path empty or with size < {}", //$NON-NLS-1$
+					IPATH_MINIMUM_FILE_SEGMENT_LENGTH);
+			return null;
+		}
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(ipath);
 	}
 
@@ -564,6 +578,13 @@ public class WorkspaceTools {
 	 * @throws CoreException if the file is not present in the workspace
 	 */
 	public static void refreshPath(IPath pathFileToRefresh) throws CoreException {
+
+		if (pathFileToRefresh == null || pathFileToRefresh.segmentCount() < IPATH_MINIMUM_FILE_SEGMENT_LENGTH) {
+			logger.debug("Impossible to refresh a file with path empty or with size < {}", //$NON-NLS-1$
+					IPATH_MINIMUM_FILE_SEGMENT_LENGTH);
+			return;
+		}
+
 		// get resource
 		IResource rsc = ResourcesPlugin.getWorkspace().getRoot().getFile(pathFileToRefresh);
 		if (rsc == null) {
@@ -702,7 +723,12 @@ public class WorkspaceTools {
 
 		IPath destinationFilePath = destinationPath.append(newFileName);
 
-		// get IFile in wokrspace
+		// get IFile in workspace
+		if (destinationFilePath == null || destinationFilePath.segmentCount() < IPATH_MINIMUM_FILE_SEGMENT_LENGTH) {
+			logger.debug("Impossible to refresh copied file: path empty or with size < {}", //$NON-NLS-1$
+					IPATH_MINIMUM_FILE_SEGMENT_LENGTH);
+			return null;
+		}
 		IFile copiedFile = ResourcesPlugin.getWorkspace().getRoot().getFile(destinationFilePath);
 
 		// refresh workspace
@@ -810,6 +836,13 @@ public class WorkspaceTools {
 	public static void openFileInWorkspace(String pathToFile) {
 		// Retrieve file
 		IPath filePath = new Path(pathToFile);
+
+		if (filePath.segmentCount() < IPATH_MINIMUM_FILE_SEGMENT_LENGTH) {
+			logger.debug("Impossible to open a file with path empty or with size < {}", //$NON-NLS-1$
+					IPATH_MINIMUM_FILE_SEGMENT_LENGTH);
+			return;
+		}
+
 		IFile iFile = ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
 
 		// Get current page

@@ -26,8 +26,6 @@ import javax.persistence.Query;
 import javax.persistence.Table;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +38,11 @@ import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 
 /**
+ * JUnit class to test the UserRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the UserRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class MigrationLogRepositoryTest extends AbstractTestRepository<MigrationLog, Integer, MigrationLogRepository> {
 
 	/**

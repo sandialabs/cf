@@ -41,8 +41,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gov.sandia.cf.application.uncertainty.IUncertaintyApplication;
-import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.Uncertainty;
 import gov.sandia.cf.model.UncertaintyParam;
 import gov.sandia.cf.parts.constants.PartsResourceConstants;
@@ -73,16 +71,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Maxime N.
  *
  */
-public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager> {
+public class UncertaintyView extends ACredibilitySubView<UncertaintyViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyView.class);
-
-	/**
-	 * Controller
-	 */
-	private UncertaintyViewController viewCtrl;
 
 	/**
 	 * The main table composite
@@ -104,15 +97,13 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 	private Map<TreeItem, TreeEditor> deleteEditors;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param viewManager The view manager
-	 * @param style       The view style
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
+	 * @param style          The view style
 	 */
-	public UncertaintyView(UncertaintyViewManager viewManager, int style) {
-		super(viewManager, viewManager, style);
-
-		this.viewCtrl = new UncertaintyViewController(this);
+	public UncertaintyView(UncertaintyViewController viewController, int style) {
+		super(viewController, viewController.getViewManager(), style);
 
 		// Make sure you dispose these buttons when viewer input changes
 		this.addEditors = new HashMap<>();
@@ -122,7 +113,7 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		this.deleteEditors = new HashMap<>();
 
 		// create the view
-		if (getViewManager().getCache().getUncertaintySpecification() != null) {
+		if (getViewController().getViewManager().getCache().getUncertaintySpecification() != null) {
 			renderPage();
 		}
 	}
@@ -148,46 +139,7 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 	 */
 	@Override
 	public void reload() {
-
-		logger.debug("Reload Uncertainty view"); //$NON-NLS-1$
-
-		// Get Model
-		Model model = getViewManager().getCache().getModel();
-		List<Uncertainty> uncertaintyGroupList = new ArrayList<>();
-
-		// Get data
-		if (model != null) {
-			uncertaintyGroupList = this.getViewManager().getAppManager().getService(IUncertaintyApplication.class)
-					.getUncertaintyGroupByModel(model);
-
-			// reload system requirement spec
-			getViewManager().getCache().reloadUncertaintySpecification();
-		}
-
-		/**
-		 * Refresh the table
-		 */
-		// Get expanded elements
-		Object[] elements = (new ArrayList<Object>()).toArray();
-		boolean initialization = true;
-		if (treeViewer != null) {
-			initialization = false;
-			elements = treeViewer.getExpandedElements();
-		}
-
-		// Refresh the table
-		refreshMainTable();
-
-		// Set input
-		treeViewer.setInput(uncertaintyGroupList);
-
-		// Set expanded elements
-		if (initialization) {
-			treeViewer.expandAll();
-		} else {
-			treeViewer.setExpandedElements(elements);
-		}
-		treeViewer.refresh();
+		getViewController().reloadData();
 	}
 
 	/**
@@ -205,9 +157,6 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh
-		refresh();
 	}
 
 	/**
@@ -247,8 +196,8 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		btnAddUncertaintyGroupOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_GREEN);
 		btnAddUncertaintyGroupOptions.put(ButtonTheme.OPTION_DATA, btnAddUncertaintyGroupData);
 		btnAddUncertaintyGroupOptions.put(ButtonTheme.OPTION_LISTENER,
-				(Listener) event -> viewCtrl.addUncertaintyGroup());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
+				(Listener) event -> getViewController().addUncertaintyGroup());
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtonsHeaderRight, SWT.CENTER,
 				btnAddUncertaintyGroupOptions);
 	}
 
@@ -270,8 +219,8 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		ButtonTheme btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnBackOptions);
+		ButtonTheme btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -280,14 +229,14 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) event -> HelpTools.openContextualHelp());
 
-		ButtonTheme btnHelp = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
-				btnHelpOptions);
+		ButtonTheme btnHelp = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons,
+				SWT.CENTER, btnHelpOptions);
 		RowData btnLayoutData = new RowData();
 		btnHelp.setLayoutData(btnLayoutData);
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.UNCERTAINTY);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackHomeButton(btnBack);
+		getViewController().getViewManager().plugBackHomeButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();
@@ -336,9 +285,10 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		columnProperties.add(RscTools.getString(RscConst.MSG_UNCERTAINTY_NAME));
 
 		// Columns - Parameters
-		for (UncertaintyParam parameter : getViewManager().getCache().getUncertaintySpecification().getParameters()) {
+		for (UncertaintyParam parameter : getViewController().getViewManager().getCache().getUncertaintySpecification()
+				.getParameters()) {
 			TreeViewerColumn treeCol = TableFactory.createGenericParamTreeColumn(parameter, treeViewer,
-					new GenericTableLabelProvider(parameter, getViewManager()) {
+					new GenericTableLabelProvider(parameter, getViewController().getViewManager()) {
 
 						@Override
 						public Color getBackground(Object element) {
@@ -405,13 +355,13 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 
 		// Tree - Hint
 		gdViewer.heightHint = treeViewer.getTree().getItemHeight();
-		gdViewer.widthHint = getViewManager().getSize().x
+		gdViewer.widthHint = getViewController().getViewManager().getSize().x
 				- 2 * ((GridLayout) compositeTable.getLayout()).horizontalSpacing;
 
 		// Tree - Customize
-		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		treeViewer.getTree().setHeaderBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
-		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewManager().getRscMgr(),
+		treeViewer.getTree().setHeaderForeground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Set label provider
@@ -456,10 +406,10 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 				if (element instanceof Uncertainty && !addEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnAddItem = TableFactory.createAddButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnAddItem = TableFactory
+							.createAddButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 					btnAddItem.addListener(SWT.Selection, event -> {
-						viewCtrl.addUncertainty((Uncertainty) element);
+						getViewController().addUncertainty((Uncertainty) element);
 						treeViewer.refresh(item);
 					});
 
@@ -497,10 +447,10 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 				if (!openEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createOpenButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnViewItem = TableFactory
+							.createOpenButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 					btnViewItem.addListener(SWT.Selection,
-							event -> viewCtrl.openAllUncertaintyValues((Uncertainty) element));
+							event -> getViewController().openAllUncertaintyValues((Uncertainty) element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -536,11 +486,11 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 				if (!viewEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnViewItem = TableFactory.createViewButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
+					ButtonTheme btnViewItem = TableFactory
+							.createViewButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
 
 					// View - Listener
-					btnViewItem.addListener(SWT.Selection, event -> viewCtrl.viewElement(element));
+					btnViewItem.addListener(SWT.Selection, event -> getViewController().viewElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -576,9 +526,9 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 				if (!editEditors.containsKey(item)) {
 
 					// Button
-					ButtonTheme btnEditItem = TableFactory.createEditButtonColumnAction(getViewManager().getRscMgr(),
-							cell);
-					btnEditItem.addListener(SWT.Selection, event -> viewCtrl.updateElement(element));
+					ButtonTheme btnEditItem = TableFactory
+							.createEditButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnEditItem.addListener(SWT.Selection, event -> getViewController().updateElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -615,8 +565,8 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 
 					// Button
 					ButtonTheme btnDeleteItem = TableFactory
-							.createDeleteButtonColumnAction(getViewManager().getRscMgr(), cell);
-					btnDeleteItem.addListener(SWT.Selection, event -> viewCtrl.deleteElement(element));
+							.createDeleteButtonColumnAction(getViewController().getViewManager().getRscMgr(), cell);
+					btnDeleteItem.addListener(SWT.Selection, event -> getViewController().deleteElement(element));
 
 					// Draw cell
 					editor = new TreeEditor(item.getParent());
@@ -661,7 +611,7 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		// Tree - Listener - Double Click
 		tree.addListener(SWT.MouseDoubleClick, event -> {
 			if (event.type == SWT.MouseDoubleClick) {
-				viewCtrl.openAllUncertaintyValues(getSelected());
+				getViewController().openAllUncertaintyValues(getSelected());
 			}
 		});
 
@@ -699,13 +649,14 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 
 		// drop support
 		Transfer[] transferTypesDrop = new Transfer[] { LocalSelectionTransfer.getTransfer() };
-		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop, new UncertaintyDropSupport(viewCtrl, treeViewer));
+		treeViewer.addDropSupport(DND.DROP_MOVE, transferTypesDrop,
+				new UncertaintyDropSupport(getViewController(), treeViewer));
 	}
 
 	/**
 	 * Refresh the main table
 	 */
-	private void refreshMainTable() {
+	void refreshMainTable() {
 		// Dispose the table components
 		if (treeViewer != null && treeViewer.getTree() != null && !treeViewer.getTree().isDisposed()) {
 			treeViewer.getTree().removeAll();
@@ -786,13 +737,13 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 
 			if (uncertainty.getParent() != null && uncertainty.getChildren() != null
 					&& !uncertainty.getChildren().isEmpty()) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			} else if (uncertainty.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		}
 
@@ -809,11 +760,11 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 		if (element instanceof Uncertainty) {
 			Uncertainty uncertainty = (Uncertainty) element;
 			if (uncertainty.getParent() == null) {
-				return ColorTools.toColor(getViewManager().getRscMgr(),
+				return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 			}
 
-			return ColorTools.toColor(getViewManager().getRscMgr(),
+			return ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 		}
 		return null;
@@ -842,5 +793,45 @@ public class UncertaintyView extends ACredibilitySubView<UncertaintyViewManager>
 			return null;
 		}
 		return treeViewer.getIdColumnText(uncertainty);
+	}
+
+	/**
+	 * Gets the tree expanded elements.
+	 *
+	 * @return the tree expanded elements
+	 */
+	Object[] getTreeExpandedElements() {
+		Object[] elements = (new ArrayList<Object>()).toArray();
+		if (treeViewer != null) {
+			elements = treeViewer.getExpandedElements();
+		}
+		return elements;
+	}
+
+	/**
+	 * Sets the tree expanded elements.
+	 *
+	 * @param elements the new tree expanded elements
+	 */
+	void setTreeExpandedElements(Object[] elements) {
+		if (treeViewer != null) {
+			if (elements == null || elements.length == 0) {
+				treeViewer.expandAll();
+			} else {
+				treeViewer.setExpandedElements(elements);
+			}
+			treeViewer.refresh();
+		}
+	}
+
+	/**
+	 * Sets the tree data.
+	 *
+	 * @param data the new tree data
+	 */
+	void setTreeData(Object data) {
+		if (treeViewer != null) {
+			treeViewer.setInput(data);
+		}
 	}
 }

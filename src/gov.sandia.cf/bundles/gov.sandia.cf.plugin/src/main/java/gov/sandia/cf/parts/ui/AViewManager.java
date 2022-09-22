@@ -109,6 +109,11 @@ public abstract class AViewManager extends Composite implements IViewManager {
 	public SystemRequirementSpecification getSystemRequirementConfiguration() {
 		return getCache().getSystemRequirementSpecification();
 	}
+	
+	@Override
+	public void refreshPCMMRole() {
+		viewManager.refreshPCMMRole();
+	}
 
 	/** {@inheritDoc} */
 	@Override

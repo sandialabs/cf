@@ -14,8 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +22,11 @@ import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.Model;
 
 /**
+ * JUnit tests to check the abstract DAO and hsqldb connection and querying
+ * 
  * @author Didier Verstraete
  *
- *         JUnit tests to check the abstract DAO and hsqldb connection and
- *         querying
  */
-@RunWith(JUnitPlatform.class)
 class HSQLDBAndAbstractCRUDRepositoryTest extends AbstractTestDao {
 
 	/**

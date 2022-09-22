@@ -6,7 +6,6 @@ package gov.sandia.cf.parts.ui.intendedpurpose;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Control;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,6 @@ import gov.sandia.cf.model.dto.EntityLockInfo;
 import gov.sandia.cf.model.dto.IntendedPurposeDto;
 import gov.sandia.cf.parts.constants.ViewMode;
 import gov.sandia.cf.parts.ui.AViewController;
-import gov.sandia.cf.parts.ui.ICredibilityView;
 import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -35,14 +33,11 @@ import gov.sandia.cf.web.services.intendedpurpose.IntendedPurposeMapper;
  *
  * @author Didier Verstraete
  */
-public class IntendedPurposeWebViewController extends AViewController<IntendedPurposeViewManager>
-		implements IIntendedPurposeViewController {
+public class IntendedPurposeWebViewController extends
+		AViewController<IntendedPurposeViewManager, IntendedPurposeWebView> implements IIntendedPurposeViewController {
 
 	/** the logger. */
 	private static final Logger logger = LoggerFactory.getLogger(IntendedPurposeWebViewController.class);
-
-	/** The view. */
-	private IntendedPurposeWebView view;
 
 	/** The intended purpose. */
 	private IntendedPurpose intendedPurpose;
@@ -63,26 +58,30 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 	 */
 	public IntendedPurposeWebViewController(IntendedPurposeViewManager viewMgr) {
 		super(viewMgr);
-		this.view = new IntendedPurposeWebView(viewMgr, this, SWT.NONE);
+		super.setView(new IntendedPurposeWebView(this, SWT.NONE));
 		this.lockToken = null;
 	}
 
 	/**
 	 * Reload intended purpose.
-	 *
-	 * @return the intended purpose reloaded
 	 */
-	IntendedPurpose reloadIntendedPurpose() {
+	void reloadData() {
+
+		logger.debug("Reload Intended Purpose view"); //$NON-NLS-1$
+
+		// repaint the form components
+		getView().repaintForm();
+		getView().repaintFooterButtons();
+
 		try {
 			// get intended purpose
-			intendedPurpose = view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
-					.get(view.getViewManager().getCache().getModel());
+			intendedPurpose = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
+					.get(getViewManager().getCache().getModel());
 
 			if (getViewManager().isWebConnection()) {
 				// is locked?
-				locked = lockToken == null
-						&& view.getViewManager().getAppManager().getService(IIntendedPurposeWebClient.class)
-								.isLocked(view.getViewManager().getCache().getModel());
+				locked = lockToken == null && getViewManager().getAppManager()
+						.getService(IIntendedPurposeWebClient.class).isLocked(getViewManager().getCache().getModel());
 
 				if (locked) {
 					lockView();
@@ -93,14 +92,16 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 
 		} catch (CredibilityException e) {
 			logger.error("An error occured while loading the intended purpose", e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 					e.getMessage());
 		} catch (WebClientRuntimeException e) {
 			logger.error("An error occured while loading the intended purpose", e); //$NON-NLS-1$
 			lockView();
 		}
 
-		return intendedPurpose;
+		// set values
+		getView().setDescription(intendedPurpose.getDescription());
+		getView().setLinkReference(intendedPurpose.getReference());
 	}
 
 	/**
@@ -140,15 +141,15 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 			}
 
 			// open the edition mode
-			view.setViewMode(ViewMode.UPDATE);
-			view.reload();
+			getView().setViewMode(ViewMode.UPDATE);
+			getView().reload();
 
 		} catch (WebClientRuntimeException e) {
 			lockView();
 			lockToken = null;
 			logger.error(e.getMessage(), e);
 		} catch (CredibilityException e) {
-			view.displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+			getView().displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 					RscTools.getString(RscConst.ERR_INTENDEDPURPOSE_LOCK) + RscTools.CARRIAGE_RETURN + e.getMessage());
 			lockView();
 			lockToken = null;
@@ -169,14 +170,14 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 			}
 
 			// return to the VIEW mode
-			view.setViewMode(ViewMode.VIEW);
-			view.reload();
+			getView().setViewMode(ViewMode.VIEW);
+			getView().reload();
 
 		} catch (WebClientRuntimeException e) {
 			lockView();
 			logger.error(e.getMessage(), e);
 		} catch (CredibilityException e) {
-			view.displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+			getView().displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 					RscTools.getString(RscConst.ERR_INTENDEDPURPOSE_UNLOCK) + RscTools.CARRIAGE_RETURN
 							+ e.getMessage());
 			lockView();
@@ -196,14 +197,14 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 
 		if (lockToken != null) {
 			try {
-				view.getViewManager().getAppManager().getService(IIntendedPurposeWebClient.class)
+				getViewManager().getAppManager().getService(IIntendedPurposeWebClient.class)
 						.unlock(getViewManager().getCache().getModel(), lockToken);
 				lockToken = null;
 
 			} catch (WebClientRuntimeException e) {
 				logger.error(e.getMessage(), e);
 			} catch (CredibilityException e) {
-				view.displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+				getView().displayWarning(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 						RscTools.getString(RscConst.ERR_INTENDEDPURPOSE_LOCK) + RscTools.CARRIAGE_RETURN
 								+ e.getMessage());
 				logger.error(e.getMessage(), e);
@@ -211,8 +212,8 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 		}
 
 		// return to the VIEW mode
-		view.setViewMode(ViewMode.VIEW);
-		view.reload();
+		getView().setViewMode(ViewMode.VIEW);
+		getView().reload();
 	}
 
 	/**
@@ -254,7 +255,7 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 	void updateIntendedPurpose() {
 
 		// get the view data
-		IntendedPurpose toUpdate = view.getViewData();
+		IntendedPurpose toUpdate = getView().getViewData();
 
 		if (intendedPurpose != null && changed(toUpdate)) {
 
@@ -264,30 +265,30 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 
 			try {
 				// update
-				intendedPurpose = view.getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
+				intendedPurpose = getViewManager().getAppManager().getService(IIntendedPurposeApp.class)
 						.updateIntendedPurpose(getViewManager().getCache().getModel(), lockToken, intendedPurpose,
 								getViewManager().getCache().getUser());
 
 				// set save state
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 				lockToken = null;
 
 			} catch (CredibilityException e) {
 				logger.error("An error occured while updating the intended purpose", e); //$NON-NLS-1$
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 						e.getMessage());
 			}
 		}
 	}
 
 	/**
-	 * Quit the view.
+	 * Quit the getView().
 	 */
 	@Override
 	public void quit() {
-		if (ViewMode.UPDATE.equals(view.getViewMode())) {
-			if (changed(view.getViewData())) {
-				boolean update = view.displayQuestion(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
+		if (ViewMode.UPDATE.equals(getView().getViewMode())) {
+			if (changed(getView().getViewData())) {
+				boolean update = getView().displayQuestion(RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_TITLE),
 						RscTools.getString(RscConst.MSG_INTENDEDPURPOSE_DLG_QUIT_SAVEBEFOREEXIT));
 				if (update) {
 					doEditDoneAction();
@@ -298,26 +299,6 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 				doCancelEditAction();
 			}
 		}
-	}
-
-	/**
-	 * Gets the view.
-	 *
-	 * @return the view
-	 */
-	@Override
-	public Control getViewControl() {
-		return view;
-	}
-
-	/**
-	 * Gets the view.
-	 *
-	 * @return the view
-	 */
-	@Override
-	public ICredibilityView getView() {
-		return view;
 	}
 
 	/**
@@ -333,7 +314,7 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 	 * Unlock view.
 	 */
 	void unlockView() {
-		view.unlock();
+		getView().unlock();
 	}
 
 	/**
@@ -342,29 +323,29 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 	void lockView() {
 
 		// cancel edition if someone is editing
-		if (ViewMode.UPDATE.equals(view.getViewMode())) {
+		if (ViewMode.UPDATE.equals(getView().getViewMode())) {
 			doCancelEditAction();
 		}
 
-		view.lock();
+		getView().lock();
 	}
 
 	@Override
 	public void handleWebEvent(WebEvent e) {
 
-		if (view == null || view.isDisposed()) {
+		if (getView() == null || getView().isDisposed()) {
 			return; // TODO close connection before
 		}
 
 		if (WebappConstants.CF_WEB_CONST_MESSAGE.equals(e.id)) {
 			String data = e.data.toString();
 			WebNotification webNotification = GsonTools.getFromGson(data, WebNotification.class);
-			view.getDisplay().syncExec(() -> {
+			getView().getDisplay().syncExec(() -> {
 				Notification notification = WebNotificationMapper.toNotification(webNotification);
 				if (notification == null) {
-					view.clearFlashMessage();
+					getView().clearFlashMessage();
 				} else {
-					view.setFlashMessage(notification);
+					getView().setFlashMessage(notification);
 				}
 			});
 		} else if (WebappConstants.CF_WEB_CONST_LOCK.equals(e.id)) {
@@ -373,7 +354,7 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 
 			// lock the view if someone else is locking intended purpose
 			if (lockToken == null) {
-				view.getDisplay().syncExec(() -> {
+				getView().getDisplay().syncExec(() -> {
 					if (lockInfo == null) {
 						unlockView();
 					} else {
@@ -388,7 +369,7 @@ public class IntendedPurposeWebViewController extends AViewController<IntendedPu
 				IntendedPurposeDto intendedPurposeDto = GsonTools.getFromGson(e.data.toString(),
 						IntendedPurposeDto.class);
 				intendedPurpose = IntendedPurposeMapper.toApp(intendedPurposeDto);
-				view.getDisplay().syncExec(() -> view.reload());
+				getView().getDisplay().syncExec(() -> getView().reload());
 			}
 		}
 	}

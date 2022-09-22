@@ -3,8 +3,6 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +10,11 @@ import gov.sandia.cf.dao.impl.RoleRepository;
 import gov.sandia.cf.model.Role;
 
 /**
+ * JUnit class to test the RoleRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the RoleRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class RoleRepositoryTest extends AbstractTestRepository<Role, Integer, RoleRepository> {
 
 	/**

@@ -180,9 +180,9 @@ public class TextWidget extends AHelperWidget {
 	}
 
 	/**
-	 * Set editable field value
-	 * 
-	 * @param value the form value to set
+	 * Set editable field value.
+	 *
+	 * @param textValue the new editable value
 	 */
 	private void setEditableValue(String textValue) {
 		text.setText(gov.sandia.cf.tools.StringTools.getOrEmpty(textValue));

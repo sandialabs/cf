@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -197,7 +199,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public QuantityOfInterest resetQoI(QuantityOfInterest qoi) throws CredibilityException {
+	public QuantityOfInterest resetQoI(QuantityOfInterest qoi, User user) throws CredibilityException {
 
 		if (qoi == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_PIRT_UPDATEQOI_QOINULL));
@@ -210,9 +212,11 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 
 		// delete all phenomena groups
 		if (qoi.getPhenomenonGroupList() != null) {
-			for (PhenomenonGroup group : qoi.getPhenomenonGroupList()) {
+			// create new list to update the qoi.getPhenomenonGroupList() list
+			List<PhenomenonGroup> groups = new ArrayList<>(qoi.getPhenomenonGroupList());
+			for (PhenomenonGroup group : groups) {
 				if (group != null) {
-					deletePhenomenonGroup(group);
+					deletePhenomenonGroup(group, user);
 				}
 			}
 
@@ -589,7 +593,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 		}
 
 		// check qoi name change in id and children tags
-		List<Integer> ids = new ArrayList<>();
+		Set<Integer> ids = new HashSet<>();
 		QuantityOfInterest qoIById = getQoIById(qoi.getId());
 		if (qoIById != null) {
 			ids.add(qoIById.getId());
@@ -599,6 +603,18 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 						ids.add(tag.getId());
 					}
 				});
+			}
+			// add nodes at same level
+			if (qoIById.getParent() != null) {
+				refresh(qoIById.getParent());
+				ids.add(qoIById.getParent().getId());
+				if (qoIById.getParent().getChildren() != null) {
+					qoIById.getParent().getChildren().forEach(tag -> {
+						if (tag != null) {
+							ids.add(tag.getId());
+						}
+					});
+				}
 			}
 
 			if (existsQoISymbol(ids.toArray(new Integer[] {}), qoi.getSymbol())) {
@@ -615,7 +631,9 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 		}
 
 		// set the update user
-		qoi.setUserUpdate(user);
+		if (user != null) {
+			qoi.setUserUpdate(user);
+		}
 
 		// Get list
 		List<QoIPlanningValue> planningValues = qoi.getQoiPlanningList();
@@ -644,7 +662,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteQoI(QuantityOfInterest qoi) throws CredibilityException {
+	public void deleteQoI(QuantityOfInterest qoi, User user) throws CredibilityException {
 
 		if (qoi == null || qoi.getId() == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_PIRT_DELETEQOI_QOINULL));
@@ -652,6 +670,8 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 
 		// refresh before deletion
 		getDaoManager().getRepository(IQuantityOfInterestRepository.class).refresh(qoi);
+
+		Model model = qoi.getModel();
 
 		// delete ARG Parameters QoI referenced
 		Map<EntityFilter, Object> filters = new HashMap<>();
@@ -681,6 +701,9 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 		// automatically
 		// deleted by cascade REMOVE
 		getDaoManager().getRepository(IQuantityOfInterestRepository.class).delete(qoi);
+
+		// reorder the tree
+		reorderAllQuantityOfInterest(model, user);
 	}
 
 	/**
@@ -790,7 +813,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deletePhenomenonGroup(PhenomenonGroup group) throws CredibilityException {
+	public void deletePhenomenonGroup(PhenomenonGroup group, User user) throws CredibilityException {
 
 		if (group == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_PIRT_DELETEPHENGROUP_GROUPNULL));
@@ -801,8 +824,13 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 		// refresh before deletion
 		getDaoManager().getRepository(IPhenomenonGroupRepository.class).refresh(group);
 
+		QuantityOfInterest qoi = group.getQoi();
+
 		// REMOVE phenomenon group - phenomena will be deleted by cascade REMOVE
 		getDaoManager().getRepository(IPhenomenonGroupRepository.class).delete(group);
+
+		// reorder the elements
+		reorderGroupsForQuantityOfInterest(qoi, user);
 	}
 
 	/**
@@ -844,7 +872,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deletePhenomenon(Phenomenon phenomenon) throws CredibilityException {
+	public void deletePhenomenon(Phenomenon phenomenon, User user) throws CredibilityException {
 
 		if (phenomenon == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_PIRT_DELETEPHENOMENON_PHENOMENONNULL));
@@ -853,10 +881,15 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 		}
 
 		// refresh before deletion
-		getDaoManager().getRepository(IPhenomenonRepository.class).delete(phenomenon);
+		getDaoManager().getRepository(IPhenomenonRepository.class).refresh(phenomenon);
+
+		PhenomenonGroup phenomenonGroup = phenomenon.getPhenomenonGroup();
 
 		// REMOVE Phenomenon - criterion will be deleted by cascade REMOVE
 		getDaoManager().getRepository(IPhenomenonRepository.class).delete(phenomenon);
+
+		// reorder the elements
+		reorderPhenomenaForGroup(phenomenonGroup);
 	}
 
 	/**
@@ -906,7 +939,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteCriterion(Criterion criterion) throws CredibilityException {
+	public void deleteCriterion(Criterion criterion, User user) throws CredibilityException {
 
 		if (criterion == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_PIRT_DELETECRITERION_CRITERIONNULL));
@@ -1418,6 +1451,43 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void reorderGroupsForQuantityOfInterest(QuantityOfInterest qoi, User user) throws CredibilityException {
+
+		if (qoi == null) {
+			return;
+		}
+
+		// refresh qoi
+		refresh(qoi);
+
+		// get group list
+		List<PhenomenonGroup> groupList = qoi.getPhenomenonGroupList();
+
+		if (groupList == null) {
+			return;
+		}
+
+		// construct data
+		groupList.sort(
+				Comparator.comparing(PhenomenonGroup::getGeneratedId, new StringWithNumberAndNullableComparator()));
+
+		// set id for parents
+		int index = 1;
+		for (PhenomenonGroup group : groupList) {
+			String elementId = null;
+			elementId = IDTools.generateAlphabeticId(index - 1);
+			group.setIdLabel(elementId);
+			PhenomenonGroup updatedPhenomenonGroup = updatePhenomenonGroup(group);
+			reorderPhenomenaForGroup(updatedPhenomenonGroup);
+			refresh(group);
+			index++;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void reorderQuantityOfInterestAtSameLevel(QuantityOfInterest toMove, User user) throws CredibilityException {
 
 		if (toMove == null || toMove.getModel() == null) {
@@ -1508,6 +1578,11 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 			}
 			qoi.setGeneratedId(elementId);
 			updateQoI(qoi, user);
+
+			if (qoi.getChildren() != null && !qoi.getChildren().isEmpty()) {
+				reorderQuantityOfInterestAtSameLevel(qoi.getChildren().get(0), user);
+			}
+
 			index++;
 		}
 
@@ -1593,6 +1668,7 @@ public class PIRTApplication extends AApplication implements IPIRTApplication {
 			String elementId = groupIdLabel + index;
 			phenomenon.setIdLabel(elementId);
 			updatePhenomenon(phenomenon);
+			refresh(phenomenon);
 			index++;
 		}
 

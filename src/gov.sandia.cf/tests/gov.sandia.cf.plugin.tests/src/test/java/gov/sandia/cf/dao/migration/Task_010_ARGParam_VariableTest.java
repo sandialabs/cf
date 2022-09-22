@@ -12,8 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +25,10 @@ import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_010_ARGParam_VariableTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_010_ARGParam_VariableTest extends AbstractTestDao {
 
 	/**

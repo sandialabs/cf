@@ -14,7 +14,7 @@ import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMEvidence;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.parts.ui.pcmm.PCMMEvidenceColumnLabelProvider;
-import gov.sandia.cf.parts.ui.pcmm.PCMMEvidenceView;
+import gov.sandia.cf.parts.ui.pcmm.PCMMEvidenceViewController;
 import gov.sandia.cf.parts.widgets.FormFactory;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.StringTools;
@@ -28,13 +28,12 @@ import gov.sandia.cf.tools.StringTools;
 public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnLabelProvider {
 
 	/**
-	 * The constructor
-	 * 
-	 * @param view the pcmm evidence view
-	 * 
+	 * The constructor.
+	 *
+	 * @param viewController the view controller
 	 */
-	public PCMMEvidenceFilenameColumnLabelProvider(PCMMEvidenceView view) {
-		super(view);
+	public PCMMEvidenceFilenameColumnLabelProvider(PCMMEvidenceViewController viewController) {
+		super(viewController);
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnL
 			PCMMEvidence evidence = (PCMMEvidence) element;
 
 			// Get notifications
-			Map<NotificationType, List<String>> notificiations = getView().getViewManager().getAppManager()
+			Map<NotificationType, List<String>> notificiations = getViewController().getViewManager().getAppManager()
 					.getService(IPCMMEvidenceApp.class).getEvidenceNotifications(evidence, evidence.getId());
 
 			// Get Error notifications
@@ -84,10 +83,10 @@ public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnL
 			// Check errors and warning
 			if (hasError) {
 				// Display error icon
-				iconEvidence = FormFactory.getErrorIcon(getView().getViewManager().getRscMgr());
+				iconEvidence = FormFactory.getErrorIcon(getViewController().getViewManager().getRscMgr());
 			} else if (hasWarning) {
 				// Display warning icon
-				iconEvidence = FormFactory.getWarningIcon(getView().getViewManager().getRscMgr());
+				iconEvidence = FormFactory.getWarningIcon(getViewController().getViewManager().getRscMgr());
 			}
 		}
 		return iconEvidence;
@@ -106,7 +105,7 @@ public class PCMMEvidenceFilenameColumnLabelProvider extends PCMMEvidenceColumnL
 			StringBuilder notificationsToString = new StringBuilder();
 
 			// Get notifications
-			Map<NotificationType, List<String>> notificiations = getView().getViewManager().getAppManager()
+			Map<NotificationType, List<String>> notificiations = getViewController().getViewManager().getAppManager()
 					.getService(IPCMMEvidenceApp.class).getEvidenceNotifications(evidence, evidence.getId());
 
 			// Get Error notifications

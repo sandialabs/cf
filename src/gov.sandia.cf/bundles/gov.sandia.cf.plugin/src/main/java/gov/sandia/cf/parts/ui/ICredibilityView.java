@@ -12,14 +12,11 @@ package gov.sandia.cf.parts.ui;
 public interface ICredibilityView {
 
 	/**
-	 * Gets the view manager.
+	 * The get view controller.
 	 *
-	 * @return the view manager
-	 * @deprecated this method should be moved to the view Controller (extending
-	 *             IViewController)
+	 * @return the view controller
 	 */
-	@Deprecated
-	IViewManager getViewManager();
+	IViewController getViewController();
 
 	/**
 	 * Gets the title.

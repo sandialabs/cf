@@ -99,12 +99,22 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 					&& structFile.getParentFile().exists();
 			progressMonitor.worked(20);
 
+			// check for user cancellation
+			if (progressMonitor.isCanceled()) {
+				return;
+			}
+
 			// Generate parameters file
 			progressMonitor.subTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_TASK_PARAMETERSFILE));
 			File parametersFile = generateParametersFile(argParameters, progressMonitor);
 			boolean paramFileOk = parametersFile != null && parametersFile.exists()
 					&& parametersFile.getParentFile() != null && parametersFile.getParentFile().exists();
 			progressMonitor.worked(20);
+
+			// check for user cancellation
+			if (progressMonitor.isCanceled()) {
+				return;
+			}
 
 			if (argParameters != null && paramFileOk && structFileOk) {
 
@@ -136,10 +146,13 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 	}
 
 	/**
-	 * Generate the structure file path
-	 * 
+	 * Generate the structure file path.
+	 *
+	 * @param options         the options
+	 * @param argParameters   the arg parameters
+	 * @param progressMonitor the progress monitor
 	 * @return The structure file path
-	 * @throws CredibilityException
+	 * @throws CredibilityException the credibility exception
 	 */
 	private File generateStructureFile(Map<ExportOptions, Object> options, ARGParameters argParameters,
 			IProgressMonitor progressMonitor) throws CredibilityException {
@@ -180,12 +193,11 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 
 	/**
 	 * Generate the parameters file.
-	 * 
-	 * @param structureFile the structure file is needed for the parameters file
-	 *                      generation
+	 *
+	 * @param argParameters   the arg parameters
+	 * @param progressMonitor the progress monitor
 	 * @return true if the parameters file has been generated
 	 * @throws CredibilityException if an error occured
-	 * @throws IOException
 	 */
 	private File generateParametersFile(ARGParameters argParameters, IProgressMonitor progressMonitor)
 			throws CredibilityException {
@@ -229,12 +241,21 @@ public class GenerateARGReportRunnable implements IRunnableWithProgress {
 			progressMonitor.subTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_TASK_DELETEPREVIOUS));
 			deletePreviousReport(parameters);
 
+			// check for user cancellation
+			if (progressMonitor.isCanceled()) {
+				return;
+			}
+
 			// Run process
 			progressMonitor.subTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_TASK_GENREPORT));
 			viewManager.getAppManager().getService(IReportARGExecutionApp.class).generateReportARG(parameters, errorLog,
-					infoLog);
-
+					infoLog, progressMonitor);
 			progressMonitor.worked(50);
+
+			// check for user cancellation
+			if (progressMonitor.isCanceled()) {
+				return;
+			}
 
 			// open ARG report
 			progressMonitor.subTask(RscTools.getString(RscConst.MSG_REPORTVIEW_GENERATE_REPORT_TASK_OPENREPORT));

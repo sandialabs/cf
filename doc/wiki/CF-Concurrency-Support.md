@@ -14,7 +14,7 @@ The need of a concurrent access to the Credibility Framework (CF) will require c
 
 The existing architecture is described below; CF is packaged as an Eclipse plugin to be embedded into an Eclipse-based product.
 
-![image](uploads/f246d8e50aa1a6b8b189c9554d030cd5/image.png)
+![image](uploads/f0575498613b2a734d9f456cb7fc3f45/image.png)
 
 The plugin is installed into an Eclipse instance. 
 The user has a number of workspaces connected to the Eclipse instance. 
@@ -27,7 +27,7 @@ Compatibility between the existing local access and the concurrent one is a prer
 
 **Important:** This architecture does not support report generation on the server side. The user will still need to install ARG and its dependencies; the evidence links must be relative to the local Eclipse workspace.
 
-![image](uploads/4b8b0d73e9c4ab2e97644ed4c4ac0b3d/image.png)
+![image](uploads/7a142cedfac2abd015651eade1a528cb/image.png)
 
 The .cf file remains the entry point into the CF application. Two options are available: local or team CF project.
 
@@ -54,7 +54,7 @@ Within the Eclipse OSGi mechanism, plugins are packaged into features and availa
 
 The current architecture is packaged into one Eclipse feature containing the Eclipse plugin jar and the needed dependencies.
 
-![image](uploads/89188ac9e17dabdd736001749df6d3a7/image.png)
+![image](uploads/01387541937c3b295b4c9b5d945b6af1/image.png)
 
 The plugin is separated into different packages:
 -	**Launcher (UI)** contains the entry point of the application and launches views
@@ -81,7 +81,7 @@ The desired architecture will be to package one Eclipse feature but assembling v
 This separation will help make a distinction between one UI and different connections.
 Three main plugins will be created, one for the UI, one for the logic processes and connections, and one for the shared packages.
 
-![image](uploads/1df35a73735b2896eea75c386c41ab4a/image.png)
+![image](uploads/d79bd749b463199c89509825619ceec9/image.png)
 
 ##### CF Plugin UI
 
@@ -128,44 +128,8 @@ Some packages are shared with the core packages (**Constants**, **Exceptions**, 
 
 *Optional:* The CF webapp can serve content to a web browser, should this kind of client solution be desired in the future. This content will be separated from the REST API but remain in common packages like **core services** or **DAO**.
 
-![image](uploads/667a74e0f459b97b7108a6899e8a30af/image.png)
+![image](uploads/f2a3aa571183559092556dc5defb86bf/image.png)
 
-# Tasks
-
-The following planning describes the different steps needed to build the concurrency support.
-
-![image](uploads/0dfbeaf2be8f0040dc32d5a477d21ff3/image.png)
-
-The above tasks are presented in a sequential diagram, but the implementation of some can be parallelized. The tests are not described but are part of the different tasks.
-
--	**Design architecture and API:** the current analysis is part of the architecture design. 
-What is the expected behavior of the concurrency support? Should we export all the logic into the web application? Or keep some on the client side (e.g. Report generation)?
-What is the best and more efficient technology?
-Prototyping will guide choosing the good solution.
-
--	**Define new CF database schema:** having several CF projects into the same database will change the defined schema. The authentication and the lock mechanism are not currently managed. These new features must be designed and will generate new entities into the database schema.
-
--	**Separate UI and logic:** to support two different connections, the plugin UI must be separated from the local processes and database access. The best and cleaner way is to have different plugins. The UI plugin will start the views and select the backend services depending of the project type.
-
--	**Create webapp:** the web application skeleton and its main components and packages are a prerequisite to the concurrency support. The connection to the database, the CF logic re-use and other features are important parts of the web app. Unit tests are part of this tasks.
-
--	**Create REST API:** the REST API is one major feature to develop. A prior analysis should be conducted, regarding the various methods called by the plugin views. These methods must be added to the REST API. In addition, other API routes must be created for the additional features of the concurrency support, like authentication, lock, multi-projects, etc. To be consistent, the REST API has to implement unit tests.
-
--	**Generate/Create Web Client:** the web client can be generated based on the REST API with some tools like OpenAPI. The generation is a possibility and can help the development process. But with or without generation, the web client will be adapted to the plugin and needs.
-
--	**Create CF project type selector:** the CF plugin UI will have a mechanism to select the project type (local or remote) and create the local database or the remote connection
-
--	**Plug views to Web client:** the CF views will receive objects from the local database or the web client. To avoid any unexpected behavior, the above architecture separates the view model objects (Model DTO) from the local database (Model Entities) and web objects. A Wrapper has to be created to transform these objects in both ways.
-
--	**Implement Authentication:** the authentication mechanism is mainly present on the server side but must be implemented into the client plugin to allow connections. The enterprise authentication has to be defined.
-
--	**Implement Lock Mechanism:** the lock mechanism is a key point of the concurrency support. Different approaches can be used (pessimistic, optimistic) depending on the usage and the desired implementation. 
-What should we do if one user locks an object and loses connection? Or if the user computer stops? Should we have a timer to unlock? A super-user?
-It must be defined to answer the CF plugin needs and guarantee usability.
-
--	**Generate API documentation:** Some tools like Swagger provide support to generate the REST API documentation. 
-
--	**Write concurrency documentation:** the concurrency support is a complex project that should be documented in the open source Gitlab repository wiki.
 
 # Products
 

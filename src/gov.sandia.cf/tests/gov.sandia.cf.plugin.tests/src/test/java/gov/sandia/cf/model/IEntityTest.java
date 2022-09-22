@@ -30,6 +30,9 @@ import gov.sandia.cf.tools.MathTools;
 class IEntityTest {
 
 	/**
+	 * Gets the model instance.
+	 *
+	 * @param modelClass the model class
 	 * @return an instance of the MODEL
 	 */
 	IEntity<?, ?> getModelInstance(Class<? extends IEntity> modelClass) {
@@ -37,8 +40,9 @@ class IEntityTest {
 		IEntity<?, ?> instance = null;
 
 		try {
-			instance = modelClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			instance = modelClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			fail("Failed with " + modelClass + e.getMessage()); //$NON-NLS-1$
 		}
 

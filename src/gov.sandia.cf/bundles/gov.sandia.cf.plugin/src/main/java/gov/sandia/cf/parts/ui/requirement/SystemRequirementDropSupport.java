@@ -126,6 +126,8 @@ public class SystemRequirementDropSupport extends ViewerDropAdapter {
 			viewCtrl.refreshSystemRequirement(previousParent);
 
 			logger.debug("The drop of {} was done on {}", systemRequirementDragged, target); //$NON-NLS-1$
+		} else {
+			systemRequirementUpdated = systemRequirementDragged;
 		}
 
 		// reorder

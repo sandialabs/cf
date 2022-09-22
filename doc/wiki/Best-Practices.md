@@ -8,6 +8,7 @@ This page contains the best pratices of the CF project.
 
 
 
+
 ## Changing version number with Maven Tycho
 
 For **releases**, delete **SNAPSHOT** from the version number. 
@@ -149,31 +150,31 @@ Fragment-Host: gov.sandia.cf.plugin;bundle-version="${NEW_VERSION}"
 
 ### Files to change
 
-Here are the files to change:
+Here are the file to change:
 
-![image](uploads/0551b22c5ecca405e89a4646df2c9ed0/image.png)
+![image](uploads/fc6aecbc06e01fb2c544a73597b369f0/image.png)
 
 
 ## Release CF Snapshot
 
 1. **Merge all** necessary Merge Requests on `develop` branch
 2. Be sure that the version number ended by -SNAPSHOT or .qualifier. See [Changing version number with Maven Tycho](#changing-version-number-with-maven-tycho)
-7. **Launch** `deploy snapshot` job, a new tag will be created and the build will be deployed into the repository:
+3. **Launch** `deploy snapshot` job, a new tag will be created and the build will be deployed into the repository:
 
-![image](uploads/d799d10249f9f920de5d02ff7c3857dc/image.png)
+![image](uploads/5d8c0d020cbc152b85bfd1679d6231db/image.png)
 
-8. Enter the tag description into Repository > Tags > YOUR_TAG
+4. Enter the tag description into Repository > Tags > YOUR_TAG
 
 
 ## Release CF Release Candidate
 
 1. **Merge all** necessary Merge Requests on `develop` branch
 2. **Change version** number to the expected one (with .RCx). See [Changing version number with Maven Tycho](#changing-version-number-with-maven-tycho)
-7. **Launch** `deploy snapshot` job, a new tag will be created and the build will be deployed into the repository:
+3. **Launch** `deploy snapshot` job, a new tag will be created and the build will be deployed into the repository:
 
-![image](uploads/d799d10249f9f920de5d02ff7c3857dc/image.png)
+![image](uploads/9553ea86e9c9a639de6c088ae4066cb6/image.png)
 
-8. Enter the tag description into Repository > Tags > YOUR_TAG
+4. Enter the tag description into Repository > Tags > YOUR_TAG
 
 
 ## Release CF version
@@ -182,18 +183,18 @@ Here are the files to change:
 2. **Change version** number to the expected one (without -SNAPSHOT or .qualifier). See [Changing version number with Maven Tycho](#changing-version-number-with-maven-tycho)
 5. **Generate Javadoc** with the following command `mvn javadoc:javadoc` and copy javadoc into the `doc/javadoc` folder of the project with the version name as parent folder
 
-<img src="uploads/eb03cadb8349e016ffe49e78736fa2e0/Screen_Shot_2020-01-09_at_3.47.51_PM.png" height="350">
+![image](uploads/b47158830ee04313a5b7dcf84a406ea9/image.png)
 
-<img src="uploads/e52fc38b33d4ac6a0575b4676accbe9e/Screen_Shot_2020-01-09_at_3.33.30_PM_2.png" height="150">
+![image](uploads/12d430707b078644b174eeac54f1bf3a/image.png)
 
 
 4. **Launch** `deploy release` job and enter the `VERSION` variable manually by clicking on the **deploy stage icon** and `deploy release` job:
 
-![image](uploads/1d08278a4147e8d392a80908fd296880/image.png)
+![image](uploads/cf131696a93dc202b919619a3c1cfab2/image.png)
 
 5. **Confirm the version manually** to ensure the release action by adding Gitlab variable `VERSION`:
 
-![image](/uploads/99d7495135662dba0964b866bc26a28f/image.png)
+![image](uploads/c823c6a7f7feea5f1ff37550074fdf4e/image.png)
 
 The following action will be done from `develop` branch:
 - Add the CF build into the `build` folder in git
@@ -204,7 +205,7 @@ The following action will be done from `develop` branch:
 
 6. **Update** the **gitlab wiki**:
 - Duplicate all existing pages into a new folder starting with the version number.
-- Create a link to the javadoc. The content of the folder ` doc/javadocs` is automatically published on gitlab at the following url `https://iwf.gitlab.io/cf/<VERSION_NUMBER>` (replace <VERSION_NUMBER> by your version number).
+- Create a link to the javadoc. The content of the folder ` doc/javadocs` is automatically published on gitlab at the following url `https://credibilityframework.gitlab.io/cf/<VERSION_NUMBER>` (replace <VERSION_NUMBER> by your version number).
 - Add a link to this new pages on the wiki home page.
 
 

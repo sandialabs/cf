@@ -3,8 +3,6 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.dao;
 
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +12,11 @@ import gov.sandia.cf.model.QoIPlanningSelectValue;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
+ * JUnit class to test the QoIPlanningSelectValueRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the QoIPlanningSelectValueRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class QoIPlanningSelectValueRepositoryTest
 		extends AbstractTestRepository<QoIPlanningSelectValue, Integer, QoIPlanningSelectValueRepository> {
 

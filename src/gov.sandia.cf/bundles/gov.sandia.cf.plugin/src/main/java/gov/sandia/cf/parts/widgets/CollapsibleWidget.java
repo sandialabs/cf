@@ -4,8 +4,12 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.widgets;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.resource.ResourceManager;
+import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ExpandEvent;
+import org.eclipse.swt.events.ExpandListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,6 +30,8 @@ import gov.sandia.cf.tools.ColorTools;
  *
  */
 public class CollapsibleWidget extends Composite {
+
+	private ListenerList<ExpandListener> listeners = new ListenerList<>();
 
 	private Label label;
 	private Button checkbox;
@@ -139,7 +145,11 @@ public class CollapsibleWidget extends Composite {
 	}
 
 	/**
-	 * Header collapse
+	 * Header collapse.
+	 *
+	 * @param headerText  the header text
+	 * @param hasCheckbox the has checkbox
+	 * @param isExpanded  the is expanded
 	 */
 	private void renderHeader(String headerText, boolean hasCheckbox, boolean isExpanded) {
 		// Header composite
@@ -167,8 +177,7 @@ public class CollapsibleWidget extends Composite {
 		} else {
 			label = FormFactory.createLabel(headerComposite, headerText);
 			label.setBackground(label.getParent().getBackground());
-			label.setForeground(
-					ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
+			label.setForeground(ColorTools.toColor(rscMgr, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY)));
 			GridData dataLabel = (GridData) label.getLayoutData();
 			dataLabel.horizontalAlignment = GridData.FILL;
 			dataLabel.verticalAlignment = GridData.FILL;
@@ -189,7 +198,9 @@ public class CollapsibleWidget extends Composite {
 	}
 
 	/**
-	 * Content collapse
+	 * Content collapse.
+	 *
+	 * @param isExpanded the is expanded
 	 */
 	private void renderContent(boolean isExpanded) {
 		// Main table composite
@@ -226,17 +237,69 @@ public class CollapsibleWidget extends Composite {
 				((GridData) this.getLayoutData()).heightHint = labelHeight;
 				button.setIcon(IconTheme.ICON_NAME_EXPAND, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_NO_COLOR),
 						false);
+				if (e != null) {
+					fireCollapsed(new ExpandEvent(e));
+				}
 			} else {
 				contentComposite.setVisible(true);
 				contentComposite.setSize(contentComposite.getSize().x, contentHeight);
 				((GridData) this.getLayoutData()).heightHint = labelHeight + contentHeight;
 				button.setIcon(IconTheme.ICON_NAME_COLLAPSE, ConstantTheme.getColor(ConstantTheme.COLOR_NAME_NO_COLOR),
 						false);
+				if (e != null) {
+					fireExpanded(new ExpandEvent(e));
+				}
 			}
 
 			// Layout parent
 			this.getParent().layout();
 		});
+	}
+
+	/**
+	 * @param listener the expand listener
+	 */
+	public void addExpandListener(ExpandListener listener) {
+		listeners.add(listener);
+	}
+
+	/**
+	 * @param listener the expand listener
+	 */
+	public void removeExpandListener(ExpandListener listener) {
+		listeners.remove(listener);
+	}
+
+	/**
+	 * Notifies all registered cell editor listeners if the item is expanded
+	 * 
+	 * @param e the event
+	 */
+	protected void fireExpanded(ExpandEvent e) {
+		for (ExpandListener l : listeners) {
+			SafeRunnable.run(new SafeRunnable() {
+				@Override
+				public void run() {
+					l.itemExpanded(e);
+				}
+			});
+		}
+	}
+
+	/**
+	 * Notifies all registered cell editor listeners if the item is collapsed
+	 * 
+	 * @param e the event
+	 */
+	protected void fireCollapsed(ExpandEvent e) {
+		for (ExpandListener l : listeners) {
+			SafeRunnable.run(new SafeRunnable() {
+				@Override
+				public void run() {
+					l.itemCollapsed(e);
+				}
+			});
+		}
 	}
 
 	@Override

@@ -12,7 +12,7 @@ import gov.sandia.cf.model.PCMMAggregation;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
-import gov.sandia.cf.parts.ui.pcmm.PCMMAggregateView;
+import gov.sandia.cf.parts.ui.pcmm.PCMMAggregateViewController;
 import gov.sandia.cf.tools.RscTools;
 
 /**
@@ -46,16 +46,16 @@ public class PCMMAggregateViewerCellModifier implements ICellModifier {
 	/**
 	 * the parent view
 	 */
-	private PCMMAggregateView parentView;
+	private PCMMAggregateViewController viewController;
 
 	/**
-	 * The constructor
-	 * 
-	 * @param parentView       the parent view
+	 * The constructor.
+	 *
+	 * @param viewController   the view controller
 	 * @param columnProperties the column properties list
 	 */
-	public PCMMAggregateViewerCellModifier(PCMMAggregateView parentView, List<String> columnProperties) {
-		this.parentView = parentView;
+	public PCMMAggregateViewerCellModifier(PCMMAggregateViewController viewController, List<String> columnProperties) {
+		this.viewController = viewController;
 		this.columnProperties = columnProperties;
 	}
 
@@ -74,7 +74,7 @@ public class PCMMAggregateViewerCellModifier implements ICellModifier {
 	public Object getValue(Object element, String property) {
 		int index = columnProperties.indexOf(property);
 
-		if (PCMMMode.DEFAULT.equals(parentView.getViewManager().getPCMMConfiguration().getMode())) {
+		if (PCMMMode.DEFAULT.equals(viewController.getViewManager().getPCMMConfiguration().getMode())) {
 			if (element instanceof PCMMElement && index == NAME_INDEX) {
 				return ((PCMMElement) element).getName();
 			} else if (element instanceof PCMMSubelement) {
@@ -82,7 +82,7 @@ public class PCMMAggregateViewerCellModifier implements ICellModifier {
 				PCMMSubelement subelt = (PCMMSubelement) element;
 
 				// retrieve the pcmm assessment aggregation for this subelement
-				PCMMAggregation<PCMMSubelement> aggregation = parentView.getAggregatedSubelementsMap().get(subelt);
+				PCMMAggregation<PCMMSubelement> aggregation = viewController.getAggregatedSubelementsMap().get(subelt);
 
 				switch (index) {
 				case ID_INDEX:
@@ -100,12 +100,12 @@ public class PCMMAggregateViewerCellModifier implements ICellModifier {
 					return RscTools.empty();
 				}
 			}
-		} else if (PCMMMode.SIMPLIFIED.equals(parentView.getViewManager().getPCMMConfiguration().getMode())
+		} else if (PCMMMode.SIMPLIFIED.equals(viewController.getViewManager().getPCMMConfiguration().getMode())
 				&& element instanceof PCMMElement) {
 			PCMMElement elt = (PCMMElement) element;
 
 			// retrieve the pcmm assessment aggregation for this element
-			PCMMAggregation<PCMMElement> aggregation = parentView.getAggregatedElementsMap().get(elt);
+			PCMMAggregation<PCMMElement> aggregation = viewController.getAggregatedElementsMap().get(elt);
 
 			switch (index) {
 			case ID_INDEX:

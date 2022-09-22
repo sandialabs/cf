@@ -320,7 +320,9 @@ public class PCMMAssessDialog extends GenericCFDialog<PCMMViewManager> {
 	}
 
 	/**
-	 * Check the level
+	 * Check the level.
+	 *
+	 * @return true, if successful
 	 */
 	private boolean checkLevel() {
 
@@ -362,7 +364,9 @@ public class PCMMAssessDialog extends GenericCFDialog<PCMMViewManager> {
 	}
 
 	/**
-	 * Check the comments
+	 * Check the comments.
+	 *
+	 * @return true, if successful
 	 */
 	private boolean checkComments() {
 

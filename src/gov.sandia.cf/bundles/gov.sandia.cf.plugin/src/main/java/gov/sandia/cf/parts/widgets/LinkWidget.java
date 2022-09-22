@@ -4,7 +4,10 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.parts.widgets;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
@@ -31,8 +34,12 @@ import gov.sandia.cf.model.Notification;
 import gov.sandia.cf.model.NotificationFactory;
 import gov.sandia.cf.model.NotificationType;
 import gov.sandia.cf.model.dto.configuration.ParameterLinkGson;
+import gov.sandia.cf.parts.theme.ButtonTheme;
+import gov.sandia.cf.parts.theme.ConstantTheme;
+import gov.sandia.cf.parts.theme.IconTheme;
 import gov.sandia.cf.parts.ui.IViewManager;
 import gov.sandia.cf.parts.widgets.filebrowser.FileChooser;
+import gov.sandia.cf.tools.ColorTools;
 import gov.sandia.cf.tools.FileTools;
 import gov.sandia.cf.tools.GsonTools;
 import gov.sandia.cf.tools.LinkTools;
@@ -61,8 +68,14 @@ public class LinkWidget extends AHelperWidget {
 	private Label textNonEditable;
 	private Label captionTextNonEditable;
 
+	// actions
+	private Button openBtn;
+
 	// data
 	private FormFieldType type;
+
+	/** Is required. */
+	private boolean onlyWarning = false;
 
 	/**
 	 * List of change listeners (element type: <code>LinkChangedListener</code>).
@@ -148,7 +161,7 @@ public class LinkWidget extends AHelperWidget {
 	 */
 	private void renderEditableField() {
 		// layout data
-		GridLayout gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(3, false);
 		gridLayout.marginWidth = 0;
 		gridLayout.marginLeft = 0;
 		gridLayout.marginRight = 0;
@@ -201,7 +214,8 @@ public class LinkWidget extends AHelperWidget {
 		gdUrlInput.horizontalAlignment = GridData.FILL;
 		urlInput.setLayoutData(gdUrlInput);
 		urlInput.addListener(SWT.Modify, this::fireChanged);
-		urlInput.setBackground(getParent().getBackground());
+		urlInput.setBackground(
+				ColorTools.toColor(viewManager.getRscMgr(), ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		/**
 		 * File chooser
@@ -210,7 +224,29 @@ public class LinkWidget extends AHelperWidget {
 		fileChooser.setOnlyBrowse(false);
 		fileChooser.addListener(this::fireChanged);
 		fileChooser.setBackground(getParent().getBackground());
+
+		// select file chooser first
 		containerLayout.topControl = fileChooser;
+
+		/**
+		 * Open
+		 */
+		// Open button
+		Map<String, Object> optionsOpenBtn = new HashMap<>();
+		optionsOpenBtn.put(ButtonTheme.OPTION_TEXT, RscTools.getString(RscConst.MSG_BTN_OPEN));
+		optionsOpenBtn.put(ButtonTheme.OPTION_ENABLED, false);
+		optionsOpenBtn.put(ButtonTheme.OPTION_OUTLINE, false);
+		optionsOpenBtn.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_OPEN);
+		optionsOpenBtn.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_PRIMARY);
+		openBtn = FormFactory.createButton(viewManager.getRscMgr(), this, null, optionsOpenBtn);
+		((GridData) openBtn.getLayoutData()).verticalAlignment = SWT.CENTER;
+		((GridData) openBtn.getLayoutData()).horizontalAlignment = SWT.LEFT;
+		openBtn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				LinkTools.openLinkValue(getGSONValue(), viewManager.getCache().getOpenLinkBrowserOpts());
+			}
+		});
 
 		/**
 		 * Caption (if image)
@@ -259,6 +295,15 @@ public class LinkWidget extends AHelperWidget {
 				fireChanged(toEvent(event));
 			}
 		});
+
+		// value changed listener
+		addChangedListener(e -> {
+			if (!openBtn.isEnabled() && !StringUtils.isBlank(getValue()) && isValid()) {
+				openBtn.setEnabled(true);
+			} else if (openBtn.isEnabled() && (StringUtils.isBlank(getValue()) || !isValid())) {
+				openBtn.setEnabled(false);
+			}
+		});
 	}
 
 	/**
@@ -294,6 +339,24 @@ public class LinkWidget extends AHelperWidget {
 	 */
 	public FormFieldType getLinkTypeSelected() {
 		return this.type;
+	}
+
+	/**
+	 * Checks if is only warning.
+	 *
+	 * @return true, if is only warning
+	 */
+	public boolean isOnlyWarning() {
+		return onlyWarning;
+	}
+
+	/**
+	 * Sets the only warning.
+	 *
+	 * @param onlyWarning the new only warning
+	 */
+	public void setOnlyWarning(boolean onlyWarning) {
+		this.onlyWarning = onlyWarning;
 	}
 
 	/**
@@ -524,7 +587,7 @@ public class LinkWidget extends AHelperWidget {
 	protected void fireChanged(Event event) {
 
 		if (withValidation) {
-			validateLink(NotificationType.ERROR);
+			validateLink(onlyWarning ? NotificationType.WARN : NotificationType.ERROR);
 		}
 
 		// update caption
@@ -547,7 +610,7 @@ public class LinkWidget extends AHelperWidget {
 	 * @return true if the link is valid, otherwise false.
 	 */
 	public boolean isValid() {
-		Notification notification = checkLink(NotificationType.ERROR);
+		Notification notification = checkLink(onlyWarning ? NotificationType.WARN : NotificationType.ERROR);
 		return notification == null;
 	}
 
@@ -555,7 +618,7 @@ public class LinkWidget extends AHelperWidget {
 	 * Apply helpers if the link is not valid. Clear the existing one.
 	 */
 	public void validateLink() {
-		validateLink(NotificationType.ERROR);
+		validateLink(onlyWarning ? NotificationType.WARN : NotificationType.ERROR);
 	}
 
 	/**
@@ -587,7 +650,7 @@ public class LinkWidget extends AHelperWidget {
 
 		// check link
 		if (FormFieldType.LINK_FILE.equals(getLinkTypeSelected())) {
-			return checkFile(getFileSelected(), type);
+			return checkFile(fileChooser.getText(), type);
 		} else if (FormFieldType.LINK_URL.equals(getLinkTypeSelected())) {
 			return checkUrl(getURLSelected(), type);
 		}
@@ -615,33 +678,38 @@ public class LinkWidget extends AHelperWidget {
 
 	/**
 	 * Check the file change.
-	 * 
-	 * @param iFile the file to verify
-	 * @param type  the notification type
+	 *
+	 * @param text the text
+	 * @param type the notification type
 	 * @return true if the file is valid, otherwise false.
 	 */
-	private Notification checkFile(IFile iFile, NotificationType type) {
-
-		// Initialize
-		Notification notification = null;
+	private Notification checkFile(String text, NotificationType type) {
 
 		// Get tree results
-		if (iFile != null) {
+		if (!StringUtils.isBlank(text)) {
+			IFile iFile = null;
+			try {
+				iFile = WorkspaceTools.getFileInWorkspaceForPath(new Path(text));
+			} catch (Exception e) {
+				return NotificationFactory.getNew(type, RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
+			}
+
+			if (iFile == null) {
+				return NotificationFactory.getNew(type, RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
+			}
 
 			IPath location = iFile.getLocation();
 			if (location != null) {
 				File file = location.toFile();
 				if (!file.isFile()) {
-					notification = NotificationFactory.getNew(type,
-							RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
+					return NotificationFactory.getNew(type, RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
 				}
 			} else {
-				notification = NotificationFactory.getNew(type,
-						RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
+				return NotificationFactory.getNew(type, RscTools.getString(RscConst.ERR_LINKWIDGET_FILE_NOTFILE));
 			}
 		}
 
-		return notification;
+		return null;
 	}
 
 	/**

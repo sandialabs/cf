@@ -16,8 +16,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +35,10 @@ import gov.sandia.cf.model.query.NullParameter;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_011_EvidenceNoAssessableTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_011_EvidenceNoAssessableTest extends AbstractTestDao {
 
 	/**

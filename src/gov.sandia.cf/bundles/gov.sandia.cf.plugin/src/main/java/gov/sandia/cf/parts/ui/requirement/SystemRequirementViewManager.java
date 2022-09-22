@@ -43,11 +43,6 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 	public static final String BTN_EVENT_ADD_GROUP = "BTN_EVENT_ADD_GROUP"; //$NON-NLS-1$
 
 	/**
-	 * the PCMM home view
-	 */
-	private SystemRequirementView requirementView;
-
-	/**
 	 * the last control opened
 	 */
 	private Control lastControl;
@@ -56,6 +51,9 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 	 * the layout manager to hide/show the different views
 	 */
 	private StackLayout stackLayout;
+
+	/** The view controller. */
+	private SystemRequirementViewController viewController;
 
 	/**
 	 * CrediblityView constructor
@@ -68,6 +66,8 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 		super(parentView, parent, style);
 
 		this.lastControl = null;
+
+		this.viewController = new SystemRequirementViewController(this);
 
 		// create the view
 		createPartControl(parent);
@@ -85,12 +85,9 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 		this.stackLayout = new StackLayout();
 		this.setLayout(stackLayout);
 
-		// load home view
-		this.requirementView = new SystemRequirementView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = requirementView;
-		this.lastControl = requirementView;
+		this.stackLayout.topControl = viewController.getViewControl();
+		this.lastControl = viewController.getViewControl();
 
 		this.layout();
 	}
@@ -136,13 +133,9 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 		// save the last opened view
 		saveLastView();
 
-		if (this.requirementView == null) {
-			this.requirementView = new SystemRequirementView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = requirementView;
-		requirementView.refresh();
+		this.stackLayout.topControl = viewController.getViewControl();
+		viewController.getView().refresh();
 
 		// Layout
 		this.layout();
@@ -201,8 +194,8 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (requirementView != null) {
-			bcHomeItemPart.setName(requirementView.getItemTitle());
+		if (viewController != null) {
+			bcHomeItemPart.setName(viewController.getView().getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -218,7 +211,7 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
 		if (item != null && item.getListener().equals(this)
-				&& item.getName().equals((requirementView).getItemTitle())) {
+				&& item.getName().equals((viewController.getView()).getItemTitle())) {
 			openHome();
 		}
 	}
@@ -227,8 +220,8 @@ public class SystemRequirementViewManager extends AViewManager implements Listen
 	public void reload() {
 
 		// reload views
-		if (requirementView != null) {
-			requirementView.reload();
+		if (viewController.getView() != null) {
+			viewController.getView().reload();
 		}
 	}
 

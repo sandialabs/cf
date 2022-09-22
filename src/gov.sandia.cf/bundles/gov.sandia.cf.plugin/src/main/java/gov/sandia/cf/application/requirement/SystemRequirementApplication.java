@@ -201,7 +201,7 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteRequirement(SystemRequirement requirement) throws CredibilityException {
+	public void deleteRequirement(SystemRequirement requirement, User user) throws CredibilityException {
 
 		if (requirement == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_SYSREQUIREMENT_DELETE_REQUIREMENTROW_NULL));
@@ -212,9 +212,18 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 		// refresh children and values lists before deletion
 		getAppMgr().getDaoManager().getRepository(ISystemRequirementRepository.class).refresh(requirement);
 
+		SystemRequirement parent = requirement.getParent();
+		Model model = requirement.getModel();
+
 		// Remove Requirement - children and values associated will be automatically
 		// deleted by cascade REMOVE
 		getAppMgr().getDaoManager().getRepository(ISystemRequirementRepository.class).delete(requirement);
+
+		if (parent == null) {
+			reorderAll(model, user);
+		} else {
+			reorderSystemRequirementAtSameLevel(parent, user);
+		}
 	}
 
 	/**
@@ -408,8 +417,8 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 		}
 
 		// construct data
-		sameGroupSystemRequirementList.sort(Comparator.comparing(SystemRequirement::getGeneratedId,
-				new StringWithNumberAndNullableComparator()));
+		sameGroupSystemRequirementList.sort(
+				Comparator.comparing(SystemRequirement::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
 		// set id for parents
 		int index = 1;
@@ -448,35 +457,11 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 		}
 
 		// construct data
-		sameGroupSystemRequirementList.sort(Comparator.comparing(SystemRequirement::getGeneratedId,
-				new StringWithNumberAndNullableComparator()));
+		sameGroupSystemRequirementList.sort(
+				Comparator.comparing(SystemRequirement::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
-		// set id for parents
-		int index = 1;
-		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (SystemRequirement systemRequirement : sameGroupSystemRequirementList) {
-
-			String elementId = null;
-			if (toMove.getParent() == null) {
-				elementId = IDTools.generateAlphabeticId(index - 1);
-			} else if (toMove.getLevel() % 2 == 0) {
-				elementId = groupIdLabel + IDTools.generateAlphabeticId(index - 1);
-			} else {
-				elementId = groupIdLabel + index;
-			}
-
-			systemRequirement.setGeneratedId(elementId);
-			updateRequirement(systemRequirement, user);
-
-			if (systemRequirement.getChildren() != null && !systemRequirement.getChildren().isEmpty()) {
-				reorderSystemRequirementAtSameLevel(systemRequirement.getChildren().get(0), user);
-			}
-
-			index++;
-		}
-
-		// refresh group
-		refresh(toMove.getParent());
+		// apply reordering
+		applyReorderFromList(sameGroupSystemRequirementList, toMove, user);
 	}
 
 	/**
@@ -504,16 +489,32 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 		}
 
 		// construct data
-		sameGroupSystemRequirementList.sort(Comparator.comparing(SystemRequirement::getGeneratedId,
-				new StringWithNumberAndNullableComparator()));
+		sameGroupSystemRequirementList.sort(
+				Comparator.comparing(SystemRequirement::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
 		// reorder
 		List<SystemRequirement> reorderedList = IDTools.reorderList(sameGroupSystemRequirementList, toMove, newIndex);
 
+		// apply reordering
+		applyReorderFromList(reorderedList, toMove, user);
+	}
+
+	/**
+	 * Apply reorder from list.
+	 *
+	 * @param orderedList the ordered list
+	 * @param toMove      the to move
+	 * @param user        the user
+	 * @throws CredibilityException the credibility exception
+	 */
+	private void applyReorderFromList(List<SystemRequirement> orderedList, SystemRequirement toMove, User user)
+			throws CredibilityException {
+
 		// set id for parents
 		int index = 1;
 		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (SystemRequirement systemRequirement : reorderedList) {
+		for (SystemRequirement systemRequirement : orderedList) {
+
 			String elementId = null;
 			if (toMove.getParent() == null) {
 				elementId = IDTools.generateAlphabeticId(index - 1);
@@ -522,8 +523,14 @@ public class SystemRequirementApplication extends AApplication implements ISyste
 			} else {
 				elementId = groupIdLabel + index;
 			}
+
 			systemRequirement.setGeneratedId(elementId);
 			updateRequirement(systemRequirement, user);
+
+			if (systemRequirement.getChildren() != null && !systemRequirement.getChildren().isEmpty()) {
+				reorderSystemRequirementAtSameLevel(systemRequirement.getChildren().get(0), user);
+			}
+
 			index++;
 		}
 

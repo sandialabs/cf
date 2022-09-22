@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +24,10 @@ import gov.sandia.cf.model.dto.configuration.QoIPlanningSpecification;
 import gov.sandia.cf.tools.WorkspaceTools;
 
 /**
- * @author Didier Verstraete
+ * The Class YmlReaderQoIPlanningSchemaTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 
 	/**
@@ -68,7 +66,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	}
 
 	@Test
-	void test_load_NotQoIPlanningFile() throws URISyntaxException, IOException, CredibilityException{
+	void test_load_NotQoIPlanningFile() throws URISyntaxException, IOException, CredibilityException {
 
 		// get configuration file
 		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
@@ -81,16 +79,14 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	}
 
 	@Test
-	void test_load_NotYmlFile() throws URISyntaxException, IOException, CredibilityException{
+	void test_load_NotYmlFile() throws URISyntaxException, IOException, CredibilityException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/NotYmlFile.txt")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/NotYmlFile.txt")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
-		QoIPlanningSpecification 
-			confLoaded = new YmlReaderQoIPlanningSchema().load(confFile);
+		QoIPlanningSpecification confLoaded = new YmlReaderQoIPlanningSchema().load(confFile);
 		assertNotNull(confLoaded);
 		assertNull(confLoaded.getParameters());
 	}
@@ -99,8 +95,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_load_FileNotFound() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/MyQoIPlanning.yml")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/MyQoIPlanning.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -131,8 +126,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_isValidQoIPlanningFile_Working() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/QoI_Planning-v0.1.yml")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/QoI_Planning-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -144,8 +138,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_isValidQoIPlanningFile_OldFileWorking() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/oldQoI_Planning.yml")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/oldQoI_Planning.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -157,8 +150,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_isValidQoIPlanningFile_NotQoIPlanningFile() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/ModSim_Decision-v0.1.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -170,8 +162,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_isValidQoIPlanningFile_NotYmlFile() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/NotYmlFile.txt")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/NotYmlFile.txt")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test
@@ -183,8 +174,7 @@ class YmlReaderQoIPlanningSchemaTest extends AbstractConfigurationTest {
 	void test_isValidQoIPlanningFile_FileNotFound() throws URISyntaxException, IOException {
 
 		// get configuration file
-		File 
-			confFile = new File(WorkspaceTools.getStaticFilePath("configuration/MyQoIPlanning.yml")); //$NON-NLS-1$
+		File confFile = new File(WorkspaceTools.getStaticFilePath("configuration/MyQoIPlanning.yml")); //$NON-NLS-1$
 		assertNotNull(confFile);
 
 		// test

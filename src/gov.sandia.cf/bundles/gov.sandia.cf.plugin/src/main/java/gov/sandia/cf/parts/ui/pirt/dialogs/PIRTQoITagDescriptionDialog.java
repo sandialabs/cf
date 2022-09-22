@@ -101,7 +101,7 @@ public class PIRTQoITagDescriptionDialog extends GenericCFSmallDialog<PIRTViewMa
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
+		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, false);
 	}
 
 	/**

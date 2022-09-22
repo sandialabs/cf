@@ -43,10 +43,8 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 	/** Buttons events ADD QOI */
 	public static final String BTN_EVENT_ADD_QOI = "BTN_EVENT_ADD_QOI"; //$NON-NLS-1$
 
-	/**
-	 * the PCMM home view
-	 */
-	private QoIPlanningView qoiPlanningView;
+	/** The qoi planning view controller. */
+	private QoIPlanningViewController qoiPlanningViewController;
 
 	/**
 	 * the last control opened
@@ -70,6 +68,14 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 
 		this.lastControl = null;
 
+		// set layout
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		this.stackLayout = new StackLayout();
+		this.setLayout(stackLayout);
+
+		// load communicate home view
+		this.qoiPlanningViewController = new QoIPlanningViewController(this);
+
 		// create the view
 		createPartControl(parent);
 	}
@@ -81,17 +87,9 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 	 */
 	public void createPartControl(Composite parent) {
 
-		// set layout
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		this.stackLayout = new StackLayout();
-		this.setLayout(stackLayout);
-
-		// load communicate home view
-		this.qoiPlanningView = new QoIPlanningView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = qoiPlanningView;
-		this.lastControl = qoiPlanningView;
+		this.stackLayout.topControl = qoiPlanningViewController.getViewControl();
+		this.lastControl = qoiPlanningViewController.getViewControl();
 
 		this.layout();
 	}
@@ -137,13 +135,9 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 		// save the last opened view
 		saveLastView();
 
-		if (this.qoiPlanningView == null) {
-			this.qoiPlanningView = new QoIPlanningView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = qoiPlanningView;
-		qoiPlanningView.refresh();
+		this.stackLayout.topControl = qoiPlanningViewController.getViewControl();
+		qoiPlanningViewController.getView().refresh();
 
 		this.layout();
 	}
@@ -201,8 +195,8 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (qoiPlanningView != null) {
-			bcHomeItemPart.setName(qoiPlanningView.getItemTitle());
+		if (qoiPlanningViewController != null) {
+			bcHomeItemPart.setName(qoiPlanningViewController.getView().getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -218,7 +212,7 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
 		if (item != null && item.getListener().equals(this)
-				&& item.getName().equals((qoiPlanningView).getItemTitle())) {
+				&& item.getName().equals(qoiPlanningViewController.getView().getItemTitle())) {
 			openHome();
 		}
 	}
@@ -227,8 +221,8 @@ public class QoIPlanningViewManager extends AViewManager implements Listener, IV
 	public void reload() {
 
 		// reload views
-		if (qoiPlanningView != null) {
-			qoiPlanningView.reload();
+		if (qoiPlanningViewController.getView() != null) {
+			qoiPlanningViewController.getView().reload();
 		}
 	}
 

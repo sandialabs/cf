@@ -125,6 +125,8 @@ public class UncertaintyDropSupport extends ViewerDropAdapter {
 			viewCtrl.refreshUncertainty(previousParent);
 
 			logger.debug("The drop of {} was done on {}", uncertaintyDragged, target); //$NON-NLS-1$
+		} else {
+			uncertaintyUpdated = uncertaintyDragged;
 		}
 
 		// reorder

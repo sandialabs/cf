@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 /**
  * The ID tools unit test class
@@ -19,7 +17,6 @@ import org.junit.runner.RunWith;
  * @author Didier Verstraete
  *
  */
-@RunWith(JUnitPlatform.class)
 class IDToolsTest {
 
 	@Test

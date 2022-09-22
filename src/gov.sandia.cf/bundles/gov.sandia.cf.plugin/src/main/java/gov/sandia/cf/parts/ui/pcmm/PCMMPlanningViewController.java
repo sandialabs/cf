@@ -8,14 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMPlanningApplication;
+import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.GenericParameter;
 import gov.sandia.cf.model.GenericValue;
@@ -23,6 +25,7 @@ import gov.sandia.cf.model.GenericValueTaggable;
 import gov.sandia.cf.model.IAssessable;
 import gov.sandia.cf.model.IGenericTableItem;
 import gov.sandia.cf.model.IGenericTableValue;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMPlanningParam;
 import gov.sandia.cf.model.PCMMPlanningQuestion;
@@ -32,6 +35,7 @@ import gov.sandia.cf.model.PCMMPlanningTableValue;
 import gov.sandia.cf.model.PCMMPlanningValue;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.query.EntityFilter;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.DateTools;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
@@ -42,7 +46,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMPlanningViewController {
+public class PCMMPlanningViewController extends AViewController<PCMMViewManager, PCMMPlanningView> {
 
 	/**
 	 * the logger
@@ -50,20 +54,93 @@ public class PCMMPlanningViewController {
 	private static final Logger logger = LoggerFactory.getLogger(PCMMPlanningViewController.class);
 
 	/**
-	 * The view
+	 * the pcmm element
 	 */
-	private PCMMPlanningView view;
+	private PCMMElement elementSelected;
+	/**
+	 * the pcmm elements
+	 */
+	private List<PCMMElement> elements;
+	/**
+	 * the pcmm planning parameters
+	 */
+	private List<PCMMPlanningParam> planningParameters;
+	/**
+	 * the pcmm planning questions
+	 */
+	private List<PCMMPlanningQuestion> planningQuestions;
 
-	PCMMPlanningViewController(PCMMPlanningView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	PCMMPlanningViewController(PCMMViewManager viewManager) {
+		super(viewManager);
+
+		// lists and maps instantiation
+		elements = new ArrayList<>();
+
+		super.setView(new PCMMPlanningView(this, SWT.NONE));
 	}
 
 	/**
-	 * Change the parameter value
-	 * 
-	 * @param field     the pcmm planning parameter to update
-	 * @param textValue the new value
+	 * Reload data.
+	 */
+	void reloadData() {
+
+		// Trigger GuidanceLevel View
+		getViewManager().getCredibilityEditor().setPartProperty(
+				CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
+				elementSelected.getAbbreviation());
+
+		// Show role selection
+		getView().showRoleSelection();
+
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		if (model != null) {
+			try {
+				/**
+				 * Load pcmm elements from database
+				 */
+				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
+
+				/**
+				 * Load pcmm planning parameters from database
+				 */
+				Map<EntityFilter, Object> filters = new HashMap<>();
+				filters.put(GenericParameter.Filter.MODEL, model);
+				filters.put(GenericParameter.Filter.PARENT, null);
+				planningParameters = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+						.getPlanningFieldsBy(filters);
+
+				/**
+				 * Load pcmm planning questions from database
+				 */
+				planningQuestions = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+						.getPlanningQuestionsByElement(elementSelected,
+								getViewManager().getPCMMConfiguration().getMode());
+				if (elements != null) {
+
+					/**
+					 * Refresh the table
+					 */
+					getView().refreshMainWidget();
+				}
+			} catch (CredibilityException e) {
+				MessageDialog.openWarning(getView().getShell(),
+						RscTools.getString(RscConst.MSG_PCMMPLANNING_DIALOG_TITLE),
+						RscTools.getString(RscConst.ERR_PCMMPLANNING_DIALOG_LOADING_MSG));
+				logger.warn("An error has occurred while loading the planning data:\n{}", e.getMessage(), e); //$NON-NLS-1$
+			}
+		}
+
+		// refresh the viewer
+		getView().refreshViewer();
+	}
+
+	/**
+	 * Change the parameter value.
+	 *
+	 * @param field      the pcmm planning parameter to update
+	 * @param assessable the assessable
+	 * @param textValue  the new value
 	 */
 	void changeParameterValue(GenericParameter<?> field, IAssessable assessable, String textValue) {
 
@@ -84,9 +161,9 @@ public class PCMMPlanningViewController {
 
 		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(GenericValue.Filter.PARAMETER, field);
-		filters.put(GenericValueTaggable.Filter.TAG, view.getViewManager().getSelectedTag());
+		filters.put(GenericValueTaggable.Filter.TAG, getViewManager().getSelectedTag());
 
-		List<PCMMPlanningQuestionValue> values = view.getViewManager().getAppManager()
+		List<PCMMPlanningQuestionValue> values = getViewManager().getAppManager()
 				.getService(IPCMMPlanningApplication.class).getPlanningQuestionValueBy(filters);
 
 		if (values == null || values.isEmpty()) {
@@ -95,20 +172,20 @@ public class PCMMPlanningViewController {
 			PCMMPlanningQuestionValue value = new PCMMPlanningQuestionValue();
 			value.setParameter(field);
 			value.setValue(textValue);
-			value.setUserCreation(view.getViewManager().getCache().getUser());
+			value.setUserCreation(getViewManager().getCache().getUser());
 			value.setDateCreation(DateTools.getCurrentDate());
 
 			try {
 				// add planning value
-				view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+				getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 						.addPlanningQuestionValue(value);
 
 				// trigger need save action
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 		} else {
@@ -117,20 +194,20 @@ public class PCMMPlanningViewController {
 
 				// fill in planning value
 				value.setValue(textValue);
-				value.setUserUpdate(view.getViewManager().getCache().getUser());
+				value.setUserUpdate(getViewManager().getCache().getUser());
 				value.setDateUpdate(DateTools.getCurrentDate());
 				try {
 
 					// update planning value
-					view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-							.updatePlanningQuestionValue(value, view.getViewManager().getCache().getUser());
+					getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+							.updatePlanningQuestionValue(value, getViewManager().getCache().getUser());
 
 					// trigger need save action
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 
 				} catch (CredibilityException e) {
 					logger.error(e.getMessage(), e);
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+					MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 							RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 				}
 			});
@@ -138,24 +215,25 @@ public class PCMMPlanningViewController {
 	}
 
 	/**
-	 * Change the parameter value
-	 * 
-	 * @param field     the pcmm planning parameter to update
-	 * @param textValue the new value
+	 * Change the parameter value.
+	 *
+	 * @param field      the pcmm planning parameter to update
+	 * @param assessable the assessable
+	 * @param textValue  the new value
 	 */
 	void changePlanningParameterValue(PCMMPlanningParam field, IAssessable assessable, String textValue) {
 
 		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(GenericValue.Filter.PARAMETER, field);
-		filters.put(GenericValueTaggable.Filter.TAG, view.getViewManager().getSelectedTag());
+		filters.put(GenericValueTaggable.Filter.TAG, getViewManager().getSelectedTag());
 		if (assessable instanceof PCMMElement) {
 			filters.put(PCMMPlanningValue.Filter.ELEMENT, assessable);
 		} else if (assessable instanceof PCMMSubelement) {
 			filters.put(PCMMPlanningValue.Filter.SUBELEMENT, assessable);
 		}
 
-		List<PCMMPlanningValue> values = view.getViewManager().getAppManager()
-				.getService(IPCMMPlanningApplication.class).getPlanningValueBy(filters);
+		List<PCMMPlanningValue> values = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+				.getPlanningValueBy(filters);
 
 		if (values == null || values.isEmpty()) {
 
@@ -163,7 +241,7 @@ public class PCMMPlanningViewController {
 			PCMMPlanningValue value = new PCMMPlanningValue();
 			value.setParameter(field);
 			value.setValue(textValue);
-			value.setUserCreation(view.getViewManager().getCache().getUser());
+			value.setUserCreation(getViewManager().getCache().getUser());
 			value.setDateCreation(DateTools.getCurrentDate());
 			if (assessable instanceof PCMMElement) {
 				value.setElement((PCMMElement) assessable);
@@ -173,15 +251,14 @@ public class PCMMPlanningViewController {
 
 			try {
 				// add planning value
-				view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-						.addPlanningValue(value);
+				getViewManager().getAppManager().getService(IPCMMPlanningApplication.class).addPlanningValue(value);
 
 				// trigger need save action
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 		} else {
@@ -192,20 +269,21 @@ public class PCMMPlanningViewController {
 						|| (textValue != null && !textValue.equals(value.getValue()))) {
 					// fill in planning value
 					value.setValue(textValue);
-					value.setUserUpdate(view.getViewManager().getCache().getUser());
+					value.setUserUpdate(getViewManager().getCache().getUser());
 					value.setDateUpdate(DateTools.getCurrentDate());
 					try {
 
 						// update planning value
-						view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-								.updatePlanningValue(value, view.getViewManager().getCache().getUser());
+						getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+								.updatePlanningValue(value, getViewManager().getCache().getUser());
 
 						// trigger need save action
-						view.getViewManager().viewChanged();
+						getViewManager().viewChanged();
 
 					} catch (CredibilityException e) {
 						logger.error(e.getMessage(), e);
-						MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+						MessageDialog.openError(getView().getShell(),
+								RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 								RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 					}
 				}
@@ -223,7 +301,7 @@ public class PCMMPlanningViewController {
 		// create filters
 		Map<EntityFilter, Object> filters = new HashMap<>();
 		filters.put(GenericValue.Filter.PARAMETER, field);
-		filters.put(GenericValueTaggable.Filter.TAG, view.getViewManager().getSelectedTag());
+		filters.put(GenericValueTaggable.Filter.TAG, getViewManager().getSelectedTag());
 
 		// retrieve values
 		List<GenericValue<?, ?>> values = new ArrayList<>();
@@ -235,10 +313,10 @@ public class PCMMPlanningViewController {
 				filters.put(PCMMPlanningValue.Filter.SUBELEMENT, assessable);
 			}
 
-			values.addAll(view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+			values.addAll(getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 					.getPlanningValueBy(filters));
 		} else if (field instanceof PCMMPlanningQuestion) {
-			values.addAll(view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+			values.addAll(getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 					.getPlanningQuestionValueBy(filters));
 		}
 
@@ -277,7 +355,7 @@ public class PCMMPlanningViewController {
 			PCMMPlanningTableItem item = new PCMMPlanningTableItem();
 			item.setParameter(field);
 			item.setDateCreation(DateTools.getCurrentDate());
-			item.setUserCreation(view.getViewManager().getCache().getUser());
+			item.setUserCreation(getViewManager().getCache().getUser());
 			if (assessable instanceof PCMMElement) {
 				item.setElement((PCMMElement) assessable);
 			} else if (assessable instanceof PCMMSubelement) {
@@ -286,14 +364,14 @@ public class PCMMPlanningViewController {
 
 			// add planning table item
 			try {
-				item = view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+				item = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 						.addPlanningTableItem(item);
 
 				// trigger need save action
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 
@@ -305,11 +383,11 @@ public class PCMMPlanningViewController {
 
 				// refresh planning table item
 				try {
-					view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+					getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 							.refreshPlanningTableItem(item);
 				} catch (CredibilityException e) {
 					logger.error(e.getMessage(), e);
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+					MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 							RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 				}
 			}
@@ -326,10 +404,11 @@ public class PCMMPlanningViewController {
 
 	/**
 	 * Add a planning table value.
-	 * 
+	 *
 	 * @param item   the item to associate the value to
 	 * @param column the column to associate the value to
 	 * @param value  the value to add
+	 * @return the PCMM planning table value
 	 */
 	PCMMPlanningTableValue addPlanningTableValue(PCMMPlanningTableItem item, GenericParameter<?> column, String value) {
 
@@ -342,16 +421,16 @@ public class PCMMPlanningViewController {
 			columnValue.setParameter((PCMMPlanningParam) column);
 			columnValue.setItem(item);
 			columnValue.setDateCreation(DateTools.getCurrentDate());
-			columnValue.setUserCreation(view.getViewManager().getCache().getUser());
+			columnValue.setUserCreation(getViewManager().getCache().getUser());
 			columnValue.setValue(value);
 
 			// add planning table item
 			try {
-				addedValue = view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+				addedValue = getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 						.addPlanningTableValue(columnValue);
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 		}
@@ -371,14 +450,14 @@ public class PCMMPlanningViewController {
 
 			// delete planning table value
 			try {
-				view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
+				getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
 						.deletePlanningTableItem((PCMMPlanningTableItem) item);
 
 				// trigger need save action
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 
@@ -387,7 +466,7 @@ public class PCMMPlanningViewController {
 			List<PCMMPlanningTableItem> input = (List<PCMMPlanningTableItem>) treeViewer.getInput();
 			input.remove(item);
 			treeViewer.setInput(input);
-			view.refreshTableItemActionButtons(treeViewer);
+			getView().refreshTableItemActionButtons(treeViewer);
 			treeViewer.refresh();
 		}
 	}
@@ -403,18 +482,56 @@ public class PCMMPlanningViewController {
 		if (value instanceof PCMMPlanningTableValue) {
 			try {
 				// update the table value
-				view.getViewManager().getAppManager().getService(IPCMMPlanningApplication.class)
-						.updatePlanningTableValue((PCMMPlanningTableValue) value,
-								view.getViewManager().getCache().getUser());
+				getViewManager().getAppManager().getService(IPCMMPlanningApplication.class).updatePlanningTableValue(
+						(PCMMPlanningTableValue) value, getViewManager().getCache().getUser());
 
 				// trigger need save action
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMPLANNING_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMPLANNING_UPDATING) + e.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * Gets the element selected.
+	 *
+	 * @return the element selected
+	 */
+	public PCMMElement getElementSelected() {
+		return elementSelected;
+	}
+
+	/**
+	 * Resets the pcmm element selected
+	 * 
+	 * @param pcmmElement the element to set
+	 */
+	public void setElementSelected(PCMMElement pcmmElement) {
+		this.elementSelected = pcmmElement;
+
+		// Refresh
+		refresh();
+	}
+
+	/**
+	 * Gets the planning parameters.
+	 *
+	 * @return the planning parameters
+	 */
+	public List<PCMMPlanningParam> getPlanningParameters() {
+		return planningParameters;
+	}
+
+	/**
+	 * Gets the planning questions.
+	 *
+	 * @return the planning questions
+	 */
+	public List<PCMMPlanningQuestion> getPlanningQuestions() {
+		return planningQuestions;
 	}
 
 }

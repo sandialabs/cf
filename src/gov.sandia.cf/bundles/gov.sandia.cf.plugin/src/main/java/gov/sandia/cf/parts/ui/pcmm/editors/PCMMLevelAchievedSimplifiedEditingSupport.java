@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMLevel;
-import gov.sandia.cf.parts.ui.pcmm.PCMMAssessView;
+import gov.sandia.cf.parts.ui.pcmm.PCMMAssessViewController;
 import gov.sandia.cf.parts.viewer.editors.CFComboBoxCellEditor;
 
 /**
@@ -39,13 +39,13 @@ public class PCMMLevelAchievedSimplifiedEditingSupport extends PCMMLevelAchieved
 	/**
 	 * The constructor
 	 * 
-	 * @param assessView   the assess view
-	 * @param viewer       the column viewer
-	 * @param propertyName the property name
+	 * @param assessViewController the assess view
+	 * @param viewer               the column viewer
+	 * @param propertyName         the property name
 	 */
-	public PCMMLevelAchievedSimplifiedEditingSupport(PCMMAssessView assessView, ColumnViewer viewer,
+	public PCMMLevelAchievedSimplifiedEditingSupport(PCMMAssessViewController assessViewController, ColumnViewer viewer,
 			String propertyName) {
-		super(assessView, viewer, propertyName);
+		super(assessViewController, viewer, propertyName);
 		this.cellEditors = new HashMap<>();
 		this.comboItems = new HashMap<>();
 
@@ -130,7 +130,7 @@ public class PCMMLevelAchievedSimplifiedEditingSupport extends PCMMLevelAchieved
 	 */
 	@Override
 	protected Object getValue(Object element) {
-		PCMMAssessment assessment = getView().getAssessmentsByElt().get(element);
+		PCMMAssessment assessment = getViewController().getAssessmentsByElt().get(element);
 		Integer value = -1;
 		if (assessment != null && comboItems.get(element) != null) {
 			value = comboItems.get(element).get(assessment.getLevel());

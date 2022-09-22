@@ -43,16 +43,11 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class ImportConfigurationView extends ACredibilitySubView<ConfigurationViewManager> {
+public class ImportConfigurationView extends ACredibilitySubView<ImportConfigurationViewController> {
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(ImportConfigurationView.class);
-
-	/**
-	 * Controller
-	 */
-	private ImportConfigurationViewController viewCtrl;
 
 	/**
 	 * The main composite
@@ -67,14 +62,12 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 	private ImportSelectorWidget textDecisionSchemaPath;
 
 	/**
-	 * @param viewManager the view manager
-	 * @param parent      the parent composite
-	 * @param style       the view style
+	 * @param viewController the view manager
+	 * @param parent         the parent composite
+	 * @param style          the view style
 	 */
-	public ImportConfigurationView(ConfigurationViewManager viewManager, Composite parent, int style) {
-		super(viewManager, parent, style);
-
-		this.viewCtrl = new ImportConfigurationViewController(this);
+	public ImportConfigurationView(ImportConfigurationViewController viewController, Composite parent, int style) {
+		super(viewController, parent, style);
 
 		// create the view
 		renderPage();
@@ -102,9 +95,6 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 
 		// Render footer buttons
 		renderFooterButtons();
-
-		// Refresh data and Save state
-		refresh();
 	}
 
 	/**
@@ -131,7 +121,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		GridLayout gdMainComposite = new GridLayout(1, false);
 		mainComposite.setLayout(gdMainComposite);
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mainComposite.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		mainComposite.setBackground(ColorTools.toColor(getViewController().getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
 
 		// Main table composite
@@ -157,8 +147,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_QOIPLANNING_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_QOIPLANNING);
 		String preferenceKey = PrefTools.CONF_IMPORT_QOIPLANNING_SCHEMA_FILE_LAST_PATH_KEY;
-		textQoIPlanningSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
-				title, message, fileType, preferenceKey) {
+		textQoIPlanningSchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -173,7 +163,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new QoI Planning Schema
-				viewCtrl.importQoIPlanningSchema();
+				getViewController().importQoIPlanningSchema();
 			}
 		};
 	}
@@ -186,8 +176,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_PIRT_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_PIRT);
 		String preferenceKey = PrefTools.CONF_IMPORT_PIRT_SCHEMA_FILE_LAST_PATH_KEY;
-		textPIRTSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
-				message, fileType, preferenceKey) {
+		textPIRTSchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(), mainComposite,
+				SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -202,7 +192,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new PIRT Schema
-				viewCtrl.importPIRTSchema();
+				getViewController().importPIRTSchema();
 			}
 		};
 	}
@@ -215,8 +205,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_PCMM_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_PCMM);
 		String preferenceKey = PrefTools.CONF_IMPORT_PCMM_SCHEMA_FILE_LAST_PATH_KEY;
-		textPCMMSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
-				message, fileType, preferenceKey) {
+		textPCMMSchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(), mainComposite,
+				SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -231,7 +221,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new PCMM Schema
-				viewCtrl.importPCMMSchema();
+				getViewController().importPCMMSchema();
 			}
 		};
 	}
@@ -244,8 +234,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_UNCERTAINTY_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_UNCERTAINTY);
 		String preferenceKey = PrefTools.CONF_IMPORT_UNCERTAINTY_SCHEMA_FILE_LAST_PATH_KEY;
-		textUncertaintySchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
-				title, message, fileType, preferenceKey) {
+		textUncertaintySchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -260,7 +250,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new Uncertainty Schema
-				viewCtrl.importUncertaintySchema();
+				getViewController().importUncertaintySchema();
 			}
 		};
 
@@ -274,8 +264,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_REQUIREMENTS_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_SYSREQUIREMENT);
 		String preferenceKey = PrefTools.CONF_IMPORT_REQUIREMENTS_SCHEMA_FILE_LAST_PATH_KEY;
-		textRequirementsSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE,
-				title, message, fileType, preferenceKey) {
+		textRequirementsSchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -290,7 +280,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new SystemRequirement Schema
-				viewCtrl.importRequirementSchema();
+				getViewController().importRequirementSchema();
 			}
 		};
 	}
@@ -303,8 +293,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		String message = RscTools.getString(RscConst.MSG_CONF_IMPORTVIEW_DECISION_SCHEMAPATH);
 		String fileType = RscTools.getString(RscConst.MSG_DECISION);
 		String preferenceKey = PrefTools.CONF_IMPORT_DECISION_SCHEMA_FILE_LAST_PATH_KEY;
-		textDecisionSchemaPath = new ImportSelectorWidget(getViewManager().getRscMgr(), mainComposite, SWT.NONE, title,
-				message, fileType, preferenceKey) {
+		textDecisionSchemaPath = new ImportSelectorWidget(getViewController().getViewManager().getRscMgr(),
+				mainComposite, SWT.NONE, title, message, fileType, preferenceKey) {
 			@Override
 			public boolean isValidImportFileRule() throws CredibilityException {
 				// check file validity
@@ -319,7 +309,7 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 			@Override
 			public void doImport() {
 				// import new Decision Schema
-				viewCtrl.importDecisionSchema();
+				getViewController().importDecisionSchema();
 			}
 		};
 	}
@@ -339,7 +329,8 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnBackOptions.put(ButtonTheme.OPTION_OUTLINE, true);
 		btnBackOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_BACK);
 		btnBackOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
-		Button btnBack = new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnBackOptions);
+		Button btnBack = new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.CENTER,
+				btnBackOptions);
 
 		// Footer buttons - Help - Create
 		Map<String, Object> btnHelpOptions = new HashMap<>();
@@ -347,13 +338,13 @@ public class ImportConfigurationView extends ACredibilitySubView<ConfigurationVi
 		btnHelpOptions.put(ButtonTheme.OPTION_ICON, IconTheme.ICON_NAME_INFO);
 		btnHelpOptions.put(ButtonTheme.OPTION_COLOR, ConstantTheme.COLOR_NAME_BLACK);
 		btnHelpOptions.put(ButtonTheme.OPTION_LISTENER, (Listener) e -> HelpTools.openContextualHelp());
-		new ButtonTheme(getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnHelpOptions);
+		new ButtonTheme(getViewController().getViewManager().getRscMgr(), compositeButtons, SWT.CENTER, btnHelpOptions);
 
 		// conextual help
 		HelpTools.addContextualHelp(compositeButtons, ContextualHelpId.IMPORT);
 
 		// Footer buttons - Back - plug
-		getViewManager().plugBackButton(btnBack);
+		getViewController().getViewManager().plugBackButton(btnBack);
 
 		// layout view
 		compositeButtons.layout();

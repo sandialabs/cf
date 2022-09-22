@@ -25,8 +25,8 @@ import gov.sandia.cf.tools.StringTools;
  */
 @Entity
 @Table(name = "PIRT_ADEQUACY_COLUMN")
-public class PIRTAdequacyColumn
-		implements Serializable, IEntity<PIRTAdequacyColumn, Integer>, IImportable<PIRTAdequacyColumn> {
+public class PIRTAdequacyColumn implements Serializable, IEntity<PIRTAdequacyColumn, Integer>,
+		IImportable<PIRTAdequacyColumn>, ISortableByIdEntity {
 
 	/**
 	 * serialVersionUID
@@ -130,6 +130,16 @@ public class PIRTAdequacyColumn
 	@SuppressWarnings("javadoc")
 	public void setIdLabel(String idLabel) {
 		this.idLabel = idLabel;
+	}
+
+	@Override
+	public String getGeneratedId() {
+		return getIdLabel();
+	}
+
+	@Override
+	public void setGeneratedId(String generatedId) {
+		setIdLabel(generatedId);
 	}
 
 	@SuppressWarnings("javadoc")

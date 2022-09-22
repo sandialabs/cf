@@ -169,13 +169,12 @@ public class ZipTools {
 	}
 
 	/**
-	 * Zip a file or a directory @param fileToZip to a zip file
-	 * 
-	 * @param fileToZip          the file to zip
-	 * @param fileToZipName      the name of the file to zip
+	 * Zip a file or a directory @param fileToZip to a zip file.
+	 *
+	 * @param listFileToZip the list file to zip
+	 * @param filePrefix the file prefix
 	 * @param zipOut             the zip output stream to pass through the recursive
 	 *                           calls (for directory)
-	 * @param skipFirstDirectory skip the first directory
 	 * @throws IOException if an error occured while zipping the specified file to
 	 *                     zip
 	 */

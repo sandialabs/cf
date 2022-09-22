@@ -22,21 +22,21 @@ import gov.sandia.cf.tools.ColorTools;
 public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 
 	/**
-	 * The evidence view
+	 * The evidence view controller
 	 */
-	private PCMMEvidenceView view;
+	private PCMMEvidenceViewController viewController;
 
 	/**
-	 * Constructor
-	 * 
-	 * @param view the evidence view
+	 * Constructor.
+	 *
+	 * @param viewController the view controller
 	 */
-	public PCMMEvidenceColumnLabelProvider(PCMMEvidenceView view) {
+	public PCMMEvidenceColumnLabelProvider(PCMMEvidenceViewController viewController) {
 		super();
-		Assert.isNotNull(view);
-		Assert.isNotNull(view.getViewManager());
+		Assert.isNotNull(viewController);
+		Assert.isNotNull(viewController.getViewManager());
 
-		this.view = view;
+		this.viewController = viewController;
 	}
 
 	@Override
@@ -59,28 +59,28 @@ public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 
 		// PCMM Element in light primary
 		if (element instanceof PCMMElement) {
-			if (!element.equals(view.getPcmmElement())) {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+			if (!element.equals(viewController.getElementSelected())) {
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT));
 			}
 		}
 		// PCMM Sub-element in light gray
 		else if (element instanceof PCMMSubelement) {
 			if (((PCMMSubelement) element).getElement() == null
-					|| !((PCMMSubelement) element).getElement().equals(view.getPcmmElement())) {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+					|| !((PCMMSubelement) element).getElement().equals(viewController.getElementSelected())) {
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 			} else {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_PRIMARY_LIGHT_2));
 			}
 		}
 		// PCMM Evidence in secondary light gray
-		if (element instanceof PCMMEvidence && !view.isFromCurrentPCMMElement((PCMMEvidence) element)) {
-			return ColorTools.toColor(view.getViewManager().getRscMgr(),
+		if (element instanceof PCMMEvidence && !viewController.isFromCurrentPCMMElement((PCMMEvidence) element)) {
+			return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY_LIGHT));
 		}
 
@@ -95,23 +95,23 @@ public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 	 */
 	private Color getTreeCellForeground(Object element) {
 		if (element == null || element instanceof PCMMElement) {
-			return ColorTools.toColor(view.getViewManager().getRscMgr(),
+			return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 					ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE));
 		} else if (element instanceof PCMMSubelement) {
 			if (((PCMMSubelement) element).getElement() == null
-					|| !((PCMMSubelement) element).getElement().equals(view.getPcmmElement())) {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+					|| !((PCMMSubelement) element).getElement().equals(viewController.getElementSelected())) {
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 			}
 		} else if (element instanceof PCMMEvidence) {
-			if (!view.isFromCurrentPCMMElement((PCMMEvidence) element)) {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+			if (!viewController.isFromCurrentPCMMElement((PCMMEvidence) element)) {
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_SECONDARY));
 			} else {
-				return ColorTools.toColor(view.getViewManager().getRscMgr(),
+				return ColorTools.toColor(viewController.getViewManager().getRscMgr(),
 						ConstantTheme.getColor(ConstantTheme.COLOR_NAME_BLACK));
 			}
 		}
@@ -120,9 +120,9 @@ public class PCMMEvidenceColumnLabelProvider extends ColumnLabelProvider {
 	}
 
 	/**
-	 * @return the pcmm evidence view
+	 * @return the pcmm evidence view controller
 	 */
-	public PCMMEvidenceView getView() {
-		return this.view;
+	public PCMMEvidenceViewController getViewController() {
+		return this.viewController;
 	}
 }

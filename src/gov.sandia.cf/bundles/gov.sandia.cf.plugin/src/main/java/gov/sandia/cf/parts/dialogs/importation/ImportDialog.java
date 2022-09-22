@@ -18,13 +18,10 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeItem;
@@ -36,8 +33,7 @@ import gov.sandia.cf.model.IImportable;
 import gov.sandia.cf.model.ImportActionType;
 import gov.sandia.cf.model.ImportSchema;
 import gov.sandia.cf.model.PCMMPlanningQuestion;
-import gov.sandia.cf.parts.constants.PartsResourceConstants;
-import gov.sandia.cf.parts.dialogs.GenericCFSmallDialog;
+import gov.sandia.cf.parts.dialogs.GenericCFScrolledDialog;
 import gov.sandia.cf.parts.theme.ConstantTheme;
 import gov.sandia.cf.parts.tools.FontTools;
 import gov.sandia.cf.parts.ui.configuration.ConfigurationViewManager;
@@ -56,7 +52,7 @@ import gov.sandia.cf.tools.RscTools;
  * @author Didier Verstraete
  *
  */
-public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager> {
+public class ImportDialog extends GenericCFScrolledDialog<ConfigurationViewManager> {
 
 	/**
 	 * the logger
@@ -110,52 +106,20 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected Control createDialogArea(Composite parent) {
+	protected Composite createDialogScrolledContent(Composite parent) {
 
 		logger.debug("Create ImportDialog content"); //$NON-NLS-1$
 
-		Composite container = (Composite) super.createDialogArea(parent);
-
-		// vertical scroll container
-		ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.V_SCROLL);
-		GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		scData.widthHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_X;
-		scData.heightHint = PartsResourceConstants.DESCRIPTIVE_DIALOG_SIZE_Y;
-		scrolledComposite.setLayoutData(scData);
-		scrolledComposite.setLayout(new GridLayout());
-
-		// form container
-		Composite formContainer = new Composite(scrolledComposite, SWT.FILL | SWT.BORDER);
-		formContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		// content
+		Composite content = new Composite(parent, SWT.FILL | SWT.BORDER);
+		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		GridLayout gridLayout = new GridLayout();
-		formContainer.setLayout(gridLayout);
-		formContainer.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
+		content.setLayout(gridLayout);
+		content.setBackground(ColorTools.toColor(getViewManager().getRscMgr(),
 				ConstantTheme.getColor(ConstantTheme.COLOR_NAME_WHITE)));
+		content.setLayout(gridLayout);
 
 		// render analysis content
-		renderAnalysisContent(formContainer);
-
-		scrolledComposite.setExpandVertical(true);
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setContent(formContainer);
-
-		// autoresize sub containers
-		scrolledComposite.addListener(SWT.Resize, event -> {
-			int width = scrolledComposite.getClientArea().width;
-			Point computeSize = formContainer.computeSize(width, SWT.DEFAULT);
-			scrolledComposite.setMinSize(computeSize);
-			formContainer.setSize(computeSize);
-		});
-
-		return container;
-	}
-
-	/**
-	 * The analysis content
-	 * 
-	 * @param parent the parent composite
-	 */
-	private void renderAnalysisContent(Composite parent) {
 		if (analysis != null) {
 			for (Entry<Class<?>, Map<ImportActionType, List<?>>> entry : analysis.entrySet()) {
 
@@ -163,9 +127,9 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				Map<ImportActionType, List<?>> value = entry.getValue();
 
 				// class container
-				Composite classContainer = new Composite(parent, SWT.NONE);
-				GridData scData = new GridData(SWT.FILL, SWT.FILL, true, true);
-				classContainer.setLayoutData(scData);
+				Composite classContainer = new Composite(content, SWT.NONE);
+				GridData analysisData = new GridData(SWT.FILL, SWT.FILL, true, true);
+				classContainer.setLayoutData(analysisData);
 				GridLayout gdClassContainer = new GridLayout();
 				gdClassContainer.marginWidth = 0;
 				classContainer.setLayout(gdClassContainer);
@@ -175,7 +139,7 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				// collapsible widget
 				String importableName = getViewManager().getAppManager().getService(IImportApplication.class)
 						.getImportableName(key);
-				new CollapsibleWidget(getViewManager().getRscMgr(), parent, SWT.BORDER, classContainer, importableName,
+				new CollapsibleWidget(getViewManager().getRscMgr(), content, SWT.BORDER, classContainer, importableName,
 						false, true);
 
 				// to add tree
@@ -191,6 +155,8 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 				renderImportElement(classContainer, ImportActionType.NO_CHANGES, key, value);
 			}
 		}
+
+		return content;
 	}
 
 	/**
@@ -261,15 +227,16 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 			}
 
 		} else {
-			FormFactory.createFormLabel(importActionComposite, RscTools.getString(RscConst.MSG_IMPORTDLG_NOCHANGES, label));
+			FormFactory.createFormLabel(importActionComposite,
+					RscTools.getString(RscConst.MSG_IMPORTDLG_NOCHANGES, label));
 		}
 	}
 
 	/**
-	 * Initialize import tree
-	 * 
-	 * @param parent the parent composite
-	 * 
+	 * Initialize import tree.
+	 *
+	 * @param parent       the parent composite
+	 * @param withCheckbox the with checkbox
 	 * @return the tree viewer created
 	 */
 	private TreeViewer renderTreeInit(Composite parent, boolean withCheckbox) {
@@ -309,9 +276,9 @@ public class ImportDialog extends GenericCFSmallDialog<ConfigurationViewManager>
 	}
 
 	/**
-	 * Check/Uncheck all the associated subelements to this treeItem
-	 * 
-	 * @param treeItem     the treeItem to verify
+	 * Check/Uncheck all the associated subelements to this treeItem.
+	 *
+	 * @param treeImport   the tree import
 	 * @param importClass  the import class
 	 * @param importAction the import action
 	 */

@@ -4,18 +4,17 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 package gov.sandia.cf.model;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -34,8 +33,7 @@ import gov.sandia.cf.tools.RscTools;
  * @param <T> The generic parameter inherited class
  *
  */
-@Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@MappedSuperclass
 public abstract class GenericParameter<T extends GenericParameter<T>> implements Serializable {
 
 	private static final long serialVersionUID = 4184820050582681422L;
@@ -254,7 +252,7 @@ public abstract class GenericParameter<T extends GenericParameter<T>> implements
 	public T copy(Class<T> classEntity) {
 		T entity = null;
 		try {
-			entity = classEntity.newInstance();
+			entity = classEntity.getDeclaredConstructor().newInstance();
 			entity.setDefaultValue(getDefaultValue());
 			entity.setLevel(getLevel());
 			entity.setModel(getModel());
@@ -262,7 +260,8 @@ public abstract class GenericParameter<T extends GenericParameter<T>> implements
 			entity.setParent(getParent());
 			entity.setRequired(getRequired());
 			entity.setType(getType());
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			logger.error("Entity copy error: {}", e.getMessage(), e); //$NON-NLS-1$
 		}
 

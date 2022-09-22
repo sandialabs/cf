@@ -10,8 +10,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +18,11 @@ import gov.sandia.cf.exceptions.CredibilityException;
 import gov.sandia.cf.model.User;
 
 /**
+ * JUnit class to test the UserRepositoryTest
+ * 
  * @author Didier Verstraete
  *
- *         JUnit class to test the UserRepositoryTest
  */
-@RunWith(JUnitPlatform.class)
 class UserRepositoryTest extends AbstractTestRepository<User, Integer, UserRepository> {
 
 	/**

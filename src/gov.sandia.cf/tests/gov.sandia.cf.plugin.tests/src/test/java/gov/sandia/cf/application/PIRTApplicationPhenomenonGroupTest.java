@@ -16,8 +16,6 @@ import javax.persistence.RollbackException;
 import javax.validation.ConstraintViolationException;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +36,6 @@ import gov.sandia.cf.tools.RscTools;
  *
  *         JUnit test class for the PIRT Application Controller
  */
-@RunWith(JUnitPlatform.class)
 class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 
 	/**
@@ -102,7 +99,7 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 			// ********************************
 			// Delete
 			// ********************************
-			getPIRTApp().deletePhenomenonGroup(group);
+			getPIRTApp().deletePhenomenonGroup(group, null);
 			list = getPIRTApp().getPhenomenonGroups();
 			assertTrue(list.isEmpty());
 
@@ -281,7 +278,7 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 		// With PhenomenonGroup null
 		// *************************
 		try {
-			getPIRTApp().deletePhenomenonGroup(null);
+			getPIRTApp().deletePhenomenonGroup(null, null);
 			fail("Delete a phenomenon group null must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETEPHENGROUP_GROUPNULL), e.getMessage());
@@ -295,7 +292,7 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 		// With PhenomenonGroup id null
 		// *****************************
 		try {
-			getPIRTApp().deletePhenomenonGroup(new PhenomenonGroup());
+			getPIRTApp().deletePhenomenonGroup(new PhenomenonGroup(), null);
 			fail("Delete a phenomenon group with no id must be impossible."); //$NON-NLS-1$
 		} catch (CredibilityException e) {
 			assertEquals(RscTools.getString(RscConst.EX_PIRT_DELETEPHENGROUP_IDNULL), e.getMessage());
@@ -314,7 +311,7 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 		// ****************************************
 		group.setPhenomenonList(null);
 		try {
-			getPIRTApp().deletePhenomenonGroup(group);
+			getPIRTApp().deletePhenomenonGroup(group, null);
 		} catch (CredibilityException e) {
 			fail("Delete a phenomenon group with PhenomenonList null is possible."); //$NON-NLS-1$
 		}
@@ -334,7 +331,7 @@ class PIRTApplicationPhenomenonGroupTest extends AbstractTestApplication {
 		list.add(null);
 		group.setPhenomenonList(list);
 		try {
-			getPIRTApp().deletePhenomenonGroup(group);
+			getPIRTApp().deletePhenomenonGroup(group, null);
 		} catch (CredibilityException e) {
 			fail("Delete a phenomenon group with PhenomenonList containing null will be possible."); //$NON-NLS-1$
 		}

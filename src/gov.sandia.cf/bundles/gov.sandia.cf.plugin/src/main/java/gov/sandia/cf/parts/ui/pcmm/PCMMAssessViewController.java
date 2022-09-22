@@ -3,16 +3,21 @@ See LICENSE file at <a href="https://gitlab.com/CredibilityFramework/cf/-/blob/m
 *************************************************************************************************************/
 package gov.sandia.cf.parts.ui.pcmm;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gov.sandia.cf.application.pcmm.IPCMMApplication;
 import gov.sandia.cf.application.pcmm.IPCMMAssessmentApp;
+import gov.sandia.cf.constants.CredibilityFrameworkConstants;
 import gov.sandia.cf.exceptions.CredibilityException;
+import gov.sandia.cf.model.Model;
 import gov.sandia.cf.model.PCMMAssessment;
 import gov.sandia.cf.model.PCMMElement;
 import gov.sandia.cf.model.PCMMLevel;
@@ -20,6 +25,8 @@ import gov.sandia.cf.model.PCMMMode;
 import gov.sandia.cf.model.PCMMSubelement;
 import gov.sandia.cf.model.Role;
 import gov.sandia.cf.model.User;
+import gov.sandia.cf.model.dto.configuration.PCMMSpecification;
+import gov.sandia.cf.parts.ui.AViewController;
 import gov.sandia.cf.tools.RscConst;
 import gov.sandia.cf.tools.RscTools;
 import gov.sandia.cf.tools.StringTools;
@@ -30,17 +37,12 @@ import gov.sandia.cf.tools.StringTools;
  * @author Didier Verstraete
  *
  */
-public class PCMMAssessViewController {
+public class PCMMAssessViewController extends AViewController<PCMMViewManager, PCMMAssessView> {
 
 	/**
 	 * the logger
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(PCMMAssessViewController.class);
-
-	/**
-	 * The view
-	 */
-	private PCMMAssessView view;
 
 	/**
 	 * The PCMM Assess view column indexes
@@ -56,9 +58,160 @@ public class PCMMAssessViewController {
 	/** PCMM Assess table COMMENTS index */
 	public static final int COMMENTS_INDEX = 4;
 
-	PCMMAssessViewController(PCMMAssessView view) {
-		Assert.isNotNull(view);
-		this.view = view;
+	/**
+	 * PCMMSpecification
+	 */
+	private PCMMSpecification pcmmConfiguration;
+
+	/**
+	 * the pcmm element
+	 */
+	private PCMMElement elementSelected;
+
+	/**
+	 * the pcmm elements
+	 */
+	private List<PCMMElement> elements;
+
+	/**
+	 * the map of pcmm assessments indexed by element for the current user and role
+	 */
+	private Map<PCMMElement, PCMMAssessment> assessmentsByElt;
+
+	/**
+	 * the map of pcmm assessments indexed by subelement for the current user and
+	 * role
+	 */
+	private Map<PCMMSubelement, PCMMAssessment> assessmentsBySubelt;
+
+	/**
+	 * Instantiates a new PCMM assess view controller.
+	 *
+	 * @param viewManager the view manager
+	 */
+	PCMMAssessViewController(PCMMViewManager viewManager) {
+		super(viewManager);
+
+		elements = new ArrayList<>();
+		assessmentsByElt = new HashMap<>();
+		assessmentsBySubelt = new HashMap<>();
+
+		// Set PCMM configuration
+		pcmmConfiguration = getViewManager().getPCMMConfiguration();
+
+		super.setView(new PCMMAssessView(this, SWT.NONE));
+
+		// Refresh
+		refresh();
+	}
+
+	void reloadData() {
+
+		// Trigger GuidanceLevel View
+		if (elementSelected != null) {
+			getViewManager().getCredibilityEditor().setPartProperty(
+					CredibilityFrameworkConstants.PART_PROPERTY_ACTIVEVIEW_PCMM_SELECTED_ASSESSABLE,
+					elementSelected.getAbbreviation());
+		}
+
+		// Show role selection
+		getView().showRoleSelection();
+
+		// Get Model
+		Model model = getViewManager().getCache().getModel();
+		if (model != null) {
+
+			try {
+				/**
+				 * Load pcmm elements from database
+				 */
+				elements = getViewManager().getAppManager().getService(IPCMMApplication.class).getElementList(model);
+
+				assessmentsBySubelt.clear();
+
+				if (elements != null) {
+
+					/**
+					 * Load assessments for the current viewer
+					 */
+					loadAssessments();
+
+					/**
+					 * Refresh the table
+					 */
+					getView().refreshMainTable();
+
+					// set pcmm elements
+					// WARNING: this instruction must be done after populating
+					// assessmentsBySubeltId because it is used to display some column labels
+					getView().setTreeData(elements);
+
+					// expand and select the selected element in the viewer input
+					getView().expandSelectedElement();
+				}
+
+			} catch (CredibilityException e) {
+				MessageDialog.openWarning(getView().getShell(),
+						RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_TITLE),
+						RscTools.getString(RscConst.ERR_PCMMASSESS_DIALOG_LOADING_MSG));
+				logger.error("An error has occurred while loading assessment data:\n{}", e.getMessage(), e); //$NON-NLS-1$
+			}
+		}
+
+		// refresh the viewer
+		getView().refreshViewer();
+	}
+
+	/**
+	 * Load assessments for the current viewer
+	 */
+	private void loadAssessments() {
+		if (PCMMMode.DEFAULT.equals(getPCMMMode())) {
+			loadAssessmentsDefault();
+		} else if (PCMMMode.SIMPLIFIED.equals(getPCMMMode())) {
+			loadAssessmentsSimplified();
+		}
+	}
+
+	/**
+	 * Load assessments for the current viewer in default mode (assessments on a
+	 * PCMM subelement)
+	 */
+	private void loadAssessmentsDefault() {
+		if (elements != null) {
+			elements.forEach(elt -> elt.getSubElementList().forEach(sub -> {
+				List<PCMMAssessment> assessments = null;
+				try {
+					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
+							.getAssessmentByRoleAndUserAndSubeltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
+									getViewManager().getCache().getUser(), sub, getViewManager().getSelectedTag());
+				} catch (CredibilityException e) {
+					logger.error("Failed to load the PCMM assessments for: {}", sub, e); //$NON-NLS-1$
+				}
+				assessmentsBySubelt.put(sub,
+						(assessments != null && !assessments.isEmpty()) ? assessments.get(0) : null);
+			}));
+		}
+	}
+
+	/**
+	 * Load assessments for the current viewer in simplified mode (assessments on a
+	 * PCMM element)
+	 */
+	private void loadAssessmentsSimplified() {
+		if (elements != null) {
+			elements.forEach(elt -> {
+				List<PCMMAssessment> assessments = null;
+				try {
+					assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
+							.getAssessmentByRoleAndUserAndEltAndTag(getViewManager().getCache().getCurrentPCMMRole(),
+									getViewManager().getCache().getUser(), elt, getViewManager().getSelectedTag());
+				} catch (CredibilityException e) {
+					logger.error("Failed to load the PCMM assessments for: {}", elt, e); //$NON-NLS-1$
+				}
+				assessmentsByElt.put(elt, (assessments != null && !assessments.isEmpty()) ? assessments.get(0) : null);
+			});
+		}
 	}
 
 	/**
@@ -71,13 +224,13 @@ public class PCMMAssessViewController {
 	void openAssessDialog(PCMMElement elt) {
 		if (elt != null) {
 
-			PCMMAssessment assessment = view.getAssessmentsByElt().get(elt);
+			PCMMAssessment assessment = assessmentsByElt.get(elt);
 			if (assessment == null) {
 				assessment = new PCMMAssessment();
 				assessment.setElement(elt);
 			}
 
-			PCMMAssessDialog assessDialog = new PCMMAssessDialog(view.getViewManager(), view.getShell(), assessment);
+			PCMMAssessDialog assessDialog = new PCMMAssessDialog(getViewManager(), getView().getShell(), assessment);
 			PCMMAssessment assessmentToReturn = assessDialog.openDialog();
 
 			// persist in database
@@ -97,13 +250,13 @@ public class PCMMAssessViewController {
 	void openAssessDialog(PCMMSubelement elt) {
 		if (elt != null) {
 
-			PCMMAssessment assessment = view.getAssessmentsBySubelt().get(elt);
+			PCMMAssessment assessment = assessmentsBySubelt.get(elt);
 			if (assessment == null) {
 				assessment = new PCMMAssessment();
 				assessment.setSubelement(elt);
 			}
 
-			PCMMAssessDialog assessDialog = new PCMMAssessDialog(view.getViewManager(), view.getShell(), assessment);
+			PCMMAssessDialog assessDialog = new PCMMAssessDialog(getViewManager(), getView().getShell(), assessment);
 			PCMMAssessment assessmentToReturn = assessDialog.openDialog();
 
 			// persist in database
@@ -123,26 +276,26 @@ public class PCMMAssessViewController {
 
 		try {
 			// Initialize
-			Role currentRole = view.getViewManager().getCurrentUserRole();
-			User currentUser = view.getViewManager().getCache().getUser();
+			Role currentRole = getViewManager().getCurrentUserRole();
+			User currentUser = getViewManager().getCache().getUser();
 
 			// It's new
 			if (null == updatedAssessment.getId() && null == updatedAssessment.getRoleCreation()
 					&& null == updatedAssessment.getUserCreation()) {
 
 				// Check element/sub-element according to mode
-				if (PCMMMode.DEFAULT.equals(view.getPCMMMode())) {
+				if (PCMMMode.DEFAULT.equals(getPCMMMode())) {
 					//
 					if (null != updatedAssessment.getSubelement()) {
 						// Clear dirty database
-						clearAssessment(updatedAssessment.getId(), updatedAssessment.getRoleCreation(),
-								updatedAssessment.getUserCreation(), updatedAssessment.getSubelement());
+						clearAssessment(updatedAssessment.getId(), currentRole, currentUser,
+								updatedAssessment.getSubelement());
 
 					} else {
 						throw new CredibilityException(
 								RscTools.getString(RscConst.EX_PCMM_ADDASSESSTBYID_SUBELEMENTNULL));
 					}
-				} else if (PCMMMode.SIMPLIFIED.equals(view.getPCMMMode())) {
+				} else if (PCMMMode.SIMPLIFIED.equals(getPCMMMode())) {
 					if (null != updatedAssessment.getElement()) {
 						// Clear dirty database
 						clearAssessment(updatedAssessment.getId(), updatedAssessment.getRoleCreation(),
@@ -158,11 +311,10 @@ public class PCMMAssessViewController {
 				updatedAssessment.setUserCreation(currentUser);
 
 				// create the assessment
-				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-						.addAssessment(updatedAssessment);
+				getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).addAssessment(updatedAssessment);
 
 				// trigger view change to save
-				view.getViewManager().viewChanged();
+				getViewManager().viewChanged();
 			}
 
 			// It's an update
@@ -172,7 +324,7 @@ public class PCMMAssessViewController {
 						&& updatedAssessment.getUserCreation() == currentUser) {
 
 					// Check mode
-					if (PCMMMode.DEFAULT.equals(view.getPCMMMode())) {
+					if (PCMMMode.DEFAULT.equals(getPCMMMode())) {
 						if (null != updatedAssessment.getSubelement()) {
 							// Clear dirty database
 							clearAssessment(updatedAssessment.getId(), updatedAssessment.getRoleCreation(),
@@ -182,7 +334,7 @@ public class PCMMAssessViewController {
 							throw new CredibilityException(
 									RscTools.getString(RscConst.EX_PCMM_ADDASSESSTBYID_SUBELEMENTNULL));
 						}
-					} else if (PCMMMode.SIMPLIFIED.equals(view.getPCMMMode())) {
+					} else if (PCMMMode.SIMPLIFIED.equals(getPCMMMode())) {
 						if (null != updatedAssessment.getElement()) {
 							// Clear dirty database
 							clearAssessment(updatedAssessment.getId(), updatedAssessment.getRoleCreation(),
@@ -195,11 +347,11 @@ public class PCMMAssessViewController {
 					}
 
 					// Update the assessment
-					view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
+					getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
 							.updateAssessment(updatedAssessment, currentUser, currentRole);
 
 					// trigger view change to save
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 				} else {
 					// Not possible but we know
 					throw new CredibilityException(RscTools.getString(RscConst.EX_PCMM_UPDATEASSESSTBYID_FORBIDDEN));
@@ -218,11 +370,11 @@ public class PCMMAssessViewController {
 			}
 
 			// Refresh
-			view.refresh();
+			getView().refresh();
 
 		} catch (CredibilityException e) {
 			logger.error("An error has occurred while loading assessment data:\n{}", e.getMessage(), e); //$NON-NLS-1$
-			MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_ASSESS),
+			MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_ASSESS),
 					e.getMessage());
 		}
 	}
@@ -241,7 +393,7 @@ public class PCMMAssessViewController {
 		if (subelt != null) {
 
 			// retrieve pcmm assessment from subelement
-			PCMMAssessment assessment = view.getAssessmentsBySubelt().get(subelt);
+			PCMMAssessment assessment = assessmentsBySubelt.get(subelt);
 
 			boolean updated = false;
 			boolean creationMode = false;
@@ -249,8 +401,8 @@ public class PCMMAssessViewController {
 			// create or update assessment
 			if (assessment == null) {
 				assessment = new PCMMAssessment();
-				assessment.setRoleCreation(view.getViewManager().getCache().getCurrentPCMMRole());
-				assessment.setUserCreation(view.getViewManager().getCache().getUser());
+				assessment.setRoleCreation(getViewManager().getCache().getCurrentPCMMRole());
+				assessment.setUserCreation(getViewManager().getCache().getUser());
 				assessment.setSubelement(subelt);
 				creationMode = true;
 			}
@@ -295,26 +447,25 @@ public class PCMMAssessViewController {
 
 					// persist modifications in database
 					if (creationMode) {
-						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-								.addAssessment(assessment);
+						getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).addAssessment(assessment);
 
 					} else {
-						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
-								assessment, view.getViewManager().getCache().getUser(),
-								view.getViewManager().getCache().getCurrentPCMMRole());
+						getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
+								assessment, getViewManager().getCache().getUser(),
+								getViewManager().getCache().getCurrentPCMMRole());
 					}
 
 					// trigger view change
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 
 					// Refresh the parent
-					view.refresh();
+					getView().refresh();
 
 				}
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMASSESS_UPDATING) + property
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
@@ -331,10 +482,10 @@ public class PCMMAssessViewController {
 	public void assessSimplifiedFromCellModifier(PCMMElement elt, String property, Object value) {
 
 		if (elt != null) {
-			int index = getColumnProperties().indexOf(property);
+			int index = getView().getColumnProperties().indexOf(property);
 
 			// retrieve pcmm assessment from element
-			PCMMAssessment assessment = view.getAssessmentsByElt().get(elt);
+			PCMMAssessment assessment = assessmentsByElt.get(elt);
 
 			boolean updated = false;
 			boolean creationMode = false;
@@ -342,14 +493,14 @@ public class PCMMAssessViewController {
 			// create or update assessment
 			if (assessment == null) {
 				assessment = new PCMMAssessment();
-				assessment.setRoleCreation(view.getViewManager().getCache().getCurrentPCMMRole());
-				assessment.setUserCreation(view.getViewManager().getCache().getUser());
-				assessment.setElement(view.getFirstElementSelected());
+				assessment.setRoleCreation(getViewManager().getCache().getCurrentPCMMRole());
+				assessment.setUserCreation(getViewManager().getCache().getUser());
+				assessment.setElement(getView().getFirstElementSelected());
 				creationMode = true;
 			}
 
 			if (assessment.getElement() == null) {
-				assessment.setElement(view.getFirstElementSelected());
+				assessment.setElement(getView().getFirstElementSelected());
 			}
 
 			try {
@@ -386,26 +537,25 @@ public class PCMMAssessViewController {
 
 					// persist modifications in database
 					if (creationMode) {
-						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-								.addAssessment(assessment);
+						getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).addAssessment(assessment);
 
 					} else {
-						view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
-								assessment, view.getViewManager().getCache().getUser(),
-								view.getViewManager().getCache().getCurrentPCMMRole());
+						getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).updateAssessment(
+								assessment, getViewManager().getCache().getUser(),
+								getViewManager().getCache().getCurrentPCMMRole());
 					}
 
 					// trigger view change
-					view.getViewManager().viewChanged();
+					getViewManager().viewChanged();
 
 					// Refresh the parent
-					view.refresh();
+					getView().refresh();
 
 				}
 
 			} catch (CredibilityException e) {
 				logger.error(e.getMessage(), e);
-				MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
 						RscTools.getString(RscConst.ERR_PCMMASSESS_UPDATING) + property
 								+ RscTools.getString(RscConst.CARRIAGE_RETURN) + e.getMessage());
 			}
@@ -423,13 +573,13 @@ public class PCMMAssessViewController {
 	 */
 	void clearAssessment(Integer id, Role role, User user, PCMMElement element) throws CredibilityException {
 		// Get assessments to clear
-		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-				.getAssessmentByRoleAndUserAndEltAndTag(role, user, element, view.getViewManager().getSelectedTag());
+		List<PCMMAssessment> assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
+				.getAssessmentByRoleAndUserAndEltAndTag(role, user, element, getViewManager().getSelectedTag());
 
 		// Delete assessments
 		for (PCMMAssessment assessment : assessments) {
 			if (id == null || (!id.equals(assessment.getId()))) {
-				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
+				getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
 			}
 
 		}
@@ -446,61 +596,72 @@ public class PCMMAssessViewController {
 	 */
 	void clearAssessment(Integer id, Role role, User user, PCMMSubelement subelement) throws CredibilityException {
 		// Get assessments to clear
-		List<PCMMAssessment> assessments = view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-				.getAssessmentByRoleAndUserAndSubeltAndTag(role, user, subelement,
-						view.getViewManager().getSelectedTag());
+		List<PCMMAssessment> assessments = getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
+				.getAssessmentByRoleAndUserAndSubeltAndTag(role, user, subelement, getViewManager().getSelectedTag());
 
 		// Delete assessments
 		for (PCMMAssessment assessment : assessments) {
 			if (id == null || (!id.equals(assessment.getId()))) {
-				view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
+				getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
 			}
 
 		}
 	}
 
 	/**
-	 * Delete the assessment in parameter after user confirmation
-	 * 
-	 * @param assessment the assessment to delete
+	 * Delete the assessment in parameter after user confirmation.
+	 *
+	 * @param element the element
 	 */
-	void delete(PCMMAssessment assessment) {
+	void delete(Object element) {
 
-		if (assessment != null) {
+		/**
+		 * Check the PCMM mode
+		 */
+		PCMMAssessment assessment = null;
+		if (PCMMMode.DEFAULT.equals(pcmmConfiguration.getMode()) && element instanceof PCMMSubelement) {
+			// get the selected sub-element to delete the assessment with
+			assessment = assessmentsBySubelt.get(element);
+		} else if (PCMMMode.SIMPLIFIED.equals(pcmmConfiguration.getMode()) && element instanceof PCMMElement) {
+			// get the selected element to delete the assessment with
+			assessment = assessmentsByElt.get(element);
+		}
 
-			// constructs confirm message
-			String title = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_ASSESS_TITLE);
-			String message = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_DELETE_ASSESSMENT,
-					assessment.getSubelement() != null ? assessment.getSubelement().getName() : RscTools.empty());
+		if (assessment == null) {
+			return;
+		}
 
-			if (PCMMMode.SIMPLIFIED.equals(view.getPCMMMode())) {
-				title = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_ASSESS_SIMPLIFIED_TITLE);
-				message = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_DELETE_ASSESSMENT_SIMPLIFIED,
-						assessment.getElement() != null ? assessment.getElement().getName() : RscTools.empty());
+		// constructs confirm message
+		String title = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_ASSESS_TITLE);
+		String message = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_DELETE_ASSESSMENT,
+				assessment.getSubelement() != null ? assessment.getSubelement().getName() : RscTools.empty());
+
+		if (PCMMMode.SIMPLIFIED.equals(getPCMMMode())) {
+			title = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_ASSESS_SIMPLIFIED_TITLE);
+			message = RscTools.getString(RscConst.MSG_PCMMASSESS_DIALOG_DELETE_ASSESSMENT_SIMPLIFIED,
+					assessment.getElement() != null ? assessment.getElement().getName() : RscTools.empty());
+		}
+
+		// confirm dialog
+		boolean confirm = MessageDialog.openConfirm(getView().getShell(), title, message);
+
+		if (confirm) {
+			try {
+
+				// delete the assessment
+				getViewManager().getAppManager().getService(IPCMMAssessmentApp.class).deleteAssessment(assessment);
+
+				// trigger view change
+				getViewManager().viewChanged();
+
+			} catch (CredibilityException e) {
+				logger.error(RscTools.getString(RscConst.ERR_PCMMASSESS_DELETE + e.getMessage()), e);
+				MessageDialog.openError(getView().getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
+						RscTools.getString(RscConst.ERR_PCMMASSESS_DELETE + e.getMessage()));
 			}
 
-			// confirm dialog
-			boolean confirm = MessageDialog.openConfirm(view.getShell(), title, message);
-
-			if (confirm) {
-				try {
-
-					// delete the assessment
-					view.getViewManager().getAppManager().getService(IPCMMAssessmentApp.class)
-							.deleteAssessment(assessment);
-
-					// trigger view change
-					view.getViewManager().viewChanged();
-
-				} catch (CredibilityException e) {
-					logger.error(RscTools.getString(RscConst.ERR_PCMMASSESS_DELETE + e.getMessage()), e);
-					MessageDialog.openError(view.getShell(), RscTools.getString(RscConst.ERR_PCMMASSESS_TITLE),
-							RscTools.getString(RscConst.ERR_PCMMASSESS_DELETE + e.getMessage()));
-				}
-
-				// Refresh
-				view.refresh();
-			}
+			// Refresh
+			getView().refresh();
 		}
 	}
 
@@ -508,21 +669,14 @@ public class PCMMAssessViewController {
 	 * @return a map of assessements indexed by subelement
 	 */
 	public Map<PCMMSubelement, PCMMAssessment> getAssessmentsBySubelt() {
-		return view.getAssessmentsBySubelt();
+		return assessmentsBySubelt;
 	}
 
 	/**
 	 * @return a map of assessements indexed by element
 	 */
 	public Map<PCMMElement, PCMMAssessment> getAssessmentsByElt() {
-		return view.getAssessmentsByElt();
-	}
-
-	/**
-	 * @return the column properties of the viewer
-	 */
-	public List<String> getColumnProperties() {
-		return view.getColumnProperties();
+		return assessmentsByElt;
 	}
 
 	/**
@@ -530,14 +684,60 @@ public class PCMMAssessViewController {
 	 * @return the column properties of the viewer
 	 */
 	public int getColumnIndex(String columnName) {
-		return view.getColumnProperties().indexOf(columnName);
+		return getView().getColumnProperties().indexOf(columnName);
 	}
 
 	/**
-	 * @return the pcmm element selected
+	 * @return the pcmm element
 	 */
-	public PCMMElement getPcmmElement() {
-		return view.getPcmmElement();
+	public PCMMElement getElementSelected() {
+		return elementSelected;
+	}
+
+	/**
+	 * Resets the pcmm element selected
+	 * 
+	 * @param pcmmElement the element to set
+	 */
+	public void setElementSelected(PCMMElement pcmmElement) {
+		this.elementSelected = pcmmElement;
+
+		// Refresh
+		refresh();
+	}
+
+	/**
+	 * Gets the pcmm configuration.
+	 *
+	 * @return the pcmm configuration
+	 */
+	public PCMMSpecification getPcmmConfiguration() {
+		return pcmmConfiguration;
+	}
+
+	/**
+	 * Gets the elements.
+	 *
+	 * @return the elements
+	 */
+	public List<PCMMElement> getElements() {
+		return elements;
+	}
+
+	/**
+	 * @return the current PCMM Mode
+	 */
+	PCMMMode getPCMMMode() {
+		return pcmmConfiguration.getMode();
+	}
+
+	/**
+	 * @param element the element
+	 * @return true if the element in parameter is contained in the current selected
+	 *         element of the parent view
+	 */
+	boolean isFromCurrentPCMMElement(PCMMElement element) {
+		return getElementSelected() != null && (getElementSelected().equals(element));
 	}
 
 	/**
@@ -546,7 +746,7 @@ public class PCMMAssessViewController {
 	 * @return true if the selected tag is a real tag, otherwise false
 	 */
 	public boolean isTagMode() {
-		return view.getViewManager().isTagMode();
+		return getViewManager().isTagMode();
 	}
 
 }

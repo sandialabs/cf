@@ -7,8 +7,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.jupiter.api.Test;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +19,10 @@ import gov.sandia.cf.model.ARGParameters;
 import gov.sandia.cf.tests.TestEntityFactory;
 
 /**
- * @author Didier Verstraete
+ * The Class Task_007_ARGParametersLongVarcharFieldsTest.
  *
+ * @author Didier Verstraete
  */
-@RunWith(JUnitPlatform.class)
 class Task_007_ARGParametersLongVarcharFieldsTest extends AbstractTestDao {
 
 	/**

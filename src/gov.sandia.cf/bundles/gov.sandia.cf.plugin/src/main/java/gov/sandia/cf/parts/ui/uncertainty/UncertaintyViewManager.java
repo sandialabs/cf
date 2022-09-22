@@ -41,11 +41,6 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 	public static final String BTN_EVENT_ADD_GROUP = "BTN_EVENT_ADD_GROUP"; //$NON-NLS-1$
 
 	/**
-	 * the Uncertainty home view
-	 */
-	private UncertaintyView uncertaintyView;
-
-	/**
 	 * the last control opened
 	 */
 	private Control lastControl;
@@ -54,6 +49,9 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 	 * the layout manager to hide/show the different views
 	 */
 	private StackLayout stackLayout;
+
+	/** The view controller. */
+	private UncertaintyViewController viewController;
 
 	/**
 	 * CrediblityView constructor
@@ -65,6 +63,8 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 	public UncertaintyViewManager(MainViewManager parentView, Composite parent, int style) {
 		super(parentView, parent, style);
 		this.lastControl = null;
+
+		this.viewController = new UncertaintyViewController(this);
 
 		// create the view
 		createPartControl(parent);
@@ -82,12 +82,9 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 		this.stackLayout = new StackLayout();
 		this.setLayout(stackLayout);
 
-		// load communicate home view
-		this.uncertaintyView = new UncertaintyView(this, SWT.NONE);
-
 		// display homeView first
-		this.stackLayout.topControl = uncertaintyView;
-		this.lastControl = uncertaintyView;
+		this.stackLayout.topControl = viewController.getViewControl();
+		this.lastControl = viewController.getViewControl();
 
 		this.layout();
 	}
@@ -130,13 +127,9 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 		// save the last opened view
 		saveLastView();
 
-		if (this.uncertaintyView == null) {
-			this.uncertaintyView = new UncertaintyView(this, SWT.NONE);
-		}
-
 		// Refresh
-		this.stackLayout.topControl = uncertaintyView;
-		uncertaintyView.refresh();
+		this.stackLayout.topControl = viewController.getViewControl();
+		viewController.getView().refresh();
 
 		this.layout();
 	}
@@ -191,8 +184,8 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 
 		// add the pcmm home view
 		BreadcrumbItemParts bcHomeItemPart = new BreadcrumbItemParts();
-		if (uncertaintyView != null) {
-			bcHomeItemPart.setName(uncertaintyView.getItemTitle());
+		if (viewController != null) {
+			bcHomeItemPart.setName(viewController.getView().getItemTitle());
 		} else {
 			bcHomeItemPart.setName(view.getItemTitle());
 		}
@@ -205,7 +198,7 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 	@Override
 	public void doBreadcrumbAction(BreadcrumbItemParts item) {
 		if (item != null && item.getListener().equals(this)
-				&& item.getName().equals((uncertaintyView).getItemTitle())) {
+				&& item.getName().equals((viewController.getView()).getItemTitle())) {
 			openHome();
 		}
 	}
@@ -214,8 +207,8 @@ public class UncertaintyViewManager extends AViewManager implements Listener, IV
 	public void reload() {
 
 		// reload views
-		if (uncertaintyView != null) {
-			uncertaintyView.reload();
+		if (viewController.getView() != null) {
+			viewController.getView().reload();
 		}
 	}
 

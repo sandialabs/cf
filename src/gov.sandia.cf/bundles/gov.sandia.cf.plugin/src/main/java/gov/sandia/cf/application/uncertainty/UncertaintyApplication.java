@@ -253,10 +253,10 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 	}
 
 	@Override
-	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList) throws CredibilityException {
+	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList, User user) throws CredibilityException {
 		if (uncertaintyList != null) {
 			for (Uncertainty value : uncertaintyList) {
-				deleteUncertainty(value);
+				deleteUncertainty(value, user);
 			}
 		}
 	}
@@ -265,7 +265,7 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void deleteUncertainty(Uncertainty uncertainty) throws CredibilityException {
+	public void deleteUncertainty(Uncertainty uncertainty, User user) throws CredibilityException {
 
 		if (uncertainty == null) {
 			throw new CredibilityException(RscTools.getString(RscConst.EX_UNCERTAINTY_DELETE_UNCERTAINTYROW_NULL));
@@ -276,9 +276,18 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 		// refresh Uncertainty
 		getAppMgr().getDaoManager().getRepository(IUncertaintyRepository.class).refresh(uncertainty);
 
+		Uncertainty parent = uncertainty.getParent();
+		Model model = uncertainty.getModel();
+
 		// Remove Uncertainty - values associated will be automatically
 		// deleted by cascade REMOVE
 		getAppMgr().getDaoManager().getRepository(IUncertaintyRepository.class).delete(uncertainty);
+
+		if (parent == null) {
+			reorderAll(model, user);
+		} else {
+			reorderUncertaintyAtSameLevel(uncertainty, user);
+		}
 	}
 
 	/**
@@ -487,35 +496,11 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 		}
 
 		// construct data
-		sameGroupUncertaintyList.sort(
-				Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()));
+		sameGroupUncertaintyList
+				.sort(Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
-		// set id for parents
-		int index = 1;
-		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (Uncertainty uncertainty : sameGroupUncertaintyList) {
-
-			String elementId = null;
-			if (toMove.getParent() == null) {
-				elementId = IDTools.generateAlphabeticId(index - 1);
-			} else if (toMove.getLevel() % 2 == 0) {
-				elementId = groupIdLabel + IDTools.generateAlphabeticId(index - 1);
-			} else {
-				elementId = groupIdLabel + index;
-			}
-
-			uncertainty.setGeneratedId(elementId);
-			updateUncertainty(uncertainty, user);
-
-			if (uncertainty.getChildren() != null && !uncertainty.getChildren().isEmpty()) {
-				reorderUncertaintyAtSameLevel(uncertainty.getChildren().get(0), user);
-			}
-
-			index++;
-		}
-
-		// refresh group
-		refresh(toMove.getParent());
+		// apply reordering to elements
+		applyReorderFromList(sameGroupUncertaintyList, toMove, user);
 	}
 
 	/**
@@ -542,16 +527,32 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 		}
 
 		// construct data
-		sameGroupUncertaintyList.sort(
-				Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()));
+		sameGroupUncertaintyList
+				.sort(Comparator.comparing(Uncertainty::getGeneratedId, new StringWithNumberAndNullableComparator()));
 
 		// reorder
 		List<Uncertainty> reorderedList = IDTools.reorderList(sameGroupUncertaintyList, toMove, newIndex);
 
+		// apply reordering to elements
+		applyReorderFromList(reorderedList, toMove, user);
+	}
+
+	/**
+	 * Apply reorder from list.
+	 *
+	 * @param orderedList the ordered list
+	 * @param toMove      the to move
+	 * @param user        the user
+	 * @throws CredibilityException the credibility exception
+	 */
+	private void applyReorderFromList(List<Uncertainty> orderedList, Uncertainty toMove, User user)
+			throws CredibilityException {
+
 		// set id for parents
 		int index = 1;
 		final String groupIdLabel = toMove.getParent() == null ? RscTools.empty() : toMove.getParent().getGeneratedId();
-		for (Uncertainty uncertainty : reorderedList) {
+		for (Uncertainty uncertainty : orderedList) {
+
 			String elementId = null;
 			if (toMove.getParent() == null) {
 				elementId = IDTools.generateAlphabeticId(index - 1);
@@ -560,8 +561,14 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 			} else {
 				elementId = groupIdLabel + index;
 			}
+
 			uncertainty.setGeneratedId(elementId);
 			updateUncertainty(uncertainty, user);
+
+			if (uncertainty.getChildren() != null && !uncertainty.getChildren().isEmpty()) {
+				reorderUncertaintyAtSameLevel(uncertainty.getChildren().get(0), user);
+			}
+
 			index++;
 		}
 

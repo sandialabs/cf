@@ -97,13 +97,13 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 	}
 
 	@Override
-	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList) throws CredibilityException {
+	public void deleteAllUncertainties(List<Uncertainty> uncertaintyList, User user) throws CredibilityException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteUncertainty(Uncertainty uncertainty) throws CredibilityException {
+	public void deleteUncertainty(Uncertainty uncertainty, User user) throws CredibilityException {
 		// TODO to implement
 
 	}
@@ -183,12 +183,12 @@ public class UncertaintyApplication extends AApplication implements IUncertainty
 	@Override
 	public void deleteAllUncertaintyConstraint(List<UncertaintyConstraint> constraints) throws CredibilityException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deleteUncertaintyConstraint(UncertaintyConstraint constraint) throws CredibilityException {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
