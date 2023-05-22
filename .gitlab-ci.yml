@@ -381,7 +381,7 @@ release in master:
 #  - automatically if it is the 'master' branch or a tag
 #  - manually if it is a protected branch (to avoid Gitlab Pages hack by another branch)
 pages:
-  image: ruby:2.7
+  image: ruby:3.0
   stage: publish
   variables: 
     PACKAGENAME: "gov.sandia.cf" # used into ci/doc/site/unzip-packages.sh script
