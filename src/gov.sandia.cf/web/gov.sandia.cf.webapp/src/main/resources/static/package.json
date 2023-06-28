@@ -1,6 +1,6 @@
 {
   "name": "gov.sandia.cf.webapp",
-  "version": "1.0.3-SNAPSHOT",
+  "version": "1.0.3",
   "description": "",
   "main": "index.js",
   "scripts": {
