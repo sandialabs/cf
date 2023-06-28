@@ -9,7 +9,7 @@ The goal of this page is to explain Credibility Framework plugin and webapp inst
 ## Obtain Credibility Framework
 [Go back to Contents](#contents)
 
-The builds of the Credibility Framework can be found into [Gitlab Package Registry](https://credibilityframework.gitlab.io/cf/packages/).
+The builds of the Credibility Framework can be found into [Gitlab Package Registry](https://george_orient.gitlab.io/cf/packages/).
 
 It contains all the available versions of the plugin.
 
@@ -37,7 +37,7 @@ Then copy the `p2 repository` url or download the zipped repository:
 
 ![image](uploads/bc6fe3ae5f245953c18865bdccd7fac8/image.png)
 
-3. In the opened window, enter the p2 repository url (e.g. https://credibilityframework.gitlab.io/cf/packages/latest/), select `Credibility Feature` and click `Next`
+3. In the opened window, enter the p2 repository url (e.g. https://george_orient.gitlab.io/cf/packages/latest/), select `Credibility Feature` and click `Next`
 
 ![image](uploads/578e6ff5ad58da946f56242f2ea5d65d/image.png)
 
@@ -61,7 +61,7 @@ Then copy the `p2 repository` url or download the zipped repository:
 ### Install plugin in a disconnected environment
 [Go back to Contents](#contents)
 
-1. Download the plugin repository from CF site [https://credibilityframework.gitlab.io/cf/packages/](https://credibilityframework.gitlab.io/cf/packages/).
+1. Download the plugin repository from CF site [https://george_orient.gitlab.io/cf/packages/](https://george_orient.gitlab.io/cf/packages/).
 
 Select the needed version and click on the zipped repository to download it:
 

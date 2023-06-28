@@ -139,7 +139,7 @@ This section describes the resulting products.
 
 The CF feature is packaged within a p2 repository with the CF plugin and dependencies. 
 
-Each client installs the plugin from CF p2 repositories which are available from the development [iwf/cf](https://iwf.gitlab.io/cf/packages/) or the official [CredibilityFramework/cf](https://credibilityframework.gitlab.io/cf/packages/) p2 sites.
+Each client installs the plugin from CF p2 repositories which are available from the development [iwf/cf](https://iwf.gitlab.io/cf/packages/) or the official [CredibilityFramework/cf](https://george_orient.gitlab.io/cf/packages/) p2 sites.
 
 The plugin embeds local and remote capabilities. 
 

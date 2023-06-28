@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.3]
+
+### Added
+- Add predefined properties extension point to CF feature
+
+
 ## [1.0.2]
 
 ### Added

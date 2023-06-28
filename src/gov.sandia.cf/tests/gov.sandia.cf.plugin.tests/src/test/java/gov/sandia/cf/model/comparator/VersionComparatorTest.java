@@ -182,6 +182,11 @@ class VersionComparatorTest {
 	}
 
 	@Test
+	void test_compare_ValidScriptLastVersion_WithComma() {
+		assertTrue(comparator.compare("1.0.2", "1.0.2-2") > 0); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Test
 	void test_compare_SuffixAsNumber_With_Release() {
 		assertTrue(comparator.compare("0.2.0.202008122545", "0.2.0") < 0); //$NON-NLS-1$ //$NON-NLS-2$
 	}

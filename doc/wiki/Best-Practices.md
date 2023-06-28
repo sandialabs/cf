@@ -205,7 +205,7 @@ The following action will be done from `develop` branch:
 
 6. **Update** the **gitlab wiki**:
 - Duplicate all existing pages into a new folder starting with the version number.
-- Create a link to the javadoc. The content of the folder ` doc/javadocs` is automatically published on gitlab at the following url `https://credibilityframework.gitlab.io/cf/<VERSION_NUMBER>` (replace <VERSION_NUMBER> by your version number).
+- Create a link to the javadoc. The content of the folder ` doc/javadocs` is automatically published on gitlab at the following url `https://george_orient.gitlab.io/cf/<VERSION_NUMBER>` (replace <VERSION_NUMBER> by your version number).
 - Add a link to this new pages on the wiki home page.
 
 
