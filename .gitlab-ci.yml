@@ -238,11 +238,11 @@ package:
     - if [ -z "$CF_VERSION" ]; then echo "No version found. Impossible to continue package import job." && exit 1; else echo "CF Version $CF_VERSION"; fi;
     # Remove existing packages folders
     - echo "==================== [package] Remove $CF_VERSION folder"
-    - wget -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
+    - wget --header "PRIVATE-TOKEN:$CF_ROBOT_PRIVATE_TOKEN" -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
     - export DELETE_CURRENT_VERSION_API_PATH=$(jq -r --arg CF_VERSION "$CF_VERSION" '.[] | select(.version==$CF_VERSION) | ._links.delete_api_path' ./packages.json)
     - if [ -z "$DELETE_CURRENT_VERSION_API_PATH" ]; then echo "$CF_VERSION package not found in Package Registry"; else curl --request DELETE --user $DEPLOY_CREDENTIALS  $DELETE_CURRENT_VERSION_API_PATH; fi;
     - echo "==================== [package] Remove $LATEST_VERSION folder"
-    - wget -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
+    - wget --header "PRIVATE-TOKEN:$CF_ROBOT_PRIVATE_TOKEN" -q -O packages.json $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages
     - export DELETE_LATEST_API_PATH=$(jq -r --arg LATEST_VERSION "$LATEST_VERSION" '.[] | select(.version==$LATEST_VERSION) | ._links.delete_api_path' ./packages.json)
     - if [ -z "$DELETE_LATEST_API_PATH" ]; then echo "Latest package not found in Package Registry"; else curl --request DELETE --user $DEPLOY_CREDENTIALS  $DELETE_LATEST_API_PATH; fi;
     # Import p2 repository into Gitlab package registry
